@@ -263,7 +263,16 @@
           <div class="setrow"><div class="lab">おおまかな位置にする<small>正確な地点をぼかして共有（約100m）</small></div><div class="toggle" id="tgCoarse" onclick="toggleCoarse(this)"><div class="k"></div></div></div>
           <div class="setrow"><div class="lab">通知<small>マッチ・メッセージをお知らせ</small></div><div class="toggle on" onclick="this.classList.toggle('on')"><div class="k"></div></div></div>
         </div>
+        <div class="setting" id="billBox" style="border-color:rgba(245,151,47,.35)">
+          <div class="setrow"><div class="lab">💬 メッセージ機能<small id="msgStat">未解禁（初回のみ有料）</small></div><button class="btn btn-primary" id="msgBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showMsgPaywall()">解禁する</button></div>
+          <div class="setrow"><div class="lab">♥ 今日のいいね<small id="likeStat">無料 3回 / 日</small></div><button class="btn btn-ghost" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showLikePaywall(null)">追加購入</button></div>
+        </div>
+        <div class="setting" style="border-color:rgba(99,214,232,.3)">
+          <div class="setrow" style="border:0;flex-direction:column;align-items:flex-start;gap:8px"><div class="lab">✨ 今後の有料機能<small>準備中。課金するとこんなことができます</small></div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px"><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">趣味一致度がわかる 近日</span><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">広告をなくす 近日</span><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">マッチ理由がわかる 近日</span></div></div>
+        </div>
         <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
+        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:12px;font-size:13px" onclick="resetBilling()">課金状態をリセット（デモ用）</button>
         <button class="btn stopbtn" onclick="leaveAll()">共有をやめてプロフィールを消す</button>
         <div class="setting" style="border-color:rgba(99,214,232,.3)">
           <div class="setrow" style="border:0"><div class="lab">🧪 テストモード<small>1台だけで動作確認できます。近くにテスト用の人が現れ、いいねするとマッチ→チャットまで試せます</small></div><button class="btn btn-primary" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="spawnTest()">試す</button></div>
@@ -288,6 +297,7 @@
   <div class="matchpop" id="matchpop"></div>
   <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
   <div class="overlay" id="editOverlay" onclick="if(event.target===this)closeEdit()"><div class="sheet" id="editSheet" style="padding:22px 22px 28px"></div></div>
+  <div class="overlay" id="payOverlay" onclick="if(event.target===this)closePay()"><div class="sheet" id="paySheet" style="padding:24px 22px 30px"></div></div>
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -526,13 +536,58 @@ function openSheet(u,d){
   $('#overlay').classList.add('show');
 }
 function closeSheet(){$('#overlay').classList.remove('show');}
+const PRICE={msg:480,like1:60,like5:240,like10:400};
+let billing={day:'',freeUsed:0,paidLikes:0,msgUnlocked:false};
+function today(){return new Date().toISOString().slice(0,10);}
+function rollBilling(){ if(billing.day!==today()){billing.day=today();billing.freeUsed=0;billing.paidLikes=0;} }
+async function loadBilling(){ if(sb){try{const {data}=await sb.from('profiles').select('billing').eq('id',myId).maybeSingle();if(data&&data.billing)billing={...billing,...data.billing};}catch(e){}} rollBilling(); updateBillUI(); }
+async function saveBilling(){ rollBilling(); updateBillUI(); if(sb){try{await sb.from('profiles').update({billing}).eq('id',myId);}catch(e){}} }
+function freeLeft(){rollBilling();return Math.max(0,3-billing.freeUsed);}
+function likeRemainText(){const f=freeLeft();return f>0?('無料'+f+'回'):(billing.paidLikes>0?('追加'+billing.paidLikes+'回'):'0回（追加購入できます）');}
+function updateBillUI(){ const ms=$('#msgStat'),mb=$('#msgBtn'),ls=$('#likeStat');
+  if(ms)ms.textContent=billing.msgUnlocked?'解禁済み（送り放題）':'未解禁（初回のみ有料）';
+  if(mb){mb.style.display=billing.msgUnlocked?'none':'';}
+  if(ls){const f=freeLeft();ls.textContent=(f>0?('無料 残り'+f+'回'):('無料分終了'))+(billing.paidLikes>0?(' ＋ 追加'+billing.paidLikes+'回'):'');} }
+function closePay(){$('#payOverlay').classList.remove('show');}
+let pendingLikeUid=null;
+function showLikePaywall(uid){ pendingLikeUid=uid;
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">いいねを追加購入</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">1日の無料いいね（3回）を使い切りました。追加のいいねを購入できます。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません／購入分も日付が変わるとリセットされます</span></p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(1,${PRICE.like1})"><span>いいね 1回分</span><b style="color:var(--amber)">¥${PRICE.like1}</b></button>
+      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(5,${PRICE.like5})"><span>いいね 5回分 <span style="font-size:11px;color:var(--ok)">お得</span></span><b style="color:var(--amber)">¥${PRICE.like5}</b></button>
+      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(10,${PRICE.like10})"><span>いいね 10回分 <span style="font-size:11px;color:var(--ok)">一番お得</span></span><b style="color:var(--amber)">¥${PRICE.like10}</b></button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+function buyLikes(n,price){
+  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  billing.paidLikes+=n; saveBilling(); closePay(); toast('✅ いいね'+n+'回分を追加しました（デモ）');
+  if(pendingLikeUid){const u=pendingLikeUid;pendingLikeUid=null;doLike(u);}
+}
+function showMsgPaywall(){
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">メッセージ機能を解禁</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:18px">マッチした相手とメッセージするには解禁が必要です。<br><b style="color:var(--ink)">一度解禁すると、以降は送り放題</b>になります。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません</span></p>
+    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;display:flex;justify-content:space-between" onclick="buyMsg(${PRICE.msg})"><span>メッセージを解禁</span><b>¥${PRICE.msg}</b></button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+function buyMsg(price){
+  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  billing.msgUnlocked=true; saveBilling(); closePay(); toast('✅ メッセージを解禁しました（デモ）');
+}
+function resetBilling(){ billing={day:today(),freeUsed:0,paidLikes:0,msgUnlocked:false}; saveBilling(); toast('課金状態をリセットしました（デモ）'); }
 async function doLike(uid){
+  if(isTest(uid)){ liked.add(uid);closeSheet();renderNearby();createMatch(uid,true); return; }
+  if(freeLeft()<=0 && billing.paidLikes<=0){ closeSheet(); showLikePaywall(uid); return; }
+  if(freeLeft()>0) billing.freeUsed++; else billing.paidLikes--;
+  saveBilling();
   liked.add(uid);closeSheet();renderNearby();
-  if(isTest(uid)){ createMatch(uid,true); return; }
   if(!sb){ toast('バックエンド未接続です'); return; }
   await sb.from('likes').upsert({from_id:myId,to_id:uid});
   const {data}=await sb.from('likes').select('from_id').eq('from_id',uid).eq('to_id',myId).maybeSingle();
-  if(data)createMatch(uid,true); else toast('いいねを送りました。相手も返すとマッチします');
+  if(data)createMatch(uid,true); else toast('いいねを送りました（今日の残り '+likeRemainText()+'）');
 }
 
 /* ---------- matches ---------- */
@@ -570,7 +625,9 @@ function openChat(uid){
 }
 function renderChat(){const m=matches[chatPeer];if(!m)return;const box=$('#msgs');
   box.innerHTML='<div class="day">今日</div>'+m.msgs.map(x=>`<div class="bub ${x.from===myId?'me':'them'}">${esc(x.text)}</div>`).join('');box.scrollTop=box.scrollHeight;renderMatches();}
-async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!t||!chatPeer)return;inp.value='';
+async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!t||!chatPeer)return;
+  if(!isTest(chatPeer) && !billing.msgUnlocked){ showMsgPaywall(); return; }
+  inp.value='';
   if(isTest(chatPeer)){matches[chatPeer].msgs.push({from:myId,text:t});renderChat();
     const rep=['ほんとだ、近いですね😊','どこかでお茶でもどうですか？','その辺よく行きます！','会えたらうれしいです','わかります〜'];
     setTimeout(()=>{if(matches[chatPeer]){matches[chatPeer].msgs.push({from:chatPeer,text:rep[Math.floor(Math.random()*rep.length)]});if(isTest(chatPeer))renderChat();}},1100);return;}
@@ -659,7 +716,7 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';}
-function startLoops(){publishMe();pollUsers();loadEncounters();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);}
+function startLoops(){publishMe();pollUsers();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);}
 
 /* ---------- boot ---------- */
 buildOnboard();
