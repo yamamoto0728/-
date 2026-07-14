@@ -129,9 +129,9 @@
   .note{padding:10px 26px 24px;text-align:center;font-size:11.5px;color:var(--muted2);line-height:1.7}
   .note b{color:var(--muted)}
   .nav{display:flex;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 6px 22px;flex-shrink:0}
-  .nav button{flex:1;background:none;border:0;color:var(--muted2);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-family:inherit;cursor:pointer;padding:6px 0;position:relative;transition:.2s;font-weight:600}
+  .nav button{flex:1;background:none;border:0;color:var(--muted2);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;font-family:inherit;cursor:pointer;padding:6px 0;position:relative;transition:.2s;font-weight:600}
   .nav button.active{color:var(--amber)}
-  .nav button svg{width:23px;height:23px}
+  .nav button svg{width:21px;height:21px}
   .nav button .ndot{position:absolute;top:2px;right:calc(50% - 16px);min-width:15px;height:15px;line-height:15px;font-size:9.5px;font-weight:700;background:var(--rose);color:#fff;border-radius:8px;padding:0 4px}
   .overlay{position:absolute;inset:0;z-index:40;background:rgba(6,8,26,.6);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:flex-end}
   .overlay.show{opacity:1;pointer-events:auto}
@@ -246,6 +246,16 @@
       <div class="msgs" id="msgs"></div>
       <div class="chatbar"><input id="chatInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">↑</button></div>
     </section>
+    <section class="screen" id="s-comm">
+      <div class="apphead"><h1>コミュニティ</h1><span class="sub" id="commSub">みんなの部屋</span></div>
+      <div style="padding:2px 16px 10px"><button class="btn btn-primary" style="width:100%;padding:13px;font-size:14px" onclick="createRoom()">＋ コミュニティを作る</button></div>
+      <div class="scroll"><div class="ulist" id="roomList"></div></div>
+    </section>
+    <section class="screen" id="s-room">
+      <div class="chathead"><button class="back" onclick="go('comm')">‹</button><div class="av" id="roomAv" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div><div class="nm" id="roomNm"></div><div class="st" id="roomSt"></div></div></div>
+      <div class="msgs" id="roomMsgs"></div>
+      <div class="chatbar"><input id="roomInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendRoomMsg()"><button class="send" onclick="sendRoomMsg()">↑</button></div>
+    </section>
     <section class="screen" id="s-invite">
       <div class="apphead"><h1>招待</h1><span class="sub">リンク / QR</span></div>
       <div class="scroll"><div class="inv">
@@ -285,6 +295,7 @@
     <button class="active" data-t="near" onclick="go('near')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-5-6-10a6 6 0 1 1 12 0c0 5-6 10-6 10z"/><circle cx="12" cy="11" r="2.3"/></svg>近くの人</button>
     <button data-t="cross" onclick="go('cross')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6c0 2-1 3-1 5s1 3 3 3M16 4c0 2 1 3 1 5s-1 3-3 4"/><circle cx="7" cy="19" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg>すれ違い<span class="ndot" id="dotCross" style="display:none"></span></button>
     <button data-t="match" onclick="go('match')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.4-7 10-7 10z"/></svg>マッチ<span class="ndot" id="dotMatch" style="display:none"></span></button>
+    <button data-t="comm" onclick="go('comm')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.5a4 4 0 0 1 0 7"/></svg>コミュ</button>
     <button data-t="invite" onclick="go('invite')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h3v3M20 14v6M17 20h3"/></svg>招待</button>
     <button data-t="me" onclick="go('me')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>設定</button>
   </nav>
@@ -636,6 +647,45 @@ async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!
   await sb.from('messages').insert({match_key:chatKey(chatPeer),from_id:myId,text:t});
 }
 
+/* ---------- コミュニティ（グループチャット） ---------- */
+let rooms=[], curRoom=null, roomPoll=null;
+async function loadRooms(){ if(!sb)return; try{const {data}=await sb.from('rooms').select('*').order('created_at',{ascending:false}); if(data){rooms=data;renderRooms();}}catch(e){} }
+function renderRooms(){ const el=$('#roomList'); if(!el)return; $('#commSub').textContent=rooms.length?rooms.length+'部屋':'まだありません';
+  if(!rooms.length){el.innerHTML=`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>「＋ コミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`;return;}
+  el.innerHTML=rooms.map(r=>`<div class="urow" onclick="openRoom('${r.id}')"><div class="av" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div class="info"><div class="n">${esc(r.name)}</div><div class="b">${esc(r.topic||'みんなで話そう')}</div></div><div class="d"><div class="m" style="font-size:12.5px">入室 ›</div></div></div>`).join('');
+}
+function createRoom(){
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">コミュニティを作成</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:14px">部屋の作成は有料です（¥500）。作った部屋には<b style="color:var(--ink)">誰でも無料で参加</b>できます。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません</span></p>
+    <div class="field"><label>コミュニティ名</label><input id="newRoomName" maxlength="20" placeholder="例：カフェ好き集まれ"></div>
+    <div class="field"><label>ひとこと（任意）</label><input id="newRoomTopic" maxlength="40" placeholder="どんな部屋？"></div>
+    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="confirmCreateRoom()">作成する（¥500）</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+async function confirmCreateRoom(){
+  const name=$('#newRoomName').value.trim(); if(!name){toast('コミュニティ名を入れてね');return;}
+  const topic=$('#newRoomTopic').value.trim();
+  if(!confirm('本来なら ¥500 かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  if(sb){try{const {error}=await sb.from('rooms').insert({name,topic,owner_id:myId}); if(error){toast('作成に失敗: '+error.message);return;}}catch(e){toast('作成に失敗しました');return;}}
+  closePay(); toast('✅ コミュニティを作成しました（デモ）'); loadRooms();
+}
+async function openRoom(id){ curRoom=rooms.find(r=>r.id===id)||{id,name:'コミュニティ',topic:''}; $('#roomNm').textContent=curRoom.name; $('#roomSt').textContent=curRoom.topic||'誰でも参加OK'; curRoom.msgs=[]; renderRoom(); await loadRoomMsgs(); go('room');
+  clearInterval(roomPoll); if(!sb)return;
+  roomPoll=setInterval(async()=>{ if(!$('#s-room').classList.contains('active'))return; await loadRoomMsgs(); },2500);
+}
+async function loadRoomMsgs(){ if(!sb||!curRoom)return; try{const {data}=await sb.from('room_messages').select('*').eq('room_id',curRoom.id).order('created_at'); if(data){curRoom.msgs=data;renderRoom();}}catch(e){} }
+function renderRoom(){ const box=$('#roomMsgs'); if(!box||!curRoom)return; const msgs=curRoom.msgs||[];
+  if(!msgs.length){box.innerHTML='<div class="day">まだメッセージはありません。最初のひとことをどうぞ！</div>';return;}
+  box.innerHTML=msgs.map(m=>{const mine=m.from_id===myId;return `<div class="bub ${mine?'me':'them'}">${mine?'':`<div style="font-size:11px;color:var(--signal);font-weight:700;margin-bottom:3px">${esc(m.emoji||'')} ${esc(m.name||'匿名')}</div>`}${esc(m.text)}</div>`;}).join('');
+  box.scrollTop=box.scrollHeight;
+}
+async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(); if(!t||!curRoom)return; inp.value='';
+  if(!sb){toast('バックエンド未接続です');return;}
+  const m={room_id:curRoom.id,from_id:myId,name:profile?profile.name:'匿名',emoji:profile?profile.emoji:'🙂',text:t};
+  curRoom.msgs=(curRoom.msgs||[]).concat(m); renderRoom();
+  try{await sb.from('room_messages').insert(m);}catch(e){}
+}
 /* ---------- settings ---------- */
 function toggleShare(el){sharing=!el.classList.contains('on');el.classList.toggle('on');geoState('ok');
   if(sharing){publishMe();}else if(sb){sb.from('profiles').update({sharing:false}).eq('id',myId);}}
@@ -715,7 +765,7 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 /* ---------- misc ---------- */
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
-  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';}
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm')loadRooms();}
 function startLoops(){publishMe();pollUsers();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);}
 
 /* ---------- boot ---------- */
