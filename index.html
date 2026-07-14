@@ -184,6 +184,18 @@
   .want{font-size:12px;padding:5px 11px;border-radius:20px;background:rgba(255,126,157,.14);border:1px solid rgba(255,126,157,.42);color:var(--rose);font-weight:700}
   .workline{font-size:13px;color:var(--muted);margin-bottom:2px}
   .workline b{color:var(--ink);font-weight:600}
+  .likeslist{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px}
+  .likechip{font-size:12px;padding:6px 12px;border-radius:20px;background:rgba(255,176,102,.12);border:1px solid rgba(255,176,102,.35);color:var(--amber);font-weight:600}
+  .interest{margin-top:12px}
+  .interest .ih{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .interest .irow{font-size:13px;color:#dfe2ff;margin-bottom:3px}
+  .interest .irow b{color:var(--signal);font-weight:700}
+  .warn-msg{margin:8px 0 2px;padding:9px 12px;border-radius:12px;background:rgba(255,207,107,.12);border:1px solid rgba(255,207,107,.4);color:#ffe0a0;font-size:12px;line-height:1.6;display:none}
+  .warn-msg.show{display:block}
+  .addrow{display:flex;gap:8px}
+  .addrow input{flex:1}
+  .addrow .addbtn{flex-shrink:0;padding:0 16px;border:0;border-radius:14px;background:var(--surface2);color:var(--amber);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .miniclose{margin-left:6px;cursor:pointer;opacity:.7}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -204,6 +216,8 @@
         <div class="field"><label>タグ（好きなだけ）</label><div class="chips" id="obTags"></div></div>
         <div class="field"><label>職業 / 学校</label><div class="chips" id="obWorkCat"></div><input id="obWorkDetail" maxlength="24" placeholder="くわしく（任意）例：法政大学 / エンジニア" style="margin-top:9px"></div>
         <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="obLooking"></div></div>
+        <div class="field"><label>好きなもの（自由に追加）</label><div class="addrow"><input id="obLikeInput" maxlength="16" placeholder="例：サウナ / 猫カフェ" onkeydown="if(event.key==='Enter'){event.preventDefault();addLike();}"><button type="button" class="addbtn" onclick="addLike()">追加</button></div><div class="likeslist" id="obLikesList"></div></div>
+        <div class="field"><label>興味のあること（ジャンル＋くわしく）</label><div class="chips" id="obInterestCat"></div><input id="obInterestDetail" maxlength="40" placeholder="くわしく 例：野球・フットサル観戦" style="margin-top:9px"><div class="likeslist" id="obInterestList"></div><div style="font-size:11px;color:var(--muted2);margin-top:6px">ジャンルを選んで内容を書き、Enterで追加できます</div></div>
         <div class="privacy">🔒 <b>位置情報について</b><br>「始める」を押すとGPSでのおおよその現在地を、<b>このリンクを開いている他の利用者に共有</b>します。共有はいつでも設定から止められます。</div>
         <button class="btn btn-primary go" id="obGo">位置情報を共有して始める</button>
       </div>
@@ -246,6 +260,7 @@
           <div class="setrow"><div class="lab">おおまかな位置にする<small>正確な地点をぼかして共有（約100m）</small></div><div class="toggle" id="tgCoarse" onclick="toggleCoarse(this)"><div class="k"></div></div></div>
           <div class="setrow"><div class="lab">通知<small>マッチ・メッセージをお知らせ</small></div><div class="toggle on" onclick="this.classList.toggle('on')"><div class="k"></div></div></div>
         </div>
+        <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <button class="btn stopbtn" onclick="leaveAll()">共有をやめてプロフィールを消す</button>
         <div class="setting" style="border-color:rgba(99,214,232,.3)">
           <div class="setrow" style="border:0"><div class="lab">🧪 テストモード<small>1台だけで動作確認できます。近くにテスト用の人が現れ、いいねするとマッチ→チャットまで試せます</small></div><button class="btn btn-primary" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="spawnTest()">試す</button></div>
@@ -269,6 +284,7 @@
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
   <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
+  <div class="overlay" id="editOverlay" onclick="if(event.target===this)closeEdit()"><div class="sheet" id="editSheet" style="padding:22px 22px 28px"></div></div>
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -285,6 +301,9 @@ const EMO=['🌙','⭐','🌸','🔥','🐱','🎧','☕','📷','🍜','🌿','
 const TAGS=['カフェ','音楽','映画','読書','写真','ランニング','ゲーム','料理','旅行','アート','犬','猫','お酒','散歩'];
 const WORKCATS=['学生','会社員','フリーランス','経営者','その他'];
 const LOOKING=['友達','話し相手','暇つぶし','趣味仲間','起業仲間','飲み仲間','挑戦仲間'];
+const INTERESTS=['スポーツ','音楽','ゲーム','グルメ','映画・ドラマ','アウトドア','旅行','アート','勉強・学び'];
+const NGWORDS=['死ね','殺す','きもい','ブス','デブ','うざい','障害者','クズ','セックス','エッチ','ヤりたい','援交','パパ活','裸','ちんこ','まんこ','セフレ','line交換','id:','tel:','090','080'];
+function ngCheck(text){ if(!text)return null; const low=text.toLowerCase(); const hit=NGWORDS.filter(w=>low.includes(w.toLowerCase())); return hit.length?hit:null; }
 const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#ff7e9d','#ffb0c8'],'🔥':['#ff6b4a','#ffb066'],'🐱':['#ffb066','#ffd166'],'🎧':['#a78bfa','#63d6e8'],'☕':['#c89b6b','#8b6b4a'],'📷':['#63d6e8','#4b8bf0'],'🍜':['#ff9d70','#ffcf6b'],'🌿':['#7be0b0','#4bc0d9'],'🎨':['#ff7e9d','#a78bfa'],'🏃':['#63d6e8','#7be0b0']};
 const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
 const gr=e=>`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
@@ -317,7 +336,7 @@ function relMeters(from,to){const dLat=(to.lat-from.lat)*Math.PI/180,dLng=(to.ln
 function esc(s){return (s||'').toString().replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
 
 /* ---------- onboarding ---------- */
-let selEmoji=EMO[0], selTags=new Set(), selWorkCat='', selLooking=new Set();
+let selEmoji=EMO[0], selTags=new Set(), selWorkCat='', selLooking=new Set(), myLikes=[], myInterests=[], selInterestCat='';
 function buildOnboard(){
   $('#obEmojis').innerHTML=EMO.map((e,i)=>`<div class="em ${i===0?'sel':''}" data-e="${e}">${e}</div>`).join('');
   $$('#obEmojis .em').forEach(el=>el.onclick=()=>{selEmoji=el.dataset.e;$$('#obEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
@@ -327,12 +346,23 @@ function buildOnboard(){
   $$('#obWorkCat .c').forEach(el=>el.onclick=()=>{selWorkCat=el.dataset.w;$$('#obWorkCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
   $('#obLooking').innerHTML=LOOKING.map(w=>`<div class="c" data-l="${w}">${w}</div>`).join('');
   $$('#obLooking .c').forEach(el=>el.onclick=()=>{const w=el.dataset.l;if(selLooking.has(w)){selLooking.delete(w);el.classList.remove('sel');}else{selLooking.add(w);el.classList.add('sel');}});
+  $('#obInterestCat').innerHTML=INTERESTS.map(w=>`<div class="c" data-i="${w}">${w}</div>`).join('');
+  $$('#obInterestCat .c').forEach(el=>el.onclick=()=>{selInterestCat=el.dataset.i;$$('#obInterestCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
+  const idet=$('#obInterestDetail'); if(idet)idet.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addInterest();}});
+  renderLikesEditor();renderInterestEditor();
 }
+function addLike(){const inp=$('#obLikeInput');const v=inp.value.trim();if(!v)return;if(!myLikes.includes(v))myLikes.push(v);inp.value='';renderLikesEditor();}
+function renderLikesEditor(){const el=$('#obLikesList');if(!el)return;el.innerHTML=myLikes.map((x,i)=>`<span class="likechip">${esc(x)}<span class="miniclose" onclick="myLikes.splice(${i},1);renderLikesEditor()">✕</span></span>`).join('');}
+function addInterest(){const d=$('#obInterestDetail');const v=d.value.trim();if(!selInterestCat){toast('ジャンルを選んでね');return;}if(!v)return;myInterests.push({cat:selInterestCat,detail:v});d.value='';renderInterestEditor();}
+function renderInterestEditor(){const el=$('#obInterestList');if(!el)return;el.innerHTML=myInterests.map((x,i)=>`<span class="likechip" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.35);color:var(--signal)">${esc(x.cat)}：${esc(x.detail)}<span class="miniclose" onclick="myInterests.splice(${i},1);renderInterestEditor()">✕</span></span>`).join('');}
 async function onStart(){
   if(!myId){ if(!(await initBackend())){ if(!configured) return; myId='local-'+uuid(); } }
   const name=$('#obName').value.trim()||'ゲスト';const age=parseInt($('#obAge').value)||null;
   const wd=$('#obWorkDetail').value.trim(); const work=selWorkCat?(wd?selWorkCat+'・'+wd:selWorkCat):wd;
-  profile={id:myId,name,age,emoji:selEmoji,bio:$('#obBio').value.trim()||'よろしくお願いします。',tags:[...selTags],work,looking:[...selLooking]};
+  const bioVal=$('#obBio').value.trim()||'よろしくお願いします。';
+  const ng=ngCheck(name)||ngCheck(bioVal);
+  if(ng){ toast('⚠️ 名前かひとことに不適切かもしれない言葉があります（登録は続行できます）'); }
+  profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[...selTags],work,looking:[...selLooking],likes:myLikes,interests:myInterests};
   $('#meAv').style.background=gr(selEmoji);$('#meAv').textContent=selEmoji;$('#meName').textContent=name+(age?' '+age:'');
   $('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
   startGeo();buildInvite();startLoops();
@@ -368,14 +398,14 @@ async function reverseGeocode(){
 async function publishMe(){
   if(!profile||!myPos||!sharing||!sb)return;let lat=myPos.lat,lng=myPos.lng;
   if(coarse){lat=Math.round(lat*1000)/1000;lng=Math.round(lng*1000)/1000;}
-  await sb.from('profiles').upsert({id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,lat,lng,coarse,sharing:true,updated_at:new Date().toISOString()});
+  await sb.from('profiles').upsert({id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,likes:profile.likes,interests:profile.interests,lat,lng,coarse,sharing:true,updated_at:new Date().toISOString()});
 }
 async function pollUsers(){
   let out=[];
   if(sb){
     const since=new Date(Date.now()-60000).toISOString();
     const {data,error}=await sb.from('profiles').select('*').eq('sharing',true).gt('updated_at',since).neq('id',myId);
-    if(!error&&data)out=data.map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],lat:u.lat,lng:u.lng}));
+    if(!error&&data)out=data.map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],lat:u.lat,lng:u.lng}));
   }
   others=out.concat(testUsers);renderNearby();
   recordEncounters();
@@ -430,7 +460,7 @@ function recordEncounters(){
 }
 async function addEncounter(u){
   const prev=encMap[u.id]; const count=(prev?prev.count:0)+1; const place=placeName||'この付近';
-  encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],count,last_place:place,last_at:Date.now()};
+  encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],count,last_place:place,last_at:Date.now()};
   renderCross(); toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`);
   const dc=$('#dotCross'); if(dc){dc.style.display='block';dc.textContent=Object.keys(encMap).length;}
   if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from('encounters').upsert(rec); }catch(e){} }
@@ -439,7 +469,7 @@ async function loadEncounters(){
   if(!sb)return; const {data}=await sb.from('encounters').select('*').eq('owner_id',myId); if(!data)return;
   for(const e of data){ let u=findUser(e.other_id);
     if(!u){ const {data:p}=await sb.from('profiles').select('*').eq('id',e.other_id).maybeSingle(); u=p; }
-    if(u) encMap[e.other_id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],count:e.count,last_place:e.last_place,last_at:new Date(e.last_at).getTime()};
+    if(u) encMap[e.other_id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],count:e.count,last_place:e.last_place,last_at:new Date(e.last_at).getTime()};
   }
   renderCross(); const dc=$('#dotCross'); const n=Object.keys(encMap).length; if(dc&&n){dc.style.display='block';dc.textContent=n;}
 }
@@ -448,7 +478,7 @@ function renderCross(){
   $('#crossSub').textContent=arr.length?arr.length+'人とすれ違い':'まだ0人';
   const ul=$('#crossList');
   if(!arr.length){ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>まだ誰ともすれ違っていません。<br>アプリを開いたまま出かけると、<br>500m以内に入った人が記録されます。</p></div>`;return;}
-  ul.innerHTML=arr.map(u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking}).replace(/'/g,"&#39;")},null)'>
+  ul.innerHTML=arr.map(u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests}).replace(/'/g,"&#39;")},null)'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
     <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div><div class="b">${esc(u.last_place||'')} ですれ違い</div></div>
     <div class="d"><div class="m">${u.count}回</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`).join('');
@@ -473,7 +503,7 @@ function openSheet(u,d){
   $('#sheet').innerHTML=`<div class="cover" style="background:${gr(u.emoji)}"><button class="close" onclick="closeSheet()">✕</button>
     <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)} <span>${u.age||''}</span></h2>
     ${d!=null?`<div class="dist">📍 いまここから <b>${Math.round(d)}m</b></div>`:''}</div></div>
-    <div class="body">${u.work?`<div class="workline">💼 <b>${esc(u.work)}</b></div>`:''}${(u.looking&&u.looking.length)?`<div class="wants">${u.looking.map(x=>`<span class="want">${esc(x)}希望</span>`).join('')}</div>`:''}<div class="bio">${esc(u.bio)}</div><div class="tags">${(u.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div></div>
+    <div class="body">${u.work?`<div class="workline">💼 <b>${esc(u.work)}</b></div>`:''}${(u.looking&&u.looking.length)?`<div class="wants">${u.looking.map(x=>`<span class="want">${esc(x)}希望</span>`).join('')}</div>`:''}<div class="bio">${esc(u.bio)}</div>${(u.likes&&u.likes.length)?`<div class="likeslist">${u.likes.map(x=>`<span class="likechip">♡ ${esc(x)}</span>`).join('')}</div>`:''}${(u.interests&&u.interests.length)?`<div class="interest"><div class="ih">興味のあること</div>${u.interests.map(x=>`<div class="irow"><b>${esc(x.cat)}</b>：${esc(x.detail)}</div>`).join('')}</div>`:''}<div class="tags">${(u.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div></div>
     <div class="actions">${isLiked?`<button class="btn btn-liked" style="flex:1" disabled>♥ いいね済み</button>`:
       `<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-rose" onclick="doLike('${u.id}')">♥ いいね</button>`}</div>`;
   $('#overlay').classList.add('show');
@@ -552,6 +582,53 @@ function spawnTest(){
   toast('🧪 テスト用の人を'+testUsers.length+'人追加しました。いいねするとマッチします');
 }
 
+/* ---------- プロフィール編集 ---------- */
+function openEdit(){
+  if(!profile){toast('先にプロフィール登録してね');return;}
+  const es=$('#editSheet');
+  es.innerHTML=`
+    <h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:16px">プロフィールを編集</h2>
+    <div class="field"><label>ニックネーム</label><input id="edName" maxlength="12" value="${esc(profile.name)}"></div>
+    <div class="field"><label>年齢</label><input id="edAge" type="number" min="18" max="99" value="${profile.age||''}"></div>
+    <div class="field"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
+    <div class="field"><label>ひとこと</label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
+    <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="edLooking"></div></div>
+    <div class="field"><label>好きなもの</label><div class="addrow"><input id="edLikeInput" maxlength="16" placeholder="追加してEnter"><button type="button" class="addbtn" onclick="edAddLike()">追加</button></div><div class="likeslist" id="edLikesList"></div></div>
+    <div class="warn-msg" id="edWarn"></div>
+    <div style="display:flex;gap:12px;margin-top:18px"><button class="btn btn-ghost" style="flex:1;padding:14px" onclick="closeEdit()">やめる</button><button class="btn btn-primary" style="flex:1;padding:14px" onclick="saveEdit()">保存</button></div>`;
+  // アイコン
+  $('#edEmojis').innerHTML=EMO.map(e=>`<div class="em ${e===profile.emoji?'sel':''}" data-e="${e}">${e}</div>`).join('');
+  $$('#edEmojis .em').forEach(el=>el.onclick=()=>{$$('#edEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
+  // 求めている関係
+  $('#edLooking').innerHTML=LOOKING.map(w=>`<div class="c ${(profile.looking||[]).includes(w)?'sel':''}" data-l="${w}">${w}</div>`).join('');
+  $$('#edLooking .c').forEach(el=>el.onclick=()=>el.classList.toggle('sel'));
+  // 好きなもの（編集用の作業配列）
+  editLikes=[...(profile.likes||[])]; edRenderLikes();
+  $('#edLikeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();edAddLike();}});
+  $('#editOverlay').classList.add('show');
+}
+let editLikes=[];
+function edAddLike(){const inp=$('#edLikeInput');const v=inp.value.trim();if(!v)return;if(!editLikes.includes(v))editLikes.push(v);inp.value='';edRenderLikes();}
+function edRenderLikes(){$('#edLikesList').innerHTML=editLikes.map((x,i)=>`<span class="likechip">${esc(x)}<span class="miniclose" onclick="editLikes.splice(${i},1);edRenderLikes()">✕</span></span>`).join('');}
+function closeEdit(){$('#editOverlay').classList.remove('show');}
+async function saveEdit(){
+  const name=$('#edName').value.trim()||profile.name;
+  const bio=$('#edBio').value.trim()||profile.bio;
+  const ng=ngCheck(name)||ngCheck(bio);
+  const w=$('#edWarn');
+  if(ng){ w.textContent='⚠️ 名前かひとことに不適切かもしれない言葉があります。このまま保存もできます。'; w.classList.add('show'); }
+  profile.name=name; profile.bio=bio;
+  profile.age=parseInt($('#edAge').value)||profile.age;
+  const se=$('#edEmojis .em.sel'); if(se)profile.emoji=se.dataset.e;
+  profile.looking=[...$('#edLooking .c.sel')].map(el=>el.dataset.l);
+  profile.likes=[...editLikes];
+  // 画面反映
+  $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;
+  $('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
+  await publishMe();
+  toast('プロフィールを更新しました');
+  closeEdit();
+}
 /* ---------- invite ---------- */
 function buildInvite(){const url=location.href;$('#shareUrl').value=url;renderQR(url);$('#shareUrl').addEventListener('input',e=>renderQR(e.target.value));}
 function renderQR(url){const box=$('#qrbox');const img=new Image();
