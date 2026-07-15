@@ -360,6 +360,18 @@ async function initBackend(){
   }catch(e){ backendError('バックエンドに接続できません: '+e.message); return false; }
 }
 function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#ff8080">'+esc(msg)+'</span><br><br>READMEの手順を確認してください。'; }
+async function tryResumeSession(){
+  if(!myId||!sb) return false;
+  try{
+    const {data,error}=await sb.from('profiles').select('*').eq('id',myId).maybeSingle();
+    if(error||!data) return false;
+    profile={id:myId,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[]};
+    $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;$('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
+    $('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
+    startGeo();buildInvite();startLoops();
+    return true;
+  }catch(e){ return false; }
+}
 
 /* ---------- state ---------- */
 let profile=null, myPos=null, origin=null, sharing=true, coarse=false, watchId=null;
@@ -771,7 +783,7 @@ function startLoops(){publishMe();pollUsers();loadEncounters();loadBilling();set
 /* ---------- boot ---------- */
 buildOnboard();
 $('#obGo').onclick=onStart;
-initBackend();
+(async()=>{ if(await initBackend()){ await tryResumeSession(); } })();
 
 </script>
 </body>
