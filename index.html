@@ -691,14 +691,14 @@ async function createMatch(uid,announce){
   if(announce){ showMatchPop(u); notifyMatchPush(uid); }
 }
 function notifyMatchPush(uid){
-  if(!sb||isTest(uid)){ toast('🔧 通知デバッグ: sb未初期化 or テストユーザーのため送信スキップ'); return; }
+  if(!sb||isTest(uid)){ alert('🔧 通知デバッグ: sb未初期化 or テストユーザーのため送信スキップ'); return; }
   const myName=profile?profile.name:'誰か';
   sb.functions.invoke('send-match-push',{body:{to:uid,title:'マッチしました！',body:myName+'さんと両想いになりました',url:'./index.html'}})
     .then(({data,error})=>{
-      if(error) toast('🔧 通知デバッグ: エラー '+(error.message||JSON.stringify(error)));
-      else toast('🔧 通知デバッグ: 送信結果 '+JSON.stringify(data));
+      if(error) alert('🔧 通知デバッグ: エラー '+(error.message||JSON.stringify(error)));
+      else alert('🔧 通知デバッグ: 送信結果 '+JSON.stringify(data));
     })
-    .catch(err=>{ toast('🔧 通知デバッグ: 呼び出し失敗 '+(err&&err.message?err.message:String(err))); });
+    .catch(err=>{ alert('🔧 通知デバッグ: 呼び出し失敗 '+(err&&err.message?err.message:String(err))); });
 }
 function showMatchPop(u){const mp=$('#matchpop');
   mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました</p>
