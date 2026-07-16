@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ちかく — 位置情報共有マッチング</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0fb0cd">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ちかく">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -271,7 +277,7 @@
         <div class="setting">
           <div class="setrow"><div class="lab">位置情報を共有<small>OFFにすると他の人に表示されません</small></div><div class="toggle on" id="tgShare" onclick="toggleShare(this)"><div class="k"></div></div></div>
           <div class="setrow"><div class="lab">おおまかな位置にする<small>正確な地点をぼかして共有（約100m）</small></div><div class="toggle" id="tgCoarse" onclick="toggleCoarse(this)"><div class="k"></div></div></div>
-          <div class="setrow"><div class="lab">通知<small>マッチ・メッセージをお知らせ</small></div><div class="toggle on" onclick="this.classList.toggle('on')"><div class="k"></div></div></div>
+          <div class="setrow"><div class="lab">通知<small id="pushHint">マッチしたらスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
         </div>
         <div class="setting" id="billBox" style="border-color:rgba(245,151,47,.35)">
           <div class="setrow"><div class="lab">💬 メッセージ機能<small id="msgStat">未解禁（初回のみ有料）</small></div><button class="btn btn-primary" id="msgBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showMsgPaywall()">解禁する</button></div>
@@ -371,6 +377,67 @@ async function tryResumeSession(){
     startGeo();buildInvite();startLoops();
     return true;
   }catch(e){ return false; }
+}
+
+/* ---------- push notifications ---------- */
+const VAPID_PUBLIC_KEY = "BO7wrifKnS7_EaYHHNu9I4rd-lChbdpM9kT8tluf1EMrjjVrDRAn6-PZ3ZDKcjsNCkYNFybj8diYC8PLqWlOrr8";
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(base64); const arr=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+let swReg=null;
+async function registerSW(){
+  if(!('serviceWorker' in navigator)) return null;
+  try{ swReg=await navigator.serviceWorker.register('sw.js'); return swReg; }catch(e){ return null; }
+}
+async function refreshPushToggle(){
+  const tg=$('#tgPush'); if(!tg) return;
+  if(!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)){ tg.classList.remove('on'); return; }
+  if(!swReg) swReg=await navigator.serviceWorker.getRegistration();
+  const sub = swReg ? await swReg.pushManager.getSubscription() : null;
+  tg.classList.toggle('on', !!sub && Notification.permission==='granted');
+}
+async function togglePush(el){
+  const turningOn = !el.classList.contains('on');
+  if(turningOn){
+    if(isIOS() && !isStandalone()){
+      toast('📲 iPhoneで通知を使うには、まずホーム画面に追加してください（共有ボタン→「ホーム画面に追加」）');
+      return;
+    }
+    const ok = await enablePush();
+    if(ok) el.classList.add('on'); else toast('通知を有効にできませんでした');
+  }else{
+    await disablePush();
+    el.classList.remove('on');
+  }
+}
+async function enablePush(){
+  if(!('Notification' in window) || !('PushManager' in window) || !sb || !myId) return false;
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm!=='granted') return false;
+    if(!swReg) swReg = await registerSW();
+    if(!swReg) return false;
+    let sub = await swReg.pushManager.getSubscription();
+    if(!sub){
+      sub = await swReg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+    }
+    await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
+    return true;
+  }catch(e){ return false; }
+}
+async function disablePush(){
+  try{
+    if(!swReg) swReg = await navigator.serviceWorker.getRegistration();
+    const sub = swReg ? await swReg.pushManager.getSubscription() : null;
+    if(sub) await sub.unsubscribe();
+    if(sb && myId) await sb.from('push_subscriptions').delete().eq('id', myId);
+  }catch(e){}
 }
 
 /* ---------- state ---------- */
@@ -621,7 +688,17 @@ async function createMatch(uid,announce){
   if(!u)u={id:uid,name:'相手',emoji:'⭐',bio:''};
   matches[uid]={u,msgs:[]};await loadChat(uid);renderMatches();
   const dm=$('#dotMatch');dm.style.display='block';dm.textContent=Object.keys(matches).length;
-  if(announce)showMatchPop(u);
+  if(announce){ showMatchPop(u); notifyMatchPush(uid); }
+}
+function notifyMatchPush(uid){
+  if(!sb||isTest(uid)){ alert('🔧 通知デバッグ: sb未初期化 or テストユーザーのため送信スキップ'); return; }
+  const myName=profile?profile.name:'誰か';
+  sb.functions.invoke('send-match-push',{body:{to:uid,title:'マッチしました！',body:myName+'さんと両想いになりました',url:'./index.html'}})
+    .then(({data,error})=>{
+      if(error) alert('🔧 通知デバッグ: エラー '+(error.message||JSON.stringify(error)));
+      else alert('🔧 通知デバッグ: 送信結果 '+JSON.stringify(data));
+    })
+    .catch(err=>{ alert('🔧 通知デバッグ: 呼び出し失敗 '+(err&&err.message?err.message:String(err))); });
 }
 function showMatchPop(u){const mp=$('#matchpop');
   mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました</p>
@@ -777,12 +854,13 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 /* ---------- misc ---------- */
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
-  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm')loadRooms();}
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm')loadRooms();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=(isIOS()&&!isStandalone())?'iPhoneはホーム画面に追加すると使えます':'マッチしたらスマホに通知';}}
 function startLoops(){publishMe();pollUsers();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);}
 
 /* ---------- boot ---------- */
 buildOnboard();
 $('#obGo').onclick=onStart;
+registerSW();
 (async()=>{ if(await initBackend()){ await tryResumeSession(); } })();
 
 </script>
