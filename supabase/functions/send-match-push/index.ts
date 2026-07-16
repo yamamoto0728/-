@@ -16,15 +16,28 @@ const corsHeaders = {
 
 const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
 const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? "";
-if (vapidPublicKey && vapidPrivateKey) {
+const vapidReady = Boolean(vapidPublicKey && vapidPrivateKey);
+if (vapidReady) {
   webpush.setVapidDetails("mailto:support@example.com", vapidPublicKey, vapidPrivateKey);
+  console.log("[send-match-push] VAPID configured, public key starts with:", vapidPublicKey.slice(0, 8));
+} else {
+  console.error("[send-match-push] VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY が Secrets に設定されていません");
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    if (!vapidReady) {
+      console.error("[send-match-push] VAPID未設定のため送信を中止");
+      return new Response(
+        JSON.stringify({ ok: false, reason: "vapid not configured" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const { to, title, body, url } = await req.json();
+    console.log("[send-match-push] request received, to:", to);
     if (!to) {
       return new Response(JSON.stringify({ error: "to is required" }), {
         status: 400,
@@ -43,7 +56,15 @@ Deno.serve(async (req) => {
       .eq("id", to)
       .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
+      console.error("[send-match-push] push_subscriptions取得エラー:", error.message);
+      return new Response(JSON.stringify({ ok: false, reason: "lookup error", detail: error.message }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!data) {
+      console.log("[send-match-push] 購読情報なし (to:", to, ") — このユーザーは通知を有効化していない");
       return new Response(JSON.stringify({ ok: false, reason: "no subscription" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -58,6 +79,7 @@ Deno.serve(async (req) => {
 
     try {
       await webpush.sendNotification(data.subscription, payload);
+      console.log("[send-match-push] 送信成功 (to:", to, ")");
       return new Response(JSON.stringify({ ok: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -65,6 +87,7 @@ Deno.serve(async (req) => {
     } catch (err) {
       // 購読が失効している場合（410 Gone など）は掃除しておく
       const statusCode = (err as { statusCode?: number })?.statusCode;
+      console.error("[send-match-push] 送信失敗 (to:", to, ") statusCode:", statusCode, "message:", String(err));
       if (statusCode === 404 || statusCode === 410) {
         await supabase.from("push_subscriptions").delete().eq("id", to);
       }
@@ -74,6 +97,7 @@ Deno.serve(async (req) => {
       });
     }
   } catch (e) {
+    console.error("[send-match-push] 想定外エラー:", String(e));
     return new Response(JSON.stringify({ error: String(e) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
