@@ -417,19 +417,22 @@ async function togglePush(el){
   }
 }
 async function enablePush(){
-  if(!('Notification' in window) || !('PushManager' in window) || !sb || !myId) return false;
+  if(!('Notification' in window) || !('PushManager' in window)){ alert('通知登録失敗: このブラウザはプッシュ通知に対応していません'); return false; }
+  if(!sb || !myId){ alert('通知登録失敗: バックエンド未接続 (sb='+!!sb+', myId='+myId+')'); return false; }
   try{
     const perm = await Notification.requestPermission();
-    if(perm!=='granted') return false;
+    if(perm!=='granted'){ alert('通知登録失敗: 通知の許可が得られませんでした ('+perm+')'); return false; }
     if(!swReg) swReg = await registerSW();
-    if(!swReg) return false;
+    if(!swReg){ alert('通知登録失敗: Service Workerの登録に失敗しました'); return false; }
     let sub = await swReg.pushManager.getSubscription();
     if(!sub){
       sub = await swReg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
     }
-    await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
+    const { data:{ user:authUser } } = await sb.auth.getUser();
+    const { error } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
+    if(error){ alert('通知登録失敗: DB保存エラー - '+error.message+'\nmyId='+myId+'\nauth.uid()='+(authUser&&authUser.id)); return false; }
     return true;
-  }catch(e){ return false; }
+  }catch(e){ alert('通知登録失敗: '+e.message); return false; }
 }
 async function disablePush(){
   try{
