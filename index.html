@@ -430,8 +430,14 @@ async function enablePush(){
     }
     const { data:{ session } } = await sb.auth.getSession();
     const tokenInfo = session ? ('あり(残り'+Math.round((session.expires_at*1000-Date.now())/1000)+'秒)') : 'セッションなし';
+    // サーバーが実際にトークンから見るID（=auth.uid()）をデコードして、myIdと一致するか確認する
+    let tokenSub='(取得不可)';
+    try{ if(session&&session.access_token){ const p=JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); tokenSub=(p.sub||'sub無し')+' / role='+(p.role||'?'); } }catch(_){}
+    // いま同じセッションでprofilesに書けるか（認証付き書き込みが効いているかの生テスト）
+    let profTest='(未実行)';
+    try{ const r=await sb.from('profiles').update({updated_at:new Date().toISOString()}).eq('id',myId); profTest = r.error ? ('NG '+r.error.message+' ('+r.status+')') : ('OK ('+r.status+')'); }catch(e){ profTest='例外 '+e.message; }
     const { error, status, statusText } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
-    if(error){ alert('通知登録失敗: DB保存エラー - '+error.message+'\nmyId='+myId+'\nsession.access_token='+tokenInfo+'\nhttp status='+status+' '+statusText); return false; }
+    if(error){ alert('通知登録失敗: DB保存エラー - '+error.message+'\nmyId='+myId+'\ntoken.sub='+tokenSub+'\nsub==myId? '+String(tokenSub).startsWith(String(myId))+'\nsession='+tokenInfo+'\nprofiles書込テスト='+profTest+'\nhttp status='+status+' '+statusText); return false; }
     return true;
   }catch(e){ alert('通知登録失敗: '+e.message); return false; }
 }
