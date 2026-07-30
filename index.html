@@ -4,12 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ちかく — 位置情報共有マッチング</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0fb0cd">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ちかく">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -79,7 +73,7 @@
   .nearest b{color:var(--amber);font-family:"JetBrains Mono";font-weight:500}
   .maplbl{position:absolute;bottom:9px;left:11px;font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.85);padding:4px 9px;border-radius:12px;border:1px solid var(--line)}
   .maplbl b{color:var(--signal)}
-  .listhead{display:flex;align-items:center;gap:8px;padding:12px 22px 8px;font-size:12.5px;font-weight:700;color:var(--muted)}
+  .listhead{display:flex;align-items:center;display:flex;align-items:center;gap:8px;padding:12px 22px 8px;font-size:12.5px;font-weight:700;color:var(--muted)}
   .listhead .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:blink 1.6s infinite}
   @keyframes blink{50%{opacity:.35}}
   .ulist{padding:0 16px 16px;display:flex;flex-direction:column;gap:8px}
@@ -201,6 +195,9 @@
   .interest .irow b{color:var(--signal);font-weight:700}
   .warn-msg{margin:8px 0 2px;padding:9px 12px;border-radius:12px;background:rgba(255,207,107,.12);border:1px solid rgba(255,207,107,.4);color:#ffe0a0;font-size:12px;line-height:1.6;display:none}
   .warn-msg.show{display:block}
+  .common{display:inline-block;font-size:11px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.35);border-radius:20px;padding:2px 9px;margin:3px 0}
+  #notifBanner{position:absolute;top:12px;left:12px;right:12px;z-index:70;background:linear-gradient(135deg,#f5972f,#ea7a22);color:#fff;padding:13px 16px;border-radius:16px;font-size:13.5px;font-weight:700;box-shadow:0 12px 30px rgba(245,151,47,.45);transform:translateY(-160%);transition:transform .45s cubic-bezier(.2,.9,.2,1);cursor:pointer}
+  #notifBanner.show{transform:translateY(0)}
   .addrow{display:flex;gap:8px}
   .addrow input{flex:1}
   .addrow .addbtn{flex-shrink:0;padding:0 16px;border:0;border-radius:14px;background:var(--surface2);color:var(--amber);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
@@ -236,7 +233,10 @@
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
       <div class="map-wrap"><canvas id="map" width="716" height="600"></canvas><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">中心が<b>あなた</b></div></div>
       <div class="listhead"><span class="live"></span> 位置を共有中の人</div>
-      <div class="scroll"><div class="ulist" id="ulist"></div></div>
+      <div class="scroll"><div class="ulist" id="ulist"></div>
+        <div class="listhead" style="margin-top:18px">💬 コミュニティ <span onclick="go('comm')" style="margin-left:auto;color:var(--signal);font-weight:700;cursor:pointer;font-size:12px">すべて見る ›</span></div>
+        <div class="ulist" id="homeRoomList"></div>
+      </div>
     </section>
     <section class="screen" id="s-cross">
       <div class="apphead"><h1>すれ違った人</h1><span class="sub" id="crossSub">&mdash;</span></div>
@@ -277,7 +277,7 @@
         <div class="setting">
           <div class="setrow"><div class="lab">位置情報を共有<small>OFFにすると他の人に表示されません</small></div><div class="toggle on" id="tgShare" onclick="toggleShare(this)"><div class="k"></div></div></div>
           <div class="setrow"><div class="lab">おおまかな位置にする<small>正確な地点をぼかして共有（約100m）</small></div><div class="toggle" id="tgCoarse" onclick="toggleCoarse(this)"><div class="k"></div></div></div>
-          <div class="setrow"><div class="lab">通知<small id="pushHint">マッチしたらスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
+          <div class="setrow"><div class="lab">通知<small>マッチ・メッセージをお知らせ</small></div><div class="toggle on" onclick="this.classList.toggle('on')"><div class="k"></div></div></div>
         </div>
         <div class="setting" id="billBox" style="border-color:rgba(245,151,47,.35)">
           <div class="setrow"><div class="lab">💬 メッセージ機能<small id="msgStat">未解禁（初回のみ有料）</small></div><button class="btn btn-primary" id="msgBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showMsgPaywall()">解禁する</button></div>
@@ -313,6 +313,7 @@
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
   <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
+  <div id="notifBanner" onclick="go('match');hideBanner()"></div>
   <div class="overlay" id="editOverlay" onclick="if(event.target===this)closeEdit()"><div class="sheet" id="editSheet" style="padding:22px 22px 28px"></div></div>
   <div class="overlay" id="payOverlay" onclick="if(event.target===this)closePay()"><div class="sheet" id="paySheet" style="padding:24px 22px 30px"></div></div>
   <div class="toast" id="toast"></div>
@@ -366,89 +367,6 @@ async function initBackend(){
   }catch(e){ backendError('バックエンドに接続できません: '+e.message); return false; }
 }
 function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#ff8080">'+esc(msg)+'</span><br><br>READMEの手順を確認してください。'; }
-async function tryResumeSession(){
-  if(!myId||!sb) return false;
-  try{
-    const {data,error}=await sb.from('profiles').select('*').eq('id',myId).maybeSingle();
-    if(error||!data) return false;
-    profile={id:myId,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[]};
-    $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;$('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
-    $('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
-    startGeo();buildInvite();startLoops();
-    return true;
-  }catch(e){ return false; }
-}
-
-/* ---------- push notifications ---------- */
-const VAPID_PUBLIC_KEY = "BO7wrifKnS7_EaYHHNu9I4rd-lChbdpM9kT8tluf1EMrjjVrDRAn6-PZ3ZDKcjsNCkYNFybj8diYC8PLqWlOrr8";
-function urlBase64ToUint8Array(base64String){
-  const padding='='.repeat((4-base64String.length%4)%4);
-  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
-  const raw=atob(base64); const arr=new Uint8Array(raw.length);
-  for(let i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
-  return arr;
-}
-const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
-let swReg=null;
-async function registerSW(){
-  if(!('serviceWorker' in navigator)) return null;
-  try{ swReg=await navigator.serviceWorker.register('sw.js'); return swReg; }catch(e){ return null; }
-}
-async function refreshPushToggle(){
-  const tg=$('#tgPush'); if(!tg) return;
-  if(!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)){ tg.classList.remove('on'); return; }
-  if(!swReg) swReg=await navigator.serviceWorker.getRegistration();
-  const sub = swReg ? await swReg.pushManager.getSubscription() : null;
-  tg.classList.toggle('on', !!sub && Notification.permission==='granted');
-}
-async function togglePush(el){
-  const turningOn = !el.classList.contains('on');
-  if(turningOn){
-    if(isIOS() && !isStandalone()){
-      toast('📲 iPhoneで通知を使うには、まずホーム画面に追加してください（共有ボタン→「ホーム画面に追加」）');
-      return;
-    }
-    const ok = await enablePush();
-    if(ok) el.classList.add('on'); else toast('通知を有効にできませんでした');
-  }else{
-    await disablePush();
-    el.classList.remove('on');
-  }
-}
-async function enablePush(){
-  if(!('Notification' in window) || !('PushManager' in window)){ alert('通知登録失敗: このブラウザはプッシュ通知に対応していません'); return false; }
-  if(!sb || !myId){ alert('通知登録失敗: バックエンド未接続 (sb='+!!sb+', myId='+myId+')'); return false; }
-  try{
-    const perm = await Notification.requestPermission();
-    if(perm!=='granted'){ alert('通知登録失敗: 通知の許可が得られませんでした ('+perm+')'); return false; }
-    if(!swReg) swReg = await registerSW();
-    if(!swReg){ alert('通知登録失敗: Service Workerの登録に失敗しました'); return false; }
-    let sub = await swReg.pushManager.getSubscription();
-    if(!sub){
-      sub = await swReg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
-    }
-    const { data:{ session } } = await sb.auth.getSession();
-    const tokenInfo = session ? ('あり(残り'+Math.round((session.expires_at*1000-Date.now())/1000)+'秒)') : 'セッションなし';
-    // サーバーが実際にトークンから見るID（=auth.uid()）をデコードして、myIdと一致するか確認する
-    let tokenSub='(取得不可)';
-    try{ if(session&&session.access_token){ const p=JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); tokenSub=(p.sub||'sub無し')+' / role='+(p.role||'?'); } }catch(_){}
-    // いま同じセッションでprofilesに書けるか（認証付き書き込みが効いているかの生テスト）
-    let profTest='(未実行)';
-    try{ const r=await sb.from('profiles').update({updated_at:new Date().toISOString()}).eq('id',myId); profTest = r.error ? ('NG '+r.error.message+' ('+r.status+')') : ('OK ('+r.status+')'); }catch(e){ profTest='例外 '+e.message; }
-    const { error, status, statusText } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
-    if(error){ alert('通知登録失敗: DB保存エラー - '+error.message+'\nmyId='+myId+'\ntoken.sub='+tokenSub+'\nsub==myId? '+String(tokenSub).startsWith(String(myId))+'\nsession='+tokenInfo+'\nprofiles書込テスト='+profTest+'\nhttp status='+status+' '+statusText); return false; }
-    return true;
-  }catch(e){ alert('通知登録失敗: '+e.message); return false; }
-}
-async function disablePush(){
-  try{
-    if(!swReg) swReg = await navigator.serviceWorker.getRegistration();
-    const sub = swReg ? await swReg.pushManager.getSubscription() : null;
-    if(sub) await sub.unsubscribe();
-    if(sb && myId) await sb.from('push_subscriptions').delete().eq('id', myId);
-  }catch(e){}
-}
 
 /* ---------- state ---------- */
 let profile=null, myPos=null, origin=null, sharing=true, coarse=false, watchId=null;
@@ -545,21 +463,48 @@ async function refreshMatches(){
   ]);
   liked=new Set((a||[]).map(x=>x.to_id));
   const likedMe=new Set((b||[]).map(x=>x.from_id));
+  const wasFirst=firstMatchLoad;
   for(const uid of liked){ if(likedMe.has(uid)&&!matches[uid]) await createMatch(uid, !firstMatchLoad); }
   firstMatchLoad=false; renderNearby();
+  const unread=updateMatchBadge();
+  if(wasFirst && unread.length){ showBanner(`🎉 新しいマッチが${unread.length}件！ タップで確認`); }
 }
 
+/* ---------- 共通の趣味を出す ---------- */
+function myInterestSet(){
+  const s=new Set();
+  if(profile){
+    (profile.tags||[]).forEach(t=>s.add(t));
+    (profile.likes||[]).forEach(t=>s.add(t));
+    (profile.interests||[]).forEach(x=>s.add(x.detail));
+  }
+  return s;
+}
+function commonWith(u){
+  const mine=myInterestSet(); if(!mine.size)return [];
+  const theirs=[];
+  (u.tags||[]).forEach(t=>theirs.push(t));
+  (u.likes||[]).forEach(t=>theirs.push(t));
+  (u.interests||[]).forEach(x=>theirs.push(x.detail));
+  const seen=new Set(); const out=[];
+  theirs.forEach(t=>{ if(t&&mine.has(t)&&!seen.has(t)){seen.add(t);out.push(t);} });
+  return out;
+}
 /* ---------- render nearby ---------- */
 function renderNearby(){
-  const list=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}return {u,d,r:(myPos&&u.lat!=null)?relMeters(myPos,u):null};}).sort((x,y)=>(x.d??1e9)-(y.d??1e9));
+  const list=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}return {u,d,r:(myPos&&u.lat!=null)?relMeters(myPos,u):null,common:commonWith(u)};})
+    .sort((x,y)=>{ if((y.common.length>0)!==(x.common.length>0))return (y.common.length>0?1:0)-(x.common.length>0?1:0); if(y.common.length!==x.common.length)return y.common.length-x.common.length; return (x.d??1e9)-(y.d??1e9); });
   $('#nearSub').textContent=list.length?list.length+'人が近くに':'まだ誰もいません';
   drawMap(list);const ul=$('#ulist');
   if(!list.length){ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「招待」からリンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('invite')">招待画面へ</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;return;}
-  ul.innerHTML=list.map(({u,d})=>`<div class="urow" onclick='openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':Math.round(d)})'>
+  ul.innerHTML=list.map(({u,d,common})=>`<div class="urow" onclick='openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':Math.round(d)})'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-    <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div><div class="b">${u.looking&&u.looking.length?`<span style="color:var(--rose);font-weight:600">${u.looking.slice(0,3).map(esc).join("・")}希望</span> · `:""}${esc(u.bio)}</div></div>
+    <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div>
+      ${common&&common.length?`<div class="common">🎯 共通 ${common.slice(0,3).map(esc).join('・')}${common.length>3?' 他':''}</div>`:''}
+      <div class="b">${u.looking&&u.looking.length?`<span style="color:var(--rose);font-weight:600">${u.looking.slice(0,3).map(esc).join("・")}希望</span> · `:""}${esc(u.bio)}</div></div>
     <div class="d"><div class="m">${d!=null?Math.round(d)+'m':'—'}</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`).join('');
 }
+function roundRect(ctx,x,y,w,hh,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+hh,r);ctx.arcTo(x+w,y+hh,x,y+hh,r);ctx.arcTo(x,y+hh,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function drawMap(list){
   const cv=$('#map'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height,cx=W/2,cy=H/2;
   const RANGE=200,ppm=(W/2)/RANGE;ctx.clearRect(0,0,W,H);
@@ -568,9 +513,9 @@ function drawMap(list){
   [50,100,200].forEach(m=>{ctx.beginPath();ctx.arc(cx,cy,m*ppm,0,7);ctx.strokeStyle='rgba(15,176,205,.28)';ctx.lineWidth=2;ctx.stroke();
     ctx.fillStyle='rgba(90,100,150,.6)';ctx.font='500 18px "JetBrains Mono"';ctx.fillText(m+'m',cx+4,cy-m*ppm+20);});
   list.forEach(({u,r,d})=>{ if(!r)return; let px=cx+r.e*ppm,py=cy-r.n*ppm;const edge=d>RANGE;if(edge){const k=RANGE/d;px=cx+r.e*ppm*k;py=cy-r.n*ppm*k;}
-    ctx.globalAlpha=edge?.4:1;ctx.beginPath();ctx.arc(px,py,edge?9:16,0,7);ctx.fillStyle=gradOf(u.emoji)[0];ctx.fill();
-    if(!edge){ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(u.emoji,px,py+1);ctx.textAlign='left';}ctx.globalAlpha=1;});
-  ctx.beginPath();ctx.arc(cx,cy,22,0,7);const g=ctx.createRadialGradient(cx-6,cy-6,2,cx,cy,22);g.addColorStop(0,'#ffd7a8');g.addColorStop(1,'#f78b3c');ctx.fillStyle=g;ctx.fill();
+    ctx.globalAlpha=edge?.4:1;const s=edge?9:16;const rr=4;roundRect(ctx,px-s/2,py-s/2,s,s,rr);ctx.fillStyle=gradOf(u.emoji)[0];ctx.fill();
+    if(!edge){ctx.font='15px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(u.emoji,px,py+1);ctx.textAlign='left';}ctx.globalAlpha=1;});
+  const half=22;roundRect(ctx,cx-half,cy-half,half*2,half*2,7);const g=ctx.createLinearGradient(cx-half,cy-half,cx+half,cy+half);g.addColorStop(0,'#ffd7a8');g.addColorStop(1,'#f78b3c');ctx.fillStyle=g;ctx.fill();
   ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(profile?profile.emoji:'📍',cx,cy+1);ctx.textAlign='left';
   const near=list[0];$('#nearest').innerHTML=near&&near.d!=null?'最寄り '+esc(near.u.name)+' · <b>'+Math.round(near.d)+'m</b>':'—';
 }
@@ -692,29 +637,26 @@ async function doLike(uid){
 
 /* ---------- matches ---------- */
 function findUser(uid){return others.find(u=>u.id===uid);}
+function showBanner(txt){const b=$('#notifBanner');if(!b)return;b.textContent=txt;b.classList.add('show');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),5000);}
+function hideBanner(){const b=$('#notifBanner');if(b)b.classList.remove('show');}
+function getSeen(){try{return new Set(JSON.parse(localStorage.getItem('seenMatches')||'[]'));}catch(e){return new Set();}}
+function setSeen(ids){try{localStorage.setItem('seenMatches',JSON.stringify([...ids]));}catch(e){}}
+function updateMatchBadge(){const ids=Object.keys(matches);const seen=getSeen();const unread=ids.filter(id=>!seen.has(id));const dm=$('#dotMatch');if(dm){if(unread.length){dm.style.display='block';dm.textContent=unread.length;}else dm.style.display='none';}return unread;}
+function buzz(){try{if(navigator.vibrate)navigator.vibrate([40,60,40]);}catch(e){}
+  try{const ac=new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sine';o.frequency.setValueAtTime(660,ac.currentTime);o.frequency.setValueAtTime(880,ac.currentTime+0.12);g.gain.setValueAtTime(0.16,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.4);o.start();o.stop(ac.currentTime+0.4);}catch(e){}}
 async function createMatch(uid,announce){
   if(matches[uid])return;let u=findUser(uid);
   if(!u&&sb){const {data}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle();if(data)u=data;}
   if(!u)u={id:uid,name:'相手',emoji:'⭐',bio:''};
   matches[uid]={u,msgs:[]};await loadChat(uid);renderMatches();
-  const dm=$('#dotMatch');dm.style.display='block';dm.textContent=Object.keys(matches).length;
-  if(announce){ showMatchPop(u); notifyMatchPush(uid); }
-}
-function notifyMatchPush(uid){
-  if(!sb||isTest(uid)){ alert('🔧 通知デバッグ: sb未初期化 or テストユーザーのため送信スキップ'); return; }
-  const myName=profile?profile.name:'誰か';
-  sb.functions.invoke('send-match-push',{body:{to:uid,title:'マッチしました！',body:myName+'さんと両想いになりました',url:'./index.html'}})
-    .then(({data,error})=>{
-      if(error) alert('🔧 通知デバッグ: エラー '+(error.message||JSON.stringify(error)));
-      else alert('🔧 通知デバッグ: 送信結果 '+JSON.stringify(data));
-    })
-    .catch(err=>{ alert('🔧 通知デバッグ: 呼び出し失敗 '+(err&&err.message?err.message:String(err))); });
+  updateMatchBadge();
+  if(announce)showMatchPop(u);
 }
 function showMatchPop(u){const mp=$('#matchpop');
   mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました</p>
     <div class="avs"><div class="a" style="background:${profile?gr(profile.emoji):'#f78b3c'}">${profile?profile.emoji:'😀'}</div><span class="heart">💛</span><div class="a" style="background:${gr(u.emoji)}">${u.emoji}</div></div>
     <div class="mbtns"><button class="btn btn-rose" onclick="closePop();openChat('${u.id}')">メッセージを送る</button><button class="btn later" onclick="closePop()">あとで</button></div>`;
-  mp.classList.add('show');confettiBurst();setTimeout(confettiBurst,350);}
+  mp.classList.add('show');confettiBurst();setTimeout(confettiBurst,350);buzz();}
 function closePop(){$('#matchpop').classList.remove('show');}
 function renderMatches(){
   const ids=Object.keys(matches);$('#matchCount').textContent=ids.length;const list=$('#matchList');
@@ -749,9 +691,10 @@ async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!
 /* ---------- コミュニティ（グループチャット） ---------- */
 let rooms=[], curRoom=null, roomPoll=null;
 async function loadRooms(){ if(!sb)return; try{const {data}=await sb.from('rooms').select('*').order('created_at',{ascending:false}); if(data){rooms=data;renderRooms();}}catch(e){} }
-function renderRooms(){ const el=$('#roomList'); if(!el)return; $('#commSub').textContent=rooms.length?rooms.length+'部屋':'まだありません';
-  if(!rooms.length){el.innerHTML=`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>「＋ コミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`;return;}
-  el.innerHTML=rooms.map(r=>`<div class="urow" onclick="openRoom('${r.id}')"><div class="av" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div class="info"><div class="n">${esc(r.name)}</div><div class="b">${esc(r.topic||'みんなで話そう')}</div></div><div class="d"><div class="m" style="font-size:12.5px">入室 ›</div></div></div>`).join('');
+function roomRow(r){return `<div class="urow" onclick="openRoom('${r.id}')"><div class="av" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div class="info"><div class="n">${esc(r.name)}</div><div class="b">${esc(r.topic||'みんなで話そう')}</div></div><div class="d"><div class="m" style="font-size:12.5px">入室 ›</div></div></div>`;}
+function renderRooms(){ const el=$('#roomList'); if(el){ $('#commSub').textContent=rooms.length?rooms.length+'部屋':'まだありません';
+    el.innerHTML=rooms.length?rooms.map(roomRow).join(''):`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>「＋ コミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`; }
+  const hr=$('#homeRoomList'); if(hr){ hr.innerHTML=rooms.length?rooms.slice(0,3).map(roomRow).join(''):`<div style="padding:14px 16px;font-size:12.5px;color:var(--muted)">まだコミュニティがありません。<span onclick="go('comm')" style="color:var(--signal);font-weight:700;cursor:pointer">作ってみる ›</span></div>`; }
 }
 function createRoom(){
   $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">コミュニティを作成</h2>
@@ -864,14 +807,13 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 /* ---------- misc ---------- */
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
-  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm')loadRooms();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=(isIOS()&&!isStandalone())?'iPhoneはホーム画面に追加すると使えます':'マッチしたらスマホに通知';}}
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match'){setSeen(Object.keys(matches));updateMatchBadge();}if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();}
 function startLoops(){publishMe();pollUsers();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);}
 
 /* ---------- boot ---------- */
 buildOnboard();
 $('#obGo').onclick=onStart;
-registerSW();
-(async()=>{ if(await initBackend()){ await tryResumeSession(); } })();
+initBackend();
 
 </script>
 </body>
