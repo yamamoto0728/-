@@ -16,36 +16,42 @@
 
 新しいセッションでこのリポジトリを開いたら、まずこのセクションを読む。過去の詳細な履歴は下の「進捗ログ」を参照。
 
-## 今回やったこと（2026-07-16）
+## 今回やったこと（2026-08-02）— プッシュ通知RLSエラー解消の実機確認 ＋ いいね通知の追加
 
-- SupabaseのSQL Editor / Edge Functions / Secretsを、あお自身が初めて実際に操作した回。結果、引継ぎ内容が事実と違うことが判明した:
-  - `push_subscriptions`テーブルとRLSポリシーは山本さんが作成済みだった（確認OK）
-  - しかし **Edge Function `send-match-push`は実際にはデプロイされていなかった**。ダッシュボードから新規作成・コードを貼り付けてデプロイした
-  - **VAPID鍵もSecretsに未設定だった**。node/python/opensslがこの環境に無いため、ブラウザのWeb Crypto APIで鍵ペアを生成するツール（`generate-vapid-keys.html`、scratchpad配下・使い捨て）を作って新規発行し、Supabase SecretsとClient側`index.html`のVAPID_PUBLIC_KEYを同期させた
-  - あおのSupabaseロール（Developer招待）ではSecrets編集に権限不足だったが、これは解決済み（あお側で追加の権限操作をして登録できるようになった）
-- 動作確認のため、あおが普段使っている本番リンクは実は Vercel（`yamamoto3.vercel.app`）で、GitHubリポジトリと連携しmainブランチを自動デプロイしている構成と判明。あお個人のVercelアカウントにはこのプロジェクトへのアクセス権が無いため、Vercelダッシュボードは使えない。**プレビューを見る/デプロイ状況を確認する手段はGitHubのPR画面（Checks/Vercel botコメント）経由**、という運用になった
-- PR #3（VAPID鍵同期＋初期デバッグログ）を作成・マージ。それでも通知が届かず、`push_subscriptions`テーブルの行数が0のままと判明
-- PR #4（`enablePush()`失敗時にalertで理由を表示するデバッグ追加）を作成・マージ。結果: **`new row violates row-level security policy for table "push_subscriptions"`** というRLSエラーで保存が失敗していることが分かった
-- 表示された`myId`と`auth.uid()`は完全一致（`a784b527-e665-41aa-a15c-407f269b7368`）。IDのズレが原因という当初の仮説は否定された
-- SQL Editorで`pg_policies`を確認 → ポリシー自体は正しい（`auth.uid() = id`、roles={public}）。`relrowsecurity=true`, `relforcerowsecurity=false`も正常値で、ここも原因ではなかった
-- PR #5（セッションのアクセストークン有無・残り有効期限も表示するデバッグ追加）を作成・マージ済み。**ここで時間切れ、まだ結果を見ていない**
+前回特定した根本原因（`push_subscriptions`にSELECTポリシーが無いため、supabase-jsの`.upsert()`がRLSで403になる）について、あおが本番のSupabase SQL Editorで以下を実行:
+```sql
+create policy "select own subscription"
+  on public.push_subscriptions for select
+  using (auth.uid() = id);
+```
+その後アプリで通知トグルをONにしたところ**エラーなく成功**。これでプッシュ通知登録のRLS問題は解決確認済み。
+
+また、mainが山本さんの作業（マッチ24h無効化・地図縮小・コミュ情報表示、コミットは`13f6cce`まで）で進んでいたため、まず`main`を取り込んでから新規ブランチ`feature/like-push-notify`を作成して以下を実装:
+
+1. `supabase/push_subscriptions.sql`にSELECTポリシーを追記（本番Supabaseには適用済みだが、リポジトリ側の記録・再現用として反映）。「upsertにはSELECTポリシーが必須」とコメントも残した
+2. デバッグ用の`alert('🔧 通知デバッグ: ...')`表示を撤去。`notifyMatchPush(uid)`を汎用の`notifyPush(uid,title,body)`に置き換え、失敗時は`console.error`のみに変更（毎回alertが出ると次のいいね通知機能でうるさすぎるため）
+3. **新機能: いいねされた側にもプッシュ通知**。`doLike()`で相手からの片想いいいね（マッチ未成立）の場合に`notifyPush(uid,'いいねが届きました💌','気になる人があなたにいいねしました。プロフィールを確認してみて！')`を呼ぶようにした。**誰からのいいねかは通知本文に出さない設計**（送った側の名前を伏せる。UI上も「誰かに好かれている」以上の情報は今まで表示していなかったため、その情報量に合わせた）
+4. マッチ時の通知（`createMatch`内）は`notifyPush(uid,'マッチしました！',myName+'さんと両想いになりました')`として維持（こちらは相互いいね成立後なので名前を出す）
 
 ## ブロッカー・待ち状態
 
-- 誰かの返事待ちではなく、**あおが本番リンク（ホーム画面のアイコン）で通知トグルをONにして、出てきたアラートの全文（`session.access_token=...`, `http status=...`を含む）を報告するのを待っている状態**
+- 現在ブロッカーなし。`feature/like-push-notify`ブランチでの実装が完了し、あおの動作確認・「マージして」指示を待っている状態
 
-## 次回まずやること
+## 次回やること
 
-1. あおに、ホーム画面のアイコンから本番リンクを開き直し、Me画面で通知トグルをONにして、出たアラート全文（特に`session.access_token`が「あり(残り◯秒)」か「セッションなし」か、`http status`が何番か）を聞く
-2. その結果次第で分岐:
-   - トークンが無い/期限切れなら → セッション永続化・リフレッシュ周り（iOS SafariのPWAスタンドアロンモード特有のストレージ挙動の可能性）を疑う
-   - トークンは有効なのにRLSで弾かれるなら → より深い原因（Supabase側の設定、PostgREST/JWT周りの既知の不具合など）を調査する必要あり
+### あお（ユーザー）がやること
+1. 実機で「いいね」を送って、相手側の端末（またはテストアカウント）に「いいねが届きました💌」の通知が来るか確認
+2. 問題なければClaudeに「マージして」と伝える
+
+### Claudeがやること
+1. あおの動作確認OK後、`feature/like-push-notify`をcommit→push→PR作成
+2. 最終確認として、実際にマッチ発生時にスマホへ通知が届くか（Edge Function `send-match-push`まで通るか）のエンドツーエンド動作確認は依然未実施なので、機会があれば進める
 
 ## 未解決の疑問点
 
-- `myId == auth.uid()`なのに`INSERT`がRLSで弾かれる根本原因はまだ不明（通常ありえないはずの状態）
-- Supabase Authenticationの「Allow anonymous sign-ins」が実際にONになっているか、このセッションでは未確認（一度見ておく価値あり）
-- 今回、あおの作業効率を優先してPR #4, #5はユーザー確認を待たずClaudeがそのままマージまで行った。次回以降もこの進め方で良いか、都度確認してほしいか未確認
+- いいね通知で送信者名を伏せる設計にしたが、あおが「誰からのいいねか分かった方がいい」という意図だった場合は要調整（未確認、あおの好みを聞く必要あり）
+- `push_subscriptions`に行が入った状態で実際にマッチさせ、Edge Function経由で通知が届くところまでは依然未確認
+- 前回・今回とも、あおの「マージして」指示のもとClaudeがpush/PR作成まで実施（実マージはあおが手動）。`gh` CLIがこの環境に無いため、PR作成だけは毎回あおが手動リンクから行う運用で確定
 
 # リポジトリの扱い方
 
@@ -108,3 +114,5 @@ PR作成には `gh` CLI のログインが必要（`gh auth login`）。未認�
 - 2026-07-15: マッチ時にスマホへプッシュ通知を送る機能を追加（PWA化）。Web Push API + manifest.json/sw.jsでPWA化し、マッチ確定時にSupabase Edge Function `send-match-push` を呼んで購読済み端末に通知する仕組み（`supabase/functions/send-match-push/index.ts`, `supabase/push_subscriptions.sql`）。Supabase側（テーブル・Edge Function・VAPID鍵）は山本さんがダッシュボードで設定済み。その後、通知が実際に届いているか怪しかったため、`notifyMatchPush`の呼び出し結果をtoast/alertで可視化するデバッグ表示を追加（原因調査中、未解決）。
 - 2026-07-16: プッシュ通知が届かない原因調査を進めるには、あお自身がSupabaseダッシュボード（プロジェクト参照: `rosgvnxqcuyenlipakck`）でEdge Functionsのログやsecretsを見られる権限が必要と判明。山本さんにSupabase組織のメンバー招待（Developerロール、blue.aochan03@gmail.com宛）を依頼することにした。招待待ち、権限が付与され次第デバッグ再開。
 - 2026-07-16: 招待が通り、あおが初めてSupabase SQL Editor/Edge Functionsを操作。Edge Function `send-match-push`とVAPID Secretsが実際には未設定だったことが判明し、両方セットアップし直した（PR #3, https://github.com/yamamoto0728/-/pull/3 、マージ済み）。それでも通知が届かず調査を継続、`push_subscriptions`へのinsertがRLSポリシー違反で失敗していることが判明（PR #4, #5, https://github.com/yamamoto0728/-/pull/4 , https://github.com/yamamoto0728/-/pull/5 、マージ済み）。`myId`と`auth.uid()`は一致・ポリシー定義自体も正しいことを確認済みだが、根本原因は未特定のまま時間切れ。詳細は上の「引継ぎノート」参照。
+- 2026-07-24: RLSエラーの根本原因を特定。SQL Editorでの検証（ポリシー同一・トリガー無し・なりすまし`auth.uid()`でのINSERT成功）でDB側は正常と確認し、アプリ側にデバッグ追加（`feature/push-debug3`、マージ済み）。結果`sub==myId? true`・`profiles書込テスト=OK`なのにpushだけ403 → **push_subscriptionsにSELECTポリシーが無く、PostgREST経由の`.upsert()`がRLSで弾かれていた**のが原因と判明。修正はSELECTポリシー追加（`create policy ... for select using (auth.uid()=id)`）。あおの実機テストでの最終確認待ちで中断。詳細は上の「引継ぎノート」参照。
+- 2026-08-02: あおがSupabase SQL EditorでSELECTポリシーを追加し、通知トグルONが成功することを実機確認（RLS問題は解決確定）。mainが山本さんの新機能（マッチ24h無効化・地図縮小・コミュ情報表示）で進んでいたため取り込んだ上で、`feature/like-push-notify`ブランチを作成。`supabase/push_subscriptions.sql`にSELECTポリシーを記録として追記、デバッグ用alert表示を撤去して`notifyMatchPush`を汎用の`notifyPush(uid,title,body)`に整理、**片想いいいね時にも相手へプッシュ通知を送る新機能**を追加（送信者名は伏せる設計）。あおの実機確認・マージ指示待ち。

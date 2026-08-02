@@ -22,4 +22,8 @@ create policy "delete own subscription"
   on public.push_subscriptions for delete
   using (auth.uid() = id);
 
--- SELECT はクライアントからは不要（Edge Functionはservice roleでRLSを回避して読む）ため付与しない
+-- SELECTポリシーが無いとPostgREST経由の`.upsert()`がRLSで403になる（Edge Function自体はservice roleで
+-- RLSを回避して読むため不要に思えるが、クライアントのsupabase-js upsertには必須）。原因調査の詳細はCLAUDE.md参照。
+create policy "select own subscription"
+  on public.push_subscriptions for select
+  using (auth.uid() = id);
