@@ -729,7 +729,8 @@ async function doLike(uid){
   if(!sb){ toast('バックエンド未接続です'); return; }
   await sb.from('likes').upsert({from_id:myId,to_id:uid});
   const {data}=await sb.from('likes').select('from_id').eq('from_id',uid).eq('to_id',myId).maybeSingle();
-  if(data)createMatch(uid,true); else toast('いいねを送りました（今日の残り '+likeRemainText()+'）');
+  if(data){ createMatch(uid,true); }
+  else{ notifyPush(uid,'いいねが届きました💌','気になる人があなたにいいねしました。プロフィールを確認してみて！'); toast('いいねを送りました（今日の残り '+likeRemainText()+'）'); }
 }
 
 /* ---------- matches ---------- */
@@ -740,17 +741,12 @@ async function createMatch(uid,announce,matchedAt){
   if(!u)u={id:uid,name:'相手',emoji:'⭐',bio:''};
   matches[uid]={u,msgs:[],matchedAt:matchedAt||Date.now()};await loadChat(uid);renderMatches();
   const dm=$('#dotMatch');dm.style.display='block';dm.textContent=Object.keys(matches).length;
-  if(announce){ showMatchPop(u); notifyMatchPush(uid); }
+  if(announce){ showMatchPop(u); notifyPush(uid,'マッチしました！',(profile?profile.name:'誰か')+'さんと両想いになりました'); }
 }
-function notifyMatchPush(uid){
-  if(!sb||isTest(uid)){ alert('🔧 通知デバッグ: sb未初期化 or テストユーザーのため送信スキップ'); return; }
-  const myName=profile?profile.name:'誰か';
-  sb.functions.invoke('send-match-push',{body:{to:uid,title:'マッチしました！',body:myName+'さんと両想いになりました',url:'./index.html'}})
-    .then(({data,error})=>{
-      if(error) alert('🔧 通知デバッグ: エラー '+(error.message||JSON.stringify(error)));
-      else alert('🔧 通知デバッグ: 送信結果 '+JSON.stringify(data));
-    })
-    .catch(err=>{ alert('🔧 通知デバッグ: 呼び出し失敗 '+(err&&err.message?err.message:String(err))); });
+function notifyPush(uid,title,body){
+  if(!sb||isTest(uid))return;
+  sb.functions.invoke('send-match-push',{body:{to:uid,title,body,url:'./index.html'}})
+    .catch(err=>console.error('[push] 送信失敗',err));
 }
 function showMatchPop(u){const mp=$('#matchpop');
   mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました</p>
