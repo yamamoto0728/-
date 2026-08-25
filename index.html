@@ -211,6 +211,14 @@
   .joinhint.show{display:block}
   .urow .d .unread{display:inline-block;min-width:20px;height:20px;line-height:20px;font-size:11px;font-weight:700;background:var(--rose);color:#fff;border-radius:10px;padding:0 6px}
   .joined-tag{color:var(--ok);font-size:11px;font-weight:700}
+  .agegate{margin:18px 0 0;padding:14px 15px;border-radius:14px;background:rgba(226,87,79,.07);border:1px solid rgba(226,87,79,.3);font-size:12px;line-height:1.7;color:var(--ink)}
+  .agegate b{color:var(--bad)}
+  .agechk{display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13.5px;font-weight:700;cursor:pointer}
+  .agechk input{width:20px;height:20px;accent-color:var(--amber)}
+  .reportbtn{background:none;border:0;color:var(--muted2);font-size:11.5px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:8px 0}
+  .reportbtn:active{opacity:.6}
+  .rsn{display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:9px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;cursor:pointer}
+  .rsn:active{background:var(--surface2)}
   .addrow{display:flex;gap:8px}
   .addrow input{flex:1}
   .addrow .addbtn{flex-shrink:0;padding:0 16px;border:0;border-radius:14px;background:var(--surface2);color:var(--amber);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
@@ -229,7 +237,7 @@
         <div class="logo">ちかく</div>
         <div class="tag">いま近くにいる人と、その場でつながる。<br>同じリンクを開いた人同士でマッチングします。</div>
         <div class="field"><label>ニックネーム</label><input id="obName" maxlength="12" placeholder="れい"></div>
-        <div class="row2"><div class="field"><label>年齢</label><input id="obAge" type="number" min="18" max="99" placeholder="24"></div><div class="field" style="flex:2"><label>アイコン</label></div></div>
+        <div class="row2"><div class="field"><label>年齢（18歳以上）</label><input id="obAge" type="number" min="18" max="99" placeholder="24"></div><div class="field" style="flex:2"><label>アイコン</label></div></div>
         <div class="emojis" id="obEmojis"></div>
         <div class="field" style="margin-top:16px"><label>ひとこと</label><textarea id="obBio" rows="2" maxlength="60" placeholder="カフェ巡りが好きです。近くにいたら話しましょう"></textarea></div>
         <div class="field"><label>タグ（好きなだけ）</label><div class="chips" id="obTags"></div></div>
@@ -237,6 +245,8 @@
         <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="obLooking"></div></div>
         <div class="field"><label>好きなもの（自由に追加）</label><div class="addrow"><input id="obLikeInput" maxlength="16" placeholder="例：サウナ / 猫カフェ" onkeydown="if(event.key==='Enter'){event.preventDefault();addLike();}"><button type="button" class="addbtn" onclick="addLike()">追加</button></div><div class="likeslist" id="obLikesList"></div></div>
         <div class="field"><label>興味のあること</label><div class="chips" id="obInterestCat"></div><div id="obInterestOpts" style="margin-top:9px"></div><div class="likeslist" id="obInterestList"></div><div style="font-size:11px;color:var(--muted2);margin-top:6px">ジャンルを押すと選択肢が出ます。タップで追加/削除。</div></div>
+        <div class="agegate">🔞 <b>18歳以上の方のみご利用いただけます</b><br>本アプリは18歳以上を対象としています。18歳未満の方はご利用いただけません。
+          <label class="agechk"><input type="checkbox" id="obAge18"><span>18歳以上です</span></label></div>
         <div class="privacy">🔒 <b>位置情報について</b><br>「始める」を押すとGPSでのおおよその現在地を、<b>このリンクを開いている他の利用者に共有</b>します。共有はいつでも設定から止められます。</div>
         <button class="btn btn-primary go" id="obGo">位置情報を共有して始める</button>
       </div>
@@ -307,7 +317,7 @@
         <div class="setting" style="border-color:rgba(99,214,232,.3)">
           <div class="setrow" style="border:0"><div class="lab">🧪 テストモード<small>1台だけで動作確認できます。近くにテスト用の人が現れ、いいねするとマッチ→チャットまで試せます</small></div><button class="btn btn-primary" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="spawnTest()">試す</button></div>
         </div>
-        <div class="note">位置は<b>このリンクを持つ人全員</b>に見えます。知らない人と会うときは公共の場所で。<br>これはプロトタイプです。本番運用には認証・通報・ブロック機能などが必要です。</div>
+        <div class="note">位置は<b>このリンクを持つ人全員</b>に見えます。知らない人と会うときは公共の場所で。<br>このアプリは<b>18歳以上</b>の方のみご利用いただけます。<br>気になる相手はプロフィールから<b>通報・ブロック</b>できます。<br>これはプロトタイプです。本番運用には年齢確認などがさらに必要です。</div>
       </div>
     </section>
   </div>
@@ -329,6 +339,7 @@
   <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
   <div class="overlay" id="editOverlay" onclick="if(event.target===this)closeEdit()"><div class="sheet" id="editSheet" style="padding:22px 22px 28px"></div></div>
   <div class="overlay" id="payOverlay" onclick="if(event.target===this)closePay()"><div class="sheet" id="paySheet" style="padding:24px 22px 30px"></div></div>
+  <div class="overlay" id="reportOverlay" onclick="if(event.target===this)closeReport()"><div class="sheet" id="reportSheet" style="padding:24px 22px 30px"></div></div>
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -461,6 +472,7 @@ let profile=null, myPos=null, origin=null, sharing=true, coarse=false, watchId=n
 let others=[], liked=new Set(), matches={}, placeName=null, chatPeer=null, chatPoll=null, firstMatchLoad=true;
 let testUsers=[]; const isTest=id=>String(id).startsWith('test-');
 let encMap={}, insideSet=new Set();
+let blocked=new Set();   // 通報・ブロックした相手（自分の画面から消す）
 const R=6371000;
 function relMeters(from,to){const dLat=(to.lat-from.lat)*Math.PI/180,dLng=(to.lng-from.lng)*Math.PI/180;return {e:dLng*R*Math.cos(from.lat*Math.PI/180),n:dLat*R};}
 function esc(s){return (s||'').toString().replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
@@ -491,6 +503,10 @@ function renderInterestEditor(){const el=$('#obInterestList');if(!el)return;el.i
 async function onStart(){
   if(!myId){ if(!(await initBackend())){ if(!configured) return; myId='local-'+uuid(); } }
   const name=$('#obName').value.trim()||'ゲスト';const age=parseInt($('#obAge').value)||null;
+  // 18歳以上のみ利用可能
+  if(!$('#obAge18').checked){ toast('「18歳以上です」にチェックを入れてください'); return; }
+  if(!age){ toast('年齢を入力してください'); return; }
+  if(age<18){ toast('⚠️ このアプリは18歳以上の方のみご利用いただけます'); return; }
   const wd=$('#obWorkDetail').value.trim(); const work=selWorkCat?(wd?selWorkCat+'・'+wd:selWorkCat):wd;
   const bioVal=$('#obBio').value.trim()||'よろしくお願いします。';
   const ng=ngCheck(name)||ngCheck(bioVal);
@@ -540,7 +556,7 @@ async function pollUsers(){
     const {data,error}=await sb.from('profiles').select('*').eq('sharing',true).gt('updated_at',since).neq('id',myId);
     if(!error&&data)out=data.map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],lat:u.lat,lng:u.lng}));
   }
-  others=out.concat(testUsers);renderNearby();
+  others=out.filter(u=>!blocked.has(u.id)).concat(testUsers);renderNearby();
   recordEncounters();
   if(sb) await refreshMatches();
 }
@@ -553,7 +569,7 @@ async function refreshMatches(){
   const myLikeAt={}; (a||[]).forEach(x=>{myLikeAt[x.to_id]=x.created_at;});
   const likedMe=new Set((b||[]).map(x=>x.from_id));
   const themLikeAt={}; (b||[]).forEach(x=>{themLikeAt[x.from_id]=x.created_at;});
-  for(const uid of liked){ if(likedMe.has(uid)){
+  for(const uid of liked){ if(blocked.has(uid))continue; if(likedMe.has(uid)){
     // マッチ成立時刻＝両者のいいねの遅いほう
     const t1=Date.parse(myLikeAt[uid]||0)||0, t2=Date.parse(themLikeAt[uid]||0)||0;
     const matchedAt=Math.max(t1,t2)||Date.now();
@@ -644,7 +660,7 @@ async function loadEncounters(){
   renderCross(); const dc=$('#dotCross'); const n=Object.keys(encMap).length; if(dc&&n){dc.style.display='block';dc.textContent=n;}
 }
 function renderCross(){
-  const arr=Object.values(encMap).sort((a,b)=>(b.last_at||0)-(a.last_at||0));
+  const arr=Object.values(encMap).filter(u=>!blocked.has(u.id)).sort((a,b)=>(b.last_at||0)-(a.last_at||0));
   $('#crossSub').textContent=arr.length?arr.length+'人とすれ違い':'まだ0人';
   const ul=$('#crossList');
   if(!arr.length){ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>まだ誰ともすれ違っていません。<br>アプリを開いたまま出かけると、<br>500m以内に入った人が記録されます。</p></div>`;return;}
@@ -667,6 +683,46 @@ function confettiBurst(){
     if(frame<150)requestAnimationFrame(tick); else ctx.clearRect(0,0,cv.width,cv.height);
   })();
 }
+/* ---------- 通報・ブロック ---------- */
+const REPORT_REASONS=['不適切な内容・発言','迷惑行為・しつこい','なりすまし・偽アカウント','スパム・勧誘','その他'];
+let reportTarget=null;
+async function loadBlocks(){
+  if(!sb)return;
+  try{
+    const {data,error}=await sb.from('blocks').select('blocked_id').eq('blocker_id',myId);
+    if(error){ console.warn('[block] 読み込めません。supabase/reports_blocks.sql を実行してください:',error.message); return; }
+    if(data)blocked=new Set(data.map(x=>x.blocked_id));
+  }catch(e){ console.warn('[block] 読み込み失敗',e); }
+}
+function openReport(uid,name){
+  reportTarget={id:uid,name:name};
+  $('#reportSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">${esc(name)} さんを通報</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">理由を選んでください。通報するとこの人は<b style="color:var(--ink)">あなたの画面に表示されなくなります</b>（ブロック）。<br><span style="color:var(--muted2)">※相手に通知されることはありません</span></p>
+    ${REPORT_REASONS.map(r=>`<button class="rsn" onclick="submitReport('${r}')">${r}</button>`).join('')}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeReport()">やめる</button>`;
+  $('#reportOverlay').classList.add('show');
+}
+function closeReport(){ $('#reportOverlay').classList.remove('show'); }
+async function submitReport(reason){
+  if(!reportTarget)return;
+  const t=reportTarget; reportTarget=null;
+  blocked.add(t.id);
+  others=others.filter(u=>u.id!==t.id);
+  testUsers=testUsers.filter(u=>u.id!==t.id);
+  delete encMap[t.id];
+  insideSet.delete(t.id);
+  closeReport(); closeSheet();
+  renderNearby(); renderCross(); renderMatches();
+  if(isTest(t.id)){ toast('通報しました（テスト用のため記録は残りません）'); return; }
+  if(!sb){ toast('通報しました（未接続のため記録は残りません）'); return; }
+  try{
+    const {error:e1}=await sb.from('reports').insert({reporter_id:myId,target_id:t.id,reason:reason});
+    if(e1) console.warn('[report] 保存に失敗',e1.message);
+    const {error:e2}=await sb.from('blocks').upsert({blocker_id:myId,blocked_id:t.id},{onConflict:'blocker_id,blocked_id'});
+    if(e2) console.warn('[block] 保存に失敗',e2.message);
+  }catch(e){ console.error('[report] 送信に失敗',e); }
+  toast('通報しました。この人はもう表示されません');
+}
 /* ---------- profile sheet + like ---------- */
 function openSheet(u,d){
   const isLiked=liked.has(u.id);
@@ -674,6 +730,7 @@ function openSheet(u,d){
     <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)} <span>${u.age||''}</span></h2>
     ${d!=null?`<div class="dist">📍 いまここから <b>${Math.round(d)}m</b></div>`:''}</div></div>
     <div class="body">${u.work?`<div class="workline">💼 <b>${esc(u.work)}</b></div>`:''}${(u.looking&&u.looking.length)?`<div class="wants">${u.looking.map(x=>`<span class="want">${esc(x)}希望</span>`).join('')}</div>`:''}<div class="bio">${esc(u.bio)}</div>${(u.likes&&u.likes.length)?`<div class="likeslist">${u.likes.map(x=>`<span class="likechip">♡ ${esc(x)}</span>`).join('')}</div>`:''}${(u.interests&&u.interests.length)?`<div class="interest"><div class="ih">興味のあること</div>${u.interests.map(x=>`<div class="irow"><b>${esc(x.cat)}</b>：${esc(x.detail)}</div>`).join('')}</div>`:''}<div class="tags">${(u.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div></div>
+    <div style="padding:0 20px;text-align:center"><button class="reportbtn" onclick="openReport('${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">⚠ この人を通報・ブロックする</button></div>
     <div class="actions">${isLiked?`<button class="btn btn-liked" style="flex:1" disabled>♥ いいね済み</button>`:
       `<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-rose" onclick="doLike('${u.id}')">♥ いいね</button>`}</div>`;
   $('#overlay').classList.add('show');
@@ -757,7 +814,7 @@ function showMatchPop(u){const mp=$('#matchpop');
 function closePop(){$('#matchpop').classList.remove('show');}
 function renderMatches(){
   const all=Object.keys(matches);
-  const ids=all.filter(id=>!isExpired(matches[id]));   // 期限切れは非表示
+  const ids=all.filter(id=>!isExpired(matches[id]) && !blocked.has(id));   // 期限切れ・ブロック済みは非表示
   $('#matchCount').textContent=ids.length;const list=$('#matchList');
   if(!ids.length){list.innerHTML=`<div class="empty"><div class="big">♥</div><p>まだ有効なマッチはありません。<br>近くの人に「いいね」して、<br>両想いになると表示されます。<br><span style="color:var(--rose);font-weight:700">※マッチは24時間で消えます</span></p></div>`;return;}
   list.innerHTML=ids.map((id,i)=>{const m=matches[id];const last=m.msgs[m.msgs.length-1];const ms=matchLeftMs(m);const warn=ms<3600000;
@@ -975,7 +1032,7 @@ function openEdit(){
   es.innerHTML=`
     <h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:16px">プロフィールを編集</h2>
     <div class="field"><label>ニックネーム</label><input id="edName" maxlength="12" value="${esc(profile.name)}"></div>
-    <div class="field"><label>年齢</label><input id="edAge" type="number" min="18" max="99" value="${profile.age||''}"></div>
+    <div class="field"><label>年齢（18歳以上）</label><input id="edAge" type="number" min="18" max="99" value="${profile.age||''}"></div>
     <div class="field"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
     <div class="field"><label>ひとこと</label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
     <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="edLooking"></div></div>
@@ -1002,7 +1059,9 @@ async function saveEdit(){
   if(ng){ w.textContent='⚠️ 名前かひとことに不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
   w.classList.remove('show');
   profile.name=name; profile.bio=bio;
-  profile.age=parseInt($('#edAge').value)||profile.age;
+  const newAge=parseInt($('#edAge').value)||profile.age;
+  if(newAge<18){ w.textContent='⚠️ このアプリは18歳以上の方のみご利用いただけます。'; w.classList.add('show'); return; }
+  profile.age=newAge;
   const se=$('#edEmojis .em.sel'); if(se)profile.emoji=se.dataset.e;
   profile.looking=[...$('#edLooking .c.sel')].map(el=>el.dataset.l);
   profile.likes=[...editLikes];
@@ -1024,7 +1083,7 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=(isIOS()&&!isStandalone())?'iPhoneはホーム画面に追加すると使えます':'マッチしたらスマホに通知';}}
-function startLoops(){publishMe();pollUsers();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);}
+function startLoops(){publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);}
 
 /* ---------- boot ---------- */
 buildOnboard();
