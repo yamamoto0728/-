@@ -63,8 +63,8 @@
   .chips{display:flex;flex-wrap:wrap;gap:8px}
   .chips .c{font-size:12.5px;padding:8px 13px;border-radius:20px;background:var(--surface);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.15s}
   .chips .c.sel{border-color:var(--signal);background:rgba(99,214,232,.12);color:var(--signal);font-weight:700}
-  .privacy{margin:18px 0;padding:14px 15px;border-radius:14px;background:rgba(255,207,107,.08);border:1px solid rgba(255,207,107,.3);font-size:12px;line-height:1.7;color:#ffe6b8}
-  .privacy b{color:var(--warn)}
+  .privacy{margin:18px 0;padding:14px 15px;border-radius:14px;background:rgba(224,160,47,.10);border:1px solid rgba(224,160,47,.45);font-size:12.5px;line-height:1.8;color:#4a3410}
+  .privacy b{color:#8a5a00;font-weight:700}
   .ob .go{padding:16px;font-size:16px;width:100%;margin-top:auto}
   .locbar{margin:4px 16px 8px;padding:11px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line);display:flex;align-items:center;gap:11px;font-size:12px}
   .locbar .pin{font-size:16px}.locbar .t{flex:1;min-width:0}
@@ -199,7 +199,7 @@
   .interest .ih{font-size:12px;color:var(--signal);font-weight:800;margin-bottom:8px;letter-spacing:.5px}
   .interest .irow{font-size:13.5px;color:#3a4066;margin-bottom:5px;padding:8px 12px;background:var(--surface2);border-radius:12px}
   .interest .irow b{color:var(--signal);font-weight:700}
-  .warn-msg{margin:8px 0 2px;padding:9px 12px;border-radius:12px;background:rgba(255,207,107,.12);border:1px solid rgba(255,207,107,.4);color:#ffe0a0;font-size:12px;line-height:1.6;display:none}
+  .warn-msg{margin:8px 0 2px;padding:9px 12px;border-radius:12px;background:rgba(224,160,47,.12);border:1px solid rgba(224,160,47,.45);color:#6b4a10;font-size:12.5px;line-height:1.7;display:none}
   .warn-msg.show{display:block}
   .ttlbar{align-self:center;margin-bottom:8px;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(240,81,123,.12);color:var(--rose);border:1px solid rgba(240,81,123,.35)}
   .ttlbar.warn{background:rgba(226,87,79,.14);color:var(--bad);border-color:rgba(226,87,79,.4)}
@@ -215,6 +215,17 @@
   .agegate b{color:var(--bad)}
   .agechk{display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13.5px;font-weight:700;cursor:pointer}
   .agechk input{width:20px;height:20px;accent-color:var(--amber)}
+  .terms{margin:14px 0 0;padding:13px 15px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);font-size:12px;line-height:1.7}
+  .terms a{color:var(--signal);font-weight:700;cursor:pointer;text-decoration:underline}
+  .termschk{display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13.5px;font-weight:700;cursor:pointer}
+  .termschk input{width:20px;height:20px;accent-color:var(--amber)}
+  .termsbody{font-size:12.5px;line-height:1.9;color:#3a4066}
+  .termsbody h4{font-size:13.5px;margin:16px 0 6px;color:var(--ink)}
+  .termsbody p{margin-bottom:8px}
+  .likereason{display:block;width:100%;text-align:left;padding:13px 15px;margin-bottom:8px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:13.5px;cursor:pointer}
+  .likereason:active{background:var(--surface2)}
+  .whylike{display:inline-block;font-size:11px;font-weight:700;color:var(--rose);background:rgba(240,81,123,.1);border:1px solid rgba(240,81,123,.3);border-radius:20px;padding:2px 9px;margin-top:3px}
+  .whylike.locked{color:var(--amber);background:rgba(245,151,47,.12);border-color:rgba(245,151,47,.4);cursor:pointer}
   .reportbtn{background:none;border:0;color:var(--muted2);font-size:11.5px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:8px 0}
   .reportbtn:active{opacity:.6}
   .rsn{display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:9px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;cursor:pointer}
@@ -245,6 +256,8 @@
         <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="obLooking"></div></div>
         <div class="field"><label>好きなもの（自由に追加）</label><div class="addrow"><input id="obLikeInput" maxlength="16" placeholder="例：サウナ / 猫カフェ" onkeydown="if(event.key==='Enter'){event.preventDefault();addLike();}"><button type="button" class="addbtn" onclick="addLike()">追加</button></div><div class="likeslist" id="obLikesList"></div></div>
         <div class="field"><label>興味のあること</label><div class="chips" id="obInterestCat"></div><div id="obInterestOpts" style="margin-top:9px"></div><div class="likeslist" id="obInterestList"></div><div style="font-size:11px;color:var(--muted2);margin-top:6px">ジャンルを押すと選択肢が出ます。タップで追加/削除。</div></div>
+        <div class="terms">📄 ご利用にあたって<br><a onclick="openTerms()">利用規約を読む</a>
+          <label class="termschk"><input type="checkbox" id="obTerms"><span>利用規約に同意します</span></label></div>
         <div class="agegate">🔞 <b>18歳以上の方のみご利用いただけます</b><br>本アプリは18歳以上を対象としています。18歳未満の方はご利用いただけません。
           <label class="agechk"><input type="checkbox" id="obAge18"><span>18歳以上です</span></label></div>
         <div class="privacy">🔒 <b>位置情報について</b><br>「始める」を押すとGPSでのおおよその現在地を、<b>このリンクを開いている他の利用者に共有</b>します。共有はいつでも設定から止められます。</div>
@@ -306,10 +319,11 @@
         <div class="setting" id="billBox" style="border-color:rgba(245,151,47,.35)">
           <div class="setrow"><div class="lab">💬 メッセージ機能<small id="msgStat">未解禁（初回のみ有料）</small></div><button class="btn btn-primary" id="msgBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showMsgPaywall()">解禁する</button></div>
           <div class="setrow"><div class="lab">♥ 今日のいいね<small id="likeStat">無料 3回 / 日</small></div><button class="btn btn-ghost" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showLikePaywall(null)">追加購入</button></div>
+          <div class="setrow"><div class="lab">🎯 いいねの理由<small id="reasonStat">未解禁（相手が惹かれたポイントが見えます）</small></div><button class="btn btn-primary" id="reasonBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showReasonPaywall()">解禁する</button></div>
         </div>
         <div class="setting" style="border-color:rgba(99,214,232,.3)">
           <div class="setrow" style="border:0;flex-direction:column;align-items:flex-start;gap:8px"><div class="lab">✨ 今後の有料機能<small>準備中。課金するとこんなことができます</small></div>
-          <div style="display:flex;flex-wrap:wrap;gap:7px"><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">趣味一致度がわかる 近日</span><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">広告をなくす 近日</span><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">マッチ理由がわかる 近日</span></div></div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px"><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">趣味一致度がわかる 近日</span><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">広告をなくす 近日</span></div></div>
         </div>
         <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:12px;font-size:13px" onclick="resetBilling()">課金状態をリセット（デモ用）</button>
@@ -332,7 +346,7 @@
   <div id="configNotice" style="position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px">
     <div style="font-size:42px;margin-bottom:14px">🔌</div>
     <h2 style="font-family:'Zen Maru Gothic';font-size:22px;margin-bottom:14px;color:#1b2244">接続情報を入れてください</h2>
-    <p style="font-size:13px;color:#6b7291;line-height:1.9">このアプリを動かすには、Supabaseの<br><b style="color:#63d6e8">Project URL</b> と <b style="color:#63d6e8">anon key</b> を<br>index.html の上のほうにある設定欄に貼ってください。<br><br>手順は同梱の <b style="color:#ffb066">README.md</b> を見てください。</p>
+    <p style="font-size:13px;color:#6b7291;line-height:1.9">このアプリを動かすには、Supabaseの<br><b style="color:#0a6b85">Project URL</b> と <b style="color:#0a6b85">anon key</b> を<br>index.html の上のほうにある設定欄に貼ってください。<br><br>手順は同梱の <b style="color:#b5610f">README.md</b> を見てください。</p>
   </div>
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
@@ -340,6 +354,8 @@
   <div class="overlay" id="editOverlay" onclick="if(event.target===this)closeEdit()"><div class="sheet" id="editSheet" style="padding:22px 22px 28px"></div></div>
   <div class="overlay" id="payOverlay" onclick="if(event.target===this)closePay()"><div class="sheet" id="paySheet" style="padding:24px 22px 30px"></div></div>
   <div class="overlay" id="reportOverlay" onclick="if(event.target===this)closeReport()"><div class="sheet" id="reportSheet" style="padding:24px 22px 30px"></div></div>
+  <div class="overlay" id="termsOverlay" onclick="if(event.target===this)closeTerms()"><div class="sheet" id="termsSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="likeOverlay" onclick="if(event.target===this)closeLikeReason()"><div class="sheet" id="likeSheet" style="padding:24px 22px 30px"></div></div>
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -390,7 +406,7 @@ async function initBackend(){
     myId = user.id; return true;
   }catch(e){ backendError('バックエンドに接続できません: '+e.message); return false; }
 }
-function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#ff8080">'+esc(msg)+'</span><br><br>READMEの手順を確認してください。'; }
+function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#c0392b;font-weight:700">'+esc(msg)+'</span><br><br>READMEの手順を確認してください。'; }
 async function tryResumeSession(){
   if(!myId||!sb) return false;
   try{
@@ -504,6 +520,7 @@ async function onStart(){
   if(!myId){ if(!(await initBackend())){ if(!configured) return; myId='local-'+uuid(); } }
   const name=$('#obName').value.trim()||'ゲスト';const age=parseInt($('#obAge').value)||null;
   // 18歳以上のみ利用可能
+  if(!$('#obTerms').checked){ toast('利用規約をご確認のうえ、同意にチェックを入れてください'); return; }
   if(!$('#obAge18').checked){ toast('「18歳以上です」にチェックを入れてください'); return; }
   if(!age){ toast('年齢を入力してください'); return; }
   if(age<18){ toast('⚠️ このアプリは18歳以上の方のみご利用いただけます'); return; }
@@ -562,19 +579,19 @@ async function pollUsers(){
 }
 async function refreshMatches(){
   const [{data:a},{data:b}]=await Promise.all([
-    sb.from('likes').select('to_id,created_at').eq('from_id',myId),
-    sb.from('likes').select('from_id,created_at').eq('to_id',myId)
+    sb.from('likes').select('to_id,created_at,reason').eq('from_id',myId),
+    sb.from('likes').select('from_id,created_at,reason').eq('to_id',myId)
   ]);
   liked=new Set((a||[]).map(x=>x.to_id));
   const myLikeAt={}; (a||[]).forEach(x=>{myLikeAt[x.to_id]=x.created_at;});
   const likedMe=new Set((b||[]).map(x=>x.from_id));
-  const themLikeAt={}; (b||[]).forEach(x=>{themLikeAt[x.from_id]=x.created_at;});
+  const themLikeAt={}, themReason={}; (b||[]).forEach(x=>{themLikeAt[x.from_id]=x.created_at;themReason[x.from_id]=x.reason;});
   for(const uid of liked){ if(blocked.has(uid))continue; if(likedMe.has(uid)){
     // マッチ成立時刻＝両者のいいねの遅いほう
     const t1=Date.parse(myLikeAt[uid]||0)||0, t2=Date.parse(themLikeAt[uid]||0)||0;
     const matchedAt=Math.max(t1,t2)||Date.now();
-    if(!matches[uid]){ await createMatch(uid, !firstMatchLoad, matchedAt); }
-    else { matches[uid].matchedAt=matchedAt; }
+    if(!matches[uid]){ await createMatch(uid, !firstMatchLoad, matchedAt, themReason[uid]); }
+    else { matches[uid].matchedAt=matchedAt; matches[uid].theirReason=themReason[uid]; }
   }}
   firstMatchLoad=false; renderMatches(); renderNearby();
 }
@@ -683,6 +700,80 @@ function confettiBurst(){
     if(frame<150)requestAnimationFrame(tick); else ctx.clearRect(0,0,cv.width,cv.height);
   })();
 }
+/* ---------- いいねの理由 ---------- */
+let likeTargetUser=null;
+function likeReasonOptions(u){
+  const out=[];
+  (u.interests||[]).forEach(x=>out.push(x.detail));
+  (u.likes||[]).forEach(x=>out.push(x));
+  (u.tags||[]).forEach(x=>out.push(x));
+  (u.looking||[]).forEach(x=>out.push(x+'希望'));
+  const seen=new Set(); const uniq=[];
+  out.forEach(x=>{ if(x&&!seen.has(x)){seen.add(x);uniq.push(x);} });
+  return uniq;
+}
+function openLikeReason(){
+  if(!curSheetUser)return;
+  likeTargetUser=curSheetUser;
+  const u=likeTargetUser; const opts=likeReasonOptions(u);
+  $('#likeSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">${esc(u.name)} さんのどこに惹かれましたか？</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">選ぶだけで、相手に「どこに惹かれたか」が伝わります。<br><span style="color:var(--muted2)">選択は無料です</span></p>
+    <div style="max-height:44vh;overflow-y:auto">
+    ${opts.length?opts.map(o=>`<button class="likereason" onclick="sendLikeWithReason('${String(o).replace(/'/g,"&#39;")}')">${esc(o)}</button>`).join(''):''}
+    ${u.bio?`<button class="likereason" onclick="sendLikeWithReason('ひとこと')">ひとこと「${esc(u.bio.length>18?u.bio.slice(0,18)+'…':u.bio)}」</button>`:''}
+    <button class="likereason" onclick="sendLikeWithReason('プロフィール全体')">プロフィール全体の雰囲気</button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeLikeReason()">やめる</button>`;
+  $('#likeOverlay').classList.add('show');
+}
+function closeLikeReason(){ $('#likeOverlay').classList.remove('show'); }
+function sendLikeWithReason(reason){
+  const u=likeTargetUser; likeTargetUser=null;
+  closeLikeReason();
+  if(u)doLike(u.id,reason);
+}
+/* ---------- 利用規約 ---------- */
+const TERMS_HTML=`
+<h4>第1条（本サービスについて）</h4>
+<p>「ちかく」（以下、本サービス）は、法政大学 社会学部 糸久正人ゼミが研究活動として開発・運営する、実証実験段階のサービスです。予告なく内容の変更・停止を行う場合があります。</p>
+<h4>第2条（利用条件）</h4>
+<p>本サービスは18歳以上の方のみご利用いただけます。登録時に年齢の確認を行います。18歳未満の方はご利用いただけません。</p>
+<h4>第3条（位置情報の取り扱い）</h4>
+<p>本サービスは、利用者が許可した場合にのみ位置情報を取得し、同じサービスを利用している他の利用者に共有します。共有は設定からいつでも停止でき、おおまかな位置（約100m）で共有することも選べます。アプリを閉じている間は位置情報を取得しません。</p>
+<h4>第4条（登録情報）</h4>
+<p>氏名・電話番号・メールアドレス・住所などの個人情報は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
+<h4>第5条（禁止事項）</h4>
+<p>次の行為を禁止します。</p>
+<p>・他の利用者への迷惑行為、つきまとい、脅迫、差別的言動<br>
+・他人になりすます行為<br>
+・営業、宗教、投資、勧誘を目的とした利用<br>
+・他の利用者に個人情報の提供を強要する行為<br>
+・法令または公序良俗に反する行為<br>
+・本サービスの運営を妨害する行為</p>
+<h4>第6条（通報・ブロック・利用停止）</h4>
+<p>利用者は、他の利用者を通報およびブロックできます。運営は通報内容を確認し、禁止事項に該当すると判断した場合、事前の通知なく当該利用者の情報を削除し、利用を停止することがあります。</p>
+<h4>第7条（料金）</h4>
+<p>本サービスの利用は無料です。アプリ内には有料機能を模した画面が含まれますが、実証実験のための表示であり、実際の請求や決済は一切発生しません。</p>
+<h4>第8条（利用者間のトラブル）</h4>
+<p>本サービスは出会いの機会を提供するものではなく、利用者どうしの交流のきっかけを提供するものです。利用者間で生じたトラブルについては、利用者ご自身の責任で対応いただきます。運営は、故意または重大な過失がある場合を除き、責任を負いません。</p>
+<h4>第9条（安全のために）</h4>
+<p>知らない相手と会う場合は、必ず公共の場所を選び、時間帯にも配慮してください。不安を感じた場合は、すぐに利用を中止し、通報機能をご利用ください。</p>
+<h4>第10条（データの削除）</h4>
+<p>利用者は設定画面から、いつでも自分の情報をすべて削除できます。また、実証実験の終了後、取得したデータは速やかに削除します。</p>
+<h4>第11条（お問い合わせ）</h4>
+<p>本サービスに関するお問い合わせは、下記までご連絡ください。<br>
+法政大学 社会学部 糸久正人ゼミ<br>
+shusuke.yamamoto.8x@stu.hosei.ac.jp</p>
+`;
+function openTerms(){
+  $('#termsSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:4px">利用規約</h2>
+    <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">ちかく（実証実験版）</div>
+    <div class="termsbody" style="max-height:52vh;overflow-y:auto">${TERMS_HTML}</div>
+    <button class="btn btn-primary" style="width:100%;padding:14px;margin-top:16px;font-size:15px" onclick="closeTerms()">閉じる</button>`;
+  $('#termsOverlay').classList.add('show');
+}
+function closeTerms(){ $('#termsOverlay').classList.remove('show'); }
+
 /* ---------- 通報・ブロック ---------- */
 const REPORT_REASONS=['不適切な内容・発言','迷惑行為・しつこい','なりすまし・偽アカウント','スパム・勧誘','その他'];
 let reportTarget=null;
@@ -724,7 +815,9 @@ async function submitReport(reason){
   toast('通報しました。この人はもう表示されません');
 }
 /* ---------- profile sheet + like ---------- */
+let curSheetUser=null;
 function openSheet(u,d){
+  curSheetUser=u;
   const isLiked=liked.has(u.id);
   $('#sheet').innerHTML=`<div class="cover" style="background:${gr(u.emoji)}"><button class="close" onclick="closeSheet()">✕</button>
     <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)} <span>${u.age||''}</span></h2>
@@ -732,12 +825,12 @@ function openSheet(u,d){
     <div class="body">${u.work?`<div class="workline">💼 <b>${esc(u.work)}</b></div>`:''}${(u.looking&&u.looking.length)?`<div class="wants">${u.looking.map(x=>`<span class="want">${esc(x)}希望</span>`).join('')}</div>`:''}<div class="bio">${esc(u.bio)}</div>${(u.likes&&u.likes.length)?`<div class="likeslist">${u.likes.map(x=>`<span class="likechip">♡ ${esc(x)}</span>`).join('')}</div>`:''}${(u.interests&&u.interests.length)?`<div class="interest"><div class="ih">興味のあること</div>${u.interests.map(x=>`<div class="irow"><b>${esc(x.cat)}</b>：${esc(x.detail)}</div>`).join('')}</div>`:''}<div class="tags">${(u.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div></div>
     <div style="padding:0 20px;text-align:center"><button class="reportbtn" onclick="openReport('${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">⚠ この人を通報・ブロックする</button></div>
     <div class="actions">${isLiked?`<button class="btn btn-liked" style="flex:1" disabled>♥ いいね済み</button>`:
-      `<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-rose" onclick="doLike('${u.id}')">♥ いいね</button>`}</div>`;
+      `<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-rose" onclick="openLikeReason()">♥ いいね</button>`}</div>`;
   $('#overlay').classList.add('show');
 }
 function closeSheet(){$('#overlay').classList.remove('show');}
-const PRICE={msg:480,like1:60,like5:240,like10:400};
-let billing={day:'',freeUsed:0,paidLikes:0,msgUnlocked:false};
+const PRICE={msg:480,like1:60,like5:240,like10:400,reason:280};
+let billing={day:'',freeUsed:0,paidLikes:0,msgUnlocked:false,reasonUnlocked:false};
 function today(){return new Date().toISOString().slice(0,10);}
 function rollBilling(){ if(billing.day!==today()){billing.day=today();billing.freeUsed=0;billing.paidLikes=0;} }
 async function loadBilling(){ if(sb){try{const {data}=await sb.from('profiles').select('billing').eq('id',myId).maybeSingle();if(data&&data.billing)billing={...billing,...data.billing};}catch(e){}} rollBilling(); updateBillUI(); }
@@ -747,9 +840,13 @@ function likeRemainText(){const f=freeLeft();return f>0?('無料'+f+'回'):(bill
 function updateBillUI(){ const ms=$('#msgStat'),mb=$('#msgBtn'),ls=$('#likeStat');
   if(ms)ms.textContent=billing.msgUnlocked?'解禁済み（送り放題）':'未解禁（初回のみ有料）';
   if(mb){mb.style.display=billing.msgUnlocked?'none':'';}
-  if(ls){const f=freeLeft();ls.textContent=(f>0?('無料 残り'+f+'回'):('無料分終了'))+(billing.paidLikes>0?(' ＋ 追加'+billing.paidLikes+'回'):'');} }
+  if(ls){const f=freeLeft();ls.textContent=(f>0?('無料 残り'+f+'回'):('無料分終了'))+(billing.paidLikes>0?(' ＋ 追加'+billing.paidLikes+'回'):'');}
+  const rs=$('#reasonStat'),rb=$('#reasonBtn');
+  if(rs)rs.textContent=billing.reasonUnlocked?'解禁済み（相手が惹かれたポイントが見えます）':'未解禁（相手が惹かれたポイントが見えます）';
+  if(rb)rb.style.display=billing.reasonUnlocked?'none':'';
+  renderMatches(); }
 function closePay(){$('#payOverlay').classList.remove('show');}
-let pendingLikeUid=null;
+let pendingLikeUid=null, pendingLikeReason=null;
 function showLikePaywall(uid){ pendingLikeUid=uid;
   $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">いいねを追加購入</h2>
     <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">1日の無料いいね（3回）を使い切りました。追加のいいねを購入できます。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません／購入分も日付が変わるとリセットされます</span></p>
@@ -764,7 +861,7 @@ function showLikePaywall(uid){ pendingLikeUid=uid;
 function buyLikes(n,price){
   if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
   billing.paidLikes+=n; saveBilling(); closePay(); toast('✅ いいね'+n+'回分を追加しました（デモ）');
-  if(pendingLikeUid){const u=pendingLikeUid;pendingLikeUid=null;doLike(u);}
+  if(pendingLikeUid){const u=pendingLikeUid;const r=pendingLikeReason;pendingLikeUid=null;pendingLikeReason=null;doLike(u,r);}
 }
 function showMsgPaywall(){
   $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">メッセージ機能を解禁</h2>
@@ -777,15 +874,27 @@ function buyMsg(price){
   if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
   billing.msgUnlocked=true; saveBilling(); closePay(); toast('✅ メッセージを解禁しました（デモ）');
 }
-function resetBilling(){ billing={day:today(),freeUsed:0,paidLikes:0,msgUnlocked:false}; saveBilling(); toast('課金状態をリセットしました（デモ）'); }
-async function doLike(uid){
+function showReasonPaywall(){
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">いいねの理由を見る</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:18px">相手が<b style="color:var(--ink)">あなたのどこに惹かれたのか</b>が見えるようになります。<br>会話のきっかけがつかみやすくなります。<br><span style="color:var(--muted2)">※一度解禁すると、以降すべての相手について見られます／デモのため実際の請求は発生しません</span></p>
+    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;display:flex;justify-content:space-between" onclick="buyReason(${PRICE.reason})"><span>理由を見られるようにする</span><b>¥${PRICE.reason}</b></button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+function buyReason(price){
+  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  billing.reasonUnlocked=true; saveBilling(); closePay(); renderMatches();
+  toast('✅ いいねの理由が見られるようになりました（デモ）');
+}
+function resetBilling(){ billing={day:today(),freeUsed:0,paidLikes:0,msgUnlocked:false,reasonUnlocked:false}; saveBilling(); toast('課金状態をリセットしました（デモ）'); }
+async function doLike(uid,reason){
   if(isTest(uid)){ liked.add(uid);closeSheet();renderNearby();createMatch(uid,true); return; }
-  if(freeLeft()<=0 && billing.paidLikes<=0){ closeSheet(); showLikePaywall(uid); return; }
+  if(freeLeft()<=0 && billing.paidLikes<=0){ closeSheet(); pendingLikeReason=reason||null; showLikePaywall(uid); return; }
   if(freeLeft()>0) billing.freeUsed++; else billing.paidLikes--;
   saveBilling();
   liked.add(uid);closeSheet();renderNearby();
   if(!sb){ toast('バックエンド未接続です'); return; }
-  await sb.from('likes').upsert({from_id:myId,to_id:uid});
+  await sb.from('likes').upsert({from_id:myId,to_id:uid,reason:reason||null});
   const {data}=await sb.from('likes').select('from_id').eq('from_id',uid).eq('to_id',myId).maybeSingle();
   if(data){ createMatch(uid,true); }
   else{ notifyPush(uid,'いいねが届きました💌','気になる人があなたにいいねしました。プロフィールを確認してみて！'); toast('いいねを送りました（今日の残り '+likeRemainText()+'）'); }
@@ -793,21 +902,22 @@ async function doLike(uid){
 
 /* ---------- matches ---------- */
 function findUser(uid){return others.find(u=>u.id===uid);}
-async function createMatch(uid,announce,matchedAt){
+async function createMatch(uid,announce,matchedAt,theirReason){
   if(matches[uid])return;let u=findUser(uid);
   if(!u&&sb){const {data}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle();if(data)u=data;}
   if(!u)u={id:uid,name:'相手',emoji:'⭐',bio:''};
-  matches[uid]={u,msgs:[],matchedAt:matchedAt||Date.now()};await loadChat(uid);renderMatches();
+  matches[uid]={u,msgs:[],matchedAt:matchedAt||Date.now(),theirReason:theirReason||null};await loadChat(uid);renderMatches();
   const dm=$('#dotMatch');dm.style.display='block';dm.textContent=Object.keys(matches).length;
-  if(announce){ showMatchPop(u); notifyPush(uid,'マッチしました！',(profile?profile.name:'誰か')+'さんと両想いになりました'); }
+  if(announce){ showMatchPop(u,theirReason); notifyPush(uid,'マッチしました！',(profile?profile.name:'誰か')+'さんと両想いになりました'); }
 }
 function notifyPush(uid,title,body){
   if(!sb||isTest(uid))return;
   sb.functions.invoke('send-match-push',{body:{to:uid,title,body,url:'./index.html'}})
     .catch(err=>console.error('[push] 送信失敗',err));
 }
-function showMatchPop(u){const mp=$('#matchpop');
-  mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました</p>
+function showMatchPop(u,theirReason){const mp=$('#matchpop');
+  const rtxt=theirReason?(billing.reasonUnlocked?`<br><span class="whylike">あなたの「${esc(theirReason)}」に惹かれたそうです</span>`:`<br><span class="whylike locked" onclick="closePop();go('me');showReasonPaywall()">🔒 相手が惹かれたポイントを見る</span>`):'';
+  mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました${rtxt}</p>
     <div class="avs"><div class="a" style="background:${profile?gr(profile.emoji):'#f78b3c'}">${profile?profile.emoji:'😀'}</div><span class="heart">💛</span><div class="a" style="background:${gr(u.emoji)}">${u.emoji}</div></div>
     <div class="mbtns"><button class="btn btn-rose" onclick="closePop();openChat('${u.id}')">メッセージを送る</button><button class="btn later" onclick="closePop()">あとで</button></div>`;
   mp.classList.add('show');confettiBurst();setTimeout(confettiBurst,350);}
@@ -819,7 +929,7 @@ function renderMatches(){
   if(!ids.length){list.innerHTML=`<div class="empty"><div class="big">♥</div><p>まだ有効なマッチはありません。<br>近くの人に「いいね」して、<br>両想いになると表示されます。<br><span style="color:var(--rose);font-weight:700">※マッチは24時間で消えます</span></p></div>`;return;}
   list.innerHTML=ids.map((id,i)=>{const m=matches[id];const last=m.msgs[m.msgs.length-1];const ms=matchLeftMs(m);const warn=ms<3600000;
     return `<div class="mrow" onclick="openChat('${id}')"><div class="av" style="background:${gr(m.u.emoji)}">${m.u.emoji}<span class="on"></span></div>
-      <div class="info"><div class="nm">${esc(m.u.name)} ${m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`:''}</div><div class="last">${last?(last.from===myId?'あなた: ':'')+esc(last.text):'マッチしました！24時間以内に話しかけて！'}</div></div></div>${i<ids.length-1?'<div class="sep"></div>':''}`;}).join('');
+      <div class="info"><div class="nm">${esc(m.u.name)} ${m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`:''}</div><div class="last">${last?(last.from===myId?'あなた: ':'')+esc(last.text):(m.theirReason?(billing.reasonUnlocked?('🎯「'+esc(m.theirReason)+'」に惹かれたそうです'):'🔒 惹かれたポイントは解禁すると見られます'):'マッチしました！24時間以内に話しかけて！')}</div></div></div>${i<ids.length-1?'<div class="sep"></div>':''}`;}).join('');
 }
 
 /* ---------- chat (Supabase messages) ---------- */
@@ -1035,19 +1145,44 @@ function openEdit(){
     <div class="field"><label>年齢（18歳以上）</label><input id="edAge" type="number" min="18" max="99" value="${profile.age||''}"></div>
     <div class="field"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
     <div class="field"><label>ひとこと</label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
+    <div class="field"><label>タグ（好きなだけ）</label><div class="chips" id="edTags"></div></div>
+    <div class="field"><label>職業 / 学校</label><div class="chips" id="edWorkCat"></div><input id="edWorkDetail" maxlength="24" placeholder="くわしく（任意）例：法政大学 / エンジニア" style="margin-top:9px"></div>
     <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="edLooking"></div></div>
-    <div class="field"><label>好きなもの</label><div class="addrow"><input id="edLikeInput" maxlength="16" placeholder="追加してEnter"><button type="button" class="addbtn" onclick="edAddLike()">追加</button></div><div class="likeslist" id="edLikesList"></div></div>
+    <div class="field"><label>好きなもの（自由に追加）</label><div class="addrow"><input id="edLikeInput" maxlength="16" placeholder="例：サウナ / 猫カフェ"><button type="button" class="addbtn" onclick="edAddLike()">追加</button></div><div class="likeslist" id="edLikesList"></div></div>
+    <div class="field"><label>興味のあること</label><div class="chips" id="edInterestCat"></div><div id="edInterestOpts" style="margin-top:9px"></div><div class="likeslist" id="edInterestList"></div><div style="font-size:11px;color:var(--muted2);margin-top:6px">ジャンルを押すと選択肢が出ます。タップで追加/削除。</div></div>
     <div class="warn-msg" id="edWarn"></div>
     <div style="display:flex;gap:12px;margin-top:18px"><button class="btn btn-ghost" style="flex:1;padding:14px" onclick="closeEdit()">やめる</button><button class="btn btn-primary" style="flex:1;padding:14px" onclick="saveEdit()">保存</button></div>`;
   $('#edEmojis').innerHTML=EMO.map(e=>`<div class="em ${e===profile.emoji?'sel':''}" data-e="${e}">${e}</div>`).join('');
   $$('#edEmojis .em').forEach(el=>el.onclick=()=>{$$('#edEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
   $('#edLooking').innerHTML=LOOKING.map(w=>`<div class="c ${(profile.looking||[]).includes(w)?'sel':''}" data-l="${w}">${w}</div>`).join('');
   $$('#edLooking .c').forEach(el=>el.onclick=()=>el.classList.toggle('sel'));
+  // タグ
+  editTags=new Set(profile.tags||[]);
+  $('#edTags').innerHTML=TAGS.map(t=>`<div class="c ${editTags.has(t)?'sel':''}" data-t="${t}">${t}</div>`).join('');
+  $$('#edTags .c').forEach(el=>el.onclick=()=>{const t=el.dataset.t;if(editTags.has(t)){editTags.delete(t);el.classList.remove('sel');}else{editTags.add(t);el.classList.add('sel');}});
+  // 職業/学校（保存時は「カテゴリ・くわしく」の形なので分解して復元する）
+  editWorkCat=''; let wdet=profile.work||'';
+  for(const c of WORKCATS){ if(wdet===c){editWorkCat=c;wdet='';break;} if(wdet.startsWith(c+'・')){editWorkCat=c;wdet=wdet.slice(c.length+1);break;} }
+  $('#edWorkCat').innerHTML=WORKCATS.map(w=>`<div class="c ${editWorkCat===w?'sel':''}" data-w="${w}">${w}</div>`).join('');
+  $$('#edWorkCat .c').forEach(el=>el.onclick=()=>{editWorkCat=el.dataset.w;$$('#edWorkCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
+  $('#edWorkDetail').value=wdet;
+  // 好きなもの
   editLikes=[...(profile.likes||[])]; edRenderLikes();
   $('#edLikeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();edAddLike();}});
+  // 興味のあること
+  editInterests=(profile.interests||[]).map(x=>({cat:x.cat,detail:x.detail})); edIntCat='';
+  $('#edInterestCat').innerHTML=INTERESTS.map(w=>`<div class="c" data-i="${w}">${w}</div>`).join('');
+  $$('#edInterestCat .c').forEach(el=>el.onclick=()=>{edIntCat=el.dataset.i;$$('#edInterestCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');edRenderIntOpts();});
+  edRenderIntOpts(); edRenderIntList();
   $('#editOverlay').classList.add('show');
 }
-let editLikes=[];
+let editLikes=[], editTags=new Set(), editWorkCat='', editInterests=[], edIntCat='';
+function edHasInt(cat,item){return editInterests.some(x=>x.cat===cat&&x.detail===item);}
+function edToggleInt(cat,item){const i=editInterests.findIndex(x=>x.cat===cat&&x.detail===item);if(i>=0)editInterests.splice(i,1);else editInterests.push({cat,detail:item});edRenderIntOpts();edRenderIntList();}
+function edRenderIntOpts(){const box=$('#edInterestOpts');if(!box)return;if(!edIntCat){box.innerHTML='';return;}
+  const opts=INTEREST_OPTS[edIntCat]||[];
+  box.innerHTML='<div class="chips">'+opts.map(o=>`<div class="c ${edHasInt(edIntCat,o)?'sel':''}" onclick="edToggleInt('${edIntCat}','${o}')">${o}</div>`).join('')+'</div>';}
+function edRenderIntList(){const el=$('#edInterestList');if(!el)return;el.innerHTML=editInterests.map((x,i)=>`<span class="likechip" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.35);color:var(--signal)">${esc(x.cat)}：${esc(x.detail)}<span class="miniclose" onclick="editInterests.splice(${i},1);edRenderIntList();edRenderIntOpts()">✕</span></span>`).join('');}
 function edAddLike(){const inp=$('#edLikeInput');const v=inp.value.trim();if(!v)return;if(!editLikes.includes(v))editLikes.push(v);inp.value='';edRenderLikes();}
 function edRenderLikes(){$('#edLikesList').innerHTML=editLikes.map((x,i)=>`<span class="likechip">${esc(x)}<span class="miniclose" onclick="editLikes.splice(${i},1);edRenderLikes()">✕</span></span>`).join('');}
 function closeEdit(){$('#editOverlay').classList.remove('show');}
@@ -1065,6 +1200,10 @@ async function saveEdit(){
   const se=$('#edEmojis .em.sel'); if(se)profile.emoji=se.dataset.e;
   profile.looking=[...$('#edLooking .c.sel')].map(el=>el.dataset.l);
   profile.likes=[...editLikes];
+  profile.tags=[...editTags];
+  const ewd=$('#edWorkDetail').value.trim();
+  profile.work=editWorkCat?(ewd?editWorkCat+'・'+ewd:editWorkCat):ewd;
+  profile.interests=editInterests.map(x=>({cat:x.cat,detail:x.detail}));
   $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;
   $('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
   await publishMe();
