@@ -299,7 +299,7 @@
             <div class="sh">📍 近くにいる人が見える</div>
             <div class="sd">同じ場所でアプリを開いている人が、距離つきで表示されます。</div>
             <div class="mini">
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい 24</div><div class="mb"><span class="mtag">🎯 共通 カフェ</span></div></div><div class="md">32m</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい 24</div><div class="mb"><span class="mtag">🎯 共通 英語</span></div></div><div class="md">32m</div></div>
               <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#a78bfa,#63d6e8)">🎧</div><div class="mtx"><div class="mn">そう 27</div><div class="mb">音楽とランニングが好きです</div></div><div class="md">87m</div></div>
               <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#7be0b0,#4bc0d9)">🌿</div><div class="mtx"><div class="mn">あおい 23</div><div class="mb">静かな喫茶店を探し中</div></div><div class="md">140m</div></div>
             </div>
@@ -321,9 +321,9 @@
             <div class="sh">💬 その場で話せる</div>
             <div class="sd">マッチした相手とメッセージができます。コミュニティではみんなで話せます。</div>
             <div class="mini">
-              <div class="mbub them">はじめまして！近くにいますね😊</div>
-              <div class="mbub me">ほんとだ！カフェ好きなんですね</div>
-              <div class="mbub them">このあと行きませんか？</div>
+              <div class="mbub them">はじめまして！英語の勉強されてるんですか？</div>
+              <div class="mbub me">はい！英検1級目指してます</div>
+              <div class="mbub them">そうなんですね、おすすめの勉強場所とか教えてほしいです！</div>
             </div>
           </div>
         </div>
@@ -483,7 +483,20 @@ const INTEREST_OPTS={
   'アート':['絵画','写真','デザイン','美術館','陶芸','ハンドメイド','建築','現代アート','イラスト'],
   '勉強・学び':['英語','プログラミング','資格','読書','投資','起業','語学','歴史','心理学','副業']
 };
-const NGWORDS=['死ね','殺す','きもい','ブス','デブ','うざい','障害者','クズ','セックス','エッチ','ヤりたい','援交','パパ活','裸','ちんこ','まんこ','セフレ','line交換','id:','tel:','090','080'];
+const NGWORDS=[
+  // 暴言・攻撃
+  '死ね','しね','殺す','ころす','殺害','消えろ','うざい','ウザい','きもい','キモい','きしょい','ブス','ブサイク','デブ','ハゲ','クズ','低能','無能',
+  // 差別
+  '障害者','きちがい','キチガイ','池沼','土人',
+  // 性的
+  'セックス','セフレ','エッチ','えっち','ヤりたい','童貞','処女','中出し','全裸','下着','パンツ見せ','ちんこ','まんこ','おっぱい','巨乳','風俗','エロ',
+  // 売買春・金銭・勧誘
+  '援交','援助交際','パパ活','ママ活','稼げる','儲かる','副業紹介','投資しません','バイナリー','ネットワークビジネス','マルチ商法','宗教の勧誘',
+  // 連絡先の強要
+  'line交換','ライン交換','LINE教え','id教え','電話番号教え','住所教え','本名教え',
+  // 危険な誘い
+  'ホテル行','泊まって','お酒飲ませ','クスリ'
+];
 function ngCheck(text){ if(!text)return null; const low=text.toLowerCase(); const hit=NGWORDS.filter(w=>low.includes(w.toLowerCase())); return hit.length?hit:null; }
 const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#ff7e9d','#ffb0c8'],'🔥':['#ff6b4a','#ffb066'],'🐱':['#ffb066','#ffd166'],'🎧':['#a78bfa','#63d6e8'],'☕':['#c89b6b','#8b6b4a'],'📷':['#63d6e8','#4b8bf0'],'🍜':['#ff9d70','#ffcf6b'],'🌿':['#7be0b0','#4bc0d9'],'🎨':['#ff7e9d','#a78bfa'],'🏃':['#63d6e8','#7be0b0']};
 const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
