@@ -210,6 +210,33 @@
   .common{display:inline-block;font-size:11px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.35);border-radius:20px;padding:2px 9px;margin:3px 0}
   .joinbtn{flex-shrink:0;padding:7px 15px;border:0;border-radius:20px;background:var(--signal);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
   .joinbtn.joined{background:var(--surface2);color:var(--muted)}
+  /* ようこそ画面 */
+  .wel{padding:22px 22px 18px;height:100%;overflow-y:auto;display:flex;flex-direction:column}
+  .wel::-webkit-scrollbar{width:0}
+  .wel .wlogo{font-family:"Zen Maru Gothic";font-weight:900;font-size:36px;letter-spacing:1px;text-align:center;background:linear-gradient(90deg,var(--amber),var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .wel .wtag{text-align:center;font-size:13.5px;color:var(--muted);margin:8px 0 18px;line-height:1.75}
+  .shots{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}
+  .shots::-webkit-scrollbar{height:0}
+  .shot{flex:0 0 76%;scroll-snap-align:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 8px 22px -12px rgba(50,70,150,.35)}
+  .shot .sh{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:3px}
+  .shot .sd{font-size:11.5px;color:var(--muted);line-height:1.6;margin-bottom:11px}
+  .mini{background:var(--surface2);border-radius:12px;padding:9px}
+  .mrow2{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:7px 9px;margin-bottom:6px}
+  .mrow2:last-child{margin-bottom:0}
+  .mrow2 .mav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .mrow2 .mtx{flex:1;min-width:0}
+  .mrow2 .mn{font-size:11px;font-weight:700;color:var(--ink)}
+  .mrow2 .mb{font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrow2 .md{font-size:10.5px;font-weight:700;color:var(--amber);flex-shrink:0}
+  .mtag{display:inline-block;font-size:9px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.3);border-radius:20px;padding:1px 6px}
+  .mbub{max-width:78%;padding:6px 10px;border-radius:12px;font-size:10.5px;line-height:1.45;margin-bottom:5px}
+  .mbub.them{background:#fff;border:1px solid var(--line)}
+  .mbub.me{background:linear-gradient(135deg,var(--amber-deep),var(--amber));color:#fff;margin-left:auto}
+  .addhome{margin-top:auto;padding:13px 15px;border-radius:14px;background:rgba(15,176,205,.08);border:1px solid rgba(15,176,205,.3);font-size:12px;line-height:1.7;color:var(--ink)}
+  .addhome a{color:var(--signal);font-weight:700;cursor:pointer;text-decoration:underline}
+  .stepnum{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px}
+  .stepnum .no{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--amber);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .stepnum .tx{font-size:13px;line-height:1.7;color:var(--ink)}
   .guide{position:absolute;inset:0;z-index:80;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column}
   .guide.show{display:flex}
   .guide .gtop{display:flex;justify-content:flex-end;padding:14px 18px 0}
@@ -263,7 +290,49 @@
   <div class="notch"></div>
   <div class="statusbar"><span class="g" id="gpsChip"><span class="fix"></span><span id="gpsTxt">&mdash;</span></span></div>
   <div class="screens">
-    <section class="screen active" id="s-onboard">
+    <section class="screen active" id="s-welcome">
+      <div class="wel">
+        <div class="wlogo">ちかく</div>
+        <div class="wtag">いま近くにいる人と、その場でつながる。<br>すれ違った人と、新しい出会いが生まれます。</div>
+        <div class="shots">
+          <div class="shot">
+            <div class="sh">📍 近くにいる人が見える</div>
+            <div class="sd">同じ場所でアプリを開いている人が、距離つきで表示されます。</div>
+            <div class="mini">
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい 24</div><div class="mb"><span class="mtag">🎯 共通 カフェ</span></div></div><div class="md">32m</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#a78bfa,#63d6e8)">🎧</div><div class="mtx"><div class="mn">そう 27</div><div class="mb">音楽とランニングが好きです</div></div><div class="md">87m</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#7be0b0,#4bc0d9)">🌿</div><div class="mtx"><div class="mn">あおい 23</div><div class="mb">静かな喫茶店を探し中</div></div><div class="md">140m</div></div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="sh">♥ いいねが両想いでマッチ</div>
+            <div class="sd">気になる人にいいねを送り、お互いに送り合うと話せるようになります。</div>
+            <div class="mini" style="text-align:center;padding:16px 9px">
+              <div style="display:flex;align-items:center;justify-content:center;margin-bottom:9px">
+                <div class="mav" style="width:40px;height:40px;font-size:20px;background:linear-gradient(135deg,#8b9dff,#63d6e8)">🌙</div>
+                <span style="font-size:16px;margin:0 -4px;z-index:2">💛</span>
+                <div class="mav" style="width:40px;height:40px;font-size:20px;background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div>
+              </div>
+              <div style="font-family:'Zen Maru Gothic';font-size:15px;font-weight:900;color:var(--rose)">マッチ！</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">ゆい さんと両想いになりました</div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="sh">💬 その場で話せる</div>
+            <div class="sd">マッチした相手とメッセージができます。コミュニティではみんなで話せます。</div>
+            <div class="mini">
+              <div class="mbub them">はじめまして！近くにいますね😊</div>
+              <div class="mbub me">ほんとだ！カフェ好きなんですね</div>
+              <div class="mbub them">このあと行きませんか？</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted2);text-align:center;margin:2px 0 14px">← 横にスワイプできます →</div>
+        <button class="btn btn-primary" style="width:100%;padding:16px;font-size:16px" onclick="goOnboard()">はじめる</button>
+        <div class="addhome">📱 <b>ホーム画面に追加すると便利です</b><br>毎回QRを読まなくても、アプリのように開けます。<br><a onclick="openAddHome()">追加のしかたを見る</a></div>
+      </div>
+    </section>
+    <section class="screen" id="s-onboard">
       <div class="ob">
         <div class="logo">ちかく</div>
         <div class="tag">いま近くにいる人と、その場でつながる。<br>同じリンクを開いた人同士でマッチングします。</div>
@@ -325,7 +394,7 @@
         <p>このQRを読むか、リンクを開いた人が<br>同じ「近くの人」に表示されます。</p>
         <div class="qrbox" id="qrbox"></div>
         <div class="urlbox"><input id="shareUrl"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
-        <div class="steps"><h4>使い方</h4><ol><li>右上のClaudeの<b>共有 / 公開</b>ボタンでこのアプリを公開する</li><li>公開されたURLを上の欄に貼り、QRを更新</li><li>近くにいる人にQRを見せる → 同じ画面に集まる</li></ol></div>
+        <div class="steps"><h4>友だちを誘うには</h4><ol><li>近くにいる人に、上の<b>QRコードを見せる</b></li><li>相手がカメラで読み取ると、このアプリが開きます</li><li>相手が登録すると、<b>お互いに「近くの人」に表示されます</b></li></ol></div>
       </div></div>
     </section>
     <section class="screen" id="s-me">
@@ -346,13 +415,14 @@
           <div style="display:flex;flex-wrap:wrap;gap:7px"><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">趣味一致度がわかる 近日</span><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">広告をなくす 近日</span></div></div>
         </div>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
+        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
         <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:12px;font-size:13px" onclick="resetBilling()">課金状態をリセット（デモ用）</button>
         <button class="btn stopbtn" onclick="leaveAll()">共有をやめてプロフィールを消す</button>
         <div class="setting" style="border-color:rgba(99,214,232,.3)">
           <div class="setrow" style="border:0"><div class="lab">🧪 テストモード<small>1台だけで動作確認できます。近くにテスト用の人が現れ、いいねするとマッチ→チャットまで試せます</small></div><button class="btn btn-primary" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="spawnTest()">試す</button></div>
         </div>
-        <div class="note">位置は<b>このリンクを持つ人全員</b>に見えます。知らない人と会うときは公共の場所で。<br>このアプリは<b>18歳以上</b>の方のみご利用いただけます。<br>気になる相手はプロフィールから<b>通報・ブロック</b>できます。<br>これはプロトタイプです。本番運用には年齢確認などがさらに必要です。</div>
+        <div class="note">位置は<b>このリンクを持つ人全員</b>に見えます。知らない人と会うときは公共の場所で。<br>このアプリは<b>18歳以上</b>の方のみご利用いただけます。<br>気になる相手はプロフィールから<b>通報・ブロック</b>できます。<br>本アプリは、法政大学 社会学部 糸久正人ゼミが研究活動として運営している<b>非公式</b>のサービスです。</div>
       </div>
     </section>
   </div>
@@ -366,8 +436,8 @@
   </nav>
   <div id="configNotice" style="position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px">
     <div style="font-size:42px;margin-bottom:14px">🔌</div>
-    <h2 style="font-family:'Zen Maru Gothic';font-size:22px;margin-bottom:14px;color:#1b2244">接続情報を入れてください</h2>
-    <p style="font-size:13px;color:#6b7291;line-height:1.9">このアプリを動かすには、Supabaseの<br><b style="color:#0a6b85">Project URL</b> と <b style="color:#0a6b85">anon key</b> を<br>index.html の上のほうにある設定欄に貼ってください。<br><br>手順は同梱の <b style="color:#b5610f">README.md</b> を見てください。</p>
+    <h2 style="font-family:'Zen Maru Gothic';font-size:22px;margin-bottom:14px;color:#1b2244">接続できませんでした</h2>
+    <p style="font-size:13px;color:#6b7291;line-height:1.9">ただいま接続できませんでした。<br>電波の良い場所で、<b style="color:#0a6b85">少し時間をおいてから</b><br>もう一度お試しください。<br><br>解決しない場合は、お手数ですが<br>運営（法政大学 糸久ゼミ）までお知らせください。</p>
   </div>
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
@@ -378,6 +448,7 @@
   <div class="overlay" id="termsOverlay" onclick="if(event.target===this)closeTerms()"><div class="sheet" id="termsSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="likeOverlay" onclick="if(event.target===this)closeLikeReason()"><div class="sheet" id="likeSheet" style="padding:24px 22px 30px"></div></div>
   <div class="overlay" id="memOverlay" onclick="if(event.target===this)closeMembers()"><div class="sheet" id="memSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="homeOverlay" onclick="if(event.target===this)closeAddHome()"><div class="sheet" id="homeSheet" style="padding:24px 22px 28px"></div></div>
   <div class="guide" id="guide">
     <div class="gtop"><button class="skip" onclick="closeGuide()">スキップ</button></div>
     <div class="gbody" id="guideBody"></div>
@@ -434,7 +505,7 @@ async function initBackend(){
     myId = user.id; return true;
   }catch(e){ backendError('バックエンドに接続できません: '+e.message); return false; }
 }
-function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#c0392b;font-weight:700">'+esc(msg)+'</span><br><br>READMEの手順を確認してください。'; }
+function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#c0392b;font-weight:700">'+esc(msg)+'</span><br><br>少し時間をおいてから、もう一度お試しください。<br>解決しない場合は運営（法政大学 糸久ゼミ）までお知らせください。'; }
 async function tryResumeSession(){
   if(!myId||!sb) return false;
   try{
@@ -442,7 +513,7 @@ async function tryResumeSession(){
     if(error||!data) return false;
     profile={id:myId,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[]};
     $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;$('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
-    $('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
+    $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
     startGeo();buildInvite();startLoops();
     maybeShowGuide(data.guide_seen===true);
     return true;
@@ -559,7 +630,7 @@ async function onStart(){
   if(ng){ toast('⚠️ 名前かひとことに不適切な言葉が含まれています。修正してください。'); return; }
   profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[...selTags],work,looking:[...selLooking],likes:myLikes,interests:myInterests};
   $('#meAv').style.background=gr(selEmoji);$('#meAv').textContent=selEmoji;$('#meName').textContent=name+(age?' '+age:'');
-  $('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
+  $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
   startGeo();buildInvite();startLoops();
   maybeShowGuide(false);   // 新規登録なので必ず出す
 }
@@ -1185,19 +1256,65 @@ async function notifyRoomMembers(room,text){
         .forEach(m=>notifyPush(m.user_id,room.name||'コミュニティ',body));
   }catch(e){ console.error('[push] コミュニティ通知の送信に失敗',e); }
 }
+/* ---------- ようこそ画面・ホーム画面への追加 ---------- */
+function goOnboard(){
+  $('#s-welcome').classList.remove('active');
+  $('#s-onboard').classList.add('active');
+}
+const isAndroid=()=>/Android/i.test(navigator.userAgent);
+let deferredInstall=null;   // Android/Chrome の「インストール」を受け取る
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; });
+function openAddHome(){
+  let body='';
+  if(isStandalone()){
+    body=`<div style="text-align:center;padding:10px 0 4px"><div style="font-size:44px;margin-bottom:10px">✅</div>
+      <div style="font-size:14px;font-weight:700;color:#0f8f6f">すでにホーム画面から開いています</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.8">この状態なら、次からはホーム画面のアイコンをタップするだけで開けます。</div></div>`;
+  }else if(isIOS()){
+    body=`<div class="stepnum"><div class="no">1</div><div class="tx">画面の下（または上）にある<b>共有ボタン</b>をタップします<br><span style="color:var(--muted);font-size:12px">四角から上向きの矢印が出ているマークです</span></div></div>
+      <div class="stepnum"><div class="no">2</div><div class="tx">メニューを下にスクロールし、<b>「ホーム画面に追加」</b>をタップ</div></div>
+      <div class="stepnum"><div class="no">3</div><div class="tx">右上の<b>「追加」</b>をタップして完了です</div></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-top:14px;padding:11px 13px;background:var(--surface2);border-radius:12px">
+      ※ Safariで開いている必要があります。<br>※ ホーム画面から開くと、通知も受け取れるようになります。</div>`;
+  }else if(isAndroid()){
+    body=`<div class="stepnum"><div class="no">1</div><div class="tx">画面右上の<b>「⋮」（縦の三点）</b>をタップします</div></div>
+      <div class="stepnum"><div class="no">2</div><div class="tx"><b>「アプリをインストール」</b>または<b>「ホーム画面に追加」</b>をタップ</div></div>
+      <div class="stepnum"><div class="no">3</div><div class="tx"><b>「インストール」</b>をタップして完了です</div></div>
+      ${deferredInstall?`<button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;margin-top:8px" onclick="doInstall()">この画面から追加する</button>`:''}
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-top:14px;padding:11px 13px;background:var(--surface2);border-radius:12px">
+      ※ ホーム画面から開くと、通知も受け取れるようになります。</div>`;
+  }else{
+    body=`<div style="font-size:13px;line-height:1.9;color:var(--ink)">スマートフォンでこのページを開くと、ホーム画面に追加できます。</div>
+      <div class="stepnum" style="margin-top:14px"><div class="no">i</div><div class="tx"><b>iPhone</b>：共有ボタン →「ホーム画面に追加」</div></div>
+      <div class="stepnum"><div class="no">A</div><div class="tx"><b>Android</b>：右上の「⋮」→「アプリをインストール」</div></div>`;
+  }
+  $('#homeSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">ホーム画面に追加する</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">毎回QRコードを読まなくても、アプリのように開けるようになります。</p>
+    ${body}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:16px;color:var(--muted)" onclick="closeAddHome()">閉じる</button>`;
+  $('#homeOverlay').classList.add('show');
+}
+function closeAddHome(){ $('#homeOverlay').classList.remove('show'); }
+async function doInstall(){
+  if(!deferredInstall)return;
+  deferredInstall.prompt();
+  try{ await deferredInstall.userChoice; }catch(e){}
+  deferredInstall=null; closeAddHome();
+}
 /* ---------- はじめての方向けガイド ---------- */
 const GUIDE=[
   {icon:'📍',title:'近くにいる人が<br>見えます',body:'いま同じ場所でこのアプリを開いている人が、地図と一覧に表示されます。距離も出るので、すぐ近くにいるかが分かります。',note:'アプリを開いている間だけ位置を共有します。閉じれば止まります。'},
   {icon:'♥',title:'気になる人に<br>いいねを送る',body:'プロフィールを開いて「いいね」を押し、どこに惹かれたかを選んで送ります。お互いに送り合うとマッチが成立します。',note:'いいねは1日3回まで無料です。'},
   {icon:'💬',title:'マッチしたら<br>24時間以内に話す',body:'マッチすると、その相手とメッセージができます。ただし24時間が過ぎると話せなくなるので、気になったら早めに声をかけてみてください。',note:'期限が切れる前なら、課金で「ずっと話せる」ようにもできます。'},
-  {icon:'👥',title:'コミュニティで<br>みんなと話す',body:'「コミュ」タブでは、部屋に参加してみんなで話せます。参加は無料です。参加者のプロフィールも見られます。',note:'困ったときは、相手のプロフィールから通報・ブロックができます。'}
+  {icon:'👥',title:'コミュニティで<br>みんなと話す',body:'「コミュ」タブでは、部屋に参加してみんなで話せます。参加は無料です。参加者のプロフィールも見られます。',note:'困ったときは、相手のプロフィールから通報・ブロックができます。'},
+  {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'毎回QRコードを読まなくても、ホーム画面のアイコンから開けるようになります。通知も受け取れます。',note:'追加のしかたは、設定の「ホーム画面に追加する方法」から見られます。',action:true}
 ];
 let guideIdx=0;
 function openGuide(){ guideIdx=0; renderGuide(); $('#guide').classList.add('show'); }
 function closeGuide(){ $('#guide').classList.remove('show'); markGuideSeen(); }
 function renderGuide(){
   const g=GUIDE[guideIdx];
-  $('#guideBody').innerHTML=`<div class="gicon">${g.icon}</div><h3>${g.title}</h3><p>${g.body}</p>${g.note?`<div class="note2">${g.note}</div>`:''}`;
+  $('#guideBody').innerHTML=`<div class="gicon">${g.icon}</div><h3>${g.title}</h3><p>${g.body}</p>${g.note?`<div class="note2">${g.note}</div>`:''}${g.action?`<button class="btn btn-ghost" style="margin-top:16px;padding:12px 20px;font-size:13.5px" onclick="openAddHome()">追加のしかたを見る</button>`:''}`;
   $('#guideDots').innerHTML=GUIDE.map((_,i)=>`<i class="${i===guideIdx?'on':''}"></i>`).join('');
   $('#guidePrev').style.visibility=guideIdx===0?'hidden':'visible';
   $('#guideNext').textContent=guideIdx===GUIDE.length-1?'はじめる':'次へ';
@@ -1357,7 +1474,9 @@ async function saveEdit(){
   closeEdit();
 }
 /* ---------- invite ---------- */
-function buildInvite(){const url=location.href;$('#shareUrl').value=url;renderQR(url);$('#shareUrl').addEventListener('input',e=>renderQR(e.target.value));}
+// 人に配るURLは常にこの正式URLにする（古いドメインで開かれても混乱しないように）
+const OFFICIAL_URL='https://chikaku-hosei.vercel.app';
+function buildInvite(){const url=OFFICIAL_URL;$('#shareUrl').value=url;renderQR(url);$('#shareUrl').addEventListener('input',e=>renderQR(e.target.value));}
 function renderQR(url){const box=$('#qrbox');const img=new Image();
   img.onload=()=>{box.innerHTML='';box.appendChild(img);};
   img.onerror=()=>{box.innerHTML=`<div class="qrfallback">QR画像を読み込めませんでした。<br>下のリンクをコピーして共有してください。</div>`;};
