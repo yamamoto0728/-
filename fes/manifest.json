@@ -1,0 +1,19 @@
+{
+  "name": "ちかく 学園祭版",
+  "short_name": "ちかく学園祭",
+  "description": "学園祭の会場で、いま近くにいる人とつながる（期間限定）",
+  "id": "/fes/",
+  "start_url": "/fes/",
+  "scope": "/fes/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0fb0cd",
+  "orientation": "portrait",
+  "lang": "ja",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

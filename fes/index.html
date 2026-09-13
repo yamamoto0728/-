@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ちかく 学園祭版</title>
+<!-- 学園祭版は /fes と /fes/ のどちらで開かれても参照がずれないよう、パスはすべてサイトのルートから書く -->
+<link rel="manifest" href="/fes/manifest.json">
+<meta name="theme-color" content="#0fb0cd">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ちかく学園祭">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#ffffff;--night2:#f4f7fe;--surface:#ffffff;--surface2:#eef2fb;
+    --glass:rgba(255,255,255,.82);--line:rgba(40,55,120,.12);
+    --amber:#f5972f;--amber-deep:#ea7a22;--signal:#0fb0cd;--rose:#f0517b;
+    --ink:#1b2244;--muted:#6b7291;--muted2:#a2a8c4;--ok:#20b483;--warn:#e0a02f;--bad:#e2574f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:"Zen Kaku Gothic New",system-ui,sans-serif;
+    background:radial-gradient(1200px 700px at 15% -10%,#e7f4ff 0,transparent 55%),radial-gradient(900px 600px at 100% 110%,#ffe9f2 0,transparent 50%),#eef1f8;
+    color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;overflow-x:hidden}
+  .phone{position:relative;width:390px;max-width:100%;height:820px;max-height:94vh;
+    background:linear-gradient(180deg,var(--night),var(--night2));border-radius:44px;overflow:hidden;
+    border:1px solid rgba(60,80,160,.14);box-shadow:0 30px 70px -28px rgba(50,70,150,.4),0 0 0 10px #e7ebf7,0 0 0 11px rgba(120,140,220,.16);display:flex;flex-direction:column}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:28px;background:#05061a;border-radius:0 0 18px 18px;z-index:60}
+  .statusbar{display:flex;justify-content:flex-end;align-items:center;padding:12px 26px 4px;font-size:12.5px;font-weight:700;z-index:5}
+  .statusbar .g{display:flex;align-items:center;gap:6px;color:var(--muted)}
+  .statusbar .g .fix{width:8px;height:8px;border-radius:50%;background:var(--muted2)}
+  .statusbar .g.on .fix{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .statusbar .g.err .fix{background:var(--bad)}
+  .screens{flex:1;position:relative;overflow:hidden}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .28s,transform .28s;overflow:hidden}
+  .screen.active{opacity:1;pointer-events:auto;transform:none}
+  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .scroll::-webkit-scrollbar{width:0}
+  .apphead{padding:8px 22px 6px;display:flex;align-items:baseline;justify-content:space-between}
+  .apphead h1{font-family:"Zen Maru Gothic";font-weight:900;font-size:22px}
+  .apphead .sub{font-size:11.5px;color:var(--muted);font-weight:500}
+  .btn{border:0;border-radius:16px;font-family:"Zen Maru Gothic";font-weight:700;cursor:pointer;transition:transform .12s}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:linear-gradient(90deg,var(--amber-deep),var(--amber));color:#3a2410}
+  .btn-rose{background:linear-gradient(90deg,var(--rose),#ff9d70);color:#fff}
+  .btn-ghost{background:var(--surface2);color:var(--muted)}
+  #s-onboard{padding:0}
+  .ob{padding:26px 24px 20px;height:100%;overflow-y:auto;display:flex;flex-direction:column}
+  .ob::-webkit-scrollbar{width:0}
+  .ob .logo{font-family:"Zen Maru Gothic";font-weight:900;font-size:34px;letter-spacing:1px;text-align:center;background:linear-gradient(90deg,var(--amber),var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .ob .tag{text-align:center;font-size:13px;color:var(--muted);margin:6px 0 22px;line-height:1.6}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:7px}
+  .field input,.field textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;color:var(--ink);font-family:inherit;font-size:14.5px;outline:none;resize:none}
+  .field input:focus,.field textarea:focus{border-color:var(--amber)}
+  .row2{display:flex;gap:12px}.row2 .field{flex:1}
+  .emojis{display:flex;flex-wrap:wrap;gap:9px}
+  .emojis .em{width:46px;height:46px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+  .emojis .em.sel{border-color:var(--amber);background:rgba(255,176,102,.14);transform:scale(1.05)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips .c{font-size:12.5px;padding:8px 13px;border-radius:20px;background:var(--surface);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.15s}
+  .chips .c.sel{border-color:var(--signal);background:rgba(99,214,232,.12);color:var(--signal);font-weight:700}
+  .privacy{margin:18px 0;padding:14px 15px;border-radius:14px;background:rgba(224,160,47,.10);border:1px solid rgba(224,160,47,.45);font-size:12.5px;line-height:1.8;color:#4a3410}
+  .privacy b{color:#8a5a00;font-weight:700}
+  .ob .go{padding:16px;font-size:16px;width:100%;margin-top:auto}
+  .locbar{margin:4px 16px 8px;padding:11px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line);display:flex;align-items:center;gap:11px;font-size:12px}
+  .locbar .pin{font-size:16px}.locbar .t{flex:1;min-width:0}
+  .locbar .t .place{font-weight:700;font-size:13px}
+  .locbar .t .coord{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--muted);margin-top:2px}
+  .locbar .acc{font-size:10.5px;color:var(--signal);text-align:right;font-weight:600;white-space:nowrap}
+  .locbar.bad{border-color:rgba(255,128,128,.4);background:rgba(255,128,128,.08)}
+  .locbar .retry{background:var(--amber);color:#3a2410;border:0;border-radius:12px;padding:8px 12px;font-weight:700;font-family:inherit;font-size:12px;cursor:pointer}
+  .map-wrap{position:relative;height:210px;margin:2px 16px 4px;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,#eef4fc,#e3edf8);flex-shrink:0}
+  #map{width:100%;height:100%;display:block}
+  .nearest{position:absolute;top:9px;right:9px;font-size:11px;background:rgba(255,255,255,.85);padding:5px 11px;border-radius:14px;border:1px solid var(--line);color:var(--muted)}
+  .nearest b{color:var(--amber);font-family:"JetBrains Mono";font-weight:500}
+  .maplbl{position:absolute;bottom:9px;left:11px;font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.85);padding:4px 9px;border-radius:12px;border:1px solid var(--line)}
+  .maplbl b{color:var(--signal)}
+  .listhead{display:flex;align-items:center;gap:8px;padding:12px 22px 8px;font-size:12.5px;font-weight:700;color:var(--muted)}
+  .listhead .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:blink 1.6s infinite}
+  @keyframes blink{50%{opacity:.35}}
+  .ulist{padding:0 16px 16px;display:flex;flex-direction:column;gap:8px}
+  .urow{display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--glass);border:1px solid var(--line);border-radius:16px;cursor:pointer;transition:transform .15s;animation:slidein .4s ease both}
+  .urow:active{transform:scale(.98)}
+  @keyframes slidein{from{opacity:0;transform:translateX(-12px)}}
+  .urow .av{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .urow .info{flex:1;min-width:0}
+  .urow .info .n{font-size:14.5px;font-weight:700}
+  .urow .info .n span{font-size:12px;color:var(--muted);font-weight:500}
+  .urow .info .b{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .urow .d{text-align:right;flex-shrink:0}
+  .urow .d .m{font-family:"JetBrains Mono";font-size:15px;font-weight:500;color:var(--amber)}
+  .urow .d .lk{font-size:11px;color:var(--rose);margin-top:2px}
+  .empty{padding:44px 30px;text-align:center;color:var(--muted)}
+  .empty .big{font-size:34px;margin-bottom:12px;opacity:.5}
+  .empty p{font-size:13px;line-height:1.8}
+  .empty .btn{margin-top:16px;padding:11px 18px;font-size:13px}
+  .mrow{display:flex;align-items:center;gap:13px;padding:13px 18px;cursor:pointer}
+  .mrow:active{background:rgba(255,255,255,.03)}
+  .mrow .av{width:52px;height:52px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:25px;position:relative}
+  .mrow .av .on{position:absolute;bottom:1px;right:1px;width:13px;height:13px;border-radius:50%;background:var(--ok);border:2.5px solid var(--night)}
+  .mrow .info{flex:1;min-width:0}.mrow .info .nm{font-size:15px;font-weight:700}
+  .mrow .info .last{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .mrow .info .last.unread{color:var(--ink);font-weight:600}
+  .sep{height:1px;background:var(--line);margin:0 18px}
+  .inv{padding:10px 24px 24px;text-align:center}
+  .qrbox{width:230px;height:230px;margin:14px auto;background:#fff;border-radius:20px;padding:14px;display:flex;align-items:center;justify-content:center}
+  .qrbox img{width:100%;height:100%;image-rendering:pixelated}
+  .qrfallback{font-size:12px;color:#333;padding:14px;text-align:center;line-height:1.6}
+  .inv p{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:6px}
+  .urlbox{display:flex;gap:8px;margin:14px 0}
+  .urlbox input{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--muted);font-family:"JetBrains Mono";font-size:11px;outline:none}
+  .urlbox .btn{padding:0 16px;font-size:13px}
+  .steps{text-align:left;background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-top:6px}
+  .steps h4{font-size:13px;margin-bottom:8px}
+  .steps ol{margin-left:18px;font-size:12.5px;color:var(--muted);line-height:1.9}
+  .steps b{color:var(--signal)}
+  .me-hero{padding:22px 22px 6px;text-align:center}
+  .me-hero .ring2{width:88px;height:88px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 0 30px rgba(255,176,102,.35)}
+  .me-hero h2{font-size:19px;font-weight:900}
+  .me-hero .h{font-size:12px;color:var(--muted);margin-top:4px}
+  .setting{margin:12px 16px;background:var(--glass);border:1px solid var(--line);border-radius:16px}
+  .setrow{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-size:14px;border-bottom:1px solid var(--line)}
+  .setrow:last-child{border:0}
+  .setrow .lab{display:flex;flex-direction:column;gap:2px;padding-right:12px}
+  .setrow .lab small{color:var(--muted);font-size:11px;line-height:1.5}
+  .toggle{width:46px;height:27px;border-radius:20px;background:#39406f;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+  .toggle.on{background:linear-gradient(90deg,var(--amber-deep),var(--amber))}
+  .toggle .k{position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:left .2s}
+  .toggle.on .k{left:22px}
+  .stopbtn{margin:8px 16px 4px;width:calc(100% - 32px);padding:14px;background:rgba(255,128,128,.12);color:var(--bad);border:1px solid rgba(255,128,128,.35)}
+  .note{padding:10px 26px 24px;text-align:center;font-size:11.5px;color:var(--muted2);line-height:1.7}
+  .note b{color:var(--muted)}
+  .nav{display:flex;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 6px 22px;flex-shrink:0}
+  .nav button{flex:1;background:none;border:0;color:var(--muted2);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;font-family:inherit;cursor:pointer;padding:6px 0;position:relative;transition:.2s;font-weight:600}
+  .nav button.active{color:var(--amber)}
+  .nav button svg{width:21px;height:21px}
+  .nav button .ndot{position:absolute;top:2px;right:calc(50% - 16px);min-width:15px;height:15px;line-height:15px;font-size:9.5px;font-weight:700;background:var(--rose);color:#fff;border-radius:8px;padding:0 4px}
+  .overlay{position:absolute;inset:0;z-index:40;background:rgba(6,8,26,.6);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:flex-end}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .sheet{width:100%;background:linear-gradient(180deg,var(--night2),var(--night));border-radius:28px 28px 0 0;border-top:1px solid var(--line);transform:translateY(30px);transition:transform .28s cubic-bezier(.3,1,.4,1);max-height:92%;overflow-y:auto}
+  .overlay.show .sheet{transform:none}.sheet::-webkit-scrollbar{width:0}
+  .sheet .cover{height:210px;display:flex;align-items:flex-end;padding:22px;position:relative;overflow:hidden}
+  .sheet .cover::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 80% 0%,rgba(255,255,255,.45),transparent 55%),linear-gradient(180deg,transparent 40%,rgba(0,0,0,.28));pointer-events:none}
+  .sheet .cover .initial{font-size:52px;position:absolute;top:22px;right:24px;width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.28);backdrop-filter:blur(4px);border:2px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .sheet .cover .close{position:absolute;top:16px;left:16px;width:34px;height:34px;border-radius:50%;background:rgba(10,13,40,.5);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .sheet .cover .idn h2{font-family:"Zen Maru Gothic";font-size:25px;font-weight:900;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+  .sheet .cover .idn h2 span{font-size:16px;opacity:.85}
+  .sheet .cover .idn .dist{font-size:12px;margin-top:5px;background:rgba(10,13,40,.5);display:inline-block;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.14)}
+  .sheet .cover .idn .dist b{color:var(--amber);font-family:"JetBrains Mono";font-weight:500}
+  .sheet .body{padding:20px 20px 4px;background:#fff}
+  .sheet{position:relative}
+  .sheet .cover .idn h2{color:#fff}
+  .sheet .bio{font-size:14px;line-height:1.85;color:#3a4066}
+  .tags{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 6px}
+  .tag{font-size:12px;padding:6px 12px;border-radius:20px;background:rgba(99,214,232,.1);border:1px solid rgba(99,214,232,.28);color:var(--signal);font-weight:600}
+  .actions{display:flex;gap:14px;padding:18px 20px 26px}
+  .actions .btn{flex:1;padding:15px;font-size:16px}
+  .btn-liked{background:rgba(123,224,176,.15);color:var(--ok);border:1px solid rgba(123,224,176,.4)}
+  .matchpop{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;background:radial-gradient(circle at 50% 38%,rgba(255,126,157,.35),rgba(255,255,255,.97));opacity:0;pointer-events:none;transition:opacity .3s}
+  .matchpop.show{opacity:1;pointer-events:auto}
+  .matchpop h2{font-family:"Zen Maru Gothic";font-size:34px;font-weight:900;color:var(--rose);margin-bottom:6px;text-shadow:0 4px 20px rgba(255,126,157,.5)}
+  .matchpop p{font-size:14px;color:#5a6086;margin-bottom:24px;line-height:1.6}
+  .matchpop .avs{display:flex;align-items:center;margin-bottom:26px}
+  .matchpop .avs .a{width:82px;height:82px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;border:3px solid var(--night);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .matchpop .avs .a:nth-child(3){margin-left:-14px}
+  .matchpop .heart{font-size:26px;margin:0 -3px;z-index:3;animation:beat 1s infinite}
+  @keyframes beat{50%{transform:scale(1.25)}}
+  .matchpop .mbtns{display:flex;flex-direction:column;gap:11px;width:100%;max-width:250px}
+  .matchpop .mbtns .btn{padding:14px;font-size:15px}
+  .matchpop .mbtns .later{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .chathead{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-shrink:0}
+  .chathead .back{background:none;border:0;color:var(--ink);font-size:24px;cursor:pointer;padding:0 4px}
+  .chathead .av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .chathead .nm{font-size:15px;font-weight:700}.chathead .st{font-size:11px;color:var(--ok)}
+  .msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:9px}.msgs::-webkit-scrollbar{width:0}
+  .msgs .day{align-self:center;font-size:10.5px;color:var(--muted2);background:var(--surface);padding:4px 12px;border-radius:20px;margin-bottom:4px}
+  .bub{max-width:74%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;animation:slidein .3s ease both}
+  .bub.them{align-self:flex-start;background:var(--surface2);border-bottom-left-radius:5px}
+  .bub.me{align-self:flex-end;background:linear-gradient(135deg,var(--amber-deep),var(--amber));color:#3a2410;border-bottom-right-radius:5px;font-weight:500}
+  .chatbar{display:flex;gap:9px;padding:12px 14px 20px;border-top:1px solid var(--line);flex-shrink:0}
+  .chatbar input{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:12px 16px;color:var(--ink);font-family:inherit;font-size:14px;outline:none}
+  .chatbar input:focus{border-color:var(--amber)}
+  .chatbar .send{width:44px;height:44px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--amber-deep),var(--amber));color:#3a2410;font-size:18px;cursor:pointer;flex-shrink:0}
+  .toast{position:absolute;top:52px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:70;background:rgba(30,36,70,.96);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:10px 16px;font-size:12.5px;opacity:0;pointer-events:none;transition:all .3s;max-width:82%;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast b{color:var(--signal)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  .wants{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 2px}
+  .want{font-size:12px;padding:5px 11px;border-radius:20px;background:rgba(255,126,157,.14);border:1px solid rgba(255,126,157,.42);color:var(--rose);font-weight:700}
+  .workline{font-size:13px;color:var(--muted);margin-bottom:2px}
+  .workline b{color:var(--ink);font-weight:600}
+  .likeslist{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px}
+  .likechip{font-size:12px;padding:6px 12px;border-radius:20px;background:rgba(255,176,102,.12);border:1px solid rgba(255,176,102,.35);color:var(--amber);font-weight:600}
+  .interest{margin-top:12px}
+  .interest .ih{font-size:12px;color:var(--signal);font-weight:800;margin-bottom:8px;letter-spacing:.5px}
+  .interest .irow{font-size:13.5px;color:#3a4066;margin-bottom:5px;padding:8px 12px;background:var(--surface2);border-radius:12px}
+  .interest .irow b{color:var(--signal);font-weight:700}
+  .warn-msg{margin:8px 0 2px;padding:9px 12px;border-radius:12px;background:rgba(224,160,47,.12);border:1px solid rgba(224,160,47,.45);color:#6b4a10;font-size:12.5px;line-height:1.7;display:none}
+  .warn-msg.show{display:block}
+  .ttlbar{align-self:center;margin-bottom:8px;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(240,81,123,.12);color:var(--rose);border:1px solid rgba(240,81,123,.35)}
+  .ttlbar.warn{background:rgba(226,87,79,.14);color:var(--bad);border-color:rgba(226,87,79,.4)}
+  .ttlbar.over{background:rgba(120,130,160,.14);color:var(--muted);border-color:rgba(120,130,160,.3)}
+  .ttlbar.keep{background:rgba(32,180,131,.12);color:#0f8f6f;border-color:rgba(32,180,131,.4)}
+  .extendbtn{display:inline-block;margin-left:7px;padding:3px 10px;border-radius:20px;background:var(--amber);color:#fff;font-size:11px;font-weight:700;cursor:pointer}
+  .keeptag{display:inline-block;font-size:11px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.35);border-radius:20px;padding:1px 8px}
+  .common{display:inline-block;font-size:11px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.35);border-radius:20px;padding:2px 9px;margin:3px 0}
+  .joinbtn{flex-shrink:0;padding:7px 15px;border:0;border-radius:20px;background:var(--signal);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+  .joinbtn.joined{background:var(--surface2);color:var(--muted)}
+  /* ようこそ画面 */
+  .wel{padding:22px 22px 18px;height:100%;overflow-y:auto;display:flex;flex-direction:column}
+  .wel::-webkit-scrollbar{width:0}
+  .wel .wlogo{font-family:"Zen Maru Gothic";font-weight:900;font-size:36px;letter-spacing:1px;text-align:center;background:linear-gradient(90deg,var(--amber),var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .wel .wtag{text-align:center;font-size:13.5px;color:var(--muted);margin:8px 0 18px;line-height:1.75}
+  .shots{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}
+  .shots::-webkit-scrollbar{height:0}
+  .shot{flex:0 0 76%;scroll-snap-align:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 8px 22px -12px rgba(50,70,150,.35)}
+  .shot .sh{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:3px}
+  .shot .sd{font-size:11.5px;color:var(--muted);line-height:1.6;margin-bottom:11px}
+  .mini{background:var(--surface2);border-radius:12px;padding:9px}
+  .mrow2{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:7px 9px;margin-bottom:6px}
+  .mrow2:last-child{margin-bottom:0}
+  .mrow2 .mav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .mrow2 .mtx{flex:1;min-width:0}
+  .mrow2 .mn{font-size:11px;font-weight:700;color:var(--ink)}
+  .mrow2 .mb{font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrow2 .md{font-size:10.5px;font-weight:700;color:var(--amber);flex-shrink:0}
+  .mtag{display:inline-block;font-size:9px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.3);border-radius:20px;padding:1px 6px}
+  .mbub{max-width:78%;padding:6px 10px;border-radius:12px;font-size:10.5px;line-height:1.45;margin-bottom:5px}
+  .mbub.them{background:#fff;border:1px solid var(--line)}
+  .mbub.me{background:linear-gradient(135deg,var(--amber-deep),var(--amber));color:#fff;margin-left:auto}
+  .addhome{margin-top:auto;padding:13px 15px;border-radius:14px;background:rgba(15,176,205,.08);border:1px solid rgba(15,176,205,.3);font-size:12px;line-height:1.7;color:var(--ink)}
+  .addhome a{color:var(--signal);font-weight:700;cursor:pointer;text-decoration:underline}
+  .stepnum{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px}
+  .stepnum .no{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--amber);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .stepnum .tx{font-size:13px;line-height:1.7;color:var(--ink)}
+  .guide{position:absolute;inset:0;z-index:80;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column}
+  .guide.show{display:flex}
+  .guide .gtop{display:flex;justify-content:flex-end;padding:14px 18px 0}
+  .guide .skip{background:none;border:0;color:var(--muted);font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline}
+  .guide .gbody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px 34px}
+  .guide .gicon{font-size:64px;margin-bottom:22px}
+  .guide h3{font-family:"Zen Maru Gothic";font-size:22px;font-weight:900;margin-bottom:14px;line-height:1.45}
+  .guide p{font-size:14px;line-height:1.95;color:var(--muted);margin-bottom:10px}
+  .guide .note2{font-size:12.5px;line-height:1.8;color:var(--muted2);margin-top:8px;padding:11px 14px;background:var(--surface2);border-radius:14px}
+  .guide .dots{display:flex;justify-content:center;gap:8px;padding:6px 0 16px}
+  .guide .dots i{width:8px;height:8px;border-radius:50%;background:var(--muted2);opacity:.4;transition:.2s}
+  .guide .dots i.on{opacity:1;background:var(--amber);width:22px;border-radius:6px}
+  .guide .gnav{display:flex;gap:12px;padding:0 24px 30px}
+  .guide .gnav .btn{flex:1;padding:15px;font-size:15px}
+  .membtn{flex-shrink:0;margin-left:7px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--surface);font-size:17px;cursor:pointer}
+  .membtn:active{background:var(--surface2)}
+  .bub .who{font-size:11px;color:var(--signal);font-weight:700;margin-bottom:3px;cursor:pointer;text-decoration:underline}
+  .joinhint{display:none;padding:10px 16px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line)}
+  .joinhint.show{display:block}
+  .urow .d .unread{display:inline-block;min-width:20px;height:20px;line-height:20px;font-size:11px;font-weight:700;background:var(--rose);color:#fff;border-radius:10px;padding:0 6px}
+  .joined-tag{color:var(--ok);font-size:11px;font-weight:700}
+  .agegate{margin:18px 0 0;padding:14px 15px;border-radius:14px;background:rgba(226,87,79,.07);border:1px solid rgba(226,87,79,.3);font-size:12px;line-height:1.7;color:var(--ink)}
+  .agegate b{color:var(--bad)}
+  .agechk{display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13.5px;font-weight:700;cursor:pointer}
+  .agechk input{width:20px;height:20px;accent-color:var(--amber)}
+  .terms{margin:14px 0 0;padding:13px 15px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);font-size:12px;line-height:1.7}
+  .terms a{color:var(--signal);font-weight:700;cursor:pointer;text-decoration:underline}
+  .termschk{display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13.5px;font-weight:700;cursor:pointer}
+  .termschk input{width:20px;height:20px;accent-color:var(--amber)}
+  .termsbody{font-size:12.5px;line-height:1.9;color:#3a4066}
+  .termsbody h4{font-size:13.5px;margin:16px 0 6px;color:var(--ink)}
+  .termsbody p{margin-bottom:8px}
+  .likereason{display:block;width:100%;text-align:left;padding:13px 15px;margin-bottom:8px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:13.5px;cursor:pointer}
+  .likereason:active{background:var(--surface2)}
+  .whylike{display:inline-block;font-size:11px;font-weight:700;color:var(--rose);background:rgba(240,81,123,.1);border:1px solid rgba(240,81,123,.3);border-radius:20px;padding:2px 9px;margin-top:3px}
+  .whylike.locked{color:var(--amber);background:rgba(245,151,47,.12);border-color:rgba(245,151,47,.4);cursor:pointer}
+  .reportbtn{background:none;border:0;color:var(--muted2);font-size:11.5px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:8px 0}
+  .reportbtn:active{opacity:.6}
+  .rsn{display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:9px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;cursor:pointer}
+  .rsn:active{background:var(--surface2)}
+  .addrow{display:flex;gap:8px}
+  .addrow input{flex:1}
+  .addrow .addbtn{flex-shrink:0;padding:0 16px;border:0;border-radius:14px;background:var(--surface2);color:var(--amber);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .miniclose{margin-left:6px;cursor:pointer;opacity:.7}
+  /* 学園祭版 */
+  .fesbadge{align-self:center;margin-top:8px;padding:4px 13px;border-radius:20px;background:linear-gradient(90deg,var(--amber),var(--rose));color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px}
+  .feslive{text-align:center;font-size:12.5px;font-weight:700;color:var(--ok);min-height:1.2em;margin-bottom:10px}
+  .fesbar{margin:0 16px 10px;padding:9px 13px;border-radius:14px;background:rgba(245,151,47,.10);border:1px solid rgba(245,151,47,.35);font-size:12px;line-height:1.6;color:#6b4a10;display:none}
+  .fesbar.show{display:block}
+  .fesbar.warn{background:rgba(240,81,123,.10);border-color:rgba(240,81,123,.4);color:#8a1d3d;cursor:pointer}
+  .fesbar b{font-weight:700}
+  .fesclosed{position:absolute;inset:0;z-index:95;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px}
+  .fesclosed.show{display:flex}
+  .fesclosed .ic{font-size:52px;margin-bottom:16px}
+  .fesclosed h2{font-family:"Zen Maru Gothic";font-size:22px;margin-bottom:12px;color:var(--ink)}
+  .fesclosed p{font-size:13.5px;color:var(--muted);line-height:1.9;margin-bottom:18px}
+  .fesclosed .when{font-size:15px;font-weight:700;color:var(--amber-deep)}
+  .fessurvey{display:block;margin-top:10px;background:none;border:0;color:var(--muted);font-family:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+  @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="statusbar"><span class="g" id="gpsChip"><span class="fix"></span><span id="gpsTxt">&mdash;</span></span></div>
+  <div class="screens">
+    <section class="screen active" id="s-welcome">
+      <div class="wel">
+        <div class="wlogo">ちかく</div>
+        <div class="fesbadge">🎪 学園祭限定版</div>
+        <div class="wtag">学園祭の会場で、いま近くにいる人と<br>その場でつながる。期間限定です。</div>
+        <div class="feslive" id="fesLiveWel"></div>
+        <div class="shots">
+          <div class="shot">
+            <div class="sh">📍 近くにいる人が見える</div>
+            <div class="sd">同じ場所でアプリを開いている人が、距離つきで表示されます。</div>
+            <div class="mini">
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい 24</div><div class="mb"><span class="mtag">🎯 共通 英語</span></div></div><div class="md">32m</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#a78bfa,#63d6e8)">🎧</div><div class="mtx"><div class="mn">そう 27</div><div class="mb">音楽とランニングが好きです</div></div><div class="md">87m</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#7be0b0,#4bc0d9)">🌿</div><div class="mtx"><div class="mn">あおい 23</div><div class="mb">静かな喫茶店を探し中</div></div><div class="md">140m</div></div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="sh">♥ いいねが両想いでマッチ</div>
+            <div class="sd">気になる人にいいねを送り、お互いに送り合うと話せるようになります。</div>
+            <div class="mini" style="text-align:center;padding:16px 9px">
+              <div style="display:flex;align-items:center;justify-content:center;margin-bottom:9px">
+                <div class="mav" style="width:40px;height:40px;font-size:20px;background:linear-gradient(135deg,#8b9dff,#63d6e8)">🌙</div>
+                <span style="font-size:16px;margin:0 -4px;z-index:2">💛</span>
+                <div class="mav" style="width:40px;height:40px;font-size:20px;background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div>
+              </div>
+              <div style="font-family:'Zen Maru Gothic';font-size:15px;font-weight:900;color:var(--rose)">マッチ！</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">ゆい さんと両想いになりました</div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="sh">💬 その場で話せる</div>
+            <div class="sd">マッチした相手とメッセージができます。コミュニティではみんなで話せます。</div>
+            <div class="mini">
+              <div class="mbub them">はじめまして！英語の勉強されてるんですか？</div>
+              <div class="mbub me">はい！英検1級目指してます</div>
+              <div class="mbub them">そうなんですね、おすすめの勉強場所とか教えてほしいです！</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted2);text-align:center;margin:2px 0 14px">← 横にスワイプできます →</div>
+        <button class="btn btn-primary" style="width:100%;padding:16px;font-size:16px" onclick="goOnboard()">はじめる</button>
+        <div class="addhome">📱 <b>ホーム画面に追加すると便利です</b><br>毎回QRを読まなくても、アプリのように開けます。<br><a onclick="openAddHome()">追加のしかたを見る</a></div>
+      </div>
+    </section>
+    <section class="screen" id="s-onboard">
+      <div class="ob">
+        <div class="logo">ちかく</div>
+        <div class="tag">いま近くにいる人と、その場でつながる。<br>同じリンクを開いた人同士でマッチングします。</div>
+        <div class="field"><label>ニックネーム</label><input id="obName" maxlength="12" placeholder="れい"></div>
+        <div class="row2"><div class="field"><label>年齢（18歳以上）</label><input id="obAge" type="number" min="18" max="99" placeholder="24"></div><div class="field" style="flex:2"><label>アイコン</label></div></div>
+        <div class="emojis" id="obEmojis"></div>
+        <div class="field" style="margin-top:16px"><label>ひとこと</label><textarea id="obBio" rows="2" maxlength="60" placeholder="カフェ巡りが好きです。近くにいたら話しましょう"></textarea></div>
+        <div class="field"><label>タグ（好きなだけ）</label><div class="chips" id="obTags"></div></div>
+        <div class="field"><label>職業 / 学校</label><div class="chips" id="obWorkCat"></div><input id="obWorkDetail" maxlength="24" placeholder="くわしく（任意）例：法政大学 / エンジニア" style="margin-top:9px"></div>
+        <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="obLooking"></div></div>
+        <div class="field"><label>好きなもの（自由に追加）</label><div class="addrow"><input id="obLikeInput" maxlength="16" placeholder="例：サウナ / 猫カフェ" onkeydown="if(event.key==='Enter'){event.preventDefault();addLike();}"><button type="button" class="addbtn" onclick="addLike()">追加</button></div><div class="likeslist" id="obLikesList"></div></div>
+        <div class="field"><label>興味のあること</label><div class="chips" id="obInterestCat"></div><div id="obInterestOpts" style="margin-top:9px"></div><div class="likeslist" id="obInterestList"></div><div style="font-size:11px;color:var(--muted2);margin-top:6px">ジャンルを押すと選択肢が出ます。タップで追加/削除。</div></div>
+        <div class="terms">📄 ご利用にあたって<br><a onclick="openTerms()">利用規約を読む</a>
+          <label class="termschk"><input type="checkbox" id="obTerms"><span>利用規約に同意します</span></label></div>
+        <div class="agegate">🔞 <b>18歳以上の方のみご利用いただけます</b><br>本アプリは18歳以上を対象としています。18歳未満の方はご利用いただけません。
+          <label class="agechk"><input type="checkbox" id="obAge18"><span>18歳以上です</span></label></div>
+        <div class="privacy">🔒 <b>位置情報について</b><br>「始める」を押すとGPSでのおおよその現在地を、<b>このリンクを開いている他の利用者に共有</b>します。共有はいつでも設定から止められます。</div>
+        <button class="btn btn-primary go" id="obGo">位置情報を共有して始める</button>
+      </div>
+    </section>
+    <section class="screen" id="s-near">
+      <div class="apphead"><h1>近くの人</h1><span class="sub" id="nearSub">&mdash;</span></div>
+      <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
+      <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
+      <div class="map-wrap"><canvas id="map" width="716" height="600"></canvas><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">中心が<b>あなた</b></div></div>
+      <div class="listhead"><span class="live"></span> 位置を共有中の人</div>
+      <div class="scroll"><div class="ulist" id="ulist"></div>
+        <div class="listhead" style="margin-top:18px">💬 コミュニティ <span onclick="go('comm')" style="margin-left:auto;color:var(--signal);font-weight:700;cursor:pointer;font-size:12px">すべて見る ›</span></div>
+        <div class="ulist" id="homeRoomList"></div>
+      </div>
+    </section>
+    <section class="screen" id="s-cross">
+      <div class="apphead"><h1>すれ違った人</h1><span class="sub" id="crossSub">&mdash;</span></div>
+      <div style="padding:2px 22px 12px;font-size:12px;color:var(--muted)">500m以内に入った人を記録します。会うほど回数が増えます。（アプリを開いている間）</div>
+      <div class="scroll"><div class="ulist" id="crossList"></div></div>
+    </section>
+    <section class="screen" id="s-match">
+      <div class="apphead"><h1>マッチ</h1><span class="sub" id="matchCount">0</span></div>
+      <div class="scroll" id="matchList"></div>
+    </section>
+    <section class="screen" id="s-chat">
+      <div class="chathead"><button class="back" onclick="go('match')">‹</button><div class="av" id="chatAv"></div><div><div class="nm" id="chatNm"></div><div class="st">位置を共有中</div></div></div>
+      <div class="msgs" id="msgs"></div>
+      <div class="chatbar"><input id="chatInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">↑</button></div>
+    </section>
+    <section class="screen" id="s-comm">
+      <div class="apphead"><h1>コミュニティ</h1><span class="sub" id="commSub">みんなの部屋</span></div>
+      <div style="padding:2px 16px 10px"><button class="btn btn-primary" style="width:100%;padding:13px;font-size:14px" onclick="createRoom()">＋ コミュニティを作る</button></div>
+      <div class="scroll"><div class="ulist" id="roomList"></div></div>
+    </section>
+    <section class="screen" id="s-room">
+      <div class="chathead"><button class="back" onclick="go('comm')">‹</button><div class="av" id="roomAv" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div style="flex:1;min-width:0"><div class="nm" id="roomNm"></div><div class="st" id="roomSt"></div></div><button class="joinbtn" id="roomJoinBtn" onclick="toggleRoomJoin()">参加</button><button class="membtn" onclick="openMembers()" title="参加者を見る">👥</button></div>
+      <div class="msgs" id="roomMsgs"></div>
+      <div class="joinhint" id="roomJoinHint">参加すると、この部屋に投稿できます</div>
+      <div class="chatbar"><input id="roomInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendRoomMsg()"><button class="send" onclick="sendRoomMsg()">↑</button></div>
+    </section>
+    <section class="screen" id="s-invite">
+      <div class="apphead"><h1>招待</h1><span class="sub">リンク / QR</span></div>
+      <div class="scroll"><div class="inv">
+        <p>このQRを読むか、リンクを開いた人が<br>同じ「近くの人」に表示されます。</p>
+        <div class="qrbox" id="qrbox"></div>
+        <div class="urlbox"><input id="shareUrl"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
+        <div class="steps"><h4>友だちを誘うには</h4><ol><li>近くにいる人に、上の<b>QRコードを見せる</b></li><li>相手がカメラで読み取ると、このアプリが開きます</li><li>相手が登録すると、<b>お互いに「近くの人」に表示されます</b></li></ol></div>
+      </div></div>
+    </section>
+    <section class="screen" id="s-me">
+      <div class="scroll">
+        <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="h" id="meLoc">📍 &mdash;</div></div>
+        <div class="setting">
+          <div class="setrow"><div class="lab">位置情報を共有<small>OFFにすると他の人に表示されません</small></div><div class="toggle on" id="tgShare" onclick="toggleShare(this)"><div class="k"></div></div></div>
+          <div class="setrow"><div class="lab">おおまかな位置にする<small>正確な地点をぼかして共有（約100m）</small></div><div class="toggle" id="tgCoarse" onclick="toggleCoarse(this)"><div class="k"></div></div></div>
+          <div class="setrow"><div class="lab">通知<small id="pushHint">マッチしたらスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
+        </div>
+        <div class="setting" id="billBox" style="border-color:rgba(245,151,47,.35)">
+          <div class="setrow"><div class="lab">💬 メッセージ機能<small id="msgStat">未解禁（初回のみ有料）</small></div><button class="btn btn-primary" id="msgBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showMsgPaywall()">解禁する</button></div>
+          <div class="setrow"><div class="lab">♥ 今日のいいね<small id="likeStat">無料 3回 / 日</small></div><button class="btn btn-ghost" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showLikePaywall(null)">追加購入</button></div>
+          <div class="setrow"><div class="lab">🎯 いいねの理由<small id="reasonStat">未解禁（相手が惹かれたポイントが見えます）</small></div><button class="btn btn-primary" id="reasonBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showReasonPaywall()">解禁する</button></div>
+        </div>
+        <div class="setting" style="border-color:rgba(99,214,232,.3)">
+          <div class="setrow" style="border:0;flex-direction:column;align-items:flex-start;gap:8px"><div class="lab">✨ 今後の有料機能<small>準備中。課金するとこんなことができます</small></div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px"><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">趣味一致度がわかる 近日</span><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">広告をなくす 近日</span></div></div>
+        </div>
+        <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openSurvey()">📝 アンケートに答える</button>
+        <div style="margin:6px 16px 0;text-align:center;font-size:11.5px;color:var(--muted2)">参加者番号 <b id="fesNo" style="font-family:'JetBrains Mono',monospace;color:var(--muted)">&mdash;</b></div>
+        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
+        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
+        <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
+        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:12px;font-size:13px" onclick="resetBilling()">課金状態をリセット（デモ用）</button>
+        <button class="btn stopbtn" onclick="leaveAll()">共有をやめてプロフィールを消す</button>
+        <div class="setting" style="border-color:rgba(99,214,232,.3)">
+          <div class="setrow" style="border:0"><div class="lab">🧪 テストモード<small>1台だけで動作確認できます。近くにテスト用の人が現れ、いいねするとマッチ→チャットまで試せます</small></div><button class="btn btn-primary" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="spawnTest()">試す</button></div>
+        </div>
+        <div class="note">位置は<b>このリンクを持つ人全員</b>に見えます。知らない人と会うときは公共の場所で。<br>このアプリは<b>18歳以上</b>の方のみご利用いただけます。<br>気になる相手はプロフィールから<b>通報・ブロック</b>できます。<br>本アプリは、法政大学 社会学部 糸久正人ゼミが研究活動として運営している<b>非公式</b>のサービスです。<br>この<b>学園祭版</b>は開催時間中だけ使えます。通常版の「ちかく」とは登録情報・マッチが分かれています。</div>
+      </div>
+    </section>
+  </div>
+  <nav class="nav" id="nav" style="display:none">
+    <button class="active" data-t="near" onclick="go('near')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-5-6-10a6 6 0 1 1 12 0c0 5-6 10-6 10z"/><circle cx="12" cy="11" r="2.3"/></svg>近くの人</button>
+    <button data-t="cross" onclick="go('cross')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6c0 2-1 3-1 5s1 3 3 3M16 4c0 2 1 3 1 5s-1 3-3 4"/><circle cx="7" cy="19" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg>すれ違い<span class="ndot" id="dotCross" style="display:none"></span></button>
+    <button data-t="match" onclick="go('match')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.4-7 10-7 10z"/></svg>マッチ<span class="ndot" id="dotMatch" style="display:none"></span></button>
+    <button data-t="comm" onclick="go('comm')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.5a4 4 0 0 1 0 7"/></svg>コミュ<span class="ndot" id="dotComm" style="display:none"></span></button>
+    <button data-t="invite" onclick="go('invite')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h3v3M20 14v6M17 20h3"/></svg>招待</button>
+    <button data-t="me" onclick="go('me')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>設定</button>
+  </nav>
+  <div id="configNotice" style="position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px">
+    <div style="font-size:42px;margin-bottom:14px">🔌</div>
+    <h2 style="font-family:'Zen Maru Gothic';font-size:22px;margin-bottom:14px;color:#1b2244">接続できませんでした</h2>
+    <p style="font-size:13px;color:#6b7291;line-height:1.9">ただいま接続できませんでした。<br>電波の良い場所で、<b style="color:#0a6b85">少し時間をおいてから</b><br>もう一度お試しください。<br><br>解決しない場合は、お手数ですが<br>運営（法政大学 糸久ゼミ）までお知らせください。</p>
+  </div>
+  <div class="fesclosed" id="fesClosed"></div>
+  <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
+  <div class="matchpop" id="matchpop"></div>
+  <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
+  <div class="overlay" id="editOverlay" onclick="if(event.target===this)closeEdit()"><div class="sheet" id="editSheet" style="padding:22px 22px 28px"></div></div>
+  <div class="overlay" id="payOverlay" onclick="if(event.target===this)closePay()"><div class="sheet" id="paySheet" style="padding:24px 22px 30px"></div></div>
+  <div class="overlay" id="reportOverlay" onclick="if(event.target===this)closeReport()"><div class="sheet" id="reportSheet" style="padding:24px 22px 30px"></div></div>
+  <div class="overlay" id="termsOverlay" onclick="if(event.target===this)closeTerms()"><div class="sheet" id="termsSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="likeOverlay" onclick="if(event.target===this)closeLikeReason()"><div class="sheet" id="likeSheet" style="padding:24px 22px 30px"></div></div>
+  <div class="overlay" id="memOverlay" onclick="if(event.target===this)closeMembers()"><div class="sheet" id="memSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="homeOverlay" onclick="if(event.target===this)closeAddHome()"><div class="sheet" id="homeSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="guide" id="guide">
+    <div class="gtop"><button class="skip" onclick="closeGuide()">スキップ</button></div>
+    <div class="gbody" id="guideBody"></div>
+    <div class="dots" id="guideDots"></div>
+    <div class="gnav"><button class="btn btn-ghost" id="guidePrev" onclick="guideMove(-1)">戻る</button><button class="btn btn-primary" id="guideNext" onclick="guideMove(1)">次へ</button></div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+
+/* ============================================================
+   設定：Supabaseの2つの値をここに貼ってください（README参照）
+   ============================================================ */
+const SUPABASE_URL      = "https://rosgvnxqcuyenlipakck.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvc2d2bnhxY3V5ZW5saXBha2NrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTQ5MDEsImV4cCI6MjA5ODgzMDkwMX0.SrEjGpoZUe6yfOMnQ-g6Cb-cBUg4L8AIElJ5e8UFXyg";
+/* ============================================================ */
+
+/* ============================================================
+   学園祭版の設定：本番前にここだけ書き換える
+   ============================================================ */
+const FES={
+  // true の間は開催時間を無視して、いつでも使える（学園祭まではメンバーだけで動作確認するため）
+  // ⚠️ 本番前に false にし、下の sessions に本番の日時を入れること
+  alwaysOpen:true,
+  // 使える時間帯。複数日なら1日ずつ並べる（日本時間。末尾の +09:00 は消さない）
+  // ⚠️ 仮の日時。本番の日時が決まったら差し替えること
+  sessions:[
+    {start:'2026-10-31T10:00:00+09:00', end:'2026-10-31T17:00:00+09:00'},
+  ],
+  // アンケート（Googleフォーム）のURL。空のままだと「準備中」と表示する
+  // URLの中に {id} と書くと参加者番号に置き換わる（事前入力リンクで回答とアプリのデータを突き合わせられる）
+  surveyUrl:'',
+  // 終了の何分前から「まもなく終了・アンケートへ」の案内を出すか
+  surveyBeforeEndMin:30,
+};
+// 学園祭版のデータは fes_ 付きの別テーブルに保存する（supabase/fes_tables.sql）。
+// push_subscriptions だけは Edge Function が読むので通常版と共用
+const T=name=>'fes_'+name;
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const EMO=['🌙','⭐','🌸','🔥','🐱','🎧','☕','📷','🍜','🌿','🎨','🏃'];
+const TAGS=['カフェ','音楽','映画','読書','写真','ランニング','ゲーム','料理','旅行','アート','犬','猫','お酒','散歩'];
+const WORKCATS=['学生','会社員','フリーランス','経営者','その他'];
+const LOOKING=['友達','話し相手','暇つぶし','趣味仲間','起業仲間','飲み仲間','挑戦仲間'];
+const INTERESTS=['スポーツ','音楽','ゲーム','グルメ','映画・ドラマ','アウトドア','旅行','アート','勉強・学び'];
+const INTEREST_OPTS={
+  'スポーツ':['野球','サッカー','バスケ','テニス','筋トレ','ランニング','ゴルフ','水泳','バドミントン','フットサル','スノボ','野球観戦','サッカー観戦','格闘技'],
+  '音楽':['J-POP','ロック','邦ロック','K-POP','ヒップホップ','R&B','EDM','クラシック','ジャズ','アニソン','ライブ','フェス','弾き語り','DTM'],
+  'ゲーム':['FPS','RPG','格ゲー','スマホゲー','Switch','PS5','Apex','ヴァロラント','ポケモン','マイクラ','原神','スプラ','レトロゲー'],
+  'グルメ':['ラーメン','カフェ','焼肉','寿司','イタリアン','甘いもの','お酒','ワイン','食べ歩き','エスニック','パン','カレー'],
+  '映画・ドラマ':['邦画','洋画','アニメ','韓国ドラマ','海外ドラマ','ホラー','SF','恋愛','アクション','ドキュメンタリー','Netflix'],
+  'アウトドア':['キャンプ','登山','ハイキング','釣り','サーフィン','サイクリング','BBQ','ソロキャンプ','スキー'],
+  '旅行':['国内旅行','海外旅行','一人旅','温泉','秘境','弾丸旅行','ドライブ','ぶらり散歩','聖地巡礼'],
+  'アート':['絵画','写真','デザイン','美術館','陶芸','ハンドメイド','建築','現代アート','イラスト'],
+  '勉強・学び':['英語','プログラミング','資格','読書','投資','起業','語学','歴史','心理学','副業']
+};
+const NGWORDS=[
+  // 暴言・攻撃
+  '死ね','しね','殺す','ころす','殺害','消えろ','うざい','ウザい','きもい','キモい','きしょい','ブス','ブサイク','デブ','ハゲ','クズ','低能','無能',
+  // 差別
+  '障害者','きちがい','キチガイ','池沼','土人',
+  // 性的
+  'セックス','セフレ','エッチ','えっち','ヤりたい','童貞','処女','中出し','全裸','下着','パンツ見せ','ちんこ','まんこ','おっぱい','巨乳','風俗','エロ',
+  // 売買春・金銭・勧誘
+  '援交','援助交際','パパ活','ママ活','稼げる','儲かる','副業紹介','投資しません','バイナリー','ネットワークビジネス','マルチ商法','宗教の勧誘',
+  // 連絡先の強要
+  'line交換','ライン交換','LINE教え','id教え','電話番号教え','住所教え','本名教え',
+  // 危険な誘い
+  'ホテル行','泊まって','お酒飲ませ','クスリ'
+];
+function ngCheck(text){ if(!text)return null; const low=text.toLowerCase(); const hit=NGWORDS.filter(w=>low.includes(w.toLowerCase())); return hit.length?hit:null; }
+const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#ff7e9d','#ffb0c8'],'🔥':['#ff6b4a','#ffb066'],'🐱':['#ffb066','#ffd166'],'🎧':['#a78bfa','#63d6e8'],'☕':['#c89b6b','#8b6b4a'],'📷':['#63d6e8','#4b8bf0'],'🍜':['#ff9d70','#ffcf6b'],'🌿':['#7be0b0','#4bc0d9'],'🎨':['#ff7e9d','#a78bfa'],'🏃':['#63d6e8','#7be0b0']};
+const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
+const gr=e=>`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
+function uuid(){return (crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(36).slice(2));}
+
+/* ---------- backend (Supabase) ---------- */
+const configured = !SUPABASE_URL.includes("PASTE_") && !SUPABASE_ANON_KEY.includes("PASTE_") && SUPABASE_ANON_KEY.length>20;
+let sb=null, myId=null;
+async function initBackend(){
+  if(!configured){ $('#configNotice').style.display='flex'; return false; }
+  try{
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let { data:{ user } } = await sb.auth.getUser();
+    if(!user){ const r = await sb.auth.signInAnonymously();
+      if(r.error){ backendError('匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。'); return false; }
+      user = r.data.user;
+    }
+    myId = user.id; return true;
+  }catch(e){ backendError('バックエンドに接続できません: '+e.message); return false; }
+}
+function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#c0392b;font-weight:700">'+esc(msg)+'</span><br><br>少し時間をおいてから、もう一度お試しください。<br>解決しない場合は運営（法政大学 糸久ゼミ）までお知らせください。'; }
+async function tryResumeSession(){
+  if(!myId||!sb) return false;
+  try{
+    const {data,error}=await sb.from(T('profiles')).select('*').eq('id',myId).maybeSingle();
+    if(error||!data) return false;
+    profile={id:myId,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[]};
+    $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;$('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
+    $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
+    startGeo();buildInvite();startLoops();
+    maybeShowGuide(data.guide_seen===true);
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ---------- push notifications ---------- */
+const VAPID_PUBLIC_KEY = "BO7wrifKnS7_EaYHHNu9I4rd-lChbdpM9kT8tluf1EMrjjVrDRAn6-PZ3ZDKcjsNCkYNFybj8diYC8PLqWlOrr8";
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(base64); const arr=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+let swReg=null;
+async function registerSW(){
+  if(!('serviceWorker' in navigator)) return null;
+  try{ swReg=await navigator.serviceWorker.register('/sw.js'); return swReg; }catch(e){ return null; }
+}
+async function refreshPushToggle(){
+  const tg=$('#tgPush'); if(!tg) return;
+  if(!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)){ tg.classList.remove('on'); return; }
+  if(!swReg) swReg=await navigator.serviceWorker.getRegistration();
+  const sub = swReg ? await swReg.pushManager.getSubscription() : null;
+  tg.classList.toggle('on', !!sub && Notification.permission==='granted');
+}
+async function togglePush(el){
+  const turningOn = !el.classList.contains('on');
+  if(turningOn){
+    if(isIOS() && !isStandalone()){
+      toast('📲 iPhoneで通知を使うには、まずホーム画面に追加してください（共有ボタン→「ホーム画面に追加」）');
+      return;
+    }
+    const ok = await enablePush();
+    if(ok) el.classList.add('on'); // 失敗時の理由は enablePush 側でtoast表示する
+  }else{
+    await disablePush();
+    el.classList.remove('on');
+  }
+}
+async function enablePush(){
+  if(!('Notification' in window) || !('PushManager' in window)){ toast('このブラウザは通知に対応していません'); return false; }
+  if(!sb || !myId){ toast('バックエンドに接続できていないため、通知を有効にできません'); return false; }
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm!=='granted'){ toast('通知が許可されませんでした。端末の設定から許可してください'); return false; }
+    if(!swReg) swReg = await registerSW();
+    if(!swReg){ toast('通知の準備に失敗しました'); return false; }
+    let sub = await swReg.pushManager.getSubscription();
+    if(!sub){
+      sub = await swReg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+    }
+    const { error } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
+    if(error){ console.error('[push] 購読情報の保存に失敗', error); toast('通知の登録に失敗しました'); return false; }
+    return true;
+  }catch(e){ console.error('[push] 通知の有効化に失敗', e); toast('通知を有効にできませんでした'); return false; }
+}
+async function disablePush(){
+  try{
+    if(!swReg) swReg = await navigator.serviceWorker.getRegistration();
+    const sub = swReg ? await swReg.pushManager.getSubscription() : null;
+    if(sub) await sub.unsubscribe();
+    if(sb && myId) await sb.from('push_subscriptions').delete().eq('id', myId);
+  }catch(e){}
+}
+
+/* ---------- state ---------- */
+let profile=null, myPos=null, origin=null, sharing=true, coarse=false, watchId=null;
+let others=[], liked=new Set(), matches={}, placeName=null, chatPeer=null, chatPoll=null, firstMatchLoad=true;
+let testUsers=[]; const isTest=id=>String(id).startsWith('test-');
+let encMap={}, insideSet=new Set();
+let blocked=new Set();   // 通報・ブロックした相手（自分の画面から消す）
+const R=6371000;
+function relMeters(from,to){const dLat=(to.lat-from.lat)*Math.PI/180,dLng=(to.lng-from.lng)*Math.PI/180;return {e:dLng*R*Math.cos(from.lat*Math.PI/180),n:dLat*R};}
+function esc(s){return (s||'').toString().replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+
+/* ---------- onboarding ---------- */
+let selEmoji=EMO[0], selTags=new Set(), selWorkCat='', selLooking=new Set(), myLikes=[], myInterests=[], selInterestCat='';
+function buildOnboard(){
+  $('#obEmojis').innerHTML=EMO.map((e,i)=>`<div class="em ${i===0?'sel':''}" data-e="${e}">${e}</div>`).join('');
+  $$('#obEmojis .em').forEach(el=>el.onclick=()=>{selEmoji=el.dataset.e;$$('#obEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
+  $('#obTags').innerHTML=TAGS.map(t=>`<div class="c" data-t="${t}">${t}</div>`).join('');
+  $$('#obTags .c').forEach(el=>el.onclick=()=>{const t=el.dataset.t;if(selTags.has(t)){selTags.delete(t);el.classList.remove('sel');}else{selTags.add(t);el.classList.add('sel');}});
+  $('#obWorkCat').innerHTML=WORKCATS.map(w=>`<div class="c" data-w="${w}">${w}</div>`).join('');
+  $$('#obWorkCat .c').forEach(el=>el.onclick=()=>{selWorkCat=el.dataset.w;$$('#obWorkCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
+  $('#obLooking').innerHTML=LOOKING.map(w=>`<div class="c" data-l="${w}">${w}</div>`).join('');
+  $$('#obLooking .c').forEach(el=>el.onclick=()=>{const w=el.dataset.l;if(selLooking.has(w)){selLooking.delete(w);el.classList.remove('sel');}else{selLooking.add(w);el.classList.add('sel');}});
+  $('#obInterestCat').innerHTML=INTERESTS.map(w=>`<div class="c" data-i="${w}">${w}</div>`).join('');
+  $$('#obInterestCat .c').forEach(el=>el.onclick=()=>{selInterestCat=el.dataset.i;$$('#obInterestCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');renderInterestOpts();});
+  renderLikesEditor();renderInterestEditor();
+}
+function addLike(){const inp=$('#obLikeInput');const v=inp.value.trim();if(!v)return;if(!myLikes.includes(v))myLikes.push(v);inp.value='';renderLikesEditor();}
+function renderLikesEditor(){const el=$('#obLikesList');if(!el)return;el.innerHTML=myLikes.map((x,i)=>`<span class="likechip">${esc(x)}<span class="miniclose" onclick="myLikes.splice(${i},1);renderLikesEditor()">✕</span></span>`).join('');}
+function hasInterest(cat,item){return myInterests.some(x=>x.cat===cat&&x.detail===item);}
+function toggleInterest(cat,item){const i=myInterests.findIndex(x=>x.cat===cat&&x.detail===item);if(i>=0)myInterests.splice(i,1);else myInterests.push({cat,detail:item});renderInterestOpts();renderInterestEditor();}
+function renderInterestOpts(){const box=$('#obInterestOpts');if(!box)return;if(!selInterestCat){box.innerHTML='';return;}
+  const opts=INTEREST_OPTS[selInterestCat]||[];
+  box.innerHTML='<div class="chips">'+opts.map(o=>`<div class="c ${hasInterest(selInterestCat,o)?'sel':''}" onclick="toggleInterest('${selInterestCat}','${o}')">${o}</div>`).join('')+'</div>';}
+function renderInterestEditor(){const el=$('#obInterestList');if(!el)return;el.innerHTML=myInterests.map((x,i)=>`<span class="likechip" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.35);color:var(--signal)">${esc(x.cat)}：${esc(x.detail)}<span class="miniclose" onclick="myInterests.splice(${i},1);renderInterestEditor();renderInterestOpts()">✕</span></span>`).join('');}
+async function onStart(){
+  if(!myId){ if(!(await initBackend())){ if(!configured) return; myId='local-'+uuid(); } }
+  const name=$('#obName').value.trim()||'ゲスト';const age=parseInt($('#obAge').value)||null;
+  // 18歳以上のみ利用可能
+  if(!$('#obTerms').checked){ toast('利用規約をご確認のうえ、同意にチェックを入れてください'); return; }
+  if(!$('#obAge18').checked){ toast('「18歳以上です」にチェックを入れてください'); return; }
+  if(!age){ toast('年齢を入力してください'); return; }
+  if(age<18){ toast('⚠️ このアプリは18歳以上の方のみご利用いただけます'); return; }
+  const wd=$('#obWorkDetail').value.trim(); const work=selWorkCat?(wd?selWorkCat+'・'+wd:selWorkCat):wd;
+  const bioVal=$('#obBio').value.trim()||'よろしくお願いします。';
+  const ng=ngCheck(name)||ngCheck(bioVal);
+  if(ng){ toast('⚠️ 名前かひとことに不適切な言葉が含まれています。修正してください。'); return; }
+  profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[...selTags],work,looking:[...selLooking],likes:myLikes,interests:myInterests};
+  $('#meAv').style.background=gr(selEmoji);$('#meAv').textContent=selEmoji;$('#meName').textContent=name+(age?' '+age:'');
+  $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
+  startGeo();buildInvite();startLoops();
+  maybeShowGuide(false);   // 新規登録なので必ず出す
+}
+
+/* ---------- GPS ---------- */
+function startGeo(){
+  if(!('geolocation' in navigator)){geoState('bad','非対応');onGeoFail('この端末は位置情報に非対応');return;}
+  navigator.geolocation.getCurrentPosition(onPos,onErr,{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  if(watchId==null)watchId=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,timeout:20000,maximumAge:1500});
+}
+function stopGeo(){if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}}
+function onPos(p){
+  myPos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};
+  if(!origin)origin={...myPos};geoState('ok');
+  $('#locCoord').textContent=myPos.lat.toFixed(5)+', '+myPos.lng.toFixed(5)+(coarse?'（ぼかし共有中）':'');
+  $('#locAcc').textContent='±'+Math.round(myPos.acc)+'m';
+  if(!placeName)reverseGeocode();publishMe();
+}
+function onErr(e){geoState('bad');onGeoFail(e.code===1?'位置情報が拒否されました':'現在地を取得できません');}
+function onGeoFail(msg){const lb=$('#locbar');lb.className='locbar bad';$('#locPlace').textContent=msg;
+  $('#locCoord').textContent='ブラウザで位置情報を「許可」してください（HTTPS必須）';$('#locAcc').innerHTML='<button class="retry" onclick="startGeo()">再試行</button>';}
+function geoState(cls,t){const c=$('#gpsChip');c.className='g '+(cls==='ok'?'on':cls==='bad'?'err':'');$('#gpsTxt').textContent=cls==='ok'?(sharing?'共有中':'停止中'):t||'GPS';}
+async function reverseGeocode(){
+  try{const u=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${myPos.lat}&lon=${myPos.lng}&accept-language=ja&zoom=16`;
+    const d=await(await fetch(u)).json();const a=d.address||{};
+    placeName=[a.neighbourhood||a.quarter||a.suburb,a.city||a.town||a.city_district].filter(Boolean).slice(0,2).join(' ')||'現在地付近';
+  }catch(e){placeName='現在地付近';}
+  $('#locPlace').textContent=placeName;$('#meLoc').textContent='📍 '+placeName;
+}
+
+/* ---------- presence (Supabase profiles) ---------- */
+async function publishMe(){
+  if(!profile||!myPos||!sharing||!sb)return;let lat=myPos.lat,lng=myPos.lng;
+  if(coarse){lat=Math.round(lat*1000)/1000;lng=Math.round(lng*1000)/1000;}
+  await sb.from(T('profiles')).upsert({id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,likes:profile.likes,interests:profile.interests,lat,lng,coarse,sharing:true,updated_at:new Date().toISOString()});
+}
+async function pollUsers(){
+  let out=[];
+  if(sb){
+    const since=new Date(Date.now()-60000).toISOString();
+    const {data,error}=await sb.from(T('profiles')).select('*').eq('sharing',true).gt('updated_at',since).neq('id',myId);
+    if(!error&&data)out=data.map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],lat:u.lat,lng:u.lng}));
+  }
+  others=out.filter(u=>!blocked.has(u.id)).concat(testUsers);renderNearby();
+  recordEncounters();
+  if(sb) await refreshMatches();
+}
+async function refreshMatches(){
+  const [{data:a},{data:b}]=await Promise.all([
+    sb.from(T('likes')).select('to_id,created_at,reason').eq('from_id',myId),
+    sb.from(T('likes')).select('from_id,created_at,reason').eq('to_id',myId)
+  ]);
+  liked=new Set((a||[]).map(x=>x.to_id));
+  const myLikeAt={}; (a||[]).forEach(x=>{myLikeAt[x.to_id]=x.created_at;});
+  const likedMe=new Set((b||[]).map(x=>x.from_id));
+  const themLikeAt={}, themReason={}; (b||[]).forEach(x=>{themLikeAt[x.from_id]=x.created_at;themReason[x.from_id]=x.reason;});
+  for(const uid of liked){ if(blocked.has(uid))continue; if(likedMe.has(uid)){
+    // マッチ成立時刻＝両者のいいねの遅いほう
+    const t1=Date.parse(myLikeAt[uid]||0)||0, t2=Date.parse(themLikeAt[uid]||0)||0;
+    const matchedAt=Math.max(t1,t2)||Date.now();
+    if(!matches[uid]){ await createMatch(uid, !firstMatchLoad, matchedAt, themReason[uid]); }
+    else { matches[uid].matchedAt=matchedAt; matches[uid].theirReason=themReason[uid]; }
+  }}
+  firstMatchLoad=false; renderMatches(); renderNearby();
+}
+// 24時間の残りミリ秒（テストマッチは常に有効）
+const MATCH_TTL=24*60*60*1000;
+// 期限をなくしたマッチ（match_keyで共有。片方が課金すれば両方に効く）
+let unlockedMatches=new Set();
+async function loadMatchUnlocks(){
+  if(!sb)return;
+  try{
+    const {data,error}=await sb.from(T('match_unlocks')).select('match_key');
+    if(error){ console.warn('[unlock] match_unlocks を読み込めません。supabase/match_unlocks.sql を実行してください:',error.message); return; }
+    if(data)unlockedMatches=new Set(data.map(x=>x.match_key));
+  }catch(e){ console.warn('[unlock] 読み込み失敗',e); }
+}
+function isUnlocked(uid){ return unlockedMatches.has(chatKey(uid)); }
+function matchLeftMs(m){ if(!m||!m.matchedAt)return MATCH_TTL; return MATCH_TTL-(Date.now()-m.matchedAt); }
+function isExpired(m){
+  if(!m||!m.matchedAt)return false;
+  if(isTest(m.u.id))return false;
+  if(isUnlocked(m.u.id))return false;   // 課金済みは期限なし
+  return matchLeftMs(m)<=0;
+}
+function leftText(ms){ if(ms<=0)return '終了'; const h=Math.floor(ms/3600000); const mi=Math.floor((ms%3600000)/60000); return h>0?(h+'時間'+mi+'分'):(mi+'分'); }
+
+/* ---------- 共通の趣味を出す ---------- */
+function myInterestSet(){
+  const s=new Set();
+  if(profile){
+    (profile.tags||[]).forEach(t=>s.add(t));
+    (profile.likes||[]).forEach(t=>s.add(t));
+    (profile.interests||[]).forEach(x=>s.add(x.detail));
+  }
+  return s;
+}
+function commonWith(u){
+  const mine=myInterestSet(); if(!mine.size)return [];
+  const theirs=[];
+  (u.tags||[]).forEach(t=>theirs.push(t));
+  (u.likes||[]).forEach(t=>theirs.push(t));
+  (u.interests||[]).forEach(x=>theirs.push(x.detail));
+  const seen=new Set(); const out=[];
+  theirs.forEach(t=>{ if(t&&mine.has(t)&&!seen.has(t)){seen.add(t);out.push(t);} });
+  return out;
+}
+/* ---------- render nearby ---------- */
+function renderNearby(){
+  const list=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}return {u,d,r:(myPos&&u.lat!=null)?relMeters(myPos,u):null,common:commonWith(u)};})
+    .sort((x,y)=>{ if((y.common.length>0)!==(x.common.length>0))return (y.common.length>0?1:0)-(x.common.length>0?1:0); if(y.common.length!==x.common.length)return y.common.length-x.common.length; return (x.d??1e9)-(y.d??1e9); });
+  $('#nearSub').textContent=list.length?list.length+'人が近くに':'まだ誰もいません';
+  drawMap(list);const ul=$('#ulist');
+  if(!list.length){ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「招待」からリンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('invite')">招待画面へ</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;return;}
+  ul.innerHTML=list.map(({u,d,common})=>`<div class="urow" onclick='openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':Math.round(d)})'>
+    <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+    <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div>
+      ${common&&common.length?`<div class="common">🎯 共通 ${common.slice(0,3).map(esc).join('・')}${common.length>3?' 他':''}</div>`:''}
+      <div class="b">${u.looking&&u.looking.length?`<span style="color:var(--rose);font-weight:600">${u.looking.slice(0,3).map(esc).join("・")}希望</span> · `:""}${esc(u.bio)}</div></div>
+    <div class="d"><div class="m">${d!=null?Math.round(d)+'m':'—'}</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`).join('');
+}
+function roundRect(ctx,x,y,w,hh,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+hh,r);ctx.arcTo(x+w,y+hh,x,y+hh,r);ctx.arcTo(x,y+hh,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawMap(list){
+  const cv=$('#map'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height,cx=W/2,cy=H/2;
+  const RANGE=200,ppm=(W/2)/RANGE;ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(40,70,130,.06)';ctx.lineWidth=2;
+  for(let g=-RANGE;g<=RANGE;g+=50){ctx.beginPath();ctx.moveTo(cx+g*ppm,0);ctx.lineTo(cx+g*ppm,H);ctx.moveTo(0,cy+g*ppm);ctx.lineTo(W,cy+g*ppm);ctx.stroke();}
+  [50,100,200].forEach(m=>{ctx.beginPath();ctx.arc(cx,cy,m*ppm,0,7);ctx.strokeStyle='rgba(15,176,205,.28)';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='rgba(90,100,150,.6)';ctx.font='500 18px "JetBrains Mono"';ctx.fillText(m+'m',cx+4,cy-m*ppm+20);});
+  list.forEach(({u,r,d})=>{ if(!r)return; let px=cx+r.e*ppm,py=cy-r.n*ppm;const edge=d>RANGE;if(edge){const k=RANGE/d;px=cx+r.e*ppm*k;py=cy-r.n*ppm*k;}
+    ctx.globalAlpha=edge?.4:1;const sq=edge?9:16;roundRect(ctx,px-sq/2,py-sq/2,sq,sq,4);ctx.fillStyle=gradOf(u.emoji)[0];ctx.fill();
+    if(!edge){ctx.font='15px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(u.emoji,px,py+1);ctx.textAlign='left';}ctx.globalAlpha=1;});
+  const half=22;roundRect(ctx,cx-half,cy-half,half*2,half*2,7);const g=ctx.createLinearGradient(cx-half,cy-half,cx+half,cy+half);g.addColorStop(0,'#ffd7a8');g.addColorStop(1,'#f78b3c');ctx.fillStyle=g;ctx.fill();
+  ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(profile?profile.emoji:'📍',cx,cy+1);ctx.textAlign='left';
+  const near=list[0];$('#nearest').innerHTML=near&&near.d!=null?'最寄り '+esc(near.u.name)+' · <b>'+Math.round(near.d)+'m</b>':'—';
+}
+
+/* ---------- すれ違い（500m・毎回カウント・入ったら即記録） ---------- */
+function recordEncounters(){
+  if(!myPos)return;
+  for(const u of others){
+    if(isTest(u.id)||u.lat==null)continue;
+    const r=relMeters(myPos,u); const d=Math.hypot(r.e,r.n);
+    if(d<=500){ if(!insideSet.has(u.id)){ insideSet.add(u.id); addEncounter(u); } }
+    else insideSet.delete(u.id);
+  }
+}
+async function addEncounter(u){
+  const prev=encMap[u.id]; const count=(prev?prev.count:0)+1; const place=placeName||'この付近';
+  encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],count,last_place:place,last_at:Date.now()};
+  renderCross(); toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`);
+  const dc=$('#dotCross'); if(dc){dc.style.display='block';dc.textContent=Object.keys(encMap).length;}
+  if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from(T('encounters')).upsert(rec); }catch(e){} }
+}
+async function loadEncounters(){
+  if(!sb)return; const {data}=await sb.from(T('encounters')).select('*').eq('owner_id',myId); if(!data)return;
+  for(const e of data){ let u=findUser(e.other_id);
+    if(!u){ const {data:p}=await sb.from(T('profiles')).select('*').eq('id',e.other_id).maybeSingle(); u=p; }
+    if(u) encMap[e.other_id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],count:e.count,last_place:e.last_place,last_at:new Date(e.last_at).getTime()};
+  }
+  renderCross(); const dc=$('#dotCross'); const n=Object.keys(encMap).length; if(dc&&n){dc.style.display='block';dc.textContent=n;}
+}
+function renderCross(){
+  const arr=Object.values(encMap).filter(u=>!blocked.has(u.id)).sort((a,b)=>(b.last_at||0)-(a.last_at||0));
+  $('#crossSub').textContent=arr.length?arr.length+'人とすれ違い':'まだ0人';
+  const ul=$('#crossList');
+  if(!arr.length){ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>まだ誰ともすれ違っていません。<br>アプリを開いたまま出かけると、<br>500m以内に入った人が記録されます。</p></div>`;return;}
+  ul.innerHTML=arr.map(u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests}).replace(/'/g,"&#39;")},null)'>
+    <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+    <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div><div class="b">${esc(u.last_place||'')} ですれ違い</div></div>
+    <div class="d"><div class="m">${u.count}回</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`).join('');
+}
+function confettiBurst(){
+  const cv=$('#confetti'); if(!cv)return; cv.width=cv.clientWidth; cv.height=cv.clientHeight;
+  const ctx=cv.getContext('2d'); const colors=['#ffb066','#63d6e8','#ff7e9d','#7be0b0','#ffd166','#a78bfa'];
+  const parts=[]; for(let i=0;i<150;i++){ parts.push({x:cv.width/2+(Math.random()-.5)*90,y:cv.height*0.4,
+    vx:(Math.random()-.5)*11,vy:-7-Math.random()*9,g:0.24+Math.random()*0.14,w:6+Math.random()*7,h:9+Math.random()*9,
+    rot:Math.random()*6,vr:(Math.random()-.5)*0.45,color:colors[i%colors.length]}); }
+  let frame=0;
+  (function tick(){ ctx.clearRect(0,0,cv.width,cv.height); frame++;
+    parts.forEach(p=>{ p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.vx*=0.99;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalAlpha=Math.max(0,1-frame/150);
+      ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore(); });
+    if(frame<150)requestAnimationFrame(tick); else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+/* ---------- いいねの理由 ---------- */
+let likeTargetUser=null;
+function likeReasonOptions(u){
+  const out=[];
+  (u.interests||[]).forEach(x=>out.push(x.detail));
+  (u.likes||[]).forEach(x=>out.push(x));
+  (u.tags||[]).forEach(x=>out.push(x));
+  (u.looking||[]).forEach(x=>out.push(x+'希望'));
+  const seen=new Set(); const uniq=[];
+  out.forEach(x=>{ if(x&&!seen.has(x)){seen.add(x);uniq.push(x);} });
+  return uniq;
+}
+function openLikeReason(){
+  if(!curSheetUser)return;
+  likeTargetUser=curSheetUser;
+  const u=likeTargetUser; const opts=likeReasonOptions(u);
+  $('#likeSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">${esc(u.name)} さんのどこに惹かれましたか？</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">選ぶだけで、相手に「どこに惹かれたか」が伝わります。<br><span style="color:var(--muted2)">選択は無料です</span></p>
+    <div style="max-height:44vh;overflow-y:auto">
+    ${opts.length?opts.map(o=>`<button class="likereason" onclick="sendLikeWithReason('${String(o).replace(/'/g,"&#39;")}')">${esc(o)}</button>`).join(''):''}
+    ${u.bio?`<button class="likereason" onclick="sendLikeWithReason('ひとこと')">ひとこと「${esc(u.bio.length>18?u.bio.slice(0,18)+'…':u.bio)}」</button>`:''}
+    <button class="likereason" onclick="sendLikeWithReason('プロフィール全体')">プロフィール全体の雰囲気</button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeLikeReason()">やめる</button>`;
+  $('#likeOverlay').classList.add('show');
+}
+function closeLikeReason(){ $('#likeOverlay').classList.remove('show'); }
+function sendLikeWithReason(reason){
+  const u=likeTargetUser; likeTargetUser=null;
+  closeLikeReason();
+  if(u)doLike(u.id,reason);
+}
+/* ---------- 利用規約 ---------- */
+const TERMS_HTML=`
+<h4>第1条（本サービスについて）</h4>
+<p>「ちかく」（以下、本サービス）は、法政大学 社会学部 糸久正人ゼミが研究活動として開発・運営する、実証実験段階のサービスです。予告なく内容の変更・停止を行う場合があります。</p>
+<h4>第2条（利用条件）</h4>
+<p>本サービスは18歳以上の方のみご利用いただけます。登録時に年齢の確認を行います。18歳未満の方はご利用いただけません。</p>
+<h4>第3条（位置情報の取り扱い）</h4>
+<p>本サービスは、利用者が許可した場合にのみ位置情報を取得し、同じサービスを利用している他の利用者に共有します。共有は設定からいつでも停止でき、おおまかな位置（約100m）で共有することも選べます。アプリを閉じている間は位置情報を取得しません。</p>
+<h4>第4条（登録情報）</h4>
+<p>氏名・電話番号・メールアドレス・住所などの個人情報は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
+<h4>第5条（禁止事項）</h4>
+<p>次の行為を禁止します。</p>
+<p>・他の利用者への迷惑行為、つきまとい、脅迫、差別的言動<br>
+・他人になりすます行為<br>
+・営業、宗教、投資、勧誘を目的とした利用<br>
+・他の利用者に個人情報の提供を強要する行為<br>
+・法令または公序良俗に反する行為<br>
+・本サービスの運営を妨害する行為</p>
+<h4>第6条（通報・ブロック・利用停止）</h4>
+<p>利用者は、他の利用者を通報およびブロックできます。運営は通報内容を確認し、禁止事項に該当すると判断した場合、事前の通知なく当該利用者の情報を削除し、利用を停止することがあります。</p>
+<h4>第7条（料金）</h4>
+<p>本サービスの利用は無料です。アプリ内には有料機能を模した画面が含まれますが、実証実験のための表示であり、実際の請求や決済は一切発生しません。</p>
+<h4>第8条（利用者間のトラブル）</h4>
+<p>本サービスは出会いの機会を提供するものではなく、利用者どうしの交流のきっかけを提供するものです。利用者間で生じたトラブルについては、利用者ご自身の責任で対応いただきます。運営は、故意または重大な過失がある場合を除き、責任を負いません。</p>
+<h4>第9条（安全のために）</h4>
+<p>知らない相手と会う場合は、必ず公共の場所を選び、時間帯にも配慮してください。不安を感じた場合は、すぐに利用を中止し、通報機能をご利用ください。</p>
+<h4>第10条（データの削除）</h4>
+<p>利用者は設定画面から、いつでも自分の情報をすべて削除できます。また、実証実験の終了後、取得したデータは速やかに削除します。</p>
+<h4>第11条（お問い合わせ）</h4>
+<p>本サービスに関するお問い合わせは、下記までご連絡ください。<br>
+法政大学 社会学部 糸久正人ゼミ<br>
+shusuke.yamamoto.8x@stu.hosei.ac.jp</p>
+`;
+function openTerms(){
+  $('#termsSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:4px">利用規約</h2>
+    <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">ちかく（実証実験版）</div>
+    <div class="termsbody" style="max-height:52vh;overflow-y:auto">${TERMS_HTML}</div>
+    <button class="btn btn-primary" style="width:100%;padding:14px;margin-top:16px;font-size:15px" onclick="closeTerms()">閉じる</button>`;
+  $('#termsOverlay').classList.add('show');
+}
+function closeTerms(){ $('#termsOverlay').classList.remove('show'); }
+
+/* ---------- 通報・ブロック ---------- */
+const REPORT_REASONS=['不適切な内容・発言','迷惑行為・しつこい','なりすまし・偽アカウント','スパム・勧誘','その他'];
+let reportTarget=null;
+async function loadBlocks(){
+  if(!sb)return;
+  try{
+    const {data,error}=await sb.from(T('blocks')).select('blocked_id').eq('blocker_id',myId);
+    if(error){ console.warn('[block] 読み込めません。supabase/reports_blocks.sql を実行してください:',error.message); return; }
+    if(data)blocked=new Set(data.map(x=>x.blocked_id));
+  }catch(e){ console.warn('[block] 読み込み失敗',e); }
+}
+function openReport(uid,name){
+  reportTarget={id:uid,name:name};
+  $('#reportSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">${esc(name)} さんを通報</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">理由を選んでください。通報するとこの人は<b style="color:var(--ink)">あなたの画面に表示されなくなります</b>（ブロック）。<br><span style="color:var(--muted2)">※相手に通知されることはありません</span></p>
+    ${REPORT_REASONS.map(r=>`<button class="rsn" onclick="submitReport('${r}')">${r}</button>`).join('')}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeReport()">やめる</button>`;
+  $('#reportOverlay').classList.add('show');
+}
+function closeReport(){ $('#reportOverlay').classList.remove('show'); }
+async function submitReport(reason){
+  if(!reportTarget)return;
+  const t=reportTarget; reportTarget=null;
+  blocked.add(t.id);
+  others=others.filter(u=>u.id!==t.id);
+  testUsers=testUsers.filter(u=>u.id!==t.id);
+  delete encMap[t.id];
+  insideSet.delete(t.id);
+  closeReport(); closeSheet();
+  renderNearby(); renderCross(); renderMatches();
+  if(isTest(t.id)){ toast('通報しました（テスト用のため記録は残りません）'); return; }
+  if(!sb){ toast('通報しました（未接続のため記録は残りません）'); return; }
+  try{
+    const {error:e1}=await sb.from(T('reports')).insert({reporter_id:myId,target_id:t.id,reason:reason});
+    if(e1) console.warn('[report] 保存に失敗',e1.message);
+    const {error:e2}=await sb.from(T('blocks')).upsert({blocker_id:myId,blocked_id:t.id},{onConflict:'blocker_id,blocked_id'});
+    if(e2) console.warn('[block] 保存に失敗',e2.message);
+  }catch(e){ console.error('[report] 送信に失敗',e); }
+  toast('通報しました。この人はもう表示されません');
+}
+/* ---------- profile sheet + like ---------- */
+let curSheetUser=null;
+function openSheet(u,d){
+  curSheetUser=u;
+  const isLiked=liked.has(u.id);
+  $('#sheet').innerHTML=`<div class="cover" style="background:${gr(u.emoji)}"><button class="close" onclick="closeSheet()">✕</button>
+    <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)} <span>${u.age||''}</span></h2>
+    ${d!=null?`<div class="dist">📍 いまここから <b>${Math.round(d)}m</b></div>`:''}</div></div>
+    <div class="body">${u.work?`<div class="workline">💼 <b>${esc(u.work)}</b></div>`:''}${(u.looking&&u.looking.length)?`<div class="wants">${u.looking.map(x=>`<span class="want">${esc(x)}希望</span>`).join('')}</div>`:''}<div class="bio">${esc(u.bio)}</div>${(u.likes&&u.likes.length)?`<div class="likeslist">${u.likes.map(x=>`<span class="likechip">♡ ${esc(x)}</span>`).join('')}</div>`:''}${(u.interests&&u.interests.length)?`<div class="interest"><div class="ih">興味のあること</div>${u.interests.map(x=>`<div class="irow"><b>${esc(x.cat)}</b>：${esc(x.detail)}</div>`).join('')}</div>`:''}<div class="tags">${(u.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div></div>
+    <div style="padding:0 20px;text-align:center"><button class="reportbtn" onclick="openReport('${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">⚠ この人を通報・ブロックする</button></div>
+    <div class="actions">${isLiked?`<button class="btn btn-liked" style="flex:1" disabled>♥ いいね済み</button>`:
+      `<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-rose" onclick="openLikeReason()">♥ いいね</button>`}</div>`;
+  $('#overlay').classList.add('show');
+}
+function closeSheet(){$('#overlay').classList.remove('show');}
+const PRICE={msg:480,like1:60,like5:240,like10:400,reason:280,extend:680};
+let billing={day:'',freeUsed:0,paidLikes:0,msgUnlocked:false,reasonUnlocked:false};
+function today(){return new Date().toISOString().slice(0,10);}
+function rollBilling(){ if(billing.day!==today()){billing.day=today();billing.freeUsed=0;billing.paidLikes=0;} }
+async function loadBilling(){ if(sb){try{const {data}=await sb.from(T('profiles')).select('billing').eq('id',myId).maybeSingle();if(data&&data.billing)billing={...billing,...data.billing};}catch(e){}} rollBilling(); updateBillUI(); }
+async function saveBilling(){ rollBilling(); updateBillUI(); if(sb){try{await sb.from(T('profiles')).update({billing}).eq('id',myId);}catch(e){}} }
+function freeLeft(){rollBilling();return Math.max(0,3-billing.freeUsed);}
+function likeRemainText(){const f=freeLeft();return f>0?('無料'+f+'回'):(billing.paidLikes>0?('追加'+billing.paidLikes+'回'):'0回（追加購入できます）');}
+function updateBillUI(){ const ms=$('#msgStat'),mb=$('#msgBtn'),ls=$('#likeStat');
+  if(ms)ms.textContent=billing.msgUnlocked?'解禁済み（送り放題）':'未解禁（初回のみ有料）';
+  if(mb){mb.style.display=billing.msgUnlocked?'none':'';}
+  if(ls){const f=freeLeft();ls.textContent=(f>0?('無料 残り'+f+'回'):('無料分終了'))+(billing.paidLikes>0?(' ＋ 追加'+billing.paidLikes+'回'):'');}
+  const rs=$('#reasonStat'),rb=$('#reasonBtn');
+  if(rs)rs.textContent=billing.reasonUnlocked?'解禁済み（相手が惹かれたポイントが見えます）':'未解禁（相手が惹かれたポイントが見えます）';
+  if(rb)rb.style.display=billing.reasonUnlocked?'none':'';
+  renderMatches(); }
+function closePay(){$('#payOverlay').classList.remove('show');}
+let pendingLikeUid=null, pendingLikeReason=null;
+function showLikePaywall(uid){ pendingLikeUid=uid;
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">いいねを追加購入</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">1日の無料いいね（3回）を使い切りました。追加のいいねを購入できます。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません／購入分も日付が変わるとリセットされます</span></p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(1,${PRICE.like1})"><span>いいね 1回分</span><b style="color:var(--amber)">¥${PRICE.like1}</b></button>
+      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(5,${PRICE.like5})"><span>いいね 5回分 <span style="font-size:11px;color:var(--ok)">お得</span></span><b style="color:var(--amber)">¥${PRICE.like5}</b></button>
+      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(10,${PRICE.like10})"><span>いいね 10回分 <span style="font-size:11px;color:var(--ok)">一番お得</span></span><b style="color:var(--amber)">¥${PRICE.like10}</b></button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+function buyLikes(n,price){
+  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  billing.paidLikes+=n; saveBilling(); closePay(); toast('✅ いいね'+n+'回分を追加しました（デモ）');
+  if(pendingLikeUid){const u=pendingLikeUid;const r=pendingLikeReason;pendingLikeUid=null;pendingLikeReason=null;doLike(u,r);}
+}
+function showMsgPaywall(){
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">メッセージ機能を解禁</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:18px">マッチした相手とメッセージするには解禁が必要です。<br><b style="color:var(--ink)">一度解禁すると、以降は送り放題</b>になります。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません</span></p>
+    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;display:flex;justify-content:space-between" onclick="buyMsg(${PRICE.msg})"><span>メッセージを解禁</span><b>¥${PRICE.msg}</b></button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+function buyMsg(price){
+  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  billing.msgUnlocked=true; saveBilling(); closePay(); toast('✅ メッセージを解禁しました（デモ）');
+}
+function showExtendPaywall(uid){
+  const m=matches[uid];
+  if(!m){ toast('マッチが見つかりません'); return; }
+  if(isUnlocked(uid)){ toast('このマッチはすでに期限なしです'); return; }
+  if(isExpired(m)){ toast('このマッチは終了しているため、延長できません'); return; }
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">${esc(m.u.name)} さんとの期限をなくす</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:18px">24時間の制限がなくなり、<b style="color:var(--ink)">この相手とはずっと話せる</b>ようになります。<br><b style="color:var(--ink)">どちらか一方が解禁すれば、二人とも話せます。</b><br><span style="color:var(--muted2)">※期限が切れたあとは解禁できません／デモのため実際の請求は発生しません</span></p>
+    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;display:flex;justify-content:space-between" onclick="buyExtend('${uid}',${PRICE.extend})"><span>期限をなくす</span><b>¥${PRICE.extend}</b></button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+async function buyExtend(uid,price){
+  if(isExpired(matches[uid])){ toast('このマッチは終了しているため、延長できません'); closePay(); return; }
+  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  const key=chatKey(uid);
+  unlockedMatches.add(key);
+  closePay(); renderMatches(); if(chatPeer===uid)renderChat();
+  toast('✅ このマッチは期限なしになりました（デモ）');
+  if(sb){ try{
+    const {error}=await sb.from(T('match_unlocks')).upsert({match_key:key,unlocked_by:myId},{onConflict:'match_key'});
+    if(error) console.warn('[unlock] 保存に失敗',error.message);
+  }catch(e){ console.error('[unlock] 送信に失敗',e); } }
+}
+function showReasonPaywall(){
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">いいねの理由を見る</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:18px">相手が<b style="color:var(--ink)">あなたのどこに惹かれたのか</b>が見えるようになります。<br>会話のきっかけがつかみやすくなります。<br><span style="color:var(--muted2)">※一度解禁すると、以降すべての相手について見られます／デモのため実際の請求は発生しません</span></p>
+    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;display:flex;justify-content:space-between" onclick="buyReason(${PRICE.reason})"><span>理由を見られるようにする</span><b>¥${PRICE.reason}</b></button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+function buyReason(price){
+  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  billing.reasonUnlocked=true; saveBilling(); closePay(); renderMatches();
+  toast('✅ いいねの理由が見られるようになりました（デモ）');
+}
+function resetBilling(){ billing={day:today(),freeUsed:0,paidLikes:0,msgUnlocked:false,reasonUnlocked:false}; saveBilling(); toast('課金状態をリセットしました（デモ）'); }
+async function doLike(uid,reason){
+  if(isTest(uid)){ liked.add(uid);closeSheet();renderNearby();createMatch(uid,true); return; }
+  if(freeLeft()<=0 && billing.paidLikes<=0){ closeSheet(); pendingLikeReason=reason||null; showLikePaywall(uid); return; }
+  if(freeLeft()>0) billing.freeUsed++; else billing.paidLikes--;
+  saveBilling();
+  liked.add(uid);closeSheet();renderNearby();
+  if(!sb){ toast('バックエンド未接続です'); return; }
+  await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:reason||null});
+  const {data}=await sb.from(T('likes')).select('from_id').eq('from_id',uid).eq('to_id',myId).maybeSingle();
+  if(data){ createMatch(uid,true); }
+  else{ notifyPush(uid,'いいねが届きました💌','気になる人があなたにいいねしました。プロフィールを確認してみて！'); toast('いいねを送りました（今日の残り '+likeRemainText()+'）'); }
+}
+
+/* ---------- matches ---------- */
+function findUser(uid){return others.find(u=>u.id===uid);}
+async function createMatch(uid,announce,matchedAt,theirReason){
+  if(matches[uid])return;let u=findUser(uid);
+  if(!u&&sb){const {data}=await sb.from(T('profiles')).select('*').eq('id',uid).maybeSingle();if(data)u=data;}
+  if(!u)u={id:uid,name:'相手',emoji:'⭐',bio:''};
+  matches[uid]={u,msgs:[],matchedAt:matchedAt||Date.now(),theirReason:theirReason||null};await loadChat(uid);renderMatches();
+  const dm=$('#dotMatch');dm.style.display='block';dm.textContent=Object.keys(matches).length;
+  if(announce){ showMatchPop(u,theirReason); notifyPush(uid,'マッチしました！',(profile?profile.name:'誰か')+'さんと両想いになりました'); }
+}
+function notifyPush(uid,title,body){
+  if(!sb||isTest(uid))return;
+  sb.functions.invoke('send-match-push',{body:{to:uid,title,body,url:'/fes/'}})
+    .catch(err=>console.error('[push] 送信失敗',err));
+}
+function showMatchPop(u,theirReason){const mp=$('#matchpop');
+  const rtxt=theirReason?(billing.reasonUnlocked?`<br><span class="whylike">あなたの「${esc(theirReason)}」に惹かれたそうです</span>`:`<br><span class="whylike locked" onclick="closePop();go('me');showReasonPaywall()">🔒 相手が惹かれたポイントを見る</span>`):'';
+  mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました${rtxt}</p>
+    <div class="avs"><div class="a" style="background:${profile?gr(profile.emoji):'#f78b3c'}">${profile?profile.emoji:'😀'}</div><span class="heart">💛</span><div class="a" style="background:${gr(u.emoji)}">${u.emoji}</div></div>
+    <div class="mbtns"><button class="btn btn-rose" onclick="closePop();openChat('${u.id}')">メッセージを送る</button><button class="btn later" onclick="closePop()">あとで</button></div>
+    <button class="fessurvey" onclick="openSurvey()">📝 アンケートにも答えてもらえると助かります</button>`;
+  mp.classList.add('show');confettiBurst();setTimeout(confettiBurst,350);}
+function closePop(){$('#matchpop').classList.remove('show');}
+function renderMatches(){
+  const all=Object.keys(matches);
+  const ids=all.filter(id=>!isExpired(matches[id]) && !blocked.has(id));   // 期限切れ・ブロック済みは非表示
+  $('#matchCount').textContent=ids.length;const list=$('#matchList');
+  if(!ids.length){list.innerHTML=`<div class="empty"><div class="big">♥</div><p>まだ有効なマッチはありません。<br>近くの人に「いいね」して、<br>両想いになると表示されます。<br><span style="color:var(--rose);font-weight:700">※マッチは24時間で消えます</span></p></div>`;return;}
+  list.innerHTML=ids.map((id,i)=>{const m=matches[id];const last=m.msgs[m.msgs.length-1];const ms=matchLeftMs(m);const warn=ms<3600000;
+    return `<div class="mrow" onclick="openChat('${id}')"><div class="av" style="background:${gr(m.u.emoji)}">${m.u.emoji}<span class="on"></span></div>
+      <div class="info"><div class="nm">${esc(m.u.name)} ${m.matchedAt&&!isTest(id)?(isUnlocked(id)?'<span class="keeptag">♾ 期限なし</span>':`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`):''}</div><div class="last">${last?(last.from===myId?'あなた: ':'')+esc(last.text):(m.theirReason?(billing.reasonUnlocked?('🎯「'+esc(m.theirReason)+'」に惹かれたそうです'):'🔒 惹かれたポイントは解禁すると見られます'):'マッチしました！24時間以内に話しかけて！')}</div></div></div>${i<ids.length-1?'<div class="sep"></div>':''}`;}).join('');
+}
+
+/* ---------- chat (Supabase messages) ---------- */
+function chatKey(uid){return [myId,uid].sort().join('__');}
+async function loadChat(uid){ if(isTest(uid)||!sb)return; const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at'); if(data)matches[uid].msgs=data.map(x=>({from:x.from_id,text:x.text})); }
+function openChat(uid){
+  chatPeer=uid;const m=matches[uid];
+  $('#chatAv').style.background=gr(m.u.emoji);$('#chatAv').textContent=m.u.emoji;$('#chatNm').textContent=m.u.name;renderChat();go('chat');
+  clearInterval(chatPoll);if(isTest(uid)||!sb)return;
+  chatPoll=setInterval(async()=>{if(chatPeer!==uid)return;const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at');if(data){matches[uid].msgs=data.map(x=>({from:x.from_id,text:x.text}));renderChat();}},2500);
+}
+function renderChat(){const m=matches[chatPeer];if(!m)return;const box=$('#msgs');
+  const expired=isExpired(m); const ms=matchLeftMs(m);
+  let banner='';
+  if(m.matchedAt&&!isTest(chatPeer)){
+    if(isUnlocked(chatPeer)) banner='<div class="ttlbar keep">♾ このマッチは期限なしで話せます</div>';
+    else if(expired) banner='<div class="ttlbar over">⌛ このマッチは終了しました。もう話せません…</div>';
+    else banner='<div class="ttlbar'+(ms<3600000?' warn':'')+'">⏳ あと <b>'+leftText(ms)+'</b> で話せなくなります <span class="extendbtn" onclick="showExtendPaywall(\''+chatPeer+'\')">期限をなくす</span></div>';
+  }
+  box.innerHTML=banner+'<div class="day">今日</div>'+m.msgs.map(x=>`<div class="bub ${x.from===myId?'me':'them'}">${esc(x.text)}</div>`).join('');box.scrollTop=box.scrollHeight;
+  // 入力欄のロック
+  const ci=$('#chatInput'); const cbtn=document.querySelector('.chatbar .send');
+  if(ci){ ci.disabled=expired; ci.placeholder=expired?'マッチが終了しました':'メッセージを入力…'; }
+  if(cbtn){ cbtn.style.opacity=expired?0.4:1; cbtn.style.pointerEvents=expired?'none':'auto'; }
+  renderMatches();}
+async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!t||!chatPeer)return;
+  if(isExpired(matches[chatPeer])){ toast('このマッチは24時間を過ぎたので、もう話せません'); return; }
+  if(ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください。'); return; }
+  if(!isTest(chatPeer) && !billing.msgUnlocked){ showMsgPaywall(); return; }
+  inp.value='';
+  if(isTest(chatPeer)){matches[chatPeer].msgs.push({from:myId,text:t});renderChat();
+    const rep=['ほんとだ、近いですね😊','どこかでお茶でもどうですか？','その辺よく行きます！','会えたらうれしいです','わかります〜'];
+    setTimeout(()=>{if(matches[chatPeer]){matches[chatPeer].msgs.push({from:chatPeer,text:rep[Math.floor(Math.random()*rep.length)]});if(isTest(chatPeer))renderChat();}},1100);return;}
+  if(!sb)return;
+  matches[chatPeer].msgs.push({from:myId,text:t});renderChat();
+  await sb.from(T('messages')).insert({match_key:chatKey(chatPeer),from_id:myId,text:t});
+}
+
+/* ---------- コミュニティ（グループチャット） ---------- */
+let rooms=[], curRoom=null, roomPoll=null;
+// 所属状態。rooms.idの型（uuid/bigint）がDB側で確定していないので、キーは常に文字列に正規化して扱う
+let myRoomIds=new Set(), roomStats={}, lastReadWrite=0;
+const rid=v=>String(v);
+// 部屋ごとに問い合わせるとN+1になるため、rooms/所属/直近メッセージを3クエリでまとめて取る
+async function loadRooms(){ if(!sb)return;
+  try{
+    const [rr,mm,gg]=await Promise.all([
+      sb.from(T('rooms')).select('*').order('created_at',{ascending:false}),
+      sb.from(T('room_members')).select('room_id,user_id,last_read_at'),
+      sb.from(T('room_messages')).select('room_id,from_id,created_at').order('created_at',{ascending:false}).limit(500)
+    ]);
+    if(rr.data)rooms=rr.data;
+    // room_members が未作成でも部屋一覧は表示できるようにする（SQL実行前にデプロイされた場合の保険）。
+    // 全員0人・未読なしになるだけなので、原因が分かるようコンソールに理由を残す
+    if(mm.error) console.warn('[rooms] room_members を読み込めません。supabase/room_members.sql を実行してください:', mm.error.message);
+    const mems=mm.data||[], msgs=gg.data||[];
+    myRoomIds=new Set(mems.filter(m=>m.user_id===myId).map(m=>rid(m.room_id)));
+    const myRead={}; mems.forEach(m=>{if(m.user_id===myId)myRead[rid(m.room_id)]=new Date(m.last_read_at).getTime();});
+    roomStats={};
+    const stat=k=>(roomStats[k]=roomStats[k]||{members:0,unread:0,last:null});
+    mems.forEach(m=>{stat(rid(m.room_id)).members++;});
+    msgs.forEach(x=>{ const s=stat(rid(x.room_id)); // 取得順が新しい順なので、最初に来たものが最終発言
+      if(!s.last)s.last=x.created_at;
+      const k=rid(x.room_id);
+      if(myRoomIds.has(k)&&x.from_id!==myId&&new Date(x.created_at).getTime()>(myRead[k]||0))s.unread++;
+    });
+    renderRooms(); updateCommDot();
+  }catch(e){}
+}
+function roomMeta(r){ const s=roomStats[rid(r.id)]||{}; const parts=['👥 '+(s.members||0)+'人']; if(s.last)parts.push('最終 '+agoText(s.last)); return parts.join(' ・ '); }
+function updateCommDot(){ const dc=$('#dotComm'); if(!dc)return;
+  let n=0; myRoomIds.forEach(k=>{n+=(roomStats[k]&&roomStats[k].unread)||0;});
+  if(n>0){dc.style.display='block';dc.textContent=n>99?'99+':n;} else dc.style.display='none';
+}
+async function joinRoom(id){
+  if(!sb){toast('バックエンド未接続です');return false;}
+  const k=rid(id); const already=myRoomIds.has(k);
+  const {error}=await sb.from(T('room_members')).upsert({room_id:id,user_id:myId,last_read_at:new Date().toISOString()},{onConflict:'room_id,user_id'});
+  if(error){toast('参加に失敗: '+error.message);return false;}
+  myRoomIds.add(k);
+  const s=roomStats[k]=roomStats[k]||{members:0,unread:0,last:null}; if(!already)s.members++; s.unread=0;
+  updateRoomJoinUI(); renderRooms(); updateCommDot(); return true;
+}
+async function leaveRoom(id){
+  if(!sb)return false;
+  const {error}=await sb.from(T('room_members')).delete().eq('room_id',id).eq('user_id',myId);
+  if(error){toast('退出に失敗: '+error.message);return false;}
+  const k=rid(id); myRoomIds.delete(k);
+  if(roomStats[k]){roomStats[k].members=Math.max(0,roomStats[k].members-1);roomStats[k].unread=0;}
+  updateRoomJoinUI(); renderRooms(); updateCommDot(); return true;
+}
+async function toggleRoomJoin(){
+  if(!curRoom)return;
+  if(myRoomIds.has(rid(curRoom.id))){ if(!confirm('この部屋を退出しますか？'))return; if(await leaveRoom(curRoom.id))toast('退出しました'); }
+  else if(await joinRoom(curRoom.id))toast('✅ 参加しました');
+}
+// 既読の書き込みは頻繁になりすぎないよう20秒に1回まで（部屋を開いた直後などはforceで即時）
+async function markRoomRead(id,force){
+  if(!sb||!myRoomIds.has(rid(id)))return;
+  const now=Date.now(); if(!force&&now-lastReadWrite<20000)return; lastReadWrite=now;
+  try{ await sb.from(T('room_members')).update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('user_id',myId); }catch(e){}
+}
+function updateRoomJoinUI(){
+  if(!curRoom)return;
+  const joined=myRoomIds.has(rid(curRoom.id));
+  const b=$('#roomJoinBtn'),hint=$('#roomJoinHint'),inp=$('#roomInput'),send=$('#s-room .chatbar .send');
+  if(b){b.textContent=joined?'参加中':'参加';b.className='joinbtn'+(joined?' joined':'');}
+  if(hint)hint.className='joinhint'+(joined?'':' show');
+  if(inp){inp.disabled=!joined;inp.placeholder=joined?'メッセージを入力…':'参加すると投稿できます';}
+  if(send){send.style.opacity=joined?1:.4;send.style.pointerEvents=joined?'auto':'none';}
+}
+function agoText(ts){ const d=Date.now()-new Date(ts).getTime(); const day=Math.floor(d/86400000); if(day>=1)return day+'日前'; const h=Math.floor(d/3600000); if(h>=1)return h+'時間前'; const mi=Math.floor(d/60000); return mi<=0?'たった今':mi+'分前'; }
+function roomRow(r){const meta=roomMeta(r); const k=rid(r.id); const s=roomStats[k]||{}; const joined=myRoomIds.has(k); const un=s.unread||0;
+  const right=un?`<div class="unread">${un>99?'99+':un}</div>`:`<div class="m" style="font-size:12.5px">${joined?'開く':'見る'} ›</div>`;
+  return `<div class="urow" onclick="openRoom('${k}')"><div class="av" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div class="info"><div class="n">${esc(r.name)}${joined?' <span class="joined-tag">参加中</span>':''}</div><div class="b">${esc(r.topic||'みんなで話そう')}${meta?' <span style=\'color:var(--signal)\'>· '+meta+'</span>':''}</div></div><div class="d">${right}</div></div>`;}
+// 未読がある部屋 → 参加中の部屋 → 残り、の順に並べる（放置された部屋が上に居座らないように）
+function sortedRooms(){ return rooms.slice().sort((a,b)=>{
+    const ka=rid(a.id),kb=rid(b.id), ua=(roomStats[ka]||{}).unread||0, ub=(roomStats[kb]||{}).unread||0;
+    if(ua!==ub)return ub-ua;
+    const ja=myRoomIds.has(ka)?1:0, jb=myRoomIds.has(kb)?1:0;
+    return jb-ja;
+  });}
+function renderRooms(){ const arr=sortedRooms(); const el=$('#roomList'); if(el){ $('#commSub').textContent=rooms.length?rooms.length+'部屋':'まだありません';
+    el.innerHTML=arr.length?arr.map(roomRow).join(''):`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>「＋ コミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`; }
+  const hr=$('#homeRoomList'); if(hr){ hr.innerHTML=arr.length?arr.slice(0,3).map(roomRow).join(''):`<div style="padding:14px 16px;font-size:12.5px;color:var(--muted)">まだコミュニティがありません。<span onclick="go('comm')" style="color:var(--signal);font-weight:700;cursor:pointer">作ってみる ›</span></div>`; }
+}
+function createRoom(){
+  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">コミュニティを作成</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:14px">部屋の作成は有料です（¥500）。作った部屋には<b style="color:var(--ink)">誰でも無料で参加</b>できます。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません</span></p>
+    <div class="field"><label>コミュニティ名</label><input id="newRoomName" maxlength="20" placeholder="例：カフェ好き集まれ"></div>
+    <div class="field"><label>ひとこと（任意）</label><input id="newRoomTopic" maxlength="40" placeholder="どんな部屋？"></div>
+    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="confirmCreateRoom()">作成する（¥500）</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  $('#payOverlay').classList.add('show');
+}
+async function confirmCreateRoom(){
+  const name=$('#newRoomName').value.trim(); if(!name){toast('コミュニティ名を入れてね');return;}
+  const topic=$('#newRoomTopic').value.trim();
+  if(ngCheck(name)||ngCheck(topic)){ toast('⚠️ 部屋名かひとことに不適切な言葉が含まれています。'); return; }
+  if(!confirm('本来なら ¥500 かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
+  if(sb){try{
+    const {data,error}=await sb.from(T('rooms')).insert({name,topic,owner_id:myId}).select().maybeSingle();
+    if(error){toast('作成に失敗: '+error.message);return;}
+    if(data)await joinRoom(data.id); // 作った本人は自動で参加状態にする（空の自室に入れないのを防ぐ）
+  }catch(e){toast('作成に失敗しました');return;}}
+  closePay(); toast('✅ コミュニティを作成しました（デモ）'); loadRooms();
+}
+async function openRoom(id){ const k=rid(id);
+  // onclick経由でidは文字列になる。rooms.idがbigintだと===で一致しないため正規化して比較する
+  curRoom=rooms.find(r=>rid(r.id)===k)||{id,name:'コミュニティ',topic:''};
+  $('#roomNm').textContent=curRoom.name; $('#roomSt').textContent=curRoom.topic||'誰でも参加OK';
+  curRoom.msgs=[]; renderRoom(); updateRoomJoinUI(); await loadRoomMsgs(); go('room');
+  if(myRoomIds.has(k)){ if(roomStats[k])roomStats[k].unread=0; renderRooms(); updateCommDot(); markRoomRead(curRoom.id,true); }
+  clearInterval(roomPoll); if(!sb)return;
+  roomPoll=setInterval(async()=>{ if(!$('#s-room').classList.contains('active'))return; await loadRoomMsgs(); markRoomRead(curRoom.id); },2500);
+}
+async function loadRoomMsgs(){ if(!sb||!curRoom)return; try{const {data}=await sb.from(T('room_messages')).select('*').eq('room_id',curRoom.id).order('created_at'); if(data){curRoom.msgs=data;renderRoom();}}catch(e){} }
+function renderRoom(){ const box=$('#roomMsgs'); if(!box||!curRoom)return; const msgs=curRoom.msgs||[];
+  if(!msgs.length){box.innerHTML='<div class="day">まだメッセージはありません。最初のひとことをどうぞ！</div>';return;}
+  box.innerHTML=msgs.map(m=>{const mine=m.from_id===myId;return `<div class="bub ${mine?'me':'them'}">${mine?'':`<div class="who" onclick="openUserById('${m.from_id}')">${esc(m.emoji||'')} ${esc(m.name||'匿名')}</div>`}${esc(m.text)}</div>`;}).join('');
+  box.scrollTop=box.scrollHeight;
+}
+async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(); if(!t||!curRoom)return;
+  if(!myRoomIds.has(rid(curRoom.id))){ toast('先にこの部屋に参加してください'); return; }
+  if(ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください。'); return; }
+  inp.value='';
+  if(!sb){toast('バックエンド未接続です');return;}
+  const m={room_id:curRoom.id,from_id:myId,name:profile?profile.name:'匿名',emoji:profile?profile.emoji:'🙂',text:t};
+  curRoom.msgs=(curRoom.msgs||[]).concat(m); renderRoom();
+  try{await sb.from(T('room_messages')).insert(m);}catch(e){}
+  markRoomRead(curRoom.id,true); notifyRoomMembers(curRoom,t);
+}
+// 部屋のメンバーに通知する。Edge Function(send-match-push)は1件ずつ受け取る仕様のまま流用しており、
+// 関数側は一切変更していない（マッチ通知が動いているので、そこを触って壊さないため）
+async function notifyRoomMembers(room,text){
+  if(!sb||!room)return;
+  try{
+    const {data}=await sb.from(T('room_members')).select('user_id,last_read_at').eq('room_id',room.id);
+    if(!data)return;
+    // 直近5分以内に部屋を見ていた人は今まさに開いているので送らない（1発言ごとの通知攻撃を防ぐ）
+    const cutoff=Date.now()-5*60*1000;
+    const body=(profile?profile.name:'誰か')+'：'+(text.length>40?text.slice(0,40)+'…':text);
+    data.filter(m=>m.user_id!==myId&&new Date(m.last_read_at).getTime()<cutoff)
+        .forEach(m=>notifyPush(m.user_id,room.name||'コミュニティ',body));
+  }catch(e){ console.error('[push] コミュニティ通知の送信に失敗',e); }
+}
+/* ---------- ようこそ画面・ホーム画面への追加 ---------- */
+function goOnboard(){
+  $('#s-welcome').classList.remove('active');
+  $('#s-onboard').classList.add('active');
+}
+const isAndroid=()=>/Android/i.test(navigator.userAgent);
+let deferredInstall=null;   // Android/Chrome の「インストール」を受け取る
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; });
+function openAddHome(){
+  let body='';
+  if(isStandalone()){
+    body=`<div style="text-align:center;padding:10px 0 4px"><div style="font-size:44px;margin-bottom:10px">✅</div>
+      <div style="font-size:14px;font-weight:700;color:#0f8f6f">すでにホーム画面から開いています</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.8">この状態なら、次からはホーム画面のアイコンをタップするだけで開けます。</div></div>`;
+  }else if(isIOS()){
+    body=`<div class="stepnum"><div class="no">1</div><div class="tx">画面の下（または上）にある<b>共有ボタン</b>をタップします<br><span style="color:var(--muted);font-size:12px">四角から上向きの矢印が出ているマークです</span></div></div>
+      <div class="stepnum"><div class="no">2</div><div class="tx">メニューを下にスクロールし、<b>「ホーム画面に追加」</b>をタップ</div></div>
+      <div class="stepnum"><div class="no">3</div><div class="tx">右上の<b>「追加」</b>をタップして完了です</div></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-top:14px;padding:11px 13px;background:var(--surface2);border-radius:12px">
+      ※ Safariで開いている必要があります。<br>※ ホーム画面から開くと、通知も受け取れるようになります。</div>`;
+  }else if(isAndroid()){
+    body=`<div class="stepnum"><div class="no">1</div><div class="tx">画面右上の<b>「⋮」（縦の三点）</b>をタップします</div></div>
+      <div class="stepnum"><div class="no">2</div><div class="tx"><b>「アプリをインストール」</b>または<b>「ホーム画面に追加」</b>をタップ</div></div>
+      <div class="stepnum"><div class="no">3</div><div class="tx"><b>「インストール」</b>をタップして完了です</div></div>
+      ${deferredInstall?`<button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;margin-top:8px" onclick="doInstall()">この画面から追加する</button>`:''}
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-top:14px;padding:11px 13px;background:var(--surface2);border-radius:12px">
+      ※ ホーム画面から開くと、通知も受け取れるようになります。</div>`;
+  }else{
+    body=`<div style="font-size:13px;line-height:1.9;color:var(--ink)">スマートフォンでこのページを開くと、ホーム画面に追加できます。</div>
+      <div class="stepnum" style="margin-top:14px"><div class="no">i</div><div class="tx"><b>iPhone</b>：共有ボタン →「ホーム画面に追加」</div></div>
+      <div class="stepnum"><div class="no">A</div><div class="tx"><b>Android</b>：右上の「⋮」→「アプリをインストール」</div></div>`;
+  }
+  $('#homeSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">ホーム画面に追加する</h2>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">毎回QRコードを読まなくても、アプリのように開けるようになります。</p>
+    ${body}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:16px;color:var(--muted)" onclick="closeAddHome()">閉じる</button>`;
+  $('#homeOverlay').classList.add('show');
+}
+function closeAddHome(){ $('#homeOverlay').classList.remove('show'); }
+async function doInstall(){
+  if(!deferredInstall)return;
+  deferredInstall.prompt();
+  try{ await deferredInstall.userChoice; }catch(e){}
+  deferredInstall=null; closeAddHome();
+}
+/* ---------- はじめての方向けガイド ---------- */
+const GUIDE=[
+  {icon:'📍',title:'近くにいる人が<br>見えます',body:'いま同じ場所でこのアプリを開いている人が、地図と一覧に表示されます。距離も出るので、すぐ近くにいるかが分かります。',note:'アプリを開いている間だけ位置を共有します。閉じれば止まります。'},
+  {icon:'♥',title:'気になる人に<br>いいねを送る',body:'プロフィールを開いて「いいね」を押し、どこに惹かれたかを選んで送ります。お互いに送り合うとマッチが成立します。',note:'いいねは1日3回まで無料です。'},
+  {icon:'💬',title:'マッチしたら<br>24時間以内に話す',body:'マッチすると、その相手とメッセージができます。ただし24時間が過ぎると話せなくなるので、気になったら早めに声をかけてみてください。',note:'期限が切れる前なら、課金で「ずっと話せる」ようにもできます。'},
+  {icon:'👥',title:'コミュニティで<br>みんなと話す',body:'「コミュ」タブでは、部屋に参加してみんなで話せます。参加は無料です。参加者のプロフィールも見られます。',note:'困ったときは、相手のプロフィールから通報・ブロックができます。'},
+  {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'毎回QRコードを読まなくても、ホーム画面のアイコンから開けるようになります。通知も受け取れます。',note:'追加のしかたは、設定の「ホーム画面に追加する方法」から見られます。',action:true}
+];
+let guideIdx=0;
+function openGuide(){ guideIdx=0; renderGuide(); $('#guide').classList.add('show'); }
+function closeGuide(){ $('#guide').classList.remove('show'); markGuideSeen(); }
+function renderGuide(){
+  const g=GUIDE[guideIdx];
+  $('#guideBody').innerHTML=`<div class="gicon">${g.icon}</div><h3>${g.title}</h3><p>${g.body}</p>${g.note?`<div class="note2">${g.note}</div>`:''}${g.action?`<button class="btn btn-ghost" style="margin-top:16px;padding:12px 20px;font-size:13.5px" onclick="openAddHome()">追加のしかたを見る</button>`:''}`;
+  $('#guideDots').innerHTML=GUIDE.map((_,i)=>`<i class="${i===guideIdx?'on':''}"></i>`).join('');
+  $('#guidePrev').style.visibility=guideIdx===0?'hidden':'visible';
+  $('#guideNext').textContent=guideIdx===GUIDE.length-1?'はじめる':'次へ';
+}
+function guideMove(d){
+  const n=guideIdx+d;
+  if(n<0)return;
+  if(n>=GUIDE.length){ closeGuide(); return; }
+  guideIdx=n; renderGuide();
+}
+// 初回だけ自動で出す（見たかどうかはプロフィールに保存し、端末をまたいでも重複しないようにする）
+function markGuideSeen(){
+  try{ localStorage.setItem('fes_guideSeen','1'); }catch(e){}
+  if(sb&&myId){ try{ sb.from(T('profiles')).update({guide_seen:true}).eq('id',myId); }catch(e){} }
+}
+function guideSeenLocally(){ try{ return localStorage.getItem('fes_guideSeen')==='1'; }catch(e){ return false; } }
+function maybeShowGuide(seenFromDb){
+  if(seenFromDb===true) return;
+  if(guideSeenLocally()) return;
+  setTimeout(openGuide,600);   // 画面が切り替わってから出す
+}
+/* ---------- コミュニティの参加者を見る ---------- */
+async function openMembers(){
+  if(!curRoom){toast('部屋が選ばれていません');return;}
+  if(!sb){toast('バックエンド未接続です');return;}
+  $('#memSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:14px">参加者</h2><div style="font-size:13px;color:var(--muted)">読み込み中…</div>`;
+  $('#memOverlay').classList.add('show');
+  try{
+    const {data:mem}=await sb.from(T('room_members')).select('user_id').eq('room_id',curRoom.id);
+    const ids=(mem||[]).map(m=>m.user_id).filter(id=>!blocked.has(id));
+    if(!ids.length){ $('#memSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:10px">参加者</h2><div class="empty" style="padding:24px 0"><div class="big">👥</div><p>まだ参加者がいません。</p></div><button class="btn btn-ghost" style="width:100%;padding:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button>`; return; }
+    const {data:profs}=await sb.from(T('profiles')).select('*').in('id',ids);
+    const list=(profs||[]).map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],lat:u.lat,lng:u.lng}));
+    // 自分を先頭に、あとは名前順
+    list.sort((a,b)=>(a.id===myId?-1:b.id===myId?1:String(a.name).localeCompare(String(b.name),'ja')));
+    $('#memSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:4px">参加者</h2>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">${list.length}人が参加中。タップでプロフィールが見られます。</div>
+      <div class="ulist" style="padding:0;max-height:52vh;overflow-y:auto">
+      ${list.map(u=>{
+        let d=null; if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.round(Math.hypot(r.e,r.n));}
+        const me=u.id===myId;
+        return `<div class="urow" ${me?'':`onclick='closeMembers();openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':d})'`}>
+          <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+          <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span>${me?' <span class="joined-tag">あなた</span>':''}</div>
+          <div class="b">${esc(u.bio||'')}</div></div>
+          <div class="d">${me?'':`<div class="m" style="font-size:12.5px">${d!=null?d+'m':'見る ›'}</div>`}</div></div>`;}).join('')}
+      </div>
+      <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closeMembers()">閉じる</button>`;
+  }catch(e){ $('#memSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:10px">参加者</h2><div style="font-size:13px;color:var(--bad)">読み込みに失敗しました</div><button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closeMembers()">閉じる</button>`; }
+}
+function closeMembers(){ $('#memOverlay').classList.remove('show'); }
+// グループチャットの発言者名をタップしてプロフィールを開く
+async function openUserById(uid){
+  if(!sb||uid===myId)return;
+  if(blocked.has(uid)){toast('この人はブロック済みです');return;}
+  try{
+    const {data}=await sb.from(T('profiles')).select('*').eq('id',uid).maybeSingle();
+    if(!data){toast('プロフィールが見つかりません');return;}
+    const u={id:data.id,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[],lat:data.lat,lng:data.lng};
+    let d=null; if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.round(Math.hypot(r.e,r.n));}
+    openSheet(u,d);
+  }catch(e){ toast('プロフィールを開けませんでした'); }
+}
+/* ---------- settings ---------- */
+function toggleShare(el){sharing=!el.classList.contains('on');el.classList.toggle('on');geoState('ok');
+  if(sharing){publishMe();}else if(sb){sb.from(T('profiles')).update({sharing:false}).eq('id',myId);}}
+function toggleCoarse(el){coarse=!el.classList.contains('on');el.classList.toggle('on');publishMe();}
+async function leaveAll(){sharing=false;stopGeo();if(sb)await sb.from(T('profiles')).delete().eq('id',myId);toast('位置の共有を停止し、プロフィールを消しました');$('#tgShare').classList.remove('on');geoState('','停止');}
+
+/* ---------- test mode (1台で確認) ---------- */
+function spawnTest(){
+  if(!myId)myId='local-'+uuid();
+  if(!myPos){myPos={lat:35.6595,lng:139.7005,acc:20};origin={...myPos};geoState('ok');placeName='テスト地点';$('#locPlace').textContent='テスト地点（渋谷付近）';$('#meLoc').textContent='📍 テスト地点';}
+  const cand=[{name:'ゆい',age:24,emoji:'☕',bio:'カフェ巡りが好きです',tags:['カフェ','映画']},
+              {name:'そう',age:27,emoji:'🎧',bio:'音楽とランニング。近くにいたら話しましょう',tags:['音楽','ランニング']},
+              {name:'あおい',age:23,emoji:'🌿',bio:'本と植物が好き。静かな喫茶店を探し中',tags:['読書','散歩']}];
+  testUsers=cand.map((c,i)=>{const ang=Math.random()*Math.PI*2,d=25+Math.random()*90;
+    const dLat=(Math.sin(ang)*d)/111320,dLng=(Math.cos(ang)*d)/(111320*Math.cos(myPos.lat*Math.PI/180));
+    return {id:'test-'+i,...c,lat:myPos.lat+dLat,lng:myPos.lng+dLng};});
+  others=others.filter(u=>!isTest(u.id)).concat(testUsers);renderNearby();go('near');
+  toast('🧪 テスト用の人を'+testUsers.length+'人追加しました。いいねするとマッチします');
+}
+
+/* ---------- プロフィール編集 ---------- */
+function openEdit(){
+  if(!profile){toast('先にプロフィール登録してね');return;}
+  const es=$('#editSheet');
+  es.innerHTML=`
+    <h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:16px">プロフィールを編集</h2>
+    <div class="field"><label>ニックネーム</label><input id="edName" maxlength="12" value="${esc(profile.name)}"></div>
+    <div class="field"><label>年齢（18歳以上）</label><input id="edAge" type="number" min="18" max="99" value="${profile.age||''}"></div>
+    <div class="field"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
+    <div class="field"><label>ひとこと</label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
+    <div class="field"><label>タグ（好きなだけ）</label><div class="chips" id="edTags"></div></div>
+    <div class="field"><label>職業 / 学校</label><div class="chips" id="edWorkCat"></div><input id="edWorkDetail" maxlength="24" placeholder="くわしく（任意）例：法政大学 / エンジニア" style="margin-top:9px"></div>
+    <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="edLooking"></div></div>
+    <div class="field"><label>好きなもの（自由に追加）</label><div class="addrow"><input id="edLikeInput" maxlength="16" placeholder="例：サウナ / 猫カフェ"><button type="button" class="addbtn" onclick="edAddLike()">追加</button></div><div class="likeslist" id="edLikesList"></div></div>
+    <div class="field"><label>興味のあること</label><div class="chips" id="edInterestCat"></div><div id="edInterestOpts" style="margin-top:9px"></div><div class="likeslist" id="edInterestList"></div><div style="font-size:11px;color:var(--muted2);margin-top:6px">ジャンルを押すと選択肢が出ます。タップで追加/削除。</div></div>
+    <div class="warn-msg" id="edWarn"></div>
+    <div style="display:flex;gap:12px;margin-top:18px"><button class="btn btn-ghost" style="flex:1;padding:14px" onclick="closeEdit()">やめる</button><button class="btn btn-primary" style="flex:1;padding:14px" onclick="saveEdit()">保存</button></div>`;
+  $('#edEmojis').innerHTML=EMO.map(e=>`<div class="em ${e===profile.emoji?'sel':''}" data-e="${e}">${e}</div>`).join('');
+  $$('#edEmojis .em').forEach(el=>el.onclick=()=>{$$('#edEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
+  $('#edLooking').innerHTML=LOOKING.map(w=>`<div class="c ${(profile.looking||[]).includes(w)?'sel':''}" data-l="${w}">${w}</div>`).join('');
+  $$('#edLooking .c').forEach(el=>el.onclick=()=>el.classList.toggle('sel'));
+  // タグ
+  editTags=new Set(profile.tags||[]);
+  $('#edTags').innerHTML=TAGS.map(t=>`<div class="c ${editTags.has(t)?'sel':''}" data-t="${t}">${t}</div>`).join('');
+  $$('#edTags .c').forEach(el=>el.onclick=()=>{const t=el.dataset.t;if(editTags.has(t)){editTags.delete(t);el.classList.remove('sel');}else{editTags.add(t);el.classList.add('sel');}});
+  // 職業/学校（保存時は「カテゴリ・くわしく」の形なので分解して復元する）
+  editWorkCat=''; let wdet=profile.work||'';
+  for(const c of WORKCATS){ if(wdet===c){editWorkCat=c;wdet='';break;} if(wdet.startsWith(c+'・')){editWorkCat=c;wdet=wdet.slice(c.length+1);break;} }
+  $('#edWorkCat').innerHTML=WORKCATS.map(w=>`<div class="c ${editWorkCat===w?'sel':''}" data-w="${w}">${w}</div>`).join('');
+  $$('#edWorkCat .c').forEach(el=>el.onclick=()=>{editWorkCat=el.dataset.w;$$('#edWorkCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
+  $('#edWorkDetail').value=wdet;
+  // 好きなもの
+  editLikes=[...(profile.likes||[])]; edRenderLikes();
+  $('#edLikeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();edAddLike();}});
+  // 興味のあること
+  editInterests=(profile.interests||[]).map(x=>({cat:x.cat,detail:x.detail})); edIntCat='';
+  $('#edInterestCat').innerHTML=INTERESTS.map(w=>`<div class="c" data-i="${w}">${w}</div>`).join('');
+  $$('#edInterestCat .c').forEach(el=>el.onclick=()=>{edIntCat=el.dataset.i;$$('#edInterestCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');edRenderIntOpts();});
+  edRenderIntOpts(); edRenderIntList();
+  $('#editOverlay').classList.add('show');
+}
+let editLikes=[], editTags=new Set(), editWorkCat='', editInterests=[], edIntCat='';
+function edHasInt(cat,item){return editInterests.some(x=>x.cat===cat&&x.detail===item);}
+function edToggleInt(cat,item){const i=editInterests.findIndex(x=>x.cat===cat&&x.detail===item);if(i>=0)editInterests.splice(i,1);else editInterests.push({cat,detail:item});edRenderIntOpts();edRenderIntList();}
+function edRenderIntOpts(){const box=$('#edInterestOpts');if(!box)return;if(!edIntCat){box.innerHTML='';return;}
+  const opts=INTEREST_OPTS[edIntCat]||[];
+  box.innerHTML='<div class="chips">'+opts.map(o=>`<div class="c ${edHasInt(edIntCat,o)?'sel':''}" onclick="edToggleInt('${edIntCat}','${o}')">${o}</div>`).join('')+'</div>';}
+function edRenderIntList(){const el=$('#edInterestList');if(!el)return;el.innerHTML=editInterests.map((x,i)=>`<span class="likechip" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.35);color:var(--signal)">${esc(x.cat)}：${esc(x.detail)}<span class="miniclose" onclick="editInterests.splice(${i},1);edRenderIntList();edRenderIntOpts()">✕</span></span>`).join('');}
+function edAddLike(){const inp=$('#edLikeInput');const v=inp.value.trim();if(!v)return;if(!editLikes.includes(v))editLikes.push(v);inp.value='';edRenderLikes();}
+function edRenderLikes(){$('#edLikesList').innerHTML=editLikes.map((x,i)=>`<span class="likechip">${esc(x)}<span class="miniclose" onclick="editLikes.splice(${i},1);edRenderLikes()">✕</span></span>`).join('');}
+function closeEdit(){$('#editOverlay').classList.remove('show');}
+async function saveEdit(){
+  const name=$('#edName').value.trim()||profile.name;
+  const bio=$('#edBio').value.trim()||profile.bio;
+  const ng=ngCheck(name)||ngCheck(bio);
+  const w=$('#edWarn');
+  if(ng){ w.textContent='⚠️ 名前かひとことに不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
+  w.classList.remove('show');
+  profile.name=name; profile.bio=bio;
+  const newAge=parseInt($('#edAge').value)||profile.age;
+  if(newAge<18){ w.textContent='⚠️ このアプリは18歳以上の方のみご利用いただけます。'; w.classList.add('show'); return; }
+  profile.age=newAge;
+  const se=$('#edEmojis .em.sel'); if(se)profile.emoji=se.dataset.e;
+  profile.looking=[...$('#edLooking .c.sel')].map(el=>el.dataset.l);
+  profile.likes=[...editLikes];
+  profile.tags=[...editTags];
+  const ewd=$('#edWorkDetail').value.trim();
+  profile.work=editWorkCat?(ewd?editWorkCat+'・'+ewd:editWorkCat):ewd;
+  profile.interests=editInterests.map(x=>({cat:x.cat,detail:x.detail}));
+  $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;
+  $('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
+  await publishMe();
+  toast('プロフィールを更新しました');
+  closeEdit();
+}
+/* ---------- invite ---------- */
+// 人に配るURLは常にこの正式URLにする（古いドメインで開かれても混乱しないように）
+const OFFICIAL_URL='https://chikaku-hosei.vercel.app/fes/';
+function buildInvite(){const url=OFFICIAL_URL;$('#shareUrl').value=url;renderQR(url);$('#shareUrl').addEventListener('input',e=>renderQR(e.target.value));}
+function renderQR(url){const box=$('#qrbox');const img=new Image();
+  img.onload=()=>{box.innerHTML='';box.appendChild(img);};
+  img.onerror=()=>{box.innerHTML=`<div class="qrfallback">QR画像を読み込めませんでした。<br>下のリンクをコピーして共有してください。</div>`;};
+  img.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data='+encodeURIComponent(url);}
+function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigator.clipboard.writeText(v).then(()=>toast('リンクをコピーしました')).catch(()=>toast('コピーできませんでした'));}else toast('手動でコピーしてください');}
+
+/* ---------- misc ---------- */
+let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
+function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=(isIOS()&&!isStandalone())?'iPhoneはホーム画面に追加すると使えます':'マッチしたらスマホに通知';}}
+function startLoops(){publishMe();loadBlocks().then(()=>pollUsers());loadMatchUnlocks();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();loadMatchUnlocks();}},6000);}
+
+/* ---------- 学園祭版：開催時間・参加人数・アンケート ---------- */
+function fesPhase(now=Date.now()){
+  if(FES.alwaysOpen)return {state:'open',end:null};
+  const list=FES.sessions.map(x=>({start:Date.parse(x.start),end:Date.parse(x.end)})).sort((a,b)=>a.start-b.start);
+  const cur=list.find(x=>now>=x.start&&now<x.end);
+  if(cur)return {state:'open',end:cur.end};
+  const next=list.find(x=>now<x.start);
+  if(next)return {state:'before',start:next.start};
+  return {state:'after'};
+}
+function fesTime(ts,withDate){
+  const o={hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tokyo'};
+  if(withDate)Object.assign(o,{month:'numeric',day:'numeric',weekday:'short'});
+  return new Date(ts).toLocaleString('ja-JP',o);
+}
+function fesNo(){ return myId&&!String(myId).startsWith('local-')?String(myId).slice(0,8):''; }
+function openSurvey(){
+  if(!FES.surveyUrl){ toast('アンケートは準備中です。もう少しお待ちください'); return; }
+  window.open(FES.surveyUrl.split('{id}').join(encodeURIComponent(fesNo())),'_blank');
+}
+let fesLive=null, fesLastState=null;
+// 「いま参加中」＝直近1分以内に位置を更新した人（近くの人一覧と同じ基準）。自分も含む
+async function fesRefreshCount(){
+  if(!sb)return;
+  try{
+    const since=new Date(Date.now()-60000).toISOString();
+    const {count,error}=await sb.from(T('profiles')).select('id',{count:'exact',head:true}).eq('sharing',true).gt('updated_at',since);
+    if(!error&&count!=null)fesLive=count;
+  }catch(e){}
+  renderFesBar(fesPhase());
+}
+function renderFesBar(ph){
+  const wel=$('#fesLiveWel'); if(wel)wel.textContent=(ph.state==='open'&&fesLive)?'● いま '+fesLive+'人が参加中':'';
+  const no=$('#fesNo'); if(no)no.textContent=fesNo()||'—';
+  const bar=$('#fesBar'); if(!bar)return;
+  if(ph.state!=='open'){ bar.className='fesbar'; return; }
+  if(ph.end==null){
+    bar.className='fesbar show';
+    bar.innerHTML='🎪 学園祭版 · <b>メンバー動作確認中</b>'+(fesLive?' · いま <b>'+fesLive+'人</b>が参加中':'');
+    return;
+  }
+  const left=ph.end-Date.now();
+  if(left<=FES.surveyBeforeEndMin*60000){
+    bar.className='fesbar show warn';
+    bar.innerHTML='⏰ あと<b>'+Math.max(1,Math.ceil(left/60000))+'分</b>で終了します。<b>アンケートにご協力ください ›</b>';
+  }else{
+    bar.className='fesbar show';
+    bar.innerHTML='🎪 学園祭限定 · <b>'+fesTime(ph.end)+'まで</b>'+(fesLive?' · いま <b>'+fesLive+'人</b>が参加中':'');
+  }
+}
+function renderFesClosed(ph){
+  const el=$('#fesClosed');
+  if(ph.state==='open'){ el.classList.remove('show'); return; }
+  el.innerHTML=ph.state==='before'
+    ?`<div class="ic">🎪</div><h2>まだ始まっていません</h2>
+      <p>「ちかく 学園祭版」は開催時間中だけ使えます。<br>次の開始は</p>
+      <div class="when">${fesTime(ph.start,true)} から</div>`
+    :`<div class="ic">🎉</div><h2>ご参加ありがとうございました</h2>
+      <p>学園祭版の受付は終了しました。<br>よろしければ、使ってみた感想を<br>アンケートで教えてください。</p>
+      <button class="btn btn-primary" style="padding:15px 26px;font-size:15px" onclick="openSurvey()">📝 アンケートに答える</button>`;
+  el.classList.add('show');
+}
+// 開催中に時間切れになったら位置の共有を止める（閉じた画面の裏で位置を送り続けないように）
+async function fesClose(){
+  sharing=false; stopGeo();
+  if(sb&&myId&&profile){ try{ await sb.from(T('profiles')).update({sharing:false}).eq('id',myId); }catch(e){} }
+}
+function fesTick(){
+  const ph=fesPhase();
+  if(fesLastState==='open'&&ph.state!=='open')fesClose();
+  // 開始時刻をまたいだら、起動処理を最初からやり直すのが一番確実
+  if(fesLastState&&fesLastState!=='open'&&ph.state==='open'){ location.reload(); return; }
+  fesLastState=ph.state;
+  renderFesClosed(ph); renderFesBar(ph);
+  if(ph.state==='open')fesRefreshCount();
+}
+
+/* ---------- boot ---------- */
+buildOnboard();
+$('#obGo').onclick=onStart;
+registerSW();
+(async()=>{
+  fesTick(); setInterval(fesTick,20000);
+  const ph=fesPhase();
+  // 開催時間外は位置情報もログインも始めない（終了後だけは、アンケート用の参加者番号を出すためにログインする）
+  if(ph.state!=='open'){ if(ph.state==='after'&&await initBackend())renderFesBar(ph); return; }
+  if(await initBackend()){ fesRefreshCount(); await tryResumeSession(); }
+})();
+
+</script>
+</body>
+</html>
