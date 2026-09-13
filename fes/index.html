@@ -74,12 +74,17 @@
   .locbar .acc{font-size:10.5px;color:var(--signal);text-align:right;font-weight:600;white-space:nowrap}
   .locbar.bad{border-color:rgba(255,128,128,.4);background:rgba(255,128,128,.08)}
   .locbar .retry{background:var(--amber);color:#3a2410;border:0;border-radius:12px;padding:8px 12px;font-weight:700;font-family:inherit;font-size:12px;cursor:pointer}
-  .map-wrap{position:relative;height:210px;margin:2px 16px 4px;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,#eef4fc,#e3edf8);flex-shrink:0}
-  #map{width:100%;height:100%;display:block}
-  .nearest{position:absolute;top:9px;right:9px;font-size:11px;background:rgba(255,255,255,.85);padding:5px 11px;border-radius:14px;border:1px solid var(--line);color:var(--muted)}
+  /* z-index:0 で重なりの基準を作る（Leaflet内部のz-indexが、プロフィールのシートなどより前に出ないように） */
+  .map-wrap{position:relative;z-index:0;height:250px;margin:2px 16px 4px;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:#e3edf8;flex-shrink:0}
+  #map{width:100%;height:100%}
+  .leaflet-container{font-family:inherit;background:#e3edf8}
+  .nearest{position:absolute;top:9px;right:9px;z-index:1000;font-size:11px;background:rgba(255,255,255,.9);padding:5px 11px;border-radius:14px;border:1px solid var(--line);color:var(--muted)}
   .nearest b{color:var(--amber);font-family:"JetBrains Mono";font-weight:500}
-  .maplbl{position:absolute;bottom:9px;left:11px;font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.85);padding:4px 9px;border-radius:12px;border:1px solid var(--line)}
+  .maplbl{position:absolute;top:9px;left:9px;z-index:1000;font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.9);padding:4px 9px;border-radius:12px;border:1px solid var(--line)}
   .maplbl b{color:var(--signal)}
+  .mapme{position:absolute;bottom:22px;right:9px;z-index:1000;border:1px solid var(--line);background:rgba(255,255,255,.95);border-radius:14px;padding:6px 11px;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--signal);cursor:pointer}
+  .pmk{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid #fff;box-shadow:0 2px 6px rgba(30,40,90,.35)}
+  .pmk.me{border-radius:10px;font-size:18px}
   .listhead{display:flex;align-items:center;gap:8px;padding:12px 22px 8px;font-size:12.5px;font-weight:700;color:var(--muted)}
   .listhead .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:blink 1.6s infinite}
   @keyframes blink{50%{opacity:.35}}
@@ -296,9 +301,44 @@
   .fesclosed p{font-size:13.5px;color:var(--muted);line-height:1.9;margin-bottom:18px}
   .fesclosed .when{font-size:15px;font-weight:700;color:var(--amber-deep)}
   .fessurvey{display:block;margin-top:10px;background:none;border:0;color:var(--muted);font-family:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+  /* 学園祭版の属性 */
+  .req{font-size:10px;color:#fff;background:var(--rose);border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+  .field select{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-family:inherit;font-size:14px;color:var(--ink)}
+  .qrow{margin-bottom:10px}
+  .qrow .qt{font-size:12.5px;color:var(--ink);margin-bottom:6px;font-weight:700}
+  .qab{flex-wrap:nowrap}
+  .qab .c{flex:1;text-align:center}
+  details.more{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:11px 14px;background:var(--surface2)}
+  details.more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--muted)}
+  details.more[open] summary{margin-bottom:10px}
+  .statusrow{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;overflow-x:auto;padding:0 16px 8px;flex-shrink:0}
+  .statusrow::-webkit-scrollbar{height:0}
+  .statusrow .sl{font-size:11px;color:var(--muted);white-space:nowrap;font-weight:700}
+  .statusrow .c{white-space:nowrap;font-size:11.5px;padding:5px 11px}
+  .stchip{display:inline-block;font-size:10.5px;font-weight:700;color:var(--amber-deep);background:rgba(245,151,47,.12);border-radius:10px;padding:1px 7px}
+  .fesattr{margin-bottom:12px;padding:12px 14px;border-radius:14px;background:var(--surface2)}
+  .fesattr .frow{font-size:13px;margin-bottom:6px;color:var(--ink)}
+  .fesattr .fh{font-size:11px;color:var(--signal);font-weight:800;margin:8px 0 5px}
+  .fchips{display:flex;flex-wrap:wrap;gap:6px}
+  .fchip{font-size:12px;padding:4px 10px;border-radius:14px;background:#fff;border:1px solid var(--line)}
+  .fchip.hit{border-color:rgba(32,180,131,.5);background:rgba(32,180,131,.12);color:#0f8f6f;font-weight:700}
+  .qline{display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:7px;flex-wrap:wrap}
+  .qline .qt{color:var(--muted)}
+  .same{display:inline-block;font-size:10.5px;font-weight:700;color:#fff;background:var(--rose);border-radius:10px;padding:1px 7px}
+  /* 出店の広告 */
+  .bmk{width:100%;height:100%;border-radius:8px;background:#fff;border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(30,40,90,.3)}
+  .boothpop{position:absolute;left:14px;right:14px;bottom:86px;z-index:70;background:#fff;border:1px solid rgba(245,151,47,.45);border-radius:18px;padding:14px 16px;box-shadow:0 14px 34px -12px rgba(50,70,150,.45);transform:translateY(20px);opacity:0;pointer-events:none;transition:.25s}
+  .boothpop.show{transform:none;opacity:1;pointer-events:auto}
+  .boothpop .bclose{position:absolute;top:8px;right:10px;border:0;background:none;font-size:15px;color:var(--muted);cursor:pointer}
+  .boothpop .bhead{font-size:11.5px;font-weight:700;color:var(--amber-deep);margin-bottom:5px}
+  .boothpop .bname{font-family:"Zen Maru Gothic";font-size:17px;font-weight:900;color:var(--ink);padding-right:20px}
+  .boothpop .bdesc{font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:4px}
+  .boothpop .bplace{font-size:12px;color:var(--ink);margin-top:6px}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -357,11 +397,14 @@
         <div class="row2"><div class="field"><label>年齢（18歳以上）</label><input id="obAge" type="number" min="18" max="99" placeholder="24"></div><div class="field" style="flex:2"><label>アイコン</label></div></div>
         <div class="emojis" id="obEmojis"></div>
         <div class="field" style="margin-top:16px"><label>ひとこと</label><textarea id="obBio" rows="2" maxlength="60" placeholder="カフェ巡りが好きです。近くにいたら話しましょう"></textarea></div>
+        <div id="obAttrs"></div>
+        <details class="more"><summary>趣味や好きなことも入れる（任意）</summary>
         <div class="field"><label>タグ（好きなだけ）</label><div class="chips" id="obTags"></div></div>
         <div class="field"><label>職業 / 学校</label><div class="chips" id="obWorkCat"></div><input id="obWorkDetail" maxlength="24" placeholder="くわしく（任意）例：法政大学 / エンジニア" style="margin-top:9px"></div>
         <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="obLooking"></div></div>
         <div class="field"><label>好きなもの（自由に追加）</label><div class="addrow"><input id="obLikeInput" maxlength="16" placeholder="例：サウナ / 猫カフェ" onkeydown="if(event.key==='Enter'){event.preventDefault();addLike();}"><button type="button" class="addbtn" onclick="addLike()">追加</button></div><div class="likeslist" id="obLikesList"></div></div>
         <div class="field"><label>興味のあること</label><div class="chips" id="obInterestCat"></div><div id="obInterestOpts" style="margin-top:9px"></div><div class="likeslist" id="obInterestList"></div><div style="font-size:11px;color:var(--muted2);margin-top:6px">ジャンルを押すと選択肢が出ます。タップで追加/削除。</div></div>
+        </details>
         <div class="terms">📄 ご利用にあたって<br><a onclick="openTerms()">利用規約を読む</a>
           <label class="termschk"><input type="checkbox" id="obTerms"><span>利用規約に同意します</span></label></div>
         <div class="agegate">🔞 <b>18歳以上の方のみご利用いただけます</b><br>本アプリは18歳以上を対象としています。18歳未満の方はご利用いただけません。
@@ -373,8 +416,9 @@
     <section class="screen" id="s-near">
       <div class="apphead"><h1>近くの人</h1><span class="sub" id="nearSub">&mdash;</span></div>
       <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
+      <div class="statusrow chips" id="statusRow"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
-      <div class="map-wrap"><canvas id="map" width="716" height="600"></canvas><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">中心が<b>あなた</b></div></div>
+      <div class="map-wrap"><div id="map"></div><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">🏫 <b>多摩キャンパス</b></div><button class="mapme" onclick="centerOnMe()">📍 自分</button></div>
       <div class="listhead"><span class="live"></span> 位置を共有中の人</div>
       <div class="scroll"><div class="ulist" id="ulist"></div>
         <div class="listhead" style="margin-top:18px">💬 コミュニティ <span onclick="go('comm')" style="margin-left:auto;color:var(--signal);font-weight:700;cursor:pointer;font-size:12px">すべて見る ›</span></div>
@@ -383,7 +427,7 @@
     </section>
     <section class="screen" id="s-cross">
       <div class="apphead"><h1>すれ違った人</h1><span class="sub" id="crossSub">&mdash;</span></div>
-      <div style="padding:2px 22px 12px;font-size:12px;color:var(--muted)">500m以内に入った人を記録します。会うほど回数が増えます。（アプリを開いている間）</div>
+      <div style="padding:2px 22px 12px;font-size:12px;color:var(--muted)"><span class="encR">50</span>m以内に入った人を記録します。会うほど回数が増えます。（アプリを開いている間）</div>
       <div class="scroll"><div class="ulist" id="crossList"></div></div>
     </section>
     <section class="screen" id="s-match">
@@ -460,6 +504,7 @@
     <p style="font-size:13px;color:#6b7291;line-height:1.9">ただいま接続できませんでした。<br>電波の良い場所で、<b style="color:#0a6b85">少し時間をおいてから</b><br>もう一度お試しください。<br><br>解決しない場合は、お手数ですが<br>運営（法政大学 糸久ゼミ）までお知らせください。</p>
   </div>
   <div class="fesclosed" id="fesClosed"></div>
+  <div class="fesclosed" id="fesOutside"></div>
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
   <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
@@ -476,6 +521,7 @@
     <div class="dots" id="guideDots"></div>
     <div class="gnav"><button class="btn btn-ghost" id="guidePrev" onclick="guideMove(-1)">戻る</button><button class="btn btn-primary" id="guideNext" onclick="guideMove(1)">次へ</button></div>
   </div>
+  <div class="boothpop" id="boothPop"></div>
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -504,7 +550,54 @@ const FES={
   surveyUrl:'',
   // 終了の何分前から「まもなく終了・アンケートへ」の案内を出すか
   surveyBeforeEndMin:30,
+  // 多摩キャンパスの外では使えないようにするか（false の間はどこでも使える。メンバーの動作確認用）
+  // ⚠️ 本番前に true にすること
+  campusOnly:false,
+  // すれ違いとして記録する距離（m）。GPS誤差の実測結果が出たらここを調整する
+  encounterRangeM:50,
+  // 位置のずれ（精度）がこれより大きい時は、すれ違いの判定に使わない（m）
+  maxAccuracyM:50,
+  // 出店の近くを通ったら知らせる距離（m）。屋内はGPSがずれやすいので広めにする
+  boothRangeM:50,
+  boothIndoorRangeM:80,
+  // 同じ出店を再び知らせるまでの間隔（分）
+  boothCooldownMin:30,
+  // 閉じている人への「近くに共通点のある人がいます」通知（閉じる直前の位置を使う）
+  nearbyPush:true,
+  nearbyPushRangeM:80,       // 閉じた後に少し動いていても当たるよう、すれ違いより広め
+  nearbyPushStaleMin:15,     // 閉じてからこの分数を過ぎた人には送らない（もう移動しているはずなので）
+  nearbyPushCooldownMin:30,  // 同じ人に送るのはこの分数に1回まで（送る端末が何台あっても）
 };
+// 多摩キャンパスの敷地。OpenStreetMap（way 597200868）の外周146点を約8m単位で間引いたもの。[緯度, 経度]
+const CAMPUS=[[35.61719,139.28974],[35.61699,139.28978],[35.61728,139.29197],[35.61708,139.29211],[35.61545,139.2918],[35.61519,139.29193],[35.61499,139.29217],[35.61473,139.29381],[35.61255,139.29435],[35.61219,139.29549],[35.61265,139.296],[35.61351,139.29604],[35.61345,139.29642],[35.61295,139.29651],[35.6134,139.29737],[35.61313,139.29768],[35.6134,139.29808],[35.61304,139.2988],[35.6127,139.29908],[35.61253,139.29886],[35.61212,139.29918],[35.61184,139.2989],[35.61222,139.29957],[35.61147,139.29986],[35.6107,139.30198],[35.61081,139.30254],[35.61096,139.30273],[35.61136,139.30283],[35.61146,139.3032],[35.61144,139.30286],[35.61158,139.30257],[35.61221,139.30225],[35.61243,139.30188],[35.61263,139.30044],[35.61235,139.2998],[35.61269,139.30038],[35.61267,139.30069],[35.61297,139.30103],[35.61377,139.30057],[35.6137,139.30032],[35.61331,139.30035],[35.6129,139.29919],[35.61318,139.29926],[35.61382,139.3],[35.61493,139.30047],[35.61498,139.30075],[35.61574,139.30084],[35.61625,139.29967],[35.61608,139.29717],[35.61628,139.2971],[35.61629,139.29661],[35.61656,139.29661],[35.61661,139.29567],[35.61749,139.29475],[35.6176,139.29446],[35.61803,139.29417],[35.6184,139.29426],[35.61847,139.29383],[35.61919,139.2937],[35.6194,139.29248],[35.61971,139.29182],[35.62038,139.29128],[35.62034,139.29021],[35.61988,139.28987],[35.61726,139.29039],[35.61719,139.28974]];
+const CAMPUS_CENTER={lat:35.61559,lng:139.29633};
+// 学園祭版の属性。共通点（＝画面に出すかどうか）の判定に使うのは「学部・今日の目的・目標」だけ
+const FA={
+  // 学科名は法政大学公式サイトで確認（2026-09-13）。スポーツ健康学部は学科ではなくコース
+  faculties:[
+    {v:'経済学部',depts:['経済学科','国際経済学科','現代ビジネス学科']},
+    {v:'社会学部',depts:['社会政策科学科','社会学科','メディア社会学科']},
+    {v:'現代福祉学部',depts:['福祉コミュニティ学科','臨床心理学科']},
+    {v:'スポーツ健康学部',depts:['ヘルスデザインコース','スポーツビジネスコース','スポーツコーチングコース']},
+    {v:'法政（市ヶ谷・小金井）',depts:[]},
+    {v:'他大学の学生',depts:[]},
+    {v:'社会人・一般',depts:[]},
+    {v:'法政の卒業生',depts:[]},
+  ],
+  grades:['1年','2年','3年','4年','大学院'],
+  purposes:['食べ歩き','ステージを見る','友達を探す','ひとりで来た','サークル・出店','なんとなく'],
+  goals:['就活','留学','資格','起業','部活・大会','まだ考え中'],
+  statuses:['一緒に回る人募集中','ひまです','休憩中','忙しい'],
+  // 一致しても共通点として数えない選択肢（誰とでも一致してしまい、表示を絞る意味がないため）
+  weak:['なんとなく','まだ考え中'],
+  // 2択のお題（必須・見せるだけ）。⚠️ 仮のお題。9/15のMTGで決めて差し替える
+  questions:[
+    {id:'q1',text:'屋台で最初に買うのは？',a:'しょっぱい系',b:'甘い系'},
+    {id:'q2',text:'学園祭の回り方は？',a:'計画を立てる',b:'気の向くまま'},
+    {id:'q3',text:'朝型？夜型？',a:'朝型',b:'夜型'},
+  ],
+};
+const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県','海外'];
 // 学園祭版のデータは fes_ 付きの別テーブルに保存する（supabase/fes_tables.sql）。
 // push_subscriptions だけは Edge Function が読むので通常版と共用
 const T=name=>'fes_'+name;
@@ -567,10 +660,13 @@ async function tryResumeSession(){
   try{
     const {data,error}=await sb.from(T('profiles')).select('*').eq('id',myId).maybeSingle();
     if(error||!data) return false;
-    profile={id:myId,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[]};
+    profile={id:myId,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[],fa:data.fes_attrs||{}};
     $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;$('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
     $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
     startGeo();buildInvite();startLoops();
+    renderStatusRow();
+    // 属性を追加する前に登録した人は必須項目が空で、誰とも共通点が出ないので入力してもらう
+    if(attrMissing(attrStateFrom(profile.fa))) setTimeout(()=>{ toast('学園祭版のプロフィール項目が増えました。入力をお願いします'); openEdit(); },900);
     maybeShowGuide(data.guide_seen===true);
     return true;
   }catch(e){ return false; }
@@ -663,6 +759,7 @@ function buildOnboard(){
   $('#obInterestCat').innerHTML=INTERESTS.map(w=>`<div class="c" data-i="${w}">${w}</div>`).join('');
   $$('#obInterestCat .c').forEach(el=>el.onclick=()=>{selInterestCat=el.dataset.i;$$('#obInterestCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');renderInterestOpts();});
   renderLikesEditor();renderInterestEditor();
+  obAttr=attrStateFrom({}); $('#obAttrs').innerHTML=attrFieldsHTML('ob'); bindAttrForm('ob',obAttr);
 }
 function addLike(){const inp=$('#obLikeInput');const v=inp.value.trim();if(!v)return;if(!myLikes.includes(v))myLikes.push(v);inp.value='';renderLikesEditor();}
 function renderLikesEditor(){const el=$('#obLikesList');if(!el)return;el.innerHTML=myLikes.map((x,i)=>`<span class="likechip">${esc(x)}<span class="miniclose" onclick="myLikes.splice(${i},1);renderLikesEditor()">✕</span></span>`).join('');}
@@ -684,10 +781,11 @@ async function onStart(){
   const bioVal=$('#obBio').value.trim()||'よろしくお願いします。';
   const ng=ngCheck(name)||ngCheck(bioVal);
   if(ng){ toast('⚠️ 名前かひとことに不適切な言葉が含まれています。修正してください。'); return; }
-  profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[...selTags],work,looking:[...selLooking],likes:myLikes,interests:myInterests};
+  const miss=attrMissing(obAttr); if(miss){ toast('⚠️ '+miss); return; }
+  profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[...selTags],work,looking:[...selLooking],likes:myLikes,interests:myInterests,fa:{...attrToFa(obAttr),status:''}};
   $('#meAv').style.background=gr(selEmoji);$('#meAv').textContent=selEmoji;$('#meName').textContent=name+(age?' '+age:'');
   $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
-  startGeo();buildInvite();startLoops();
+  startGeo();buildInvite();startLoops();renderStatusRow();
   maybeShowGuide(false);   // 新規登録なので必ず出す
 }
 
@@ -703,7 +801,30 @@ function onPos(p){
   if(!origin)origin={...myPos};geoState('ok');
   $('#locCoord').textContent=myPos.lat.toFixed(5)+', '+myPos.lng.toFixed(5)+(coarse?'（ぼかし共有中）':'');
   $('#locAcc').textContent='±'+Math.round(myPos.acc)+'m';
+  fesCampusGate();
+  checkBooths();
   if(!placeName)reverseGeocode();publishMe();
+}
+/* ---------- 多摩キャンパス限定 ---------- */
+// 点が敷地の多角形の内側にあるか（レイキャスティング法）
+function inCampus(lat,lng){
+  let inside=false;
+  for(let i=0,j=CAMPUS.length-1;i<CAMPUS.length;j=i++){
+    const [yi,xi]=CAMPUS[i],[yj,xj]=CAMPUS[j];
+    if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;
+  }
+  return inside;
+}
+let fesOutside=false;
+// キャンパスの外にいる間は画面をふさぎ、自分の位置も送らない（他の人の一覧からは1分で消える）
+function fesCampusGate(){
+  fesOutside=FES.campusOnly&&!!myPos&&!inCampus(myPos.lat,myPos.lng);
+  const el=$('#fesOutside'); if(!el)return;
+  if(!fesOutside){ el.classList.remove('show'); return; }
+  el.innerHTML=`<div class="ic">🏫</div><h2>多摩キャンパスに<br>来ると使えます</h2>
+    <p>「ちかく 学園祭版」は、法政大学 多摩キャンパスの中にいる人どうしで使うアプリです。<br><br>キャンパス内にいるのにこの画面が出る場合は、<br>空が開けた屋外でもう一度お試しください。</p>
+    <button class="btn btn-primary" style="padding:14px 24px;font-size:15px" onclick="startGeo()">📍 位置を取り直す</button>`;
+  el.classList.add('show');
 }
 function onErr(e){geoState('bad');onGeoFail(e.code===1?'位置情報が拒否されました':'現在地を取得できません');}
 function onGeoFail(msg){const lb=$('#locbar');lb.className='locbar bad';$('#locPlace').textContent=msg;
@@ -719,18 +840,28 @@ async function reverseGeocode(){
 
 /* ---------- presence (Supabase profiles) ---------- */
 async function publishMe(){
-  if(!profile||!myPos||!sharing||!sb)return;let lat=myPos.lat,lng=myPos.lng;
+  if(!profile||!myPos||!sharing||!sb||fesOutside)return;let lat=myPos.lat,lng=myPos.lng;
   if(coarse){lat=Math.round(lat*1000)/1000;lng=Math.round(lng*1000)/1000;}
-  await sb.from(T('profiles')).upsert({id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,likes:profile.likes,interests:profile.interests,lat,lng,coarse,sharing:true,updated_at:new Date().toISOString()});
+  const row={id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,likes:profile.likes,interests:profile.interests,lat,lng,coarse,sharing:true,updated_at:new Date().toISOString()};
+  if(!fesAttrColMissing)row.fes_attrs=profile.fa||{};
+  const {error}=await sb.from(T('profiles')).upsert(row);
+  // SQL（supabase/fes_attributes.sql）の実行前にデプロイされても、位置の共有だけは止めない
+  if(error&&/fes_attrs/.test(error.message)){
+    fesAttrColMissing=true;
+    console.warn('[attrs] fes_profiles に fes_attrs 列がありません。supabase/fes_attributes.sql を実行してください:',error.message);
+    delete row.fes_attrs; await sb.from(T('profiles')).upsert(row);
+  }
 }
+let fesAttrColMissing=false;
 async function pollUsers(){
   let out=[];
   if(sb){
     const since=new Date(Date.now()-60000).toISOString();
     const {data,error}=await sb.from(T('profiles')).select('*').eq('sharing',true).gt('updated_at',since).neq('id',myId);
-    if(!error&&data)out=data.map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],lat:u.lat,lng:u.lng}));
+    if(!error&&data)out=data.map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},lat:u.lat,lng:u.lng}));
   }
-  others=out.filter(u=>!blocked.has(u.id)).concat(testUsers);renderNearby();
+  // キャンパス限定の時は、敷地の外から位置を送ってきている人を表示もすれ違いもしない
+  others=out.filter(u=>!blocked.has(u.id)&&(!FES.campusOnly||(u.lat!=null&&inCampus(u.lat,u.lng)))).concat(testUsers);renderNearby();
   recordEncounters();
   if(sb) await refreshMatches();
 }
@@ -774,89 +905,278 @@ function isExpired(m){
 }
 function leftText(ms){ if(ms<=0)return '終了'; const h=Math.floor(ms/3600000); const mi=Math.floor((ms%3600000)/60000); return h>0?(h+'時間'+mi+'分'):(mi+'分'); }
 
-/* ---------- 共通の趣味を出す ---------- */
-function myInterestSet(){
-  const s=new Set();
-  if(profile){
-    (profile.tags||[]).forEach(t=>s.add(t));
-    (profile.likes||[]).forEach(t=>s.add(t));
-    (profile.interests||[]).forEach(x=>s.add(x.detail));
-  }
-  return s;
+/* ---------- 学園祭版の属性（学部・今日の目的・目標など） ---------- */
+let obAttr=null, edAttr=null;
+function attrsOf(u){ return (u&&(u.fa||u.fes_attrs))||{}; }
+function toggleArr(a,v){ const i=a.indexOf(v); if(i>=0)a.splice(i,1); else a.push(v); }
+function attrStateFrom(fa){ fa=fa||{}; return {faculty:fa.faculty||'',dept:fa.dept||'',grade:fa.grade||'',purposes:[...(fa.purposes||[])],goals:[...(fa.goals||[])],hometown:fa.hometown||'',answers:{...(fa.answers||{})}}; }
+function attrToFa(st){ return {faculty:st.faculty,dept:st.dept,grade:st.grade,purposes:[...st.purposes],goals:[...st.goals],hometown:st.hometown,answers:{...st.answers}}; }
+function attrMissing(st){
+  if(!st.faculty)return '学部・所属を選んでください';
+  if(!st.purposes.length)return '今日の目的を1つ以上選んでください';
+  if(FA.questions.some(q=>!st.answers[q.id]))return '2択にすべて答えてください';
+  return null;
 }
+// 登録画面と編集画面で同じ入力欄を使う（p は id の頭につける文字: 'ob' / 'ed'）
+function attrFieldsHTML(p){
+  return `<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
+    <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意・見せるだけ）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>
+    <div class="field"><label>今日の目的（複数OK）<span class="req">必須</span></label><div class="chips" id="${p}Purpose"></div></div>
+    <div class="field"><label>2択に答えてください<span class="req">必須</span></label><div id="${p}Qs"></div></div>
+    <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
+    <div class="field"><label>出身（任意・見せるだけ）</label><select id="${p}Home"><option value="">選ばない</option>${PREFS.map(x=>`<option>${x}</option>`).join('')}</select></div>`;
+}
+function bindAttrForm(p,st){
+  const chips=(id,opts,isSel,onTap)=>{ const el=$('#'+p+id); if(!el)return;
+    el.innerHTML=opts.map(o=>`<div class="c ${isSel(o)?'sel':''}" data-v="${esc(o)}">${esc(o)}</div>`).join('');
+    [...el.children].forEach(c=>c.onclick=()=>{ onTap(c.dataset.v); render(); }); };
+  function render(){
+    chips('Faculty',FA.faculties.map(f=>f.v),o=>st.faculty===o,o=>{ if(st.faculty!==o){ st.faculty=o; st.dept=''; } });
+    const f=FA.faculties.find(x=>x.v===st.faculty);
+    // 学科・学年は学生の時だけ出す
+    const student=!!f&&!['社会人・一般','法政の卒業生'].includes(f.v);
+    $('#'+p+'DeptWrap').style.display=student?'':'none';
+    chips('Dept',f?f.depts:[],o=>st.dept===o,o=>{ st.dept=st.dept===o?'':o; });
+    chips('Grade',FA.grades,o=>st.grade===o,o=>{ st.grade=st.grade===o?'':o; });
+    chips('Purpose',FA.purposes,o=>st.purposes.includes(o),o=>toggleArr(st.purposes,o));
+    chips('Goals',FA.goals,o=>st.goals.includes(o),o=>toggleArr(st.goals,o));
+    $('#'+p+'Qs').innerHTML=FA.questions.map(q=>`<div class="qrow"><div class="qt">${esc(q.text)}</div><div class="chips qab">${['a','b'].map(k=>`<div class="c ${st.answers[q.id]===k?'sel':''}" data-q="${q.id}" data-k="${k}">${esc(q[k])}</div>`).join('')}</div></div>`).join('');
+    $$('#'+p+'Qs .c').forEach(c=>c.onclick=()=>{ st.answers[c.dataset.q]=c.dataset.k; render(); });
+  }
+  const home=$('#'+p+'Home'); home.value=st.hometown||''; home.onchange=e=>{ st.hometown=e.target.value; };
+  render();
+}
+// 共通点＝学部・今日の目的・目標のどれかが一致。画面に出すかどうかはこれで決める（データは全員分記録する）
 function commonWith(u){
-  const mine=myInterestSet(); if(!mine.size)return [];
-  const theirs=[];
-  (u.tags||[]).forEach(t=>theirs.push(t));
-  (u.likes||[]).forEach(t=>theirs.push(t));
-  (u.interests||[]).forEach(x=>theirs.push(x.detail));
-  const seen=new Set(); const out=[];
-  theirs.forEach(t=>{ if(t&&mine.has(t)&&!seen.has(t)){seen.add(t);out.push(t);} });
+  if(!profile)return [];
+  const me=attrsOf(profile), th=attrsOf(u), out=[];
+  if(me.faculty&&me.faculty===th.faculty)out.push(me.faculty);
+  (me.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.purposes||[]).includes(x))out.push(x); });
+  (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))out.push(x); });
   return out;
+}
+// 2択で同じ答えを選んだお題（共通点の判定には使わず、プロフィールに「同じ！」と出すだけ）
+function sameAnswers(u){ const a=attrsOf(profile).answers||{}, b=attrsOf(u).answers||{}; return FA.questions.filter(q=>a[q.id]&&a[q.id]===b[q.id]); }
+function attrBlock(u){
+  const a=attrsOf(u); if(!a.faculty&&!(a.purposes||[]).length)return '';
+  const common=new Set(commonWith(u)), same=new Set(sameAnswers(u).map(q=>q.id));
+  const chip=x=>`<span class="fchip${common.has(x)?' hit':''}">${esc(x)}</span>`;
+  return `<div class="fesattr">
+    ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${common.has(a.faculty)?' <span class="same">同じ！</span>':''}</div>`:''}
+    ${a.status?`<div class="frow">💬 いま <b>${esc(a.status)}</b></div>`:''}
+    ${(a.purposes||[]).length?`<div class="fh">今日の目的</div><div class="fchips">${a.purposes.map(chip).join('')}</div>`:''}
+    ${(a.goals||[]).length?`<div class="fh">これから・目標</div><div class="fchips">${a.goals.map(chip).join('')}</div>`:''}
+    ${a.hometown?`<div class="frow" style="margin-top:8px">🏠 出身 <b>${esc(a.hometown)}</b></div>`:''}
+    ${FA.questions.filter(q=>(a.answers||{})[q.id]).map(q=>`<div class="qline"><span class="qt">${esc(q.text)}</span><b>${esc(q[a.answers[q.id]])}</b>${same.has(q.id)?'<span class="same">同じ！</span>':''}</div>`).join('')}
+  </div>`;
+}
+function renderStatusRow(){
+  const el=$('#statusRow'); if(!el)return;
+  if(!profile){ el.innerHTML=''; return; }
+  const cur=attrsOf(profile).status||'';
+  el.innerHTML='<span class="sl">いまの状態</span>'+FA.statuses.map(s=>`<span class="c${cur===s?' sel':''}" onclick="setStatus('${s}')">${s}</span>`).join('');
+}
+function setStatus(s){
+  if(!profile)return;
+  profile.fa=profile.fa||{}; profile.fa.status=profile.fa.status===s?'':s;
+  renderStatusRow(); publishMe();
 }
 /* ---------- render nearby ---------- */
 function renderNearby(){
-  const list=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}return {u,d,r:(myPos&&u.lat!=null)?relMeters(myPos,u):null,common:commonWith(u)};})
-    .sort((x,y)=>{ if((y.common.length>0)!==(x.common.length>0))return (y.common.length>0?1:0)-(x.common.length>0?1:0); if(y.common.length!==x.common.length)return y.common.length-x.common.length; return (x.d??1e9)-(y.d??1e9); });
-  $('#nearSub').textContent=list.length?list.length+'人が近くに':'まだ誰もいません';
+  const all=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}return {u,d,r:(myPos&&u.lat!=null)?relMeters(myPos,u):null,common:commonWith(u)};});
+  // すれ違いの記録は全員分とるが、画面（一覧・地図）に出すのは共通点がある人だけ。テスト用の人は動作確認のため常に出す
+  const list=all.filter(x=>x.common.length||isTest(x.u.id))
+    .sort((x,y)=>{ if(y.common.length!==x.common.length)return y.common.length-x.common.length; return (x.d??1e9)-(y.d??1e9); });
+  $('#nearSub').textContent=list.length?list.length+'人（共通点あり）':(all.length?'共通点のある人はまだ':'まだ誰もいません');
   drawMap(list);const ul=$('#ulist');
-  if(!list.length){ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「招待」からリンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('invite')">招待画面へ</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;return;}
-  ul.innerHTML=list.map(({u,d,common})=>`<div class="urow" onclick='openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':Math.round(d)})'>
+  if(!list.length){
+    ul.innerHTML=all.length
+      ?`<div class="empty"><div class="big">🔎</div><p>近くに<b>${all.length}人</b>いますが、<br>共通点のある人はまだいません。<br>今日の目的や目標を増やすと<br>見つかりやすくなります。</p><button class="btn btn-primary" onclick="openEdit()">プロフィールを見直す</button></div>`
+      :`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「招待」からリンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('invite')">招待画面へ</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;
+    return;
+  }
+  ul.innerHTML=list.map(({u,d,common})=>{ const a=attrsOf(u); return `<div class="urow" onclick='openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':Math.round(d)})'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
     <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div>
-      ${common&&common.length?`<div class="common">🎯 共通 ${common.slice(0,3).map(esc).join('・')}${common.length>3?' 他':''}</div>`:''}
-      <div class="b">${u.looking&&u.looking.length?`<span style="color:var(--rose);font-weight:600">${u.looking.slice(0,3).map(esc).join("・")}希望</span> · `:""}${esc(u.bio)}</div></div>
-    <div class="d"><div class="m">${d!=null?Math.round(d)+'m':'—'}</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`).join('');
+      ${common.length?`<div class="common">🎯 共通 ${common.slice(0,3).map(esc).join('・')}${common.length>3?' 他':''}</div>`:''}
+      <div class="b">${a.status?`<span class="stchip">${esc(a.status)}</span> `:''}${a.faculty?esc(a.faculty)+' · ':''}${esc(u.bio)}</div></div>
+    <div class="d"><div class="m">${d!=null?Math.round(d)+'m':'—'}</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`; }).join('');
 }
-function roundRect(ctx,x,y,w,hh,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+hh,r);ctx.arcTo(x+w,y+hh,x,y+hh,r);ctx.arcTo(x,y+hh,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+/* ---------- 地図（OpenStreetMap / Leaflet） ---------- */
+let fesMap=null, fesLayer=null, fesMe=null, fesRange=null, fesFollowed=false;
+function initMap(){
+  if(fesMap||!window.L)return;   // CDNが読めなかった時は地図なしで一覧だけ動かす
+  fesMap=L.map('map',{zoomControl:false});
+  fesMap.attributionControl.setPrefix(false);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(fesMap);
+  const campus=L.polygon(CAMPUS,{color:'#0fb0cd',weight:2,fillColor:'#0fb0cd',fillOpacity:.06,interactive:false}).addTo(fesMap);
+  fesMap.fitBounds(campus.getBounds(),{padding:[4,4]});
+  fesLayer=L.layerGroup().addTo(fesMap);
+  fesBoothLayer=L.layerGroup().addTo(fesMap);
+  drawBooths();
+}
+function mapIcon(emoji,me){
+  const s=me?34:28;
+  return L.divIcon({className:'',iconSize:[s,s],iconAnchor:[s/2,s/2],
+    html:`<div class="pmk${me?' me':''}" style="background:${me?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${emoji}</div>`});
+}
+function centerOnMe(){
+  if(!fesMap)return;
+  if(!myPos){ toast('現在地を取得中です'); return; }
+  fesMap.setView([myPos.lat,myPos.lng],18);
+}
 function drawMap(list){
-  const cv=$('#map'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height,cx=W/2,cy=H/2;
-  const RANGE=200,ppm=(W/2)/RANGE;ctx.clearRect(0,0,W,H);
-  ctx.strokeStyle='rgba(40,70,130,.06)';ctx.lineWidth=2;
-  for(let g=-RANGE;g<=RANGE;g+=50){ctx.beginPath();ctx.moveTo(cx+g*ppm,0);ctx.lineTo(cx+g*ppm,H);ctx.moveTo(0,cy+g*ppm);ctx.lineTo(W,cy+g*ppm);ctx.stroke();}
-  [50,100,200].forEach(m=>{ctx.beginPath();ctx.arc(cx,cy,m*ppm,0,7);ctx.strokeStyle='rgba(15,176,205,.28)';ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle='rgba(90,100,150,.6)';ctx.font='500 18px "JetBrains Mono"';ctx.fillText(m+'m',cx+4,cy-m*ppm+20);});
-  list.forEach(({u,r,d})=>{ if(!r)return; let px=cx+r.e*ppm,py=cy-r.n*ppm;const edge=d>RANGE;if(edge){const k=RANGE/d;px=cx+r.e*ppm*k;py=cy-r.n*ppm*k;}
-    ctx.globalAlpha=edge?.4:1;const sq=edge?9:16;roundRect(ctx,px-sq/2,py-sq/2,sq,sq,4);ctx.fillStyle=gradOf(u.emoji)[0];ctx.fill();
-    if(!edge){ctx.font='15px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(u.emoji,px,py+1);ctx.textAlign='left';}ctx.globalAlpha=1;});
-  const half=22;roundRect(ctx,cx-half,cy-half,half*2,half*2,7);const g=ctx.createLinearGradient(cx-half,cy-half,cx+half,cy+half);g.addColorStop(0,'#ffd7a8');g.addColorStop(1,'#f78b3c');ctx.fillStyle=g;ctx.fill();
-  ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(profile?profile.emoji:'📍',cx,cy+1);ctx.textAlign='left';
+  initMap();
+  if(fesMap){
+    fesLayer.clearLayers();
+    list.forEach(({u,d})=>{ if(u.lat==null)return;
+      L.marker([u.lat,u.lng],{icon:mapIcon(u.emoji,false)}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
+    if(myPos){
+      const ll=[myPos.lat,myPos.lng], icon=mapIcon(profile?profile.emoji:'📍',true);
+      if(!fesMe){
+        fesMe=L.marker(ll,{icon,zIndexOffset:1000,interactive:false}).addTo(fesMap);
+        // すれ違い判定の範囲を自分の周りに表示する
+        fesRange=L.circle(ll,{radius:FES.encounterRangeM,color:'#f5972f',weight:1.5,fillOpacity:.08,interactive:false}).addTo(fesMap);
+      }else{ fesMe.setLatLng(ll).setIcon(icon); fesRange.setLatLng(ll); }
+      // 最初にキャンパス内で位置が取れた時だけ自分の周りに寄せる（その後は利用者が動かした地図を勝手に戻さない）
+      if(!fesFollowed&&inCampus(myPos.lat,myPos.lng)){ fesFollowed=true; fesMap.setView(ll,18); }
+    }
+  }
   const near=list[0];$('#nearest').innerHTML=near&&near.d!=null?'最寄り '+esc(near.u.name)+' · <b>'+Math.round(near.d)+'m</b>':'—';
 }
 
-/* ---------- すれ違い（500m・毎回カウント・入ったら即記録） ---------- */
+/* ---------- 閉じている人への「近くにいます」通知（最後にいた位置を使う） ---------- */
+// ブラウザは閉じている間の位置を取れない。そこで、アプリを開いている人の端末が
+// 閉じた人の「閉じる直前の位置」の近くに来たら、閉じた人に通知を送る。
+// 同じ人への通知は fes_push_log に記録し、送る端末が何台あっても FES.nearbyPushCooldownMin 分に1回までにする
+let pushLogMissing=false;
+async function checkClosedNearby(){
+  if(!FES.nearbyPush||!sb||!profile||!myPos||fesOutside||pushLogMissing)return;
+  if(myPos.acc>FES.maxAccuracyM)return;
+  try{
+    const now=Date.now();
+    // 「閉じた人」＝位置の更新が90秒以上止まっているが、止まってからまだ FES.nearbyPushStaleMin 分以内の人
+    const {data,error}=await sb.from(T('profiles')).select('*').eq('sharing',true)
+      .lt('updated_at',new Date(now-90000).toISOString())
+      .gt('updated_at',new Date(now-FES.nearbyPushStaleMin*60000).toISOString())
+      .neq('id',myId);
+    if(error||!data)return;
+    const cands=data.filter(u=>!blocked.has(u.id)&&u.lat!=null&&(!FES.campusOnly||inCampus(u.lat,u.lng)))
+      .map(u=>{ const r=relMeters(myPos,u); return {u,d:Math.hypot(r.e,r.n),common:commonWith(u)}; })
+      .filter(x=>x.d<=FES.nearbyPushRangeM&&x.common.length)
+      .sort((a,b)=>a.d-b.d).slice(0,3);
+    if(!cands.length)return;
+    const {data:logs,error:le}=await sb.from(T('push_log')).select('recipient_id')
+      .in('recipient_id',cands.map(x=>x.u.id)).eq('kind','nearby')
+      .gt('created_at',new Date(now-FES.nearbyPushCooldownMin*60000).toISOString());
+    // 記録テーブルが無い状態で送ると回数制限が効かず通知が連打になるので、送らない
+    if(le){ pushLogMissing=true; console.warn('[push] fes_push_log を読み込めません。supabase/fes_notifications.sql を実行してください:',le.message); return; }
+    const recent=new Set((logs||[]).map(x=>x.recipient_id));
+    for(const {u,common} of cands){
+      if(recent.has(u.id))continue;
+      // 先に記録してから送る（別の端末とほぼ同時に送ってしまう重複を減らすため）
+      const {error:ie}=await sb.from(T('push_log')).insert({recipient_id:u.id,kind:'nearby'});
+      if(ie){ console.warn('[push] 通知の記録に失敗',ie.message); continue; }
+      // 相手の名前は出さず、共通点だけ伝える
+      notifyPush(u.id,'近くに共通点のある人がいます👀','「'+common[0]+'」が同じ人が、いまあなたの近くにいます。アプリを開いてみて！');
+    }
+  }catch(e){ console.warn('[push] 近くの人への通知に失敗',e); }
+}
+
+/* ---------- 出店の広告（運営が fes_booths に登録したものを表示） ---------- */
+let booths=[], fesBoothLayer=null, boothPopTimer=null;
+async function loadBooths(){
+  if(!sb)return;
+  try{
+    const {data,error}=await sb.from(T('booths')).select('*').eq('active',true);
+    if(error){ console.warn('[booths] fes_booths を読み込めません。supabase/fes_booths.sql を実行してください:',error.message); return; }
+    // テストモードで出した試しの出店は残す
+    booths=(data||[]).concat(booths.filter(b=>isTest(b.id))); drawBooths();
+  }catch(e){}
+}
+function drawBooths(){
+  if(!fesMap||!fesBoothLayer)return;
+  fesBoothLayer.clearLayers();
+  booths.forEach(b=>L.marker([b.lat,b.lng],{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:`<div class="bmk">${esc(b.emoji||'🏪')}</div>`})})
+    .on('click',()=>showBoothPop(b,false)).addTo(fesBoothLayer));
+}
+// 同じ出店を何度も知らせないよう、最後に知らせた時刻を端末に覚えておく
+function boothSeenAt(id){ try{ return +localStorage.getItem('fes_booth_'+id)||0; }catch(e){ return 0; } }
+function markBoothSeen(id){ try{ localStorage.setItem('fes_booth_'+id,String(Date.now())); }catch(e){} }
+// 近くを通った出店を知らせる（ブラウザの制約で、アプリを開いている間だけ）
+function checkBooths(){
+  if(!myPos||fesOutside||!booths.length)return;
+  if(myPos.acc>FES.maxAccuracyM*2)return;   // 位置が大きくずれている時は出さない
+  const now=Date.now(); let best=null;
+  for(const b of booths){
+    const r=relMeters(myPos,b), d=Math.hypot(r.e,r.n);
+    const range=b.indoor?FES.boothIndoorRangeM:FES.boothRangeM;
+    if(d>range||now-boothSeenAt(b.id)<FES.boothCooldownMin*60000)continue;
+    if(!best||d<best.d)best={b,d};
+  }
+  if(best)showBoothPop(best.b,true,best.d);
+}
+function showBoothPop(b,auto,d){
+  if(auto)markBoothSeen(b.id);
+  const el=$('#boothPop');
+  // 屋内はGPSの距離が当てにならないので、距離ではなく場所の説明だけ出す
+  const where=(b.place?esc(b.place):'このあたり')+(b.indoor?'（建物の中）':(d!=null?' · 約'+Math.max(10,Math.round(d/10)*10)+'m':''));
+  el.innerHTML=`<button class="bclose" onclick="closeBoothPop()">✕</button>
+    <div class="bhead">${auto?'📣 近くにこんなお店があります！':'🏪 出店'}</div>
+    <div class="bname">${esc(b.emoji||'🏪')} ${esc(b.name)}</div>
+    ${b.description?`<div class="bdesc">${esc(b.description)}</div>`:''}
+    <div class="bplace">📍 ${where}</div>
+    <button class="btn btn-ghost" style="margin-top:10px;padding:9px 14px;font-size:12.5px" onclick="focusBooth('${String(b.id).replace(/[^\w-]/g,'')}')">地図で見る</button>`;
+  el.classList.add('show');
+  clearTimeout(boothPopTimer); if(auto)boothPopTimer=setTimeout(closeBoothPop,15000);
+}
+function closeBoothPop(){ $('#boothPop').classList.remove('show'); }
+function focusBooth(id){
+  const b=booths.find(x=>String(x.id)===id); if(!b)return;
+  closeBoothPop(); go('near'); if(fesMap)fesMap.setView([b.lat,b.lng],19);
+}
+
+/* ---------- すれ違い（FES.encounterRangeM以内・毎回カウント・入ったら即記録） ---------- */
 function recordEncounters(){
   if(!myPos)return;
+  // 位置のずれが大きい時は判定しない（離れているのに記録したり、いるのに離れたと判定したりしないように）
+  if(myPos.acc>FES.maxAccuracyM)return;
   for(const u of others){
     if(isTest(u.id)||u.lat==null)continue;
     const r=relMeters(myPos,u); const d=Math.hypot(r.e,r.n);
-    if(d<=500){ if(!insideSet.has(u.id)){ insideSet.add(u.id); addEncounter(u); } }
+    if(d<=FES.encounterRangeM){ if(!insideSet.has(u.id)){ insideSet.add(u.id); addEncounter(u); } }
     else insideSet.delete(u.id);
   }
 }
 async function addEncounter(u){
   const prev=encMap[u.id]; const count=(prev?prev.count:0)+1; const place=placeName||'この付近';
-  encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],count,last_place:place,last_at:Date.now()};
-  renderCross(); toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`);
-  const dc=$('#dotCross'); if(dc){dc.style.display='block';dc.textContent=Object.keys(encMap).length;}
+  encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},count,last_place:place,last_at:Date.now()};
+  renderCross();
+  // 記録は全員分とるが、共通点のない人とのすれ違いは名前を出さない（画面上は隠している人なので）
+  if(commonWith(u).length){ toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`); const dc=$('#dotCross'); if(dc){dc.style.display='block';dc.textContent=crossShown().length;} }
   if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from(T('encounters')).upsert(rec); }catch(e){} }
 }
 async function loadEncounters(){
   if(!sb)return; const {data}=await sb.from(T('encounters')).select('*').eq('owner_id',myId); if(!data)return;
   for(const e of data){ let u=findUser(e.other_id);
     if(!u){ const {data:p}=await sb.from(T('profiles')).select('*').eq('id',e.other_id).maybeSingle(); u=p; }
-    if(u) encMap[e.other_id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],count:e.count,last_place:e.last_place,last_at:new Date(e.last_at).getTime()};
+    if(u) encMap[e.other_id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},count:e.count,last_place:e.last_place,last_at:new Date(e.last_at).getTime()};
   }
-  renderCross(); const dc=$('#dotCross'); const n=Object.keys(encMap).length; if(dc&&n){dc.style.display='block';dc.textContent=n;}
+  renderCross(); const dc=$('#dotCross'); const n=crossShown().length; if(dc&&n){dc.style.display='block';dc.textContent=n;}
 }
+// すれ違いは全員分記録しているが、一覧に出すのは共通点がある人だけ
+function crossShown(){ return Object.values(encMap).filter(u=>!blocked.has(u.id)&&commonWith(u).length); }
 function renderCross(){
-  const arr=Object.values(encMap).filter(u=>!blocked.has(u.id)).sort((a,b)=>(b.last_at||0)-(a.last_at||0));
+  const total=Object.values(encMap).filter(u=>!blocked.has(u.id)).length;
+  const arr=crossShown().sort((a,b)=>(b.last_at||0)-(a.last_at||0));
   $('#crossSub').textContent=arr.length?arr.length+'人とすれ違い':'まだ0人';
   const ul=$('#crossList');
-  if(!arr.length){ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>まだ誰ともすれ違っていません。<br>アプリを開いたまま出かけると、<br>500m以内に入った人が記録されます。</p></div>`;return;}
-  ul.innerHTML=arr.map(u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests}).replace(/'/g,"&#39;")},null)'>
+  if(!arr.length){ul.innerHTML=total
+    ?`<div class="empty"><div class="big">🚶</div><p>${total}人とすれ違いましたが、<br>共通点のある人はまだいません。</p></div>`
+    :`<div class="empty"><div class="big">🚶</div><p>まだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`;return;}
+  ul.innerHTML=arr.map(u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/'/g,"&#39;")},null)'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-    <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div><div class="b">${esc(u.last_place||'')} ですれ違い</div></div>
+    <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div><div class="common">🎯 共通 ${commonWith(u).slice(0,3).map(esc).join('・')}</div><div class="b">${esc(u.last_place||'')} ですれ違い</div></div>
     <div class="d"><div class="m">${u.count}回</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`).join('');
 }
 function confettiBurst(){
@@ -877,6 +1197,10 @@ function confettiBurst(){
 let likeTargetUser=null;
 function likeReasonOptions(u){
   const out=[];
+  const fa=attrsOf(u);
+  if(fa.faculty)out.push(fa.faculty);
+  (fa.purposes||[]).filter(x=>!FA.weak.includes(x)).forEach(x=>out.push(x));
+  (fa.goals||[]).filter(x=>!FA.weak.includes(x)).forEach(x=>out.push(x));
   (u.interests||[]).forEach(x=>out.push(x.detail));
   (u.likes||[]).forEach(x=>out.push(x));
   (u.tags||[]).forEach(x=>out.push(x));
@@ -995,7 +1319,7 @@ function openSheet(u,d){
   $('#sheet').innerHTML=`<div class="cover" style="background:${gr(u.emoji)}"><button class="close" onclick="closeSheet()">✕</button>
     <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)} <span>${u.age||''}</span></h2>
     ${d!=null?`<div class="dist">📍 いまここから <b>${Math.round(d)}m</b></div>`:''}</div></div>
-    <div class="body">${u.work?`<div class="workline">💼 <b>${esc(u.work)}</b></div>`:''}${(u.looking&&u.looking.length)?`<div class="wants">${u.looking.map(x=>`<span class="want">${esc(x)}希望</span>`).join('')}</div>`:''}<div class="bio">${esc(u.bio)}</div>${(u.likes&&u.likes.length)?`<div class="likeslist">${u.likes.map(x=>`<span class="likechip">♡ ${esc(x)}</span>`).join('')}</div>`:''}${(u.interests&&u.interests.length)?`<div class="interest"><div class="ih">興味のあること</div>${u.interests.map(x=>`<div class="irow"><b>${esc(x.cat)}</b>：${esc(x.detail)}</div>`).join('')}</div>`:''}<div class="tags">${(u.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div></div>
+    <div class="body">${attrBlock(u)}${u.work?`<div class="workline">💼 <b>${esc(u.work)}</b></div>`:''}${(u.looking&&u.looking.length)?`<div class="wants">${u.looking.map(x=>`<span class="want">${esc(x)}希望</span>`).join('')}</div>`:''}<div class="bio">${esc(u.bio)}</div>${(u.likes&&u.likes.length)?`<div class="likeslist">${u.likes.map(x=>`<span class="likechip">♡ ${esc(x)}</span>`).join('')}</div>`:''}${(u.interests&&u.interests.length)?`<div class="interest"><div class="ih">興味のあること</div>${u.interests.map(x=>`<div class="irow"><b>${esc(x.cat)}</b>：${esc(x.detail)}</div>`).join('')}</div>`:''}<div class="tags">${(u.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div></div>
     <div style="padding:0 20px;text-align:center"><button class="reportbtn" onclick="openReport('${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">⚠ この人を通報・ブロックする</button></div>
     <div class="actions">${isLiked?`<button class="btn btn-liked" style="flex:1" disabled>♥ いいね済み</button>`:
       `<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-rose" onclick="openLikeReason()">♥ いいね</button>`}</div>`;
@@ -1090,7 +1414,14 @@ async function doLike(uid,reason){
   saveBilling();
   liked.add(uid);closeSheet();renderNearby();
   if(!sb){ toast('バックエンド未接続です'); return; }
-  await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:reason||null});
+  // いいねした時点で何が共通していたかを残す（どの種類の共通点がマッチにつながったかを後で集計するため）
+  const tu=findUser(uid)||curSheetUser||{};
+  const matched={common:commonWith(tu),same:sameAnswers(tu).map(q=>q.id)};
+  const {error:le}=await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:reason||null,matched});
+  if(le&&/matched/.test(le.message)){
+    console.warn('[attrs] fes_likes に matched 列がありません。supabase/fes_attributes.sql を実行してください:',le.message);
+    await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:reason||null});
+  }
   const {data}=await sb.from(T('likes')).select('from_id').eq('from_id',uid).eq('to_id',myId).maybeSingle();
   if(data){ createMatch(uid,true); }
   else{ notifyPush(uid,'いいねが届きました💌','気になる人があなたにいいねしました。プロフィールを確認してみて！'); toast('いいねを送りました（今日の残り '+likeRemainText()+'）'); }
@@ -1360,7 +1691,7 @@ async function doInstall(){
 }
 /* ---------- はじめての方向けガイド ---------- */
 const GUIDE=[
-  {icon:'📍',title:'近くにいる人が<br>見えます',body:'いま同じ場所でこのアプリを開いている人が、地図と一覧に表示されます。距離も出るので、すぐ近くにいるかが分かります。',note:'アプリを開いている間だけ位置を共有します。閉じれば止まります。'},
+  {icon:'📍',title:'近くにいる人が<br>見えます',body:'いま多摩キャンパスでこのアプリを開いている人のうち、学部・今日の目的・目標のどれかが同じ人が、地図と一覧に表示されます。',note:'アプリを開いている間だけ位置を共有します。閉じれば止まります。'},
   {icon:'♥',title:'気になる人に<br>いいねを送る',body:'プロフィールを開いて「いいね」を押し、どこに惹かれたかを選んで送ります。お互いに送り合うとマッチが成立します。',note:'いいねは1日3回まで無料です。'},
   {icon:'💬',title:'マッチしたら<br>24時間以内に話す',body:'マッチすると、その相手とメッセージができます。ただし24時間が過ぎると話せなくなるので、気になったら早めに声をかけてみてください。',note:'期限が切れる前なら、課金で「ずっと話せる」ようにもできます。'},
   {icon:'👥',title:'コミュニティで<br>みんなと話す',body:'「コミュ」タブでは、部屋に参加してみんなで話せます。参加は無料です。参加者のプロフィールも見られます。',note:'困ったときは、相手のプロフィールから通報・ブロックができます。'},
@@ -1404,7 +1735,7 @@ async function openMembers(){
     const ids=(mem||[]).map(m=>m.user_id).filter(id=>!blocked.has(id));
     if(!ids.length){ $('#memSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:10px">参加者</h2><div class="empty" style="padding:24px 0"><div class="big">👥</div><p>まだ参加者がいません。</p></div><button class="btn btn-ghost" style="width:100%;padding:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button>`; return; }
     const {data:profs}=await sb.from(T('profiles')).select('*').in('id',ids);
-    const list=(profs||[]).map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],lat:u.lat,lng:u.lng}));
+    const list=(profs||[]).map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},lat:u.lat,lng:u.lng}));
     // 自分を先頭に、あとは名前順
     list.sort((a,b)=>(a.id===myId?-1:b.id===myId?1:String(a.name).localeCompare(String(b.name),'ja')));
     $('#memSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:4px">参加者</h2>
@@ -1430,7 +1761,7 @@ async function openUserById(uid){
   try{
     const {data}=await sb.from(T('profiles')).select('*').eq('id',uid).maybeSingle();
     if(!data){toast('プロフィールが見つかりません');return;}
-    const u={id:data.id,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[],lat:data.lat,lng:data.lng};
+    const u={id:data.id,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[],fa:data.fes_attrs||{},lat:data.lat,lng:data.lng};
     let d=null; if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.round(Math.hypot(r.e,r.n));}
     openSheet(u,d);
   }catch(e){ toast('プロフィールを開けませんでした'); }
@@ -1444,14 +1775,18 @@ async function leaveAll(){sharing=false;stopGeo();if(sb)await sb.from(T('profile
 /* ---------- test mode (1台で確認) ---------- */
 function spawnTest(){
   if(!myId)myId='local-'+uuid();
-  if(!myPos){myPos={lat:35.6595,lng:139.7005,acc:20};origin={...myPos};geoState('ok');placeName='テスト地点';$('#locPlace').textContent='テスト地点（渋谷付近）';$('#meLoc').textContent='📍 テスト地点';}
-  const cand=[{name:'ゆい',age:24,emoji:'☕',bio:'カフェ巡りが好きです',tags:['カフェ','映画']},
-              {name:'そう',age:27,emoji:'🎧',bio:'音楽とランニング。近くにいたら話しましょう',tags:['音楽','ランニング']},
-              {name:'あおい',age:23,emoji:'🌿',bio:'本と植物が好き。静かな喫茶店を探し中',tags:['読書','散歩']}];
+  if(!myPos){myPos={lat:CAMPUS_CENTER.lat,lng:CAMPUS_CENTER.lng,acc:20};origin={...myPos};geoState('ok');placeName='テスト地点';$('#locPlace').textContent='テスト地点（多摩キャンパス）';$('#meLoc').textContent='📍 テスト地点';}
+  const cand=[{name:'ゆい',age:20,emoji:'☕',bio:'カフェ巡りが好きです',tags:['カフェ','映画'],fa:{faculty:'社会学部',dept:'メディア社会学科',grade:'2年',purposes:['食べ歩き','ひとりで来た'],goals:['留学'],status:'一緒に回る人募集中',hometown:'神奈川県',answers:{q1:'b',q2:'b',q3:'a'}}},
+              {name:'そう',age:21,emoji:'🎧',bio:'音楽とランニング。近くにいたら話しましょう',tags:['音楽','ランニング'],fa:{faculty:'経済学部',dept:'現代ビジネス学科',grade:'3年',purposes:['ステージを見る','友達を探す'],goals:['就活','起業'],status:'ひまです',hometown:'東京都',answers:{q1:'a',q2:'a',q3:'b'}}},
+              {name:'あおい',age:23,emoji:'🌿',bio:'本と植物が好き。静かな喫茶店を探し中',tags:['読書','散歩'],fa:{faculty:'他大学の学生',grade:'4年',purposes:['食べ歩き','サークル・出店'],goals:['資格'],status:'休憩中',hometown:'長野県',answers:{q1:'a',q2:'b',q3:'b'}}}];
   testUsers=cand.map((c,i)=>{const ang=Math.random()*Math.PI*2,d=25+Math.random()*90;
     const dLat=(Math.sin(ang)*d)/111320,dLng=(Math.cos(ang)*d)/(111320*Math.cos(myPos.lat*Math.PI/180));
     return {id:'test-'+i,...c,lat:myPos.lat+dLat,lng:myPos.lng+dLng};});
   others=others.filter(u=>!isTest(u.id)).concat(testUsers);renderNearby();go('near');
+  // 出店の広告も1台で試せるよう、自分のすぐ近くに試しの出店を置く
+  booths=booths.filter(b=>!isTest(b.id)).concat([{id:'test-booth',name:'焼きそば屋（テスト）',description:'1パック300円。大盛りあります',emoji:'🍜',lat:myPos.lat+0.0002,lng:myPos.lng+0.0001,place:'テスト地点のそば',indoor:false}]);
+  try{ localStorage.removeItem('fes_booth_test-booth'); }catch(e){}
+  drawBooths(); setTimeout(checkBooths,2500);
   toast('🧪 テスト用の人を'+testUsers.length+'人追加しました。いいねするとマッチします');
 }
 
@@ -1465,6 +1800,7 @@ function openEdit(){
     <div class="field"><label>年齢（18歳以上）</label><input id="edAge" type="number" min="18" max="99" value="${profile.age||''}"></div>
     <div class="field"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
     <div class="field"><label>ひとこと</label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
+    ${attrFieldsHTML('ed')}
     <div class="field"><label>タグ（好きなだけ）</label><div class="chips" id="edTags"></div></div>
     <div class="field"><label>職業 / 学校</label><div class="chips" id="edWorkCat"></div><input id="edWorkDetail" maxlength="24" placeholder="くわしく（任意）例：法政大学 / エンジニア" style="margin-top:9px"></div>
     <div class="field"><label>求めている関係（複数OK）</label><div class="chips" id="edLooking"></div></div>
@@ -1494,6 +1830,7 @@ function openEdit(){
   $('#edInterestCat').innerHTML=INTERESTS.map(w=>`<div class="c" data-i="${w}">${w}</div>`).join('');
   $$('#edInterestCat .c').forEach(el=>el.onclick=()=>{edIntCat=el.dataset.i;$$('#edInterestCat .c').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');edRenderIntOpts();});
   edRenderIntOpts(); edRenderIntList();
+  edAttr=attrStateFrom(profile.fa); bindAttrForm('ed',edAttr);
   $('#editOverlay').classList.add('show');
 }
 let editLikes=[], editTags=new Set(), editWorkCat='', editInterests=[], edIntCat='';
@@ -1512,6 +1849,8 @@ async function saveEdit(){
   const ng=ngCheck(name)||ngCheck(bio);
   const w=$('#edWarn');
   if(ng){ w.textContent='⚠️ 名前かひとことに不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
+  const miss=attrMissing(edAttr);
+  if(miss){ w.textContent='⚠️ '+miss; w.classList.add('show'); return; }
   w.classList.remove('show');
   profile.name=name; profile.bio=bio;
   const newAge=parseInt($('#edAge').value)||profile.age;
@@ -1524,6 +1863,8 @@ async function saveEdit(){
   const ewd=$('#edWorkDetail').value.trim();
   profile.work=editWorkCat?(ewd?editWorkCat+'・'+ewd:editWorkCat):ewd;
   profile.interests=editInterests.map(x=>({cat:x.cat,detail:x.detail}));
+  profile.fa={...attrToFa(edAttr),status:(profile.fa||{}).status||''};   // いまの状態は編集画面では変えないので引き継ぐ
+  renderNearby(); renderCross();
   $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;
   $('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
   await publishMe();
@@ -1543,8 +1884,11 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 /* ---------- misc ---------- */
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
+  if(t==='near'&&fesMap)setTimeout(()=>fesMap.invalidateSize(),60);   // 非表示の間にサイズが変わっても地図が崩れないように
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=(isIOS()&&!isStandalone())?'iPhoneはホーム画面に追加すると使えます':'マッチしたらスマホに通知';}}
-function startLoops(){publishMe();loadBlocks().then(()=>pollUsers());loadMatchUnlocks();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();loadMatchUnlocks();}},6000);}
+function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
+  setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
+  publishMe();loadBlocks().then(()=>pollUsers());loadMatchUnlocks();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();loadMatchUnlocks();}},6000);}
 
 /* ---------- 学園祭版：開催時間・参加人数・アンケート ---------- */
 function fesPhase(now=Date.now()){
@@ -1625,6 +1969,7 @@ function fesTick(){
 
 /* ---------- boot ---------- */
 buildOnboard();
+$$('.encR').forEach(e=>e.textContent=FES.encounterRangeM);
 $('#obGo').onclick=onStart;
 registerSW();
 (async()=>{
