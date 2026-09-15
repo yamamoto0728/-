@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ちかく 学園祭版</title>
-<!-- 学園祭版は /fes と /fes/ のどちらで開かれても参照がずれないよう、パスはすべてサイトのルートから書く -->
-<link rel="manifest" href="/fes/manifest.json">
+<title>ちかく 多摩キャン版</title>
+<!-- 多摩キャン版（学園祭の前に学食のQRから入ってもらう簡易実験用）。学園祭版 fes/index.html を複製して改変。
+     /tama と /tama/ のどちらで開かれても参照がずれないよう、パスはすべてサイトのルートから書く（地図の形 campus-geo.js は多摩キャン版のものを共用） -->
+<link rel="manifest" href="/tama/manifest.json">
 <meta name="theme-color" content="#0fb0cd">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ちかく学園祭">
+<meta name="apple-mobile-web-app-title" content="ちかく多摩キャン">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -290,7 +291,7 @@
   .addrow input{flex:1}
   .addrow .addbtn{flex-shrink:0;padding:0 16px;border:0;border-radius:14px;background:var(--surface2);color:var(--amber);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
   .miniclose{margin-left:6px;cursor:pointer;opacity:.7}
-  /* 学園祭版 */
+  /* 多摩キャン版 */
   .fesbadge{align-self:center;margin-top:8px;padding:4px 13px;border-radius:20px;background:linear-gradient(90deg,var(--amber),var(--rose));color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px}
   .feslive{text-align:center;font-size:12.5px;font-weight:700;color:var(--ok);min-height:1.2em;margin-bottom:10px}
   .fesbar{margin:0 16px 10px;padding:9px 13px;border-radius:14px;background:rgba(245,151,47,.10);border:1px solid rgba(245,151,47,.35);font-size:12px;line-height:1.6;color:#6b4a10;display:none}
@@ -304,7 +305,7 @@
   .fesclosed p{font-size:13.5px;color:var(--muted);line-height:1.9;margin-bottom:18px}
   .fesclosed .when{font-size:15px;font-weight:700;color:var(--amber-deep)}
   .fessurvey{display:block;margin-top:10px;background:none;border:0;color:var(--muted);font-family:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
-  /* 学園祭版の属性 */
+  /* 多摩キャン版の属性 */
   .req{font-size:10px;color:#fff;background:var(--rose);border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:1px}
   .field select{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-family:inherit;font-size:14px;color:var(--ink)}
   .qrow{margin-bottom:10px}
@@ -352,8 +353,8 @@
     <section class="screen active" id="s-welcome">
       <div class="wel">
         <div class="wlogo">ちかく</div>
-        <div class="fesbadge">🎪 学園祭限定版</div>
-        <div class="wtag">学園祭の会場で、いま近くにいる人と<br>その場でつながる。期間限定です。</div>
+        <div class="fesbadge">🍛 多摩キャン限定版</div>
+        <div class="wtag">多摩キャンパスで、いま近くにいる人と<br>その場でつながる。期間限定です。</div>
         <div class="feslive" id="fesLiveWel"></div>
         <div class="shots">
           <div class="shot">
@@ -490,7 +491,7 @@
         <div class="setting" style="border-color:rgba(99,214,232,.3)">
           <div class="setrow" style="border:0"><div class="lab">🧪 テストモード<small>1台だけで動作確認できます。近くにテスト用の人が現れ、いいねするとマッチ→チャットまで試せます</small></div><button class="btn btn-primary" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="spawnTest()">試す</button></div>
         </div>
-        <div class="note">位置は<b>このリンクを持つ人全員</b>に見えます。知らない人と会うときは公共の場所で。<br>このアプリは<b>18歳以上</b>の方のみご利用いただけます。<br>気になる相手はプロフィールから<b>通報・ブロック</b>できます。<br>本アプリは、法政大学 社会学部 糸久正人ゼミが研究活動として運営している<b>非公式</b>のサービスです。<br>この<b>学園祭版</b>は開催時間中だけ使えます。通常版の「ちかく」とは登録情報・マッチが分かれています。</div>
+        <div class="note">位置は<b>このリンクを持つ人全員</b>に見えます。知らない人と会うときは公共の場所で。<br>このアプリは<b>18歳以上</b>の方のみご利用いただけます。<br>気になる相手はプロフィールから<b>通報・ブロック</b>できます。<br>本アプリは、法政大学 社会学部 糸久正人ゼミが研究活動として運営している<b>非公式</b>のサービスです。<br>この<b>多摩キャン版</b>は開催時間中だけ使えます。通常版の「ちかく」とは登録情報・マッチが分かれています。</div>
       </div>
     </section>
   </div>
@@ -538,7 +539,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 /* ============================================================ */
 
 /* ============================================================
-   学園祭版の設定：本番前にここだけ書き換える
+   多摩キャン版の設定：本番前にここだけ書き換える
    ============================================================ */
 const FES={
   // true の間は開催時間を無視して、いつでも使える（学園祭まではメンバーだけで動作確認するため）
@@ -555,7 +556,7 @@ const FES={
   // 終了の何分前から「まもなく終了・アンケートへ」の案内を出すか
   surveyBeforeEndMin:30,
   // 多摩キャンパスの外では使えないようにするか（false の間はどこでも使える。メンバーの動作確認用）
-  // ⚠️ 本番前に true にすること
+  // ⚠️ 学食にQRを貼る前に true にすること
   campusOnly:false,
   // すれ違いとして記録する距離（m）。GPS誤差の実測結果が出たらここを調整する
   encounterRangeM:50,
@@ -575,7 +576,7 @@ const FES={
 // 多摩キャンパスの敷地。OpenStreetMap（way 597200868）の外周146点を約8m単位で間引いたもの。[緯度, 経度]
 const CAMPUS=[[35.61719,139.28974],[35.61699,139.28978],[35.61728,139.29197],[35.61708,139.29211],[35.61545,139.2918],[35.61519,139.29193],[35.61499,139.29217],[35.61473,139.29381],[35.61255,139.29435],[35.61219,139.29549],[35.61265,139.296],[35.61351,139.29604],[35.61345,139.29642],[35.61295,139.29651],[35.6134,139.29737],[35.61313,139.29768],[35.6134,139.29808],[35.61304,139.2988],[35.6127,139.29908],[35.61253,139.29886],[35.61212,139.29918],[35.61184,139.2989],[35.61222,139.29957],[35.61147,139.29986],[35.6107,139.30198],[35.61081,139.30254],[35.61096,139.30273],[35.61136,139.30283],[35.61146,139.3032],[35.61144,139.30286],[35.61158,139.30257],[35.61221,139.30225],[35.61243,139.30188],[35.61263,139.30044],[35.61235,139.2998],[35.61269,139.30038],[35.61267,139.30069],[35.61297,139.30103],[35.61377,139.30057],[35.6137,139.30032],[35.61331,139.30035],[35.6129,139.29919],[35.61318,139.29926],[35.61382,139.3],[35.61493,139.30047],[35.61498,139.30075],[35.61574,139.30084],[35.61625,139.29967],[35.61608,139.29717],[35.61628,139.2971],[35.61629,139.29661],[35.61656,139.29661],[35.61661,139.29567],[35.61749,139.29475],[35.6176,139.29446],[35.61803,139.29417],[35.6184,139.29426],[35.61847,139.29383],[35.61919,139.2937],[35.6194,139.29248],[35.61971,139.29182],[35.62038,139.29128],[35.62034,139.29021],[35.61988,139.28987],[35.61726,139.29039],[35.61719,139.28974]];
 const CAMPUS_CENTER={lat:35.61559,lng:139.29633};
-// 学園祭版の属性。共通点（＝画面に出すかどうか）の判定に使うのは「学部・今日の目的・目標」だけ
+// 多摩キャン版の属性。共通点（＝画面に出すかどうか）の判定に使うのは「学部・今日の目的・目標」だけ
 const FA={
   // 学科名は法政大学公式サイトで確認（2026-09-13）。スポーツ健康学部は学科ではなくコース
   faculties:[
@@ -602,9 +603,9 @@ const FA={
   ],
 };
 const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県','海外'];
-// 学園祭版のデータは fes_ 付きの別テーブルに保存する（supabase/fes_tables.sql）。
+// 多摩キャン版のデータは tama_ 付きの別テーブルに保存する（supabase/tama_tables.sql）。
 // push_subscriptions だけは Edge Function が読むので通常版と共用
-const T=name=>'fes_'+name;
+const T=name=>'tama_'+name;
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const EMO=['🌙','⭐','🌸','🔥','🐱','🎧','☕','📷','🍜','🌿','🎨','🏃'];
@@ -670,7 +671,7 @@ async function tryResumeSession(){
     startGeo();buildInvite();startLoops();
     renderStatusRow();
     // 属性を追加する前に登録した人は必須項目が空で、誰とも共通点が出ないので入力してもらう
-    if(attrMissing(attrStateFrom(profile.fa))) setTimeout(()=>{ toast('学園祭版のプロフィール項目が増えました。入力をお願いします'); openEdit(); },900);
+    if(attrMissing(attrStateFrom(profile.fa))) setTimeout(()=>{ toast('多摩キャン版のプロフィール項目が増えました。入力をお願いします'); openEdit(); },900);
     maybeShowGuide(data.guide_seen===true);
     return true;
   }catch(e){ return false; }
@@ -842,7 +843,7 @@ function fesCampusGate(){
   const el=$('#fesOutside'); if(!el)return;
   if(!fesOutside){ el.classList.remove('show'); return; }
   el.innerHTML=`<div class="ic">🏫</div><h2>多摩キャンパスに<br>来ると使えます</h2>
-    <p>「ちかく 学園祭版」は、法政大学 多摩キャンパスの中にいる人どうしで使うアプリです。<br><br>キャンパス内にいるのにこの画面が出る場合は、<br>空が開けた屋外でもう一度お試しください。</p>
+    <p>「ちかく 多摩キャン版」は、法政大学 多摩キャンパスの中にいる人どうしで使うアプリです。<br><br>キャンパス内にいるのにこの画面が出る場合は、<br>空が開けた屋外でもう一度お試しください。</p>
     <button class="btn btn-primary" style="padding:14px 24px;font-size:15px" onclick="startGeo()">📍 位置を取り直す</button>`;
   el.classList.add('show');
 }
@@ -858,10 +859,10 @@ async function publishMe(){
   const row={id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,likes:profile.likes,interests:profile.interests,lat,lng,coarse,sharing:true,updated_at:new Date().toISOString()};
   if(!fesAttrColMissing)row.fes_attrs=profile.fa||{};
   const {error}=await sb.from(T('profiles')).upsert(row);
-  // SQL（supabase/fes_attributes.sql）の実行前にデプロイされても、位置の共有だけは止めない
+  // SQL（supabase/tama_tables.sql）の実行前にデプロイされても、位置の共有だけは止めない
   if(error&&/fes_attrs/.test(error.message)){
     fesAttrColMissing=true;
-    console.warn('[attrs] fes_profiles に fes_attrs 列がありません。supabase/fes_attributes.sql を実行してください:',error.message);
+    console.warn('[attrs] tama_profiles に fes_attrs 列がありません。supabase/tama_tables.sql を実行してください:',error.message);
     delete row.fes_attrs; await sb.from(T('profiles')).upsert(row);
   }
 }
@@ -918,7 +919,7 @@ function isExpired(m){
 }
 function leftText(ms){ if(ms<=0)return '終了'; const h=Math.floor(ms/3600000); const mi=Math.floor((ms%3600000)/60000); return h>0?(h+'時間'+mi+'分'):(mi+'分'); }
 
-/* ---------- 学園祭版の属性（学部・今日の目的・目標など） ---------- */
+/* ---------- 多摩キャン版の属性（学部・今日の目的・目標など） ---------- */
 let obAttr=null, edAttr=null;
 function attrsOf(u){ return (u&&(u.fa||u.fes_attrs))||{}; }
 function toggleArr(a,v){ const i=a.indexOf(v); if(i>=0)a.splice(i,1); else a.push(v); }
@@ -1042,7 +1043,7 @@ function initMap(){
     photo:L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',{maxZoom:18,attribution:GSI_ATTR}),
     illust:window.CAMPUS_GEO?buildIllust():null,
   };
-  try{ if(localStorage.getItem('fes_maptype')==='illust'&&fesBase.illust)fesMapType='illust'; }catch(e){}
+  try{ if(localStorage.getItem('tama_maptype')==='illust'&&fesBase.illust)fesMapType='illust'; }catch(e){}
   applyMapType();
   // キャンパスの外を白く覆って、キャンパスだけが見えるようにする（世界全体の四角にキャンパスの形の穴をあける）
   L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{stroke:false,fillColor:'#f4f7fe',fillOpacity:.95,interactive:false}).addTo(fesMap);
@@ -1097,7 +1098,7 @@ function toggleMapType(){
   if(!fesMap)return;
   if(fesMapType==='photo'&&!fesBase.illust){ toast('イラスト地図を読み込めませんでした'); return; }
   fesMapType=fesMapType==='photo'?'illust':'photo';
-  try{ localStorage.setItem('fes_maptype',fesMapType); }catch(e){}
+  try{ localStorage.setItem('tama_maptype',fesMapType); }catch(e){}
   applyMapType();
 }
 function applyMapType(){
@@ -1145,7 +1146,7 @@ function drawMap(list){
 /* ---------- 閉じている人への「近くにいます」通知（最後にいた位置を使う） ---------- */
 // ブラウザは閉じている間の位置を取れない。そこで、アプリを開いている人の端末が
 // 閉じた人の「閉じる直前の位置」の近くに来たら、閉じた人に通知を送る。
-// 同じ人への通知は fes_push_log に記録し、送る端末が何台あっても FES.nearbyPushCooldownMin 分に1回までにする
+// 同じ人への通知は tama_push_log に記録し、送る端末が何台あっても FES.nearbyPushCooldownMin 分に1回までにする
 let pushLogMissing=false;
 async function checkClosedNearby(){
   if(!FES.nearbyPush||!sb||!profile||!myPos||fesOutside||pushLogMissing)return;
@@ -1167,7 +1168,7 @@ async function checkClosedNearby(){
       .in('recipient_id',cands.map(x=>x.u.id)).eq('kind','nearby')
       .gt('created_at',new Date(now-FES.nearbyPushCooldownMin*60000).toISOString());
     // 記録テーブルが無い状態で送ると回数制限が効かず通知が連打になるので、送らない
-    if(le){ pushLogMissing=true; console.warn('[push] fes_push_log を読み込めません。supabase/fes_notifications.sql を実行してください:',le.message); return; }
+    if(le){ pushLogMissing=true; console.warn('[push] tama_push_log を読み込めません。supabase/tama_tables.sql を実行してください:',le.message); return; }
     const recent=new Set((logs||[]).map(x=>x.recipient_id));
     for(const {u,common} of cands){
       if(recent.has(u.id))continue;
@@ -1186,7 +1187,7 @@ async function loadBooths(){
   if(!sb)return;
   try{
     const {data,error}=await sb.from(T('booths')).select('*').eq('active',true);
-    if(error){ console.warn('[booths] fes_booths を読み込めません。supabase/fes_booths.sql を実行してください:',error.message); return; }
+    if(error){ console.warn('[booths] tama_booths を読み込めません。supabase/fes_booths.sql を実行してください:',error.message); return; }
     // テストモードで出した試しの出店は残す
     booths=(data||[]).concat(booths.filter(b=>isTest(b.id))); drawBooths();
   }catch(e){}
@@ -1198,8 +1199,8 @@ function drawBooths(){
     .on('click',()=>showBoothPop(b,false)).addTo(fesBoothLayer));
 }
 // 同じ出店を何度も知らせないよう、最後に知らせた時刻を端末に覚えておく
-function boothSeenAt(id){ try{ return +localStorage.getItem('fes_booth_'+id)||0; }catch(e){ return 0; } }
-function markBoothSeen(id){ try{ localStorage.setItem('fes_booth_'+id,String(Date.now())); }catch(e){} }
+function boothSeenAt(id){ try{ return +localStorage.getItem('tama_booth_'+id)||0; }catch(e){ return 0; } }
+function markBoothSeen(id){ try{ localStorage.setItem('tama_booth_'+id,String(Date.now())); }catch(e){} }
 // 近くを通った出店を知らせる（ブラウザの制約で、アプリを開いている間だけ）
 function checkBooths(){
   if(!myPos||fesOutside||!booths.length)return;
@@ -1516,7 +1517,7 @@ async function doLike(uid,reason){
   const matched={common:commonWith(tu),same:sameAnswers(tu).map(q=>q.id)};
   const {error:le}=await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:reason||null,matched});
   if(le&&/matched/.test(le.message)){
-    console.warn('[attrs] fes_likes に matched 列がありません。supabase/fes_attributes.sql を実行してください:',le.message);
+    console.warn('[attrs] tama_likes に matched 列がありません。supabase/tama_tables.sql を実行してください:',le.message);
     await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:reason||null});
   }
   const {data}=await sb.from(T('likes')).select('from_id').eq('from_id',uid).eq('to_id',myId).maybeSingle();
@@ -1536,7 +1537,7 @@ async function createMatch(uid,announce,matchedAt,theirReason){
 }
 function notifyPush(uid,title,body){
   if(!sb||isTest(uid))return;
-  sb.functions.invoke('send-match-push',{body:{to:uid,title,body,url:'/fes/'}})
+  sb.functions.invoke('send-match-push',{body:{to:uid,title,body,url:'/tama/'}})
     .catch(err=>console.error('[push] 送信失敗',err));
 }
 function showMatchPop(u,theirReason){const mp=$('#matchpop');
@@ -1812,10 +1813,10 @@ function guideMove(d){
 }
 // 初回だけ自動で出す（見たかどうかはプロフィールに保存し、端末をまたいでも重複しないようにする）
 function markGuideSeen(){
-  try{ localStorage.setItem('fes_guideSeen','1'); }catch(e){}
+  try{ localStorage.setItem('tama_guideSeen','1'); }catch(e){}
   if(sb&&myId){ try{ sb.from(T('profiles')).update({guide_seen:true}).eq('id',myId); }catch(e){} }
 }
-function guideSeenLocally(){ try{ return localStorage.getItem('fes_guideSeen')==='1'; }catch(e){ return false; } }
+function guideSeenLocally(){ try{ return localStorage.getItem('tama_guideSeen')==='1'; }catch(e){ return false; } }
 function maybeShowGuide(seenFromDb){
   if(seenFromDb===true) return;
   if(guideSeenLocally()) return;
@@ -1883,7 +1884,7 @@ function spawnTest(){
   others=others.filter(u=>!isTest(u.id)).concat(testUsers);renderNearby();go('near');
   // 出店の広告も1台で試せるよう、自分のすぐ近くに試しの出店を置く
   booths=booths.filter(b=>!isTest(b.id)).concat([{id:'test-booth',name:'焼きそば屋（テスト）',description:'1パック300円。大盛りあります',emoji:'🍜',lat:myPos.lat+0.0002,lng:myPos.lng+0.0001,place:'テスト地点のそば',indoor:false}]);
-  try{ localStorage.removeItem('fes_booth_test-booth'); }catch(e){}
+  try{ localStorage.removeItem('tama_booth_test-booth'); }catch(e){}
   drawBooths(); setTimeout(checkBooths,2500);
   toast('🧪 テスト用の人を'+testUsers.length+'人追加しました。いいねするとマッチします');
 }
@@ -1971,7 +1972,7 @@ async function saveEdit(){
 }
 /* ---------- invite ---------- */
 // 人に配るURLは常にこの正式URLにする（古いドメインで開かれても混乱しないように）
-const OFFICIAL_URL='https://chikaku-hosei.vercel.app/fes/';
+const OFFICIAL_URL='https://chikaku-hosei.vercel.app/tama/';
 function buildInvite(){const url=OFFICIAL_URL;$('#shareUrl').value=url;renderQR(url);$('#shareUrl').addEventListener('input',e=>renderQR(e.target.value));}
 function renderQR(url){const box=$('#qrbox');const img=new Image();
   img.onload=()=>{box.innerHTML='';box.appendChild(img);};
@@ -1988,7 +1989,7 @@ function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBoot
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
   publishMe();loadBlocks().then(()=>pollUsers());loadMatchUnlocks();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();loadMatchUnlocks();}},6000);}
 
-/* ---------- 学園祭版：開催時間・参加人数・アンケート ---------- */
+/* ---------- 多摩キャン版：開催時間・参加人数・アンケート ---------- */
 function fesPhase(now=Date.now()){
   if(FES.alwaysOpen)return {state:'open',end:null};
   const list=FES.sessions.map(x=>({start:Date.parse(x.start),end:Date.parse(x.end)})).sort((a,b)=>a.start-b.start);
@@ -2026,7 +2027,7 @@ function renderFesBar(ph){
   if(ph.state!=='open'){ bar.className='fesbar'; return; }
   if(ph.end==null){
     bar.className='fesbar show';
-    bar.innerHTML='🎪 学園祭版 · <b>メンバー動作確認中</b>'+(fesLive?' · いま <b>'+fesLive+'人</b>が参加中':'');
+    bar.innerHTML='🍛 多摩キャン版 · <b>メンバー動作確認中</b>'+(fesLive?' · いま <b>'+fesLive+'人</b>が参加中':'');
     return;
   }
   const left=ph.end-Date.now();
@@ -2035,7 +2036,7 @@ function renderFesBar(ph){
     bar.innerHTML='⏰ あと<b>'+Math.max(1,Math.ceil(left/60000))+'分</b>で終了します。<b>アンケートにご協力ください ›</b>';
   }else{
     bar.className='fesbar show';
-    bar.innerHTML='🎪 学園祭限定 · <b>'+fesTime(ph.end)+'まで</b>'+(fesLive?' · いま <b>'+fesLive+'人</b>が参加中':'');
+    bar.innerHTML='🍛 多摩キャン限定 · <b>'+fesTime(ph.end)+'まで</b>'+(fesLive?' · いま <b>'+fesLive+'人</b>が参加中':'');
   }
 }
 function renderFesClosed(ph){
@@ -2043,10 +2044,10 @@ function renderFesClosed(ph){
   if(ph.state==='open'){ el.classList.remove('show'); return; }
   el.innerHTML=ph.state==='before'
     ?`<div class="ic">🎪</div><h2>まだ始まっていません</h2>
-      <p>「ちかく 学園祭版」は開催時間中だけ使えます。<br>次の開始は</p>
+      <p>「ちかく 多摩キャン版」は開催時間中だけ使えます。<br>次の開始は</p>
       <div class="when">${fesTime(ph.start,true)} から</div>`
     :`<div class="ic">🎉</div><h2>ご参加ありがとうございました</h2>
-      <p>学園祭版の受付は終了しました。<br>よろしければ、使ってみた感想を<br>アンケートで教えてください。</p>
+      <p>多摩キャン版の受付は終了しました。<br>よろしければ、使ってみた感想を<br>アンケートで教えてください。</p>
       <button class="btn btn-primary" style="padding:15px 26px;font-size:15px" onclick="openSurvey()">📝 アンケートに答える</button>`;
   el.classList.add('show');
 }
