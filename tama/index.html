@@ -76,17 +76,31 @@
   .locbar.bad{border-color:rgba(255,128,128,.4);background:rgba(255,128,128,.08)}
   .locbar .retry{background:var(--amber);color:#3a2410;border:0;border-radius:12px;padding:8px 12px;font-weight:700;font-family:inherit;font-size:12px;cursor:pointer}
   /* z-index:0 で重なりの基準を作る（Leaflet内部のz-indexが、プロフィールのシートなどより前に出ないように） */
-  .map-wrap{position:relative;z-index:0;height:300px;margin:2px 16px 4px;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:#f4f7fe;flex-shrink:0}
+  .map-wrap{position:relative;z-index:0;height:360px;margin:2px 16px 4px;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:#f4f7fe;flex-shrink:0}
   #map{width:100%;height:100%}
   .leaflet-container{font-family:inherit;background:#f4f7fe}
   .maptype{position:absolute;bottom:9px;left:9px;z-index:1000;border:1px solid var(--line);background:rgba(255,255,255,.95);border-radius:14px;padding:6px 11px;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--ink);cursor:pointer}
   .blbl-wrap{width:0!important;height:0!important}
-  .blbl{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;font-size:10px;font-weight:700;color:#1b2244;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.85);box-shadow:0 1px 3px rgba(30,40,90,.25)}
+  /* 建物名。文字の大きさはズームに合わせて layoutLabels() が --blbl-fs で変える */
+  .blbl{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;font-size:var(--blbl-fs,10.5px);font-weight:700;color:#2a3358;padding:2px 7px;border-radius:7px;background:rgba(255,255,255,.92);border:1px solid rgba(110,125,176,.35);box-shadow:0 1px 3px rgba(30,40,90,.18);line-height:1.25}
+  .blbl.key{color:#141b3d;border-color:rgba(110,125,176,.6)}
+  .blbl.food{color:#8a4a12;background:#fff4e6;border-color:#f0a55c}
+  .blbl.field{color:#2f6b2a;background:rgba(244,252,240,.92);border-color:rgba(110,170,100,.5)}
   .nearest{position:absolute;top:9px;right:9px;z-index:1000;font-size:11px;background:rgba(255,255,255,.9);padding:5px 11px;border-radius:14px;border:1px solid var(--line);color:var(--muted)}
   .nearest b{color:var(--amber);font-family:"JetBrains Mono";font-weight:500}
   .maplbl{position:absolute;top:9px;left:9px;z-index:1000;font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.9);padding:4px 9px;border-radius:12px;border:1px solid var(--line)}
   .maplbl b{color:var(--signal)}
   .mapme{position:absolute;bottom:22px;right:9px;z-index:1000;border:1px solid var(--line);background:rgba(255,255,255,.95);border-radius:14px;padding:6px 11px;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--signal);cursor:pointer}
+  /* 地図を大きく表示（画面いっぱい。プロフィールのシート z-index:40 より下） */
+  .map-wrap.full{position:absolute;inset:0;z-index:30;height:auto;margin:0;border-radius:0;border:0}
+  .map-wrap.full .maplbl{top:40px}.map-wrap.full .nearest{top:40px}.map-wrap.full .mapzoom{top:80px}
+  .map-wrap.full .maptype{bottom:30px}.map-wrap.full .mapme{bottom:30px}
+  /* ＋／－／全体 ボタン。指で押しやすい大きさにする */
+  .mapzoom{position:absolute;top:44px;right:9px;z-index:1000;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.96);box-shadow:0 2px 8px rgba(30,40,90,.12)}
+  .mapzoom button{width:40px;height:40px;border:0;background:none;font-size:20px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit;line-height:1}
+  .mapzoom button+button{border-top:1px solid var(--line)}
+  .mapzoom button:last-child{font-size:17px}
+  .mapzoom button:active{background:#eef2fb}
   .pmk{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid #fff;box-shadow:0 2px 6px rgba(30,40,90,.35)}
   .pmk.me{border-radius:10px;font-size:18px}
   .listhead{display:flex;align-items:center;gap:8px;padding:12px 22px 8px;font-size:12.5px;font-weight:700;color:var(--muted)}
@@ -423,7 +437,9 @@
       <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
       <div class="statusrow chips" id="statusRow"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
-      <div class="map-wrap"><div id="map"></div><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">🏫 <b>多摩キャンパス</b></div><button class="maptype" id="mapTypeBtn" onclick="toggleMapType()">🗺 イラスト</button><button class="mapme" onclick="centerOnMe()">📍 自分</button></div>
+      <div class="map-wrap" id="mapWrap"><div id="map"></div><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">🏫 <b>多摩キャンパス</b></div>
+        <div class="mapzoom"><button onclick="mapZoom(1)" aria-label="拡大">＋</button><button onclick="mapZoom(-1)" aria-label="縮小">－</button><button onclick="mapFitCampus()" aria-label="キャンパス全体を表示">🏫</button></div>
+        <button class="maptype" id="mapFullBtn" onclick="toggleMapFull()">⤢ 大きく</button><button class="mapme" onclick="centerOnMe()">📍 自分</button></div>
       <div class="listhead"><span class="live"></span> 位置を共有中の人</div>
       <div class="scroll"><div class="ulist" id="ulist"></div>
         <div class="listhead" style="margin-top:18px">💬 コミュニティ <span onclick="go('comm')" style="margin-left:auto;color:var(--signal);font-weight:700;cursor:pointer;font-size:12px">すべて見る ›</span></div>
@@ -1027,101 +1043,129 @@ function renderNearby(){
       <div class="b">${a.status?`<span class="stchip">${esc(a.status)}</span> `:''}${a.faculty?esc(a.faculty)+' · ':''}${esc(u.bio)}</div></div>
     <div class="d"><div class="m">${d!=null?Math.round(d)+'m':'—'}</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`; }).join('');
 }
-/* ---------- 地図（多摩キャンパスだけを映す。地図画像は国土地理院、Leaflet） ---------- */
-// 建物名は OpenStreetMap に登録されている名前（2026-09-13取得）。航空写真だとどれが何の建物か分かりにくいので載せる
+/* ---------- 地図（多摩キャンパスだけを映す。campus-geo.js の図形で描くイラスト地図、Leaflet） ---------- */
+// 建物名は OpenStreetMap に登録されている名前（2026-09-13取得）。
+// 4つ目の値は優先度（1=主要な建物。名前どうしが重なる時は優先度の高い方を残す）
 const CAMPUS_LABELS=[
-  ['総合棟',35.61509,139.29728],['大教室A棟',35.61453,139.29722],['大教室B棟',35.61474,139.29877],
-  ['研究・実験棟',35.61534,139.29546],['経済学部A棟',35.61464,139.29482],['経済学部B棟',35.61430,139.29450],['経済学部C棟',35.61479,139.29546],
-  ['社会学部A棟',35.61574,139.29939],['社会学部B棟',35.61551,139.29964],['現代福祉学部棟',35.61475,139.29938],
-  ['図書館・研究棟',35.61528,139.29815],['食堂A棟',35.61551,139.29867],['食堂B棟',35.61430,139.29512],
-  ['EGG DOME',35.61345,139.29767],['百周年記念館',35.61523,139.29309],['総合体育館',35.61759,139.29259],
-  ['スポーツ健康学部棟',35.61172,139.30143],['体育棟',35.61932,139.29187],
-  ['野球場',35.61962,139.29085],['陸上競技場',35.61828,139.29123],['ラグビー場',35.61858,139.29250],
-  ['正門',35.61390,139.29752],['グラウンド門',35.61718,139.29006],
+  ['総合棟',35.61509,139.29728,1],['大教室A棟',35.61453,139.29722,2],['大教室B棟',35.61474,139.29877,2],
+  ['研究・実験棟',35.61534,139.29546,2],['経済学部A棟',35.61464,139.29482,2],['経済学部B棟',35.61430,139.29450,2],['経済学部C棟',35.61479,139.29546,2],
+  ['社会学部A棟',35.61574,139.29939,2],['社会学部B棟',35.61551,139.29964,2],['現代福祉学部棟',35.61475,139.29938,2],
+  ['図書館・研究棟',35.61528,139.29815,1],['食堂A棟',35.61551,139.29867,1],['食堂B棟',35.61430,139.29512,1],
+  ['EGG DOME',35.61345,139.29767,1],['百周年記念館',35.61523,139.29309,2],['総合体育館',35.61759,139.29259,1],
+  ['スポーツ健康学部棟',35.61172,139.30143,1],['体育棟',35.61932,139.29187,2],
+  ['野球場',35.61962,139.29085,2],['陸上競技場',35.61828,139.29123,1],['ラグビー場',35.61858,139.29250,2],
+  ['正門',35.61390,139.29752,1],['グラウンド門',35.61718,139.29006,2],
 ];
 const GSI_ATTR='<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a> / 建物名 © OpenStreetMap';
-let fesMap=null, fesLayer=null, fesMe=null, fesRange=null, fesFollowed=false, fesBase={}, fesLabels=null, fesMapType='photo';
+let fesMap=null, fesLayer=null, fesMe=null, fesRange=null, fesFollowed=false, fesLabelMarkers=[], fesCampusBounds=null;
 function initMap(){
   if(fesMap||!window.L)return;   // CDNが読めなかった時は地図なしで一覧だけ動かす
-  const bounds=L.polygon(CAMPUS).getBounds();
-  // キャンパスの外へ地図を動かせないようにする（端が切れないよう少しだけ余白を持たせる）
-  // 国土地理院の画像はズーム18まで。それ以上は引き伸ばしになってぼやけるので18で止める
-  fesMap=L.map('map',{zoomControl:false,maxBounds:bounds.pad(0.12),maxBoundsViscosity:1,maxZoom:18});
+  const bounds=fesCampusBounds=L.polygon(CAMPUS).getBounds();
+  // キャンパスの外へ地図を動かせないようにする（端が切れないよう少しだけ余白を持たせる）。
+  // 拡大・縮小は0.5段階で細かく。ホイールでも少ない回転で動くようにする
+  fesMap=L.map('map',{zoomControl:false,maxBounds:bounds.pad(0.12),maxBoundsViscosity:1,maxZoom:20,
+    zoomSnap:0.5,zoomDelta:0.5,wheelPxPerZoomLevel:80,bounceAtZoomLimits:false});
   fesMap.attributionControl.setPrefix(false);
-  // イラストは外部の地図サービスを使わず、campus-geo.js の建物・道などの形をアプリで描く。
-  // （国土地理院の淡色地図は拡大すると等高線と巨大な地名で見づらく、CARTOはAPIキーが必要だったため）
-  fesBase={
-    photo:L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',{maxZoom:18,attribution:GSI_ATTR}),
-    illust:window.CAMPUS_GEO?buildIllust():null,
-  };
-  try{ if(localStorage.getItem('tama_maptype')==='illust'&&fesBase.illust)fesMapType='illust'; }catch(e){}
-  applyMapType();
+  // 地図はイラストだけ（航空写真はどれが何の建物か分かりにくいため）。
+  // campus-geo.js が読めなかった時だけ、代わりに国土地理院の航空写真を映す（画像はズーム18まで）
+  if(window.CAMPUS_GEO){ buildIllust().addTo(fesMap); }
+  else{ fesMap.setMaxZoom(18); L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',{maxZoom:18,attribution:GSI_ATTR}).addTo(fesMap); }
   // キャンパスの外を白く覆って、キャンパスだけが見えるようにする（世界全体の四角にキャンパスの形の穴をあける）
   L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{stroke:false,fillColor:'#f4f7fe',fillOpacity:.95,interactive:false}).addTo(fesMap);
   L.polygon(CAMPUS,{color:'#0fb0cd',weight:2.5,fill:false,interactive:false}).addTo(fesMap);
   fesMap.fitBounds(bounds,{padding:[6,6]});
   fesMap.setMinZoom(fesMap.getZoom());   // キャンパス全体より引いて見られないようにする
-  // 建物名は人のアイコンより下に描く（名前でアイコンが隠れないように）。細かくて読めない引きの状態では出さない
+  // 建物名は人のアイコンより下に描く（名前でアイコンが隠れないように）
   fesMap.createPane('labels'); fesMap.getPane('labels').style.zIndex=450; fesMap.getPane('labels').style.pointerEvents='none';
-  fesLabels=L.layerGroup(CAMPUS_LABELS.map(([n,lat,lng])=>L.marker([lat,lng],{pane:'labels',interactive:false,keyboard:false,
-    icon:L.divIcon({className:'blbl-wrap',iconSize:null,html:`<span class="blbl">${n}</span>`})})));
-  const syncLabels=()=>{ if(fesMap.getZoom()>=17)fesLabels.addTo(fesMap); else fesLabels.remove(); };
-  fesMap.on('zoomend',syncLabels); syncLabels();
+  fesLabelMarkers=CAMPUS_LABELS.map(([n,lat,lng,tier])=>{
+    const food=/食堂/.test(n), cls=(food?' food':/場$/.test(n)?' field':'')+(tier===1?' key':'');
+    const m=L.marker([lat,lng],{pane:'labels',interactive:false,keyboard:false,
+      icon:L.divIcon({className:'blbl-wrap',iconSize:null,html:`<span class="blbl${cls}">${food?'🍛 ':''}${n}</span>`})});
+    // 名前の幅の目安（文字数。英数字は細いので0.62文字分、絵文字は1.4文字分）
+    // 食堂は学食のQRから来た人の目印になるので、いちばん優先して名前を出す
+    m._tier=food?0:tier; m._len=[...n].reduce((s,c)=>s+(c.charCodeAt(0)<128?.62:1),0)+(food?1.4:0);
+    return m;
+  }).sort((a,b)=>a._tier-b._tier);
+  fesMap.on('zoomend',layoutLabels); layoutLabels();
   fesLayer=L.layerGroup().addTo(fesMap);
   fesBoothLayer=L.layerGroup().addTo(fesMap);
-  updateMapTypeBtn();
   drawBooths();
+}
+// 建物名を、名前どうしが重ならない分だけ出す（優先度の高い主要な建物から置いていく）。
+// 引いた状態でも主要な建物の名前は読め、拡大するほど小さな建物の名前も増えていく
+function layoutLabels(){
+  if(!fesMap||!fesLabelMarkers.length)return;
+  const z=fesMap.getZoom(), fs=z>=19?13:z>=18?12:z>=17?11.5:z>=16?11:10.5, placed=[];
+  fesMap.getContainer().style.setProperty('--blbl-fs',fs+'px');
+  for(const m of fesLabelMarkers){
+    const p=fesMap.latLngToContainerPoint(m.getLatLng()), w=m._len*fs+16, h=fs+8;
+    const box=[p.x-w/2-2,p.y-h/2-2,p.x+w/2+2,p.y+h/2+2];
+    const free=!placed.some(b=>box[0]<b[2]&&box[2]>b[0]&&box[1]<b[3]&&box[3]>b[1]);
+    if(free){ placed.push(box); if(!fesMap.hasLayer(m))m.addTo(fesMap); }
+    else if(fesMap.hasLayer(m)) m.remove();
+  }
+}
+// 点が多角形の内側にあるか（建物に名前を付けて色分けするために使う）
+function inRing(lat,lng,ring){
+  let inside=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const [yi,xi]=ring[i],[yj,xj]=ring[j];
+    if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;
+  }
+  return inside;
 }
 // キャンパスのイラスト地図を描く。どこまで拡大してもくっきり見えるよう、画像ではなく図形で描く
 let illustRoads=[];
 function buildIllust(){
   const G=window.CAMPUS_GEO;
   fesMap.createPane('illust'); fesMap.getPane('illust').style.zIndex=250;   // 地図画像（200）と覆い（400）の間
-  const renderer=L.canvas({pane:'illust',padding:0.3});
+  const renderer=L.canvas({pane:'illust',padding:0.5});
   const group=L.layerGroup();
   group.getAttribution=()=>'地図 © OpenStreetMap';
   const base={renderer,pane:'illust',interactive:false};
   const polys=(arr,o)=>(arr||[]).forEach(p=>L.polygon(p,{...base,...o}).addTo(group));
   const lines=(arr,o)=>(arr||[]).map(p=>L.polyline(p,{...base,lineCap:'round',lineJoin:'round',...o}).addTo(group));
-  L.polygon(CAMPUS,{...base,stroke:false,fillColor:'#f7f3ea',fillOpacity:1}).addTo(group);   // 地面
-  polys(G.g,{stroke:false,fillColor:'#d6ecc9',fillOpacity:1});                             // 緑地
-  polys(G.p,{color:'#ffffff',weight:1.5,fillColor:'#bde3b4',fillOpacity:1});               // グラウンド・コート
-  polys(G.w,{stroke:false,fillColor:'#b5dbf2',fillOpacity:1});                             // 池
-  polys(G.k,{stroke:false,fillColor:'#e7eaf1',fillOpacity:1});                             // 駐車場
-  const casing=lines(G.r,{color:'#d3d8e4',weight:7});                                      // 車道のふち
-  const road=lines(G.r,{color:'#ffffff',weight:5});                                        // 車道
-  const foot=lines(G.f,{color:'#ffffff',weight:2,opacity:.95});                            // 歩道・階段
-  polys(G.b,{color:'#aeb7cf',weight:1.2,fillColor:'#ffffff',fillOpacity:1});               // 建物
-  illustRoads=[casing,road,foot];
+  L.polygon(CAMPUS,{...base,stroke:false,fillColor:'#f2eee4',fillOpacity:1}).addTo(group);             // 地面
+  polys(G.g,{color:'#bcdcab',weight:1,fillColor:'#d4ebc5',fillOpacity:1});                           // 緑地
+  polys(G.p,{color:'#ffffff',weight:2,fillColor:'#a9da9d',fillOpacity:1});                           // グラウンド・コート
+  polys(G.w,{color:'#80bde6',weight:1,fillColor:'#a8d5f2',fillOpacity:1});                           // 池
+  polys(G.k,{color:'#c9cfdc',weight:1,dashArray:'3 3',fillColor:'#e5e8ef',fillOpacity:1});           // 駐車場
+  // 道は「ふち（濃い色・太い）」の上に「白い線」を重ねて、ベージュの地面の上でも道筋が分かるようにする
+  const footCase=lines(G.f,{color:'#d8d0bd',weight:4});                                             // 歩道のふち
+  const casing=lines(G.r,{color:'#bfc7d8',weight:7});                                               // 車道のふち
+  const foot=lines(G.f,{color:'#ffffff',weight:2});                                                 // 歩道・階段
+  const road=lines(G.r,{color:'#ffffff',weight:5});                                                 // 車道
+  // 建物：少し右下にずらした影を敷いて立体的に見せる。名前のある建物は青、食堂はオレンジで目立たせる
+  const SH=0.000012;   // 約1.3m
+  (G.b||[]).forEach(ring=>L.polygon(ring.map(([a,b])=>[a-SH,b+SH]),{...base,stroke:false,fillColor:'#8e97b0',fillOpacity:.35}).addTo(group));
+  (G.b||[]).forEach(ring=>{
+    const lb=CAMPUS_LABELS.find(([n,lat,lng])=>inRing(lat,lng,ring)), food=!!lb&&/食堂/.test(lb[0]);
+    L.polygon(ring,{...base,color:food?'#e0883a':lb?'#6d7db0':'#a0a8bf',weight:food?1.8:1.2,
+      fillColor:food?'#ffd8a8':lb?'#dce5ff':'#eef0f6',fillOpacity:1}).addTo(group);
+  });
+  illustRoads=[casing,road,foot,footCase];
   fesMap.on('zoomend',styleIllustRoads); styleIllustRoads();
   return group;
 }
 // 道の太さをズームに合わせる（引きの時に道が太すぎて建物を隠さないように）
 function styleIllustRoads(){
   if(!illustRoads.length)return;
-  const z=fesMap.getZoom(), w=z>=19?10:z>=18?8:z>=17?6:z>=16?4:2.5;
+  const z=fesMap.getZoom(), w=z>=20?13:z>=19?10:z>=18?8:z>=17?6:z>=16?4:2.5, fw=Math.max(1.5,w/2.2);
   illustRoads[0].forEach(l=>l.setStyle({weight:w+2.5}));
   illustRoads[1].forEach(l=>l.setStyle({weight:w}));
-  illustRoads[2].forEach(l=>l.setStyle({weight:Math.max(1.5,w/2.5)}));
+  illustRoads[2].forEach(l=>l.setStyle({weight:fw}));
+  illustRoads[3].forEach(l=>l.setStyle({weight:fw+1.5}));
 }
-// 航空写真とイラストを切り替える。選んだ方を端末に覚えておく
-function toggleMapType(){
-  if(!fesMap)return;
-  if(fesMapType==='photo'&&!fesBase.illust){ toast('イラスト地図を読み込めませんでした'); return; }
-  fesMapType=fesMapType==='photo'?'illust':'photo';
-  try{ localStorage.setItem('tama_maptype',fesMapType); }catch(e){}
-  applyMapType();
+// 地図の操作ボタン（＋／－、キャンパス全体、大きく表示）
+function mapZoom(d){ if(fesMap)fesMap.setZoom(fesMap.getZoom()+d); }
+function mapFitCampus(){ if(fesMap&&fesCampusBounds)fesMap.fitBounds(fesCampusBounds,{padding:[6,6]}); }
+function toggleMapFull(){
+  const w=$('#mapWrap'); if(!w)return;
+  const on=w.classList.toggle('full');
+  $('#mapFullBtn').textContent=on?'✕ 閉じる':'⤢ 大きく';
+  // 大きさが変わったことを地図に伝えて、見えている範囲と建物名を置き直す
+  if(fesMap)setTimeout(()=>{ fesMap.invalidateSize(); layoutLabels(); },60);
 }
-function applyMapType(){
-  Object.values(fesBase).forEach(l=>{ if(l&&fesMap.hasLayer(l))fesMap.removeLayer(l); });
-  // 航空写真は画像がズーム18まで（それ以上はぼやける）。イラストは図形なので19まで拡大できる
-  fesMap.setMaxZoom(fesMapType==='photo'?18:19);
-  // アニメーション付きだと戻り切る前に次の処理が進むので、すぐ上限に合わせる
-  if(fesMap.getZoom()>fesMap.getMaxZoom())fesMap.setZoom(fesMap.getMaxZoom(),{animate:false});
-  fesBase[fesMapType].addTo(fesMap);
-  updateMapTypeBtn();
-}
-function updateMapTypeBtn(){ const b=$('#mapTypeBtn'); if(b)b.textContent=fesMapType==='photo'?'🗺 イラスト':'🛰 航空写真'; }
 function mapIcon(emoji,me){
   const s=me?34:28;
   return L.divIcon({className:'',iconSize:[s,s],iconAnchor:[s/2,s/2],
