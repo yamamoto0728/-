@@ -101,6 +101,28 @@
   .mapzoom button+button{border-top:1px solid var(--line)}
   .mapzoom button:last-child{font-size:17px}
   .mapzoom button:active{background:#eef2fb}
+  /* 友達・いまどこ */
+  .mypres{margin:4px 16px 6px;padding:14px 15px;background:var(--glass);border:1px solid var(--line);border-radius:18px}
+  .mypres .mphead{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:4px}
+  .mypres .mpwhere{font-size:15.5px}.mypres .mpwhere b{color:var(--ink)}
+  .mypres .mpsub{font-size:11.5px;color:var(--muted);margin:3px 0 10px}
+  .mypres .mpedit{width:100%;padding:11px;font-size:14px}
+  .mypres .mpvis{gap:6px}.mypres .mpvis .c{font-size:11.5px;padding:6px 10px}
+  .mypres .mpnote{font-size:10.5px;color:var(--muted);margin-top:7px;line-height:1.6}
+  .frbtns{display:flex;gap:6px;flex-shrink:0}.frbtns .btn{padding:8px 12px;font-size:12.5px}
+  .urow .d .frago{font-size:11px;color:var(--muted)}.urow .d .frmap{font-size:11px;color:var(--signal);font-weight:700;margin-top:2px}
+  .frnote{margin:6px 16px;padding:10px 12px;border-radius:12px;background:rgba(255,128,128,.08);border:1px solid rgba(255,128,128,.35);font-size:12px;color:#b04a4a}
+  .frrow{padding:6px 20px 2px;background:#fff;display:flex;flex-direction:column;gap:7px}
+  .frrow .frbtn{width:100%;padding:12px;font-size:14px}
+  .frrow .fr-on{font-size:13px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.1);border:1px solid rgba(32,180,131,.35);border-radius:14px;padding:10px 12px}
+  .frrow .frquit{background:none;border:0;color:var(--muted);font-size:11.5px;text-decoration:underline;cursor:pointer;font-family:inherit;align-self:center;padding:2px}
+  .pmk.fr{border:3px solid #20b483;box-shadow:0 0 0 3px rgba(32,180,131,.3),0 2px 6px rgba(30,40,90,.35)}
+  .frname{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:3px;font-size:10px;font-weight:700;white-space:nowrap;background:#20b483;color:#fff;border-radius:8px;padding:0 6px;line-height:1.6}
+  .pstitle{font-family:"Zen Maru Gothic";font-size:20px;margin-bottom:6px}
+  .psdesc{font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+  .psquick{margin-top:8px;gap:6px}.psquick .c{font-size:12px;padding:6px 11px}
+  .psvis{font-size:11.5px;color:var(--muted);margin:-4px 0 12px}
+  .psbtns{display:flex;gap:10px}.psbtns .btn{flex:1;padding:13px;font-size:14px}
   .pmk{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid #fff;box-shadow:0 2px 6px rgba(30,40,90,.35)}
   .pmk.me{border-radius:10px;font-size:18px}
   .listhead{display:flex;align-items:center;gap:8px;padding:12px 22px 8px;font-size:12.5px;font-weight:700;color:var(--muted)}
@@ -471,14 +493,19 @@
       <div class="joinhint" id="roomJoinHint">参加すると、この部屋に投稿できます</div>
       <div class="chatbar"><input id="roomInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendRoomMsg()"><button class="send" onclick="sendRoomMsg()">↑</button></div>
     </section>
-    <section class="screen" id="s-invite">
-      <div class="apphead"><h1>招待</h1><span class="sub">リンク / QR</span></div>
-      <div class="scroll"><div class="inv">
-        <p>このQRを読むか、リンクを開いた人が<br>同じ「近くの人」に表示されます。</p>
-        <div class="qrbox" id="qrbox"></div>
-        <div class="urlbox"><input id="shareUrl"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
-        <div class="steps"><h4>友だちを誘うには</h4><ol><li>近くにいる人に、上の<b>QRコードを見せる</b></li><li>相手がカメラで読み取ると、このアプリが開きます</li><li>相手が登録すると、<b>お互いに「近くの人」に表示されます</b></li></ol></div>
-      </div></div>
+    <section class="screen" id="s-friends">
+      <div class="apphead"><h1>友達</h1><span class="sub" id="friendSub">0人</span></div>
+      <div class="scroll">
+        <div class="mypres" id="myPresence"></div>
+        <div id="friendBox"></div>
+        <div class="listhead" style="margin-top:6px">📨 アプリに誘う</div>
+        <div class="inv">
+          <p>このQRを読むか、リンクを開いた人が<br>同じ「近くの人」に表示されます。</p>
+          <div class="qrbox" id="qrbox"></div>
+          <div class="urlbox"><input id="shareUrl"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
+          <div class="steps"><h4>友達になるには</h4><ol><li>相手にも、上の<b>QRコード</b>からアプリを開いてもらう</li><li>「近くの人」や「すれ違い」で相手のプロフィールを開き、<b>「友達申請する」</b></li><li>相手が承認すると友達になり、<b>いまいる建物や教室</b>が見られます</li></ol></div>
+        </div>
+      </div>
     </section>
     <section class="screen" id="s-me">
       <div class="scroll">
@@ -516,7 +543,7 @@
     <button data-t="cross" onclick="go('cross')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6c0 2-1 3-1 5s1 3 3 3M16 4c0 2 1 3 1 5s-1 3-3 4"/><circle cx="7" cy="19" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg>すれ違い<span class="ndot" id="dotCross" style="display:none"></span></button>
     <button data-t="match" onclick="go('match')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.4-7 10-7 10z"/></svg>マッチ<span class="ndot" id="dotMatch" style="display:none"></span></button>
     <button data-t="comm" onclick="go('comm')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.5a4 4 0 0 1 0 7"/></svg>コミュ<span class="ndot" id="dotComm" style="display:none"></span></button>
-    <button data-t="invite" onclick="go('invite')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h3v3M20 14v6M17 20h3"/></svg>招待</button>
+    <button data-t="friends" onclick="go('friends')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.2 4.5 2.1 4.5 4.9"/></svg>友達<span class="ndot" id="dotFriends" style="display:none"></span></button>
     <button data-t="me" onclick="go('me')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>設定</button>
   </nav>
   <div id="configNotice" style="position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px">
@@ -534,6 +561,7 @@
   <div class="overlay" id="termsOverlay" onclick="if(event.target===this)closeTerms()"><div class="sheet" id="termsSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="likeOverlay" onclick="if(event.target===this)closeLikeReason()"><div class="sheet" id="likeSheet" style="padding:24px 22px 30px"></div></div>
   <div class="overlay" id="memOverlay" onclick="if(event.target===this)closeMembers()"><div class="sheet" id="memSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="placeOverlay" onclick="if(event.target===this)closePlaceEdit()"><div class="sheet" id="placeSheet" style="padding:22px 22px 28px"></div></div>
   <div class="overlay" id="homeOverlay" onclick="if(event.target===this)closeAddHome()"><div class="sheet" id="homeSheet" style="padding:24px 22px 28px"></div></div>
   <div class="guide" id="guide">
     <div class="gtop"><button class="skip" onclick="closeGuide()">スキップ</button></div>
@@ -587,6 +615,11 @@ const FES={
   nearbyPushRangeM:80,       // 閉じた後に少し動いていても当たるよう、すれ違いより広め
   nearbyPushStaleMin:15,     // 閉じてからこの分数を過ぎた人には送らない（もう移動しているはずなので）
   nearbyPushCooldownMin:30,  // 同じ人に送るのはこの分数に1回まで（送る端末が何台あっても）
+  // 友達に見せる教室・ひとことが消えるまでの分数（授業1コマ分）。建物を出た時も消える
+  roomExpireMin:90,
+  // 建物に「入った」「出た」と判定するまで、同じ判定が続く秒数（GPSは建物の中でふらつくので、出る方を長めにする）
+  placeEnterSec:20,
+  placeLeaveSec:180,
 };
 // 多摩キャンパスの敷地。OpenStreetMap（way 597200868）の外周146点を約8m単位で間引いたもの。[緯度, 経度]
 const CAMPUS=[[35.61719,139.28974],[35.61699,139.28978],[35.61728,139.29197],[35.61708,139.29211],[35.61545,139.2918],[35.61519,139.29193],[35.61499,139.29217],[35.61473,139.29381],[35.61255,139.29435],[35.61219,139.29549],[35.61265,139.296],[35.61351,139.29604],[35.61345,139.29642],[35.61295,139.29651],[35.6134,139.29737],[35.61313,139.29768],[35.6134,139.29808],[35.61304,139.2988],[35.6127,139.29908],[35.61253,139.29886],[35.61212,139.29918],[35.61184,139.2989],[35.61222,139.29957],[35.61147,139.29986],[35.6107,139.30198],[35.61081,139.30254],[35.61096,139.30273],[35.61136,139.30283],[35.61146,139.3032],[35.61144,139.30286],[35.61158,139.30257],[35.61221,139.30225],[35.61243,139.30188],[35.61263,139.30044],[35.61235,139.2998],[35.61269,139.30038],[35.61267,139.30069],[35.61297,139.30103],[35.61377,139.30057],[35.6137,139.30032],[35.61331,139.30035],[35.6129,139.29919],[35.61318,139.29926],[35.61382,139.3],[35.61493,139.30047],[35.61498,139.30075],[35.61574,139.30084],[35.61625,139.29967],[35.61608,139.29717],[35.61628,139.2971],[35.61629,139.29661],[35.61656,139.29661],[35.61661,139.29567],[35.61749,139.29475],[35.6176,139.29446],[35.61803,139.29417],[35.6184,139.29426],[35.61847,139.29383],[35.61919,139.2937],[35.6194,139.29248],[35.61971,139.29182],[35.62038,139.29128],[35.62034,139.29021],[35.61988,139.28987],[35.61726,139.29039],[35.61719,139.28974]];
@@ -821,6 +854,7 @@ function onPos(p){
   if(!origin)origin={...myPos};geoState('ok');
   showPlace();
   fesCampusGate();
+  detectPlace();
   checkBooths();
   publishMe();
 }
@@ -1033,7 +1067,7 @@ function renderNearby(){
   if(!list.length){
     ul.innerHTML=all.length
       ?`<div class="empty"><div class="big">🔎</div><p>近くに<b>${all.length}人</b>いますが、<br>共通点のある人はまだいません。<br>今日の目的や目標を増やすと<br>見つかりやすくなります。</p><button class="btn btn-primary" onclick="openEdit()">プロフィールを見直す</button></div>`
-      :`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「招待」からリンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('invite')">招待画面へ</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;
+      :`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「友達」タブのQR・リンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('friends')">QR・リンクを開く</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;
     return;
   }
   ul.innerHTML=list.map(({u,d,common})=>{ const a=attrsOf(u); return `<div class="urow" onclick='openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':Math.round(d)})'>
@@ -1194,6 +1228,7 @@ function drawMap(list){
       // 最初に位置が取れた時だけ自分の周りに寄せる（建物名が見えるズーム17。その後は利用者が動かした地図を勝手に戻さない）
       if(!fesFollowed){ fesFollowed=true; fesMap.setView(ll,17); }
     }else if(fesMe){ fesMe.remove(); fesRange.remove(); fesMe=null; fesRange=null; }
+    drawFriendMarkers();
   }
   const near=list[0];$('#nearest').innerHTML=near&&near.d!=null?'最寄り '+esc(near.u.name)+' · <b>'+Math.round(near.d)+'m</b>':'—';
 }
@@ -1473,6 +1508,7 @@ function openSheet(u,d){
     <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)} <span>${u.age||''}</span></h2>
     ${d!=null?`<div class="dist">📍 いまここから <b>${Math.round(d)}m</b></div>`:''}</div></div>
     <div class="body">${attrBlock(u)}${u.work?`<div class="workline">💼 <b>${esc(u.work)}</b></div>`:''}${(u.looking&&u.looking.length)?`<div class="wants">${u.looking.map(x=>`<span class="want">${esc(x)}希望</span>`).join('')}</div>`:''}<div class="bio">${esc(u.bio)}</div>${(u.likes&&u.likes.length)?`<div class="likeslist">${u.likes.map(x=>`<span class="likechip">♡ ${esc(x)}</span>`).join('')}</div>`:''}${(u.interests&&u.interests.length)?`<div class="interest"><div class="ih">興味のあること</div>${u.interests.map(x=>`<div class="irow"><b>${esc(x.cat)}</b>：${esc(x.detail)}</div>`).join('')}</div>`:''}<div class="tags">${(u.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div></div>
+    ${friendBtnHTML(u)}
     <div style="padding:0 20px;text-align:center"><button class="reportbtn" onclick="openReport('${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">⚠ この人を通報・ブロックする</button></div>
     <div class="actions">${isLiked?`<button class="btn btn-liked" style="flex:1" disabled>♥ いいね済み</button>`:
       `<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-rose" onclick="openLikeReason()">♥ いいね</button>`}</div>`;
@@ -1919,6 +1955,280 @@ async function openUserById(uid){
     openSheet(u,d);
   }catch(e){ toast('プロフィールを開けませんでした'); }
 }
+/* ---------- 友達・いまどこ（建物・教室） ---------- */
+// 友達は「申請 → 承認」でなる（tama_friends）。建物は位置から自動で入り、教室とひとことは本人が入れる（tama_presence）。
+// 教室とひとことは、建物を出るか FES.roomExpireMin 分たつと消える。友達にどこまで見せるかは本人が選ぶ。
+// 読める人はデータベース側（RLS）でも「本人と承認済みの友達」に絞っている（supabase/tama_friends.sql）
+const VIS_LABEL={map:'地図の位置も見せる',building:'建物と教室だけ',hidden:'友達にも見せない'};
+let friendRows=[], friendProfiles={}, friendPresence={}, friendTablesMissing=false;
+let myPresence={place:null,room:'',note:'',visibility:'building',expires_at:null}, myPresenceLoaded=false, lastPresenceSave=0;
+let placeCand=undefined, placeCandSince=0, curPlace=null, placePromptedFor=null;
+let testFriendRows=[], testFriendData={};   // 「🧪 1台で動作確認する」の人と友達になった時だけ使う（端末の中だけ）
+
+// 建物・グラウンドの形に名前を付ける。名前の点が形の内側にあればその形、なければ60m以内でいちばん近い名前なしの形。
+// 門は「入った」と判定しても教室を聞く意味がないので外す
+let CAMPUS_PLACES=null;
+function campusPlaces(){
+  if(CAMPUS_PLACES)return CAMPUS_PLACES;
+  const G=window.CAMPUS_GEO; if(!G)return [];
+  const rings=[...(G.b||[]),...(G.p||[])].map(ring=>({ring,name:null}));
+  const center=r=>{ let a=0,b=0; r.forEach(([y,x])=>{a+=y;b+=x;}); return [a/r.length,b/r.length]; };
+  for(const [n,lat,lng] of CAMPUS_LABELS.filter(([n])=>!/門$/.test(n))){
+    let hit=rings.find(x=>!x.name&&inRing(lat,lng,x.ring));
+    if(!hit){
+      let best=null,bd=60;
+      rings.forEach(x=>{ if(x.name)return; const [cy,cx]=center(x.ring);
+        const d=Math.hypot((cy-lat)*111320,(cx-lng)*111320*Math.cos(lat*Math.PI/180)); if(d<bd){bd=d;best=x;} });
+      hit=best;
+    }
+    if(hit)hit.name=n;
+  }
+  return CAMPUS_PLACES=rings.filter(x=>x.name);
+}
+// いる建物の名前。GPSのずれで壁ぎわだと外と判定されやすいので、8mずらした4点も調べる
+function placeAt(lat,lng){
+  const P=campusPlaces(), dy=8/111320, dx=8/(111320*Math.cos(lat*Math.PI/180));
+  for(const [a,b] of [[0,0],[dy,0],[-dy,0],[0,dx],[0,-dx]]){ const p=P.find(x=>inRing(lat+a,lng+b,x.ring)); if(p)return p.name; }
+  return null;
+}
+// 建物に入った・出たの判定。GPSは建物の中でふらつくので、同じ判定が続いた時だけ切り替える
+// （入る：FES.placeEnterSec 秒、出る：FES.placeLeaveSec 秒。位置が止まっていても10秒ごとに呼ぶ）
+function detectPlace(){
+  if(!myPos||!profile)return;
+  if(fesOutside||!inCampus(myPos.lat,myPos.lng)){ if(myPresence.place||curPlace)leavePlace(); placeCand=undefined; return; }
+  if(myPos.acc>FES.maxAccuracyM)return;   // 位置のずれが大きい時は判定しない
+  const p=placeAt(myPos.lat,myPos.lng), now=Date.now();
+  if(p!==placeCand){ placeCand=p; placeCandSince=now; return; }
+  const stable=now-placeCandSince;
+  if(p&&p!==curPlace&&stable>=FES.placeEnterSec*1000) enterPlace(p);
+  else if(!p&&curPlace&&stable>=FES.placeLeaveSec*1000) leavePlace();
+}
+function enterPlace(p){
+  curPlace=p;
+  const changed=myPresence.place!==p;
+  myPresence.place=p;
+  if(changed){ myPresence.room=''; myPresence.note=''; myPresence.expires_at=null; }   // 前の建物の教室は消す
+  savePresence(); renderMyPresence();
+  // 建物に入ったら「いまどこ？」を聞く（同じ建物では1回だけ。ほかの画面を開いている時は邪魔しない）
+  if(changed&&placePromptedFor!==p&&!$$('.overlay.show').length){ placePromptedFor=p; openPlaceEdit(true); }
+}
+function leavePlace(){
+  curPlace=null; placePromptedFor=null;
+  if(!myPresence.place&&!myPresence.room&&!myPresence.note)return;
+  myPresence.place=null; myPresence.room=''; myPresence.note=''; myPresence.expires_at=null;
+  savePresence(); renderMyPresence();
+}
+// 1分ごと：時間切れの教室・ひとことを消す／建物にいる間は2分に1回「まだいる」を保存する（友達の画面の「◯分前」用）
+function presenceTick(){
+  if(myPresence.expires_at&&Date.parse(myPresence.expires_at)<=Date.now()){
+    myPresence.room=''; myPresence.note=''; myPresence.expires_at=null; savePresence(); renderMyPresence();
+  }else if(myPresence.place&&Date.now()-lastPresenceSave>120000) savePresence();
+}
+async function savePresence(){
+  if(!sb||!myId||String(myId).startsWith('local-')||friendTablesMissing)return;
+  lastPresenceSave=Date.now();
+  const {error}=await sb.from(T('presence')).upsert({id:myId,place:myPresence.place,room:myPresence.room||null,note:myPresence.note||null,
+    visibility:myPresence.visibility,expires_at:myPresence.expires_at,updated_at:new Date().toISOString()});
+  if(error)console.warn('[friends] tama_presence に保存できません。supabase/tama_friends.sql を実行してください:',error.message);
+}
+
+/* 友達の読み込み */
+const allFriendRows=()=>friendRows.concat(testFriendRows);
+const friendUser=id=>(testFriendData[id]&&testFriendData[id].u)||friendProfiles[id];
+const friendPres=id=>(testFriendData[id]&&testFriendData[id].p)||friendPresence[id];
+const otherIdOf=r=>r.from_id===myId?r.to_id:r.from_id;
+function friendRowWith(id){ return allFriendRows().find(r=>(r.from_id===myId&&r.to_id===id)||(r.to_id===myId&&r.from_id===id)); }
+function isFriend(id){ const r=friendRowWith(id); return !!r&&r.status==='accepted'; }
+async function loadFriends(){
+  if(!sb||!myId||String(myId).startsWith('local-')||friendTablesMissing){ renderFriends(); return; }
+  const {data,error}=await sb.from(T('friends')).select('*').or(`from_id.eq.${myId},to_id.eq.${myId}`);
+  if(error){ console.warn('[friends] tama_friends を読み込めません。supabase/tama_friends.sql を実行してください:',error.message);
+    friendTablesMissing=true; renderFriends(); return; }
+  friendRows=(data||[]).filter(r=>!blocked.has(otherIdOf(r)));
+  const ids=[...new Set(friendRows.map(otherIdOf))];
+  if(ids.length){
+    const [{data:ps},{data:pr}]=await Promise.all([
+      sb.from(T('profiles')).select('*').in('id',ids),
+      sb.from(T('presence')).select('*').in('id',ids)]);   // 友達でない人・非公開の人の行は RLS で返ってこない
+    friendProfiles={}; (ps||[]).forEach(u=>{ friendProfiles[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},lat:u.lat,lng:u.lng}; });
+    friendPresence={}; (pr||[]).forEach(p=>{ friendPresence[p.id]=p; });
+  }else{ friendProfiles={}; friendPresence={}; }
+  if(!myPresenceLoaded){
+    myPresenceLoaded=true;
+    const {data:me}=await sb.from(T('presence')).select('visibility').eq('id',myId).maybeSingle();
+    if(me&&me.visibility)myPresence.visibility=me.visibility;   // 公開範囲は前回の選択を引き継ぐ
+  }
+  renderFriends(); renderNearby(); updateFriendDot();
+  if(curSheetUser&&$('#overlay').classList.contains('show'))refreshSheetFriendBtn(curSheetUser.id);
+}
+function updateFriendDot(){
+  const n=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length, dot=$('#dotFriends');
+  if(dot){ dot.style.display=n?'':'none'; dot.textContent=n||''; }
+}
+
+/* 申請・承認・取り消し */
+async function requestFriend(id,name){
+  if(isTest(id)){ testFriendAccept(id); return; }
+  if(!sb||String(myId).startsWith('local-')||friendTablesMissing){ toast('友達機能はまだ準備中です'); return; }
+  const r=friendRowWith(id);
+  if(r&&r.status==='pending'&&r.to_id===myId) return acceptFriend(r.id,id,name);   // 相手から申請が来ていたら、そのまま承認する
+  if(r)return;
+  const {error}=await sb.from(T('friends')).insert({from_id:myId,to_id:id});
+  if(error){ console.warn('[friends] 申請できません:',error.message); toast('申請できませんでした'); return; }
+  notifyPush(id,'👥 友達申請が届きました',(profile?profile.name:'だれか')+'さんから友達申請が届きました');
+  toast('友達申請を送りました'); await loadFriends();
+}
+async function acceptFriend(rowId,id,name){
+  if(!sb)return;
+  const {error}=await sb.from(T('friends')).update({status:'accepted',responded_at:new Date().toISOString()}).eq('id',rowId);
+  if(error){ console.warn('[friends] 承認できません:',error.message); toast('承認できませんでした'); return; }
+  notifyPush(id,'👥 友達になりました',(profile?profile.name:'')+'さんが友達申請を承認しました');
+  toast('🎉 '+esc(name||'')+'さんと友達になりました'); await loadFriends();
+}
+async function removeFriendRow(rowId,unfriend){
+  if(unfriend&&!confirm('友達をやめますか？（相手には通知されません）'))return;
+  if(rowId<0){ testFriendRows=testFriendRows.filter(r=>r.id!==rowId); renderFriends(); renderNearby();
+    if(curSheetUser)refreshSheetFriendBtn(curSheetUser.id); return; }
+  if(!sb)return;
+  const {error}=await sb.from(T('friends')).delete().eq('id',rowId);
+  if(error){ console.warn('[friends] 削除できません:',error.message); toast('できませんでした'); return; }
+  await loadFriends();
+}
+// テスト用の人は申請するとすぐ友達になり、社会学部A棟の401にいることにする
+function testFriendAccept(id){
+  const u=testUsers.find(x=>x.id===id); if(!u)return;
+  if(!testFriendRows.some(r=>r.to_id===id)) testFriendRows.push({id:-(testFriendRows.length+1),from_id:myId,to_id:id,status:'accepted'});
+  const now=Date.now();
+  testFriendData[id]={u,p:{id,place:'社会学部A棟',room:'401',note:'授業中',visibility:'map',
+    expires_at:new Date(now+FES.roomExpireMin*60000).toISOString(),updated_at:new Date(now-3*60000).toISOString()}};
+  toast('🧪 テスト：'+esc(u.name)+'さんと友達になりました'); renderFriends(); renderNearby(); refreshSheetFriendBtn(id);
+}
+
+/* 表示 */
+function presenceActive(p){ return !!p&&(!p.expires_at||Date.parse(p.expires_at)>Date.now()); }
+// 「社会学部A棟・401「授業中」」の形。最後の保存から FES.roomExpireMin 分たった人は、もういないとみなして出さない
+function presenceText(p){
+  if(!p||!p.place||p.visibility==='hidden')return '';
+  if(p.updated_at&&Date.now()-Date.parse(p.updated_at)>FES.roomExpireMin*60000)return '';
+  const act=presenceActive(p);
+  return p.place+(act&&p.room?'・'+p.room:'')+(act&&p.note?'「'+p.note+'」':'');
+}
+function agoText(ts){
+  const m=Math.floor((Date.now()-Date.parse(ts))/60000);
+  return m<1?'たった今':m<60?m+'分前':Math.floor(m/60)+'時間前';
+}
+const hhmm=ts=>new Date(ts).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+function friendOnMap(id){
+  const p=friendPres(id); if(!p||p.visibility!=='map')return null;
+  const o=others.find(x=>x.id===id);
+  return o&&o.lat!=null&&inCampus(o.lat,o.lng)?o:null;
+}
+function renderMyPresence(){
+  const el=$('#myPresence'); if(!el)return;
+  const p=myPresence, act=presenceActive(p);
+  const where=p.place?p.place+(act&&p.room?'・'+p.room:''):(myPos&&inCampus(myPos.lat,myPos.lng)?'建物の外':'キャンパスの外');
+  el.innerHTML=`<div class="mphead">いまの自分</div>
+    <div class="mpwhere">📍 <b>${esc(where)}</b>${act&&p.note?` <span class="stchip">${esc(p.note)}</span>`:''}</div>
+    <div class="mpsub">${act&&p.expires_at?`教室とひとことは ${hhmm(p.expires_at)} ごろに消えます`:'建物に入ると、いる教室を聞きます'}</div>
+    <button class="btn btn-primary mpedit" onclick="openPlaceEdit(false)">✏️ いまどこを編集</button>
+    <div class="mphead" style="margin-top:12px">友達にどこまで見せる？</div>
+    <div class="chips mpvis">${Object.entries(VIS_LABEL).map(([k,v])=>`<span class="c${p.visibility===k?' sel':''}" onclick="setVisibility('${k}')">${v}</span>`).join('')}</div>
+    <div class="mpnote">「近くの人」への表示は、設定の「位置情報を共有」で切り替えます</div>`;
+}
+function setVisibility(k){ myPresence.visibility=k; savePresence(); renderMyPresence(); toast('友達への公開：'+VIS_LABEL[k]); }
+function renderFriends(){
+  const box=$('#friendBox'); if(!box)return;
+  const rows=allFriendRows();
+  const incoming=rows.filter(r=>r.status==='pending'&&r.to_id===myId);
+  const sent=rows.filter(r=>r.status==='pending'&&r.from_id===myId);
+  const friends=rows.filter(r=>r.status==='accepted').map(r=>{ const id=otherIdOf(r); return {r,id,u:friendUser(id),p:friendPres(id)}; })
+    .filter(x=>x.u).sort((a,b)=>(presenceText(b.p)?1:0)-(presenceText(a.p)?1:0));   // 建物にいる友達を上に
+  $('#friendSub').textContent=friends.length+'人';
+  const nm=u=>esc(u.name).replace(/'/g,'&#39;');
+  const who=id=>friendUser(id)||{name:'だれか',emoji:'🙂'};
+  let h='';
+  if(friendTablesMissing) h+=`<div class="frnote">⚠️ 友達機能のデータベースがまだ準備されていません（運営向け：supabase/tama_friends.sql を実行）</div>`;
+  if(incoming.length){
+    h+=`<div class="listhead">📩 届いた友達申請</div><div class="ulist">`+incoming.map(r=>{ const u=who(r.from_id);
+      return `<div class="urow" style="cursor:default"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">友達申請が届いています</div></div>
+        <div class="frbtns"><button class="btn btn-primary" onclick="acceptFriend(${r.id},'${r.from_id}','${nm(u)}')">承認</button><button class="btn btn-ghost" onclick="removeFriendRow(${r.id},false)">断る</button></div></div>`; }).join('')+`</div>`;
+  }
+  h+=`<div class="listhead">👥 友達のいまどこ</div><div class="ulist">`;
+  h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
+      return `<div class="urow" onclick="openFriend('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+        <div class="info"><div class="n">${esc(u.name)}</div><div class="b">${t?'📍 '+esc(t):'いまどこは表示されていません'}</div></div>
+        <div class="d">${t&&p.updated_at?`<div class="frago">${agoText(p.updated_at)}</div>`:''}${map?'<div class="frmap">🗺 地図</div>':''}</div></div>`; }).join('')
+    :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>「近くの人」や「すれ違い」でプロフィールを開き、<br>「友達申請する」を押しましょう。</p></div>`;
+  h+=`</div>`;
+  if(sent.length){
+    h+=`<div class="listhead">⏳ 送った申請</div><div class="ulist">`+sent.map(r=>{ const u=who(r.to_id);
+      return `<div class="urow" style="cursor:default"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">承認待ち</div></div>
+        <div class="frbtns"><button class="btn btn-ghost" onclick="removeFriendRow(${r.id},false)">取り消す</button></div></div>`; }).join('')+`</div>`;
+  }
+  box.innerHTML=h;
+  renderMyPresence();
+}
+// プロフィールのシートに出す友達ボタン
+function friendBtnHTML(u){
+  if(!u||u.id===myId)return '';
+  const r=friendRowWith(u.id); let inner;
+  if(r&&r.status==='accepted'){
+    const t=presenceText(friendPres(u.id));
+    inner=`<div class="fr-on">👥 友達${t?' · 📍 '+esc(t):''}</div>`
+      +(friendOnMap(u.id)?`<button class="btn btn-ghost frbtn" onclick="showFriendOnMap('${u.id}')">🗺 地図で見る</button>`:'')
+      +`<button class="frquit" onclick="removeFriendRow(${r.id},true)">友達をやめる</button>`;
+  }else if(r&&r.to_id===myId) inner=`<button class="btn btn-primary frbtn" onclick="acceptFriend(${r.id},'${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">👥 友達申請を承認する</button>`;
+  else if(r) inner=`<button class="btn btn-ghost frbtn" disabled>👥 友達申請中（承認待ち）</button>`;
+  else inner=`<button class="btn btn-ghost frbtn" onclick="requestFriend('${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">👥 友達申請する</button>`;
+  return `<div class="frrow" id="sheetFriend">${inner}</div>`;
+}
+function refreshSheetFriendBtn(id){ const el=$('#sheetFriend'); if(el&&curSheetUser&&curSheetUser.id===id)el.outerHTML=friendBtnHTML(curSheetUser); }
+function openFriend(id){
+  const u=friendUser(id); if(!u)return;
+  const o=others.find(x=>x.id===id); let d=null;
+  if(o&&myPos&&o.lat!=null){ const r=relMeters(myPos,o); d=Math.hypot(r.e,r.n); }
+  openSheet(o?{...u,lat:o.lat,lng:o.lng}:u,d);
+}
+function showFriendOnMap(id){
+  const o=friendOnMap(id); if(!o)return;
+  closeSheet(); go('near'); setTimeout(()=>{ if(fesMap)fesMap.setView([o.lat,o.lng],19); },120);
+}
+// 地図に友達を出す（「地図の位置も見せる」にしている友達だけ。緑のふちと名前付き）
+function drawFriendMarkers(){
+  if(!fesMap||!fesLayer)return;
+  allFriendRows().filter(r=>r.status==='accepted').forEach(r=>{
+    const id=otherIdOf(r), o=friendOnMap(id); if(!o)return;
+    const u=friendUser(id)||o;
+    L.marker([o.lat,o.lng],{zIndexOffset:500,icon:L.divIcon({className:'',iconSize:[30,30],iconAnchor:[15,15],
+      html:`<div class="pmk fr" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="frname">${esc(u.name)}</div>`})})
+      .on('click',()=>openFriend(id)).addTo(fesLayer);
+  });
+}
+// 「いまどこ？」の入力シート（建物に入った時に自動で開く／いつでも自分で開ける）
+function openPlaceEdit(auto){
+  const p=myPresence, act=presenceActive(p);
+  const opts=campusPlaces().map(x=>x.name);
+  $('#placeSheet').innerHTML=`<h2 class="pstitle">${auto?`🏢 ${esc(p.place)}に入りました`:'📍 いまどこ？'}</h2>
+    <p class="psdesc">${auto?'いる教室や場所を入れると、友達に表示されます。':'友達に表示する場所を編集します。'}${FES.roomExpireMin}分たつか、建物を出ると消えます。</p>
+    <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
+    <div class="field"><label>教室・場所（任意）</label><input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
+    <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、ひまです" value="${act?esc(p.note||''):''}">
+      <div class="chips psquick">${['授業中','ひまです','休憩中','勉強中','ごはん中'].map(s=>`<span class="c" onclick="$('#psNote').value='${s}'">${s}</span>`).join('')}</div></div>
+    <div class="psvis">友達への公開：<b>${VIS_LABEL[p.visibility]}</b>（「友達」タブで変更）</div>
+    <div class="psbtns"><button class="btn btn-ghost" onclick="closePlaceEdit()">${auto?'あとで':'閉じる'}</button><button class="btn btn-primary" onclick="savePlaceEdit()">保存する</button></div>`;
+  $('#placeOverlay').classList.add('show');
+}
+function closePlaceEdit(){ $('#placeOverlay').classList.remove('show'); }
+function savePlaceEdit(){
+  const place=$('#psPlace').value||null, room=$('#psRoom').value.trim(), note=$('#psNote').value.trim();
+  if(ngCheck(room)||ngCheck(note)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  myPresence.place=place; curPlace=place; placeCand=place; placeCandSince=Date.now();
+  myPresence.room=room; myPresence.note=note;
+  myPresence.expires_at=(room||note)?new Date(Date.now()+FES.roomExpireMin*60000).toISOString():null;
+  savePresence(); renderMyPresence(); closePlaceEdit();
+  toast(myPresence.visibility==='hidden'?'保存しました（いまは「友達にも見せない」設定です）':'保存しました。友達に表示されます');
+}
+
 /* ---------- settings ---------- */
 function toggleShare(el){sharing=!el.classList.contains('on');el.classList.toggle('on');geoState('ok');
   if(sharing){publishMe();}else if(sb){sb.from(T('profiles')).update({sharing:false}).eq('id',myId);}}
@@ -1941,7 +2251,7 @@ function spawnTest(){
   booths=booths.filter(b=>!isTest(b.id)).concat([{id:'test-booth',name:'焼きそば屋（テスト）',description:'1パック300円。大盛りあります',emoji:'🍜',lat:myPos.lat+0.0002,lng:myPos.lng+0.0001,place:'テスト地点のそば',indoor:false}]);
   try{ localStorage.removeItem('tama_booth_test-booth'); }catch(e){}
   drawBooths(); setTimeout(checkBooths,2500);
-  toast('🧪 テスト用の人を'+testUsers.length+'人追加しました。いいねするとマッチします');
+  toast('🧪 テスト用の人を'+testUsers.length+'人追加しました。いいねするとマッチ、友達申請するとすぐ友達になります');
 }
 
 /* ---------- プロフィール編集 ---------- */
@@ -2039,10 +2349,12 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
   if(t==='near'&&fesMap)setTimeout(()=>fesMap.invalidateSize(),60);   // 非表示の間にサイズが変わっても地図が崩れないように
-  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=(isIOS()&&!isStandalone())?'iPhoneはホーム画面に追加すると使えます':'マッチしたらスマホに通知';}}
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='friends')loadFriends();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=(isIOS()&&!isStandalone())?'iPhoneはホーム画面に追加すると使えます':'マッチしたらスマホに通知';}}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
-  publishMe();loadBlocks().then(()=>pollUsers());loadMatchUnlocks();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();loadMatchUnlocks();}},6000);}
+  publishMe();loadBlocks().then(()=>pollUsers());loadMatchUnlocks();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();loadMatchUnlocks();}},6000);
+  loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
+  setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden)presenceTick();},60000);}
 
 /* ---------- 多摩キャン版：開催時間・参加人数・アンケート ---------- */
 function fesPhase(now=Date.now()){
