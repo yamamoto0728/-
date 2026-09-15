@@ -1,0 +1,19 @@
+{
+  "name": "ちかく 多摩キャン版",
+  "short_name": "ちかく多摩キャン",
+  "description": "多摩キャンパスで、いま近くにいる人とつながる（期間限定）",
+  "id": "/tama/",
+  "start_url": "/tama/",
+  "scope": "/tama/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0fb0cd",
+  "orientation": "portrait",
+  "lang": "ja",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
