@@ -414,7 +414,7 @@
           <label class="termschk"><input type="checkbox" id="obTerms"><span>利用規約に同意します</span></label></div>
         <div class="agegate">🔞 <b>18歳以上の方のみご利用いただけます</b><br>本アプリは18歳以上を対象としています。18歳未満の方はご利用いただけません。
           <label class="agechk"><input type="checkbox" id="obAge18"><span>18歳以上です</span></label></div>
-        <div class="privacy">🔒 <b>位置情報について</b><br>「始める」を押すとGPSでのおおよその現在地を、<b>このリンクを開いている他の利用者に共有</b>します。共有はいつでも設定から止められます。</div>
+        <div class="privacy">🔒 <b>位置情報について</b><br>「始める」を押すとGPSでのおおよその現在地を、<b>多摩キャンパスの中にいる間だけ</b>、このリンクを開いている他の利用者に共有します。キャンパスの外では位置を送りません。共有はいつでも設定から止められます。</div>
         <button class="btn btn-primary go" id="obGo">位置情報を共有して始める</button>
       </div>
     </section>
@@ -509,7 +509,6 @@
     <p style="font-size:13px;color:#6b7291;line-height:1.9">ただいま接続できませんでした。<br>電波の良い場所で、<b style="color:#0a6b85">少し時間をおいてから</b><br>もう一度お試しください。<br><br>解決しない場合は、お手数ですが<br>運営（法政大学 糸久ゼミ）までお知らせください。</p>
   </div>
   <div class="fesclosed" id="fesClosed"></div>
-  <div class="fesclosed" id="fesOutside"></div>
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
   <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
@@ -555,9 +554,9 @@ const FES={
   surveyUrl:'',
   // 終了の何分前から「まもなく終了・アンケートへ」の案内を出すか
   surveyBeforeEndMin:30,
-  // 多摩キャンパスの外では使えないようにするか（false の間はどこでも使える。メンバーの動作確認用）
-  // ⚠️ 学食にQRを貼る前に true にすること
-  campusOnly:false,
+  // true の間は、多摩キャンパスの外では位置の機能だけ止める（位置を送らない・近くの人の一覧と地図・すれ違い・通知・出店の判定をしない）。
+  // プロフィール・マッチ・チャット・コミュニティは外でも使える。false にするとどこでも位置の機能が動く（家から試したい時だけ）
+  campusOnly:true,
   // すれ違いとして記録する距離（m）。GPS誤差の実測結果が出たらここを調整する
   encounterRangeM:50,
   // 位置のずれ（精度）がこれより大きい時は、すれ違いの判定に使わない（m）
@@ -820,6 +819,7 @@ function showPlace(){
     $('#locAcc').textContent='±'+Math.round(myPos.acc)+'m';
   }else{
     placeName=null;
+    if(FES.campusOnly)$('#gpsTxt').textContent='キャンパス外';
     $('#locPlace').textContent='キャンパスの外にいます';
     $('#locCoord').textContent='現在地は多摩キャンパスの中でだけ表示します';
     $('#locAcc').textContent='';
@@ -837,15 +837,21 @@ function inCampus(lat,lng){
   return inside;
 }
 let fesOutside=false;
-// キャンパスの外にいる間は画面をふさぎ、自分の位置も送らない（他の人の一覧からは1分で消える）
+// キャンパスの外にいる間は位置の機能だけ止める（位置を送らない・近くの人の一覧と地図・すれ違い・通知・出店の判定をしない）。
+// プロフィール・マッチ・チャット・コミュニティはそのまま使える。
 function fesCampusGate(){
+  const was=fesOutside;
   fesOutside=FES.campusOnly&&!!myPos&&!inCampus(myPos.lat,myPos.lng);
-  const el=$('#fesOutside'); if(!el)return;
-  if(!fesOutside){ el.classList.remove('show'); return; }
-  el.innerHTML=`<div class="ic">🏫</div><h2>多摩キャンパスに<br>来ると使えます</h2>
-    <p>「ちかく 多摩キャン版」は、法政大学 多摩キャンパスの中にいる人どうしで使うアプリです。<br><br>キャンパス内にいるのにこの画面が出る場合は、<br>空が開けた屋外でもう一度お試しください。</p>
-    <button class="btn btn-primary" style="padding:14px 24px;font-size:15px" onclick="startGeo()">📍 位置を取り直す</button>`;
-  el.classList.add('show');
+  if(fesOutside===was)return;
+  if(fesOutside){
+    insideSet.clear();
+    others=others.filter(u=>isTest(u.id));
+    // 最後に送ったキャンパス内の位置が、他の人の一覧・参加人数・「近くにいます」通知に使われないようにする
+    // （共有スイッチを切った時と同じ。キャンパスに戻ると publishMe が sharing:true で送り直す）
+    if(sb&&myId&&profile) sb.from(T('profiles')).update({sharing:false}).eq('id',myId)
+      .then(({error})=>{ if(error)console.warn('[geo] 共有の停止を保存できませんでした:',error.message); });
+  }
+  renderNearby();
 }
 function onErr(e){geoState('bad');onGeoFail(e.code===1?'位置情報が拒否されました':'現在地を取得できません');}
 function onGeoFail(msg){const lb=$('#locbar');lb.className='locbar bad';$('#locPlace').textContent=msg;
@@ -869,7 +875,7 @@ async function publishMe(){
 let fesAttrColMissing=false;
 async function pollUsers(){
   let out=[];
-  if(sb){
+  if(sb&&!fesOutside){
     const since=new Date(Date.now()-60000).toISOString();
     const {data,error}=await sb.from(T('profiles')).select('*').eq('sharing',true).gt('updated_at',since).neq('id',myId);
     if(!error&&data)out=data.map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},lat:u.lat,lng:u.lng}));
@@ -1003,6 +1009,11 @@ function renderNearby(){
     .sort((x,y)=>{ if(y.common.length!==x.common.length)return y.common.length-x.common.length; return (x.d??1e9)-(y.d??1e9); });
   $('#nearSub').textContent=list.length?list.length+'人（共通点あり）':(all.length?'共通点のある人はまだ':'まだ誰もいません');
   drawMap(list);const ul=$('#ulist');
+  if(fesOutside&&!list.length){
+    $('#nearSub').textContent='キャンパスの外では表示しません';
+    ul.innerHTML=`<div class="empty"><div class="big">🏫</div><p>いまは多摩キャンパスの外にいます。<br>キャンパスに入ると、近くの人の表示と<br>すれ違いの記録が始まります。<br><br>プロフィール・マッチ・チャットは<br>このまま使えます。</p></div>`;
+    return;
+  }
   if(!list.length){
     ul.innerHTML=all.length
       ?`<div class="empty"><div class="big">🔎</div><p>近くに<b>${all.length}人</b>いますが、<br>共通点のある人はまだいません。<br>今日の目的や目標を増やすと<br>見つかりやすくなります。</p><button class="btn btn-primary" onclick="openEdit()">プロフィールを見直す</button></div>`
@@ -1236,7 +1247,7 @@ function focusBooth(id){
 
 /* ---------- すれ違い（FES.encounterRangeM以内・毎回カウント・入ったら即記録） ---------- */
 function recordEncounters(){
-  if(!myPos)return;
+  if(!myPos||fesOutside)return;
   // 位置のずれが大きい時は判定しない（離れているのに記録したり、いるのに離れたと判定したりしないように）
   if(myPos.acc>FES.maxAccuracyM)return;
   for(const u of others){
