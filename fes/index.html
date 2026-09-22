@@ -660,7 +660,13 @@ async function initBackend(){
   if(!configured){ $('#configNotice').style.display='flex'; return false; }
   try{
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    let { data:{ user } } = await sb.auth.getUser();
+    // 端末に残っているログイン情報をまず localStorage から読む（通信しない）。
+    // getUser() はSupabaseに問い合わせに行くので、電波が悪いと user が null で返る。
+    // それだけを見て signInAnonymously() すると、登録済みの人が起動のたびに別人になり、
+    // プロフィール・マッチ・すれ違いの履歴が消えてしまうため、先に getSession() を見る。
+    let user = null;
+    try{ const { data:{ session } } = await sb.auth.getSession(); if(session && session.user) user = session.user; }catch(e){}
+    if(!user){ try{ const g = await sb.auth.getUser(); if(g.data && g.data.user) user = g.data.user; }catch(e){} }
     if(!user){ const r = await sb.auth.signInAnonymously();
       if(r.error){ backendError('匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。'); return false; }
       user = r.data.user;
