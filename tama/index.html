@@ -58,6 +58,7 @@
   .field label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:7px}
   .field input,.field textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;color:var(--ink);font-family:inherit;font-size:14.5px;outline:none;resize:none}
   .field input:focus,.field textarea:focus{border-color:var(--amber)}
+  .field .hint{margin-top:6px;font-size:11.5px;color:var(--muted2);line-height:1.6}
   .row2{display:flex;gap:12px}.row2 .field{flex:1}
   .emojis{display:flex;flex-wrap:wrap;gap:9px}
   .emojis .em{width:46px;height:46px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
@@ -250,9 +251,6 @@
   .ttlbar{align-self:center;margin-bottom:8px;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(240,81,123,.12);color:var(--rose);border:1px solid rgba(240,81,123,.35)}
   .ttlbar.warn{background:rgba(226,87,79,.14);color:var(--bad);border-color:rgba(226,87,79,.4)}
   .ttlbar.over{background:rgba(120,130,160,.14);color:var(--muted);border-color:rgba(120,130,160,.3)}
-  .ttlbar.keep{background:rgba(32,180,131,.12);color:#0f8f6f;border-color:rgba(32,180,131,.4)}
-  .extendbtn{display:inline-block;margin-left:7px;padding:3px 10px;border-radius:20px;background:var(--amber);color:#fff;font-size:11px;font-weight:700;cursor:pointer}
-  .keeptag{display:inline-block;font-size:11px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.35);border-radius:20px;padding:1px 8px}
   .common{display:inline-block;font-size:11px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.35);border-radius:20px;padding:2px 9px;margin:3px 0}
   .joinbtn{flex-shrink:0;padding:7px 15px;border:0;border-radius:20px;background:var(--signal);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
   .joinbtn.joined{background:var(--surface2);color:var(--muted)}
@@ -318,7 +316,6 @@
   .likereason{display:block;width:100%;text-align:left;padding:13px 15px;margin-bottom:8px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:13.5px;cursor:pointer}
   .likereason:active{background:var(--surface2)}
   .whylike{display:inline-block;font-size:11px;font-weight:700;color:var(--rose);background:rgba(240,81,123,.1);border:1px solid rgba(240,81,123,.3);border-radius:20px;padding:2px 9px;margin-top:3px}
-  .whylike.locked{color:var(--amber);background:rgba(245,151,47,.12);border-color:rgba(245,151,47,.4);cursor:pointer}
   .reportbtn{background:none;border:0;color:var(--muted2);font-size:11.5px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:8px 0}
   .reportbtn:active{opacity:.6}
   .rsn{display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:9px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:14px;cursor:pointer}
@@ -344,10 +341,6 @@
   /* 多摩キャン版の属性 */
   .req{font-size:10px;color:#fff;background:var(--rose);border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:1px}
   .field select{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-family:inherit;font-size:14px;color:var(--ink)}
-  .qrow{margin-bottom:10px}
-  .qrow .qt{font-size:12.5px;color:var(--ink);margin-bottom:6px;font-weight:700}
-  .qab{flex-wrap:nowrap}
-  .qab .c{flex:1;text-align:center}
   details.more{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:11px 14px;background:var(--surface2)}
   details.more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--muted)}
   details.more[open] summary{margin-bottom:10px}
@@ -515,21 +508,11 @@
           <div class="setrow"><div class="lab">おおまかな位置にする<small>正確な地点をぼかして共有（約100m）</small></div><div class="toggle" id="tgCoarse" onclick="toggleCoarse(this)"><div class="k"></div></div></div>
           <div class="setrow"><div class="lab">通知<small id="pushHint">マッチしたらスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
         </div>
-        <div class="setting" id="billBox" style="border-color:rgba(245,151,47,.35)">
-          <div class="setrow"><div class="lab">💬 メッセージ機能<small id="msgStat">未解禁（初回のみ有料）</small></div><button class="btn btn-primary" id="msgBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showMsgPaywall()">解禁する</button></div>
-          <div class="setrow"><div class="lab">♥ 今日のいいね<small id="likeStat">無料 3回 / 日</small></div><button class="btn btn-ghost" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showLikePaywall(null)">追加購入</button></div>
-          <div class="setrow"><div class="lab">🎯 いいねの理由<small id="reasonStat">未解禁（相手が惹かれたポイントが見えます）</small></div><button class="btn btn-primary" id="reasonBtn" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="showReasonPaywall()">解禁する</button></div>
-        </div>
-        <div class="setting" style="border-color:rgba(99,214,232,.3)">
-          <div class="setrow" style="border:0;flex-direction:column;align-items:flex-start;gap:8px"><div class="lab">✨ 今後の有料機能<small>準備中。課金するとこんなことができます</small></div>
-          <div style="display:flex;flex-wrap:wrap;gap:7px"><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">趣味一致度がわかる 近日</span><span class="want" style="background:rgba(99,214,232,.12);border-color:rgba(99,214,232,.4);color:var(--signal)">広告をなくす 近日</span></div></div>
-        </div>
         <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openSurvey()">📝 アンケートに答える</button>
         <div style="margin:6px 16px 0;text-align:center;font-size:11.5px;color:var(--muted2)">参加者番号 <b id="fesNo" style="font-family:'JetBrains Mono',monospace;color:var(--muted)">&mdash;</b></div>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
         <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
-        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:12px;font-size:13px" onclick="resetBilling()">課金状態をリセット（デモ用）</button>
         <button class="btn stopbtn" onclick="leaveAll()">共有をやめてプロフィールを消す</button>
         <div class="setting" style="border-color:rgba(99,214,232,.3)">
           <div class="setrow" style="border:0"><div class="lab">🧪 テストモード<small>1台だけで動作確認できます。近くにテスト用の人が現れ、いいねするとマッチ→チャットまで試せます</small></div><button class="btn btn-primary" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="spawnTest()">試す</button></div>
@@ -635,31 +618,27 @@ const FES={
 // 多摩キャンパスの敷地。OpenStreetMap（way 597200868）の外周146点を約8m単位で間引いたもの。[緯度, 経度]
 const CAMPUS=[[35.61719,139.28974],[35.61699,139.28978],[35.61728,139.29197],[35.61708,139.29211],[35.61545,139.2918],[35.61519,139.29193],[35.61499,139.29217],[35.61473,139.29381],[35.61255,139.29435],[35.61219,139.29549],[35.61265,139.296],[35.61351,139.29604],[35.61345,139.29642],[35.61295,139.29651],[35.6134,139.29737],[35.61313,139.29768],[35.6134,139.29808],[35.61304,139.2988],[35.6127,139.29908],[35.61253,139.29886],[35.61212,139.29918],[35.61184,139.2989],[35.61222,139.29957],[35.61147,139.29986],[35.6107,139.30198],[35.61081,139.30254],[35.61096,139.30273],[35.61136,139.30283],[35.61146,139.3032],[35.61144,139.30286],[35.61158,139.30257],[35.61221,139.30225],[35.61243,139.30188],[35.61263,139.30044],[35.61235,139.2998],[35.61269,139.30038],[35.61267,139.30069],[35.61297,139.30103],[35.61377,139.30057],[35.6137,139.30032],[35.61331,139.30035],[35.6129,139.29919],[35.61318,139.29926],[35.61382,139.3],[35.61493,139.30047],[35.61498,139.30075],[35.61574,139.30084],[35.61625,139.29967],[35.61608,139.29717],[35.61628,139.2971],[35.61629,139.29661],[35.61656,139.29661],[35.61661,139.29567],[35.61749,139.29475],[35.6176,139.29446],[35.61803,139.29417],[35.6184,139.29426],[35.61847,139.29383],[35.61919,139.2937],[35.6194,139.29248],[35.61971,139.29182],[35.62038,139.29128],[35.62034,139.29021],[35.61988,139.28987],[35.61726,139.29039],[35.61719,139.28974]];
 const CAMPUS_CENTER={lat:35.61559,lng:139.29633};
-// 多摩キャン版の属性。共通点（＝画面に出すかどうか）の判定に使うのは「学部・今日の目的・目標」だけ
+// 多摩キャン版の属性。共通点（＝画面に出すかどうか）の判定に使うのは「学部・いま探していること・目標」だけ
 const FA={
-  // 学科名は法政大学公式サイトで確認（2026-09-13）。スポーツ健康学部は学科ではなくコース
+  // 学科名は法政大学公式サイトで確認（2026-09-13）。スポーツ健康学部は学科ではなくコース。
+  // 多摩キャンパスにあるのはこの4学部だけなので、他キャンパス・社会人・卒業生の行は置いていない
+  // （学食のQRから入る人にはまず当てはまらず、選択肢が長いと登録の途中で離脱するため）
   faculties:[
     {v:'経済学部',depts:['経済学科','国際経済学科','現代ビジネス学科']},
     {v:'社会学部',depts:['社会政策科学科','社会学科','メディア社会学科']},
     {v:'現代福祉学部',depts:['福祉コミュニティ学科','臨床心理学科']},
     {v:'スポーツ健康学部',depts:['ヘルスデザインコース','スポーツビジネスコース','スポーツコーチングコース']},
-    {v:'法政（市ヶ谷・小金井）',depts:[]},
+    {v:'大学院',depts:[]},
     {v:'他大学の学生',depts:[]},
-    {v:'社会人・一般',depts:[]},
-    {v:'法政の卒業生',depts:[]},
+    {v:'その他',depts:[]},
   ],
   grades:['1年','2年','3年','4年','大学院'],
-  purposes:['食べ歩き','ステージを見る','友達を探す','ひとりで来た','サークル・出店','なんとなく'],
-  goals:['就活','留学','資格','起業','部活・大会','まだ考え中'],
-  statuses:['一緒に回る人募集中','ひまです','休憩中','忙しい'],
+  // 学園祭版の「今日の目的」にあたる項目。キーは purposes のまま（DBのjsonbを作り直さずに済ませるため）
+  purposes:['一緒にごはん','授業・履修の情報交換','一緒に勉強・課題','友達をつくる','サークル・団体の仲間','ひまつぶしに話す','いまはひとりがいい'],
+  goals:['就活・インターン','資格・語学','留学','ゼミ・研究','部活・大会','起業','まだ考え中'],
+  statuses:['一緒にごはん行ける','ひまです','勉強中','授業・移動中','これから帰る'],
   // 一致しても共通点として数えない選択肢（誰とでも一致してしまい、表示を絞る意味がないため）
-  weak:['なんとなく','まだ考え中'],
-  // 2択のお題（必須・見せるだけ）。⚠️ 仮のお題。9/15のMTGで決めて差し替える
-  questions:[
-    {id:'q1',text:'屋台で最初に買うのは？',a:'しょっぱい系',b:'甘い系'},
-    {id:'q2',text:'学園祭の回り方は？',a:'計画を立てる',b:'気の向くまま'},
-    {id:'q3',text:'朝型？夜型？',a:'朝型',b:'夜型'},
-  ],
+  weak:['いまはひとりがいい','まだ考え中'],
 };
 const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県','海外'];
 // 多摩キャン版のデータは tama_ 付きの別テーブルに保存する（supabase/tama_tables.sql）。
@@ -710,7 +689,13 @@ async function initBackend(){
   if(!configured){ $('#configNotice').style.display='flex'; return false; }
   try{
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    let { data:{ user } } = await sb.auth.getUser();
+    // 端末に残っているログイン情報をまず localStorage から読む（通信しない）。
+    // getUser() はSupabaseに問い合わせに行くので、電波が悪いと user が null で返る。
+    // それだけを見て signInAnonymously() すると、登録済みの人が起動のたびに別人になり、
+    // プロフィール・マッチ・すれ違いの履歴が消えてしまうため、先に getSession() を見る。
+    let user = null;
+    try{ const { data:{ session } } = await sb.auth.getSession(); if(session && session.user) user = session.user; }catch(e){}
+    if(!user){ try{ const g = await sb.auth.getUser(); if(g.data && g.data.user) user = g.data.user; }catch(e){} }
     if(!user){ const r = await sb.auth.signInAnonymously();
       if(r.error){ backendError('匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。'); return false; }
       user = r.data.user;
@@ -936,6 +921,7 @@ async function onStart(){
   const ng=ngCheck(name)||ngCheck(bioVal);
   if(ng){ toast('⚠️ 名前かひとことに不適切な言葉が含まれています。修正してください。'); return; }
   const miss=attrMissing(obAttr); if(miss){ toast('⚠️ '+miss); return; }
+  if(ngCheck(obAttr.course)){ toast('⚠️ 科目名に不適切な言葉が含まれています。修正してください。'); return; }
   profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[...selTags],work,looking:[...selLooking],likes:myLikes,interests:myInterests,fa:{...attrToFa(obAttr),status:''}};
   $('#meAv').style.background=gr(selEmoji);$('#meAv').textContent=selEmoji;$('#meName').textContent=name+(age?' '+age:'');
   $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
@@ -1057,44 +1043,36 @@ async function refreshMatches(){
 }
 // 24時間の残りミリ秒（テストマッチは常に有効）
 const MATCH_TTL=24*60*60*1000;
-// 期限をなくしたマッチ（match_keyで共有。片方が課金すれば両方に効く）
-let unlockedMatches=new Set();
-async function loadMatchUnlocks(){
-  if(!sb)return;
-  try{
-    const {data,error}=await sb.from(T('match_unlocks')).select('match_key');
-    if(error){ console.warn('[unlock] match_unlocks を読み込めません。supabase/match_unlocks.sql を実行してください:',error.message); return; }
-    if(data)unlockedMatches=new Set(data.map(x=>x.match_key));
-  }catch(e){ console.warn('[unlock] 読み込み失敗',e); }
-}
-function isUnlocked(uid){ return unlockedMatches.has(chatKey(uid)); }
 function matchLeftMs(m){ if(!m||!m.matchedAt)return MATCH_TTL; return MATCH_TTL-(Date.now()-m.matchedAt); }
 function isExpired(m){
   if(!m||!m.matchedAt)return false;
   if(isTest(m.u.id))return false;
-  if(isUnlocked(m.u.id))return false;   // 課金済みは期限なし
   return matchLeftMs(m)<=0;
 }
 function leftText(ms){ if(ms<=0)return '終了'; const h=Math.floor(ms/3600000); const mi=Math.floor((ms%3600000)/60000); return h>0?(h+'時間'+mi+'分'):(mi+'分'); }
 
-/* ---------- 多摩キャン版の属性（学部・今日の目的・目標など） ---------- */
+/* ---------- 多摩キャン版の属性（学部・いま探していること・目標など） ---------- */
 let obAttr=null, edAttr=null;
 function attrsOf(u){ return (u&&(u.fa||u.fes_attrs))||{}; }
 function toggleArr(a,v){ const i=a.indexOf(v); if(i>=0)a.splice(i,1); else a.push(v); }
-function attrStateFrom(fa){ fa=fa||{}; return {faculty:fa.faculty||'',dept:fa.dept||'',grade:fa.grade||'',purposes:[...(fa.purposes||[])],goals:[...(fa.goals||[])],hometown:fa.hometown||'',answers:{...(fa.answers||{})}}; }
-function attrToFa(st){ return {faculty:st.faculty,dept:st.dept,grade:st.grade,purposes:[...st.purposes],goals:[...st.goals],hometown:st.hometown,answers:{...st.answers}}; }
+// 選択肢が入れ替わった項目は、いまのFAに無い値を落としてから入力欄に流す。
+// そうすると学園祭向けの古い値（「食べ歩き」など）が残っている人は必須が空になり、
+// 起動時に attrMissing が効いて編集画面が開き、選び直してもらえる
+const keepKnown=(arr,opts)=>[...(arr||[])].filter(x=>opts.includes(x));
+function attrStateFrom(fa){ fa=fa||{}; return {faculty:FA.faculties.some(f=>f.v===fa.faculty)?fa.faculty:'',dept:fa.dept||'',grade:fa.grade||'',purposes:keepKnown(fa.purposes,FA.purposes),goals:keepKnown(fa.goals,FA.goals),hometown:fa.hometown||'',course:fa.course||''}; }
+function attrToFa(st){ return {faculty:st.faculty,dept:st.dept,grade:st.grade,purposes:[...st.purposes],goals:[...st.goals],hometown:st.hometown,course:st.course.trim()}; }
 function attrMissing(st){
   if(!st.faculty)return '学部・所属を選んでください';
-  if(!st.purposes.length)return '今日の目的を1つ以上選んでください';
-  if(FA.questions.some(q=>!st.answers[q.id]))return '2択にすべて答えてください';
+  if(!st.purposes.length)return 'いま探していることを1つ以上選んでください';
+  if(!st.course.trim())return '今季絶対取りたい科目を入れてください';
   return null;
 }
 // 登録画面と編集画面で同じ入力欄を使う（p は id の頭につける文字: 'ob' / 'ed'）
 function attrFieldsHTML(p){
   return `<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意・見せるだけ）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>
-    <div class="field"><label>今日の目的（複数OK）<span class="req">必須</span></label><div class="chips" id="${p}Purpose"></div></div>
-    <div class="field"><label>2択に答えてください<span class="req">必須</span></label><div id="${p}Qs"></div></div>
+    <div class="field"><label>いま探していること（複数OK）<span class="req">必須</span></label><div class="chips" id="${p}Purpose"></div></div>
+    <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field"><label>出身（任意・見せるだけ）</label><select id="${p}Home"><option value="">選ばない</option>${PREFS.map(x=>`<option>${x}</option>`).join('')}</select></div>`;
 }
@@ -1106,19 +1084,19 @@ function bindAttrForm(p,st){
     chips('Faculty',FA.faculties.map(f=>f.v),o=>st.faculty===o,o=>{ if(st.faculty!==o){ st.faculty=o; st.dept=''; } });
     const f=FA.faculties.find(x=>x.v===st.faculty);
     // 学科・学年は学生の時だけ出す
-    const student=!!f&&!['社会人・一般','法政の卒業生'].includes(f.v);
+    const student=!!f&&f.v!=='その他';
     $('#'+p+'DeptWrap').style.display=student?'':'none';
     chips('Dept',f?f.depts:[],o=>st.dept===o,o=>{ st.dept=st.dept===o?'':o; });
     chips('Grade',FA.grades,o=>st.grade===o,o=>{ st.grade=st.grade===o?'':o; });
     chips('Purpose',FA.purposes,o=>st.purposes.includes(o),o=>toggleArr(st.purposes,o));
     chips('Goals',FA.goals,o=>st.goals.includes(o),o=>toggleArr(st.goals,o));
-    $('#'+p+'Qs').innerHTML=FA.questions.map(q=>`<div class="qrow"><div class="qt">${esc(q.text)}</div><div class="chips qab">${['a','b'].map(k=>`<div class="c ${st.answers[q.id]===k?'sel':''}" data-q="${q.id}" data-k="${k}">${esc(q[k])}</div>`).join('')}</div></div>`).join('');
-    $$('#'+p+'Qs .c').forEach(c=>c.onclick=()=>{ st.answers[c.dataset.q]=c.dataset.k; render(); });
   }
+  // 科目は入力のたびに render() を呼ぶと打っている途中でカーソルが飛ぶので、値だけ拾う
+  const course=$('#'+p+'Course'); course.value=st.course||''; course.oninput=e=>{ st.course=e.target.value; };
   const home=$('#'+p+'Home'); home.value=st.hometown||''; home.onchange=e=>{ st.hometown=e.target.value; };
   render();
 }
-// 共通点＝学部・今日の目的・目標のどれかが一致。画面に出すかどうかはこれで決める（データは全員分記録する）
+// 共通点＝学部・いま探していること・目標のどれかが一致。画面に出すかどうかはこれで決める（データは全員分記録する）
 function commonWith(u){
   if(!profile)return [];
   const me=attrsOf(profile), th=attrsOf(u), out=[];
@@ -1127,19 +1105,21 @@ function commonWith(u){
   (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))out.push(x); });
   return out;
 }
-// 2択で同じ答えを選んだお題（共通点の判定には使わず、プロフィールに「同じ！」と出すだけ）
-function sameAnswers(u){ const a=attrsOf(profile).answers||{}, b=attrsOf(u).answers||{}; return FA.questions.filter(q=>a[q.id]&&a[q.id]===b[q.id]); }
+// 取りたい科目が同じか（共通点の判定には使わず、プロフィールに「同じ！」と出すだけ）。
+// 「 マーケティング論 」「ﾏｰｹﾃｨﾝｸﾞ論」のような書き方のゆれを吸収してから比べる
+function normCourse(s){ return (s||'').normalize('NFKC').replace(/[\s　]+/g,'').toLowerCase(); }
+function sameCourse(u){ const a=normCourse(attrsOf(profile).course), b=normCourse(attrsOf(u).course); return !!a&&a===b; }
 function attrBlock(u){
   const a=attrsOf(u); if(!a.faculty&&!(a.purposes||[]).length)return '';
-  const common=new Set(commonWith(u)), same=new Set(sameAnswers(u).map(q=>q.id));
+  const common=new Set(commonWith(u)), courseHit=sameCourse(u);
   const chip=x=>`<span class="fchip${common.has(x)?' hit':''}">${esc(x)}</span>`;
   return `<div class="fesattr">
     ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${common.has(a.faculty)?' <span class="same">同じ！</span>':''}</div>`:''}
     ${a.status?`<div class="frow">💬 いま <b>${esc(a.status)}</b></div>`:''}
-    ${(a.purposes||[]).length?`<div class="fh">今日の目的</div><div class="fchips">${a.purposes.map(chip).join('')}</div>`:''}
+    ${(a.purposes||[]).length?`<div class="fh">いま探していること</div><div class="fchips">${a.purposes.map(chip).join('')}</div>`:''}
     ${(a.goals||[]).length?`<div class="fh">これから・目標</div><div class="fchips">${a.goals.map(chip).join('')}</div>`:''}
     ${a.hometown?`<div class="frow" style="margin-top:8px">🏠 出身 <b>${esc(a.hometown)}</b></div>`:''}
-    ${FA.questions.filter(q=>(a.answers||{})[q.id]).map(q=>`<div class="qline"><span class="qt">${esc(q.text)}</span><b>${esc(q[a.answers[q.id]])}</b>${same.has(q.id)?'<span class="same">同じ！</span>':''}</div>`).join('')}
+    ${a.course?`<div class="qline"><span class="qt">今季絶対取りたい科目</span><b>${esc(a.course)}</b>${courseHit?'<span class="same">同じ！</span>':''}</div>`:''}
   </div>`;
 }
 function renderStatusRow(){
@@ -1168,7 +1148,7 @@ function renderNearby(){
   }
   if(!list.length){
     ul.innerHTML=all.length
-      ?`<div class="empty"><div class="big">🔎</div><p>近くに<b>${all.length}人</b>いますが、<br>共通点のある人はまだいません。<br>今日の目的や目標を増やすと<br>見つかりやすくなります。</p><button class="btn btn-primary" onclick="openEdit()">プロフィールを見直す</button></div>`
+      ?`<div class="empty"><div class="big">🔎</div><p>近くに<b>${all.length}人</b>いますが、<br>共通点のある人はまだいません。<br>いま探していることや目標を<br>増やすと見つかりやすくなります。</p><button class="btn btn-primary" onclick="openEdit()">プロフィールを見直す</button></div>`
       :`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「友達」タブのQR・リンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('friends')">QR・リンクを開く</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;
     return;
   }
@@ -1491,6 +1471,7 @@ function likeReasonOptions(u){
   if(fa.faculty)out.push(fa.faculty);
   (fa.purposes||[]).filter(x=>!FA.weak.includes(x)).forEach(x=>out.push(x));
   (fa.goals||[]).filter(x=>!FA.weak.includes(x)).forEach(x=>out.push(x));
+  if(fa.course)out.push(fa.course+'を狙ってる');
   (u.interests||[]).forEach(x=>out.push(x.detail));
   (u.likes||[]).forEach(x=>out.push(x));
   (u.tags||[]).forEach(x=>out.push(x));
@@ -1504,7 +1485,7 @@ function openLikeReason(){
   likeTargetUser=curSheetUser;
   const u=likeTargetUser; const opts=likeReasonOptions(u);
   $('#likeSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">${esc(u.name)} さんのどこに惹かれましたか？</h2>
-    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">選ぶだけで、相手に「どこに惹かれたか」が伝わります。<br><span style="color:var(--muted2)">選択は無料です</span></p>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">選ぶだけで、相手に「どこに惹かれたか」が伝わります。</p>
     <div style="max-height:44vh;overflow-y:auto">
     ${opts.length?opts.map(o=>`<button class="likereason" onclick="sendLikeWithReason('${String(o).replace(/'/g,"&#39;")}')">${esc(o)}</button>`).join(''):''}
     ${u.bio?`<button class="likereason" onclick="sendLikeWithReason('ひとこと')">ひとこと「${esc(u.bio.length>18?u.bio.slice(0,18)+'…':u.bio)}」</button>`:''}
@@ -1540,7 +1521,7 @@ const TERMS_HTML=`
 <h4>第6条（通報・ブロック・利用停止）</h4>
 <p>利用者は、他の利用者を通報およびブロックできます。運営は通報内容を確認し、禁止事項に該当すると判断した場合、事前の通知なく当該利用者の情報を削除し、利用を停止することがあります。</p>
 <h4>第7条（料金）</h4>
-<p>本サービスの利用は無料です。アプリ内には有料機能を模した画面が含まれますが、実証実験のための表示であり、実際の請求や決済は一切発生しません。</p>
+<p>本サービスの利用は無料です。すべての機能を無料でご利用いただけ、請求や決済は一切発生しません。</p>
 <h4>第8条（利用者間のトラブル）</h4>
 <p>本サービスは出会いの機会を提供するものではなく、利用者どうしの交流のきっかけを提供するものです。利用者間で生じたトラブルについては、利用者ご自身の責任で対応いただきます。運営は、故意または重大な過失がある場合を除き、責任を負いません。</p>
 <h4>第9条（安全のために）</h4>
@@ -1617,97 +1598,17 @@ function openSheet(u,d){
   $('#overlay').classList.add('show');
 }
 function closeSheet(){$('#overlay').classList.remove('show');}
-const PRICE={msg:480,like1:60,like5:240,like10:400,reason:280,extend:680};
-let billing={day:'',freeUsed:0,paidLikes:0,msgUnlocked:false,reasonUnlocked:false};
-function today(){return new Date().toISOString().slice(0,10);}
-function rollBilling(){ if(billing.day!==today()){billing.day=today();billing.freeUsed=0;billing.paidLikes=0;} }
-async function loadBilling(){ if(sb){try{const {data}=await sb.from(T('profiles')).select('billing').eq('id',myId).maybeSingle();if(data&&data.billing)billing={...billing,...data.billing};}catch(e){}} rollBilling(); updateBillUI(); }
-async function saveBilling(){ rollBilling(); updateBillUI(); if(sb){try{await sb.from(T('profiles')).update({billing}).eq('id',myId);}catch(e){}} }
-function freeLeft(){rollBilling();return Math.max(0,3-billing.freeUsed);}
-function likeRemainText(){const f=freeLeft();return f>0?('無料'+f+'回'):(billing.paidLikes>0?('追加'+billing.paidLikes+'回'):'0回（追加購入できます）');}
-function updateBillUI(){ const ms=$('#msgStat'),mb=$('#msgBtn'),ls=$('#likeStat');
-  if(ms)ms.textContent=billing.msgUnlocked?'解禁済み（送り放題）':'未解禁（初回のみ有料）';
-  if(mb){mb.style.display=billing.msgUnlocked?'none':'';}
-  if(ls){const f=freeLeft();ls.textContent=(f>0?('無料 残り'+f+'回'):('無料分終了'))+(billing.paidLikes>0?(' ＋ 追加'+billing.paidLikes+'回'):'');}
-  const rs=$('#reasonStat'),rb=$('#reasonBtn');
-  if(rs)rs.textContent=billing.reasonUnlocked?'解禁済み（相手が惹かれたポイントが見えます）':'未解禁（相手が惹かれたポイントが見えます）';
-  if(rb)rb.style.display=billing.reasonUnlocked?'none':'';
-  renderMatches(); }
+// 多摩キャン版の実証実験は全機能解放。課金デモ（メッセージ解禁・いいねの追加購入・いいねの理由の解禁・
+// マッチの期限をなくす・部屋の作成料）は撤去してあり、いいねは無制限・メッセージといいねの理由は最初から使える。
+// #payOverlay / #paySheet はコミュニティ作成の入力シートで引き続き使っている。
 function closePay(){$('#payOverlay').classList.remove('show');}
-let pendingLikeUid=null, pendingLikeReason=null;
-function showLikePaywall(uid){ pendingLikeUid=uid;
-  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">いいねを追加購入</h2>
-    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">1日の無料いいね（3回）を使い切りました。追加のいいねを購入できます。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません／購入分も日付が変わるとリセットされます</span></p>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(1,${PRICE.like1})"><span>いいね 1回分</span><b style="color:var(--amber)">¥${PRICE.like1}</b></button>
-      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(5,${PRICE.like5})"><span>いいね 5回分 <span style="font-size:11px;color:var(--ok)">お得</span></span><b style="color:var(--amber)">¥${PRICE.like5}</b></button>
-      <button class="btn btn-ghost" style="padding:14px;justify-content:space-between;display:flex" onclick="buyLikes(10,${PRICE.like10})"><span>いいね 10回分 <span style="font-size:11px;color:var(--ok)">一番お得</span></span><b style="color:var(--amber)">¥${PRICE.like10}</b></button>
-    </div>
-    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closePay()">やめる</button>`;
-  $('#payOverlay').classList.add('show');
-}
-function buyLikes(n,price){
-  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
-  billing.paidLikes+=n; saveBilling(); closePay(); toast('✅ いいね'+n+'回分を追加しました（デモ）');
-  if(pendingLikeUid){const u=pendingLikeUid;const r=pendingLikeReason;pendingLikeUid=null;pendingLikeReason=null;doLike(u,r);}
-}
-function showMsgPaywall(){
-  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">メッセージ機能を解禁</h2>
-    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:18px">マッチした相手とメッセージするには解禁が必要です。<br><b style="color:var(--ink)">一度解禁すると、以降は送り放題</b>になります。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません</span></p>
-    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;display:flex;justify-content:space-between" onclick="buyMsg(${PRICE.msg})"><span>メッセージを解禁</span><b>¥${PRICE.msg}</b></button>
-    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closePay()">やめる</button>`;
-  $('#payOverlay').classList.add('show');
-}
-function buyMsg(price){
-  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
-  billing.msgUnlocked=true; saveBilling(); closePay(); toast('✅ メッセージを解禁しました（デモ）');
-}
-function showExtendPaywall(uid){
-  const m=matches[uid];
-  if(!m){ toast('マッチが見つかりません'); return; }
-  if(isUnlocked(uid)){ toast('このマッチはすでに期限なしです'); return; }
-  if(isExpired(m)){ toast('このマッチは終了しているため、延長できません'); return; }
-  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">${esc(m.u.name)} さんとの期限をなくす</h2>
-    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:18px">24時間の制限がなくなり、<b style="color:var(--ink)">この相手とはずっと話せる</b>ようになります。<br><b style="color:var(--ink)">どちらか一方が解禁すれば、二人とも話せます。</b><br><span style="color:var(--muted2)">※期限が切れたあとは解禁できません／デモのため実際の請求は発生しません</span></p>
-    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;display:flex;justify-content:space-between" onclick="buyExtend('${uid}',${PRICE.extend})"><span>期限をなくす</span><b>¥${PRICE.extend}</b></button>
-    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closePay()">やめる</button>`;
-  $('#payOverlay').classList.add('show');
-}
-async function buyExtend(uid,price){
-  if(isExpired(matches[uid])){ toast('このマッチは終了しているため、延長できません'); closePay(); return; }
-  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
-  const key=chatKey(uid);
-  unlockedMatches.add(key);
-  closePay(); renderMatches(); if(chatPeer===uid)renderChat();
-  toast('✅ このマッチは期限なしになりました（デモ）');
-  if(sb){ try{
-    const {error}=await sb.from(T('match_unlocks')).upsert({match_key:key,unlocked_by:myId},{onConflict:'match_key'});
-    if(error) console.warn('[unlock] 保存に失敗',error.message);
-  }catch(e){ console.error('[unlock] 送信に失敗',e); } }
-}
-function showReasonPaywall(){
-  $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">いいねの理由を見る</h2>
-    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:18px">相手が<b style="color:var(--ink)">あなたのどこに惹かれたのか</b>が見えるようになります。<br>会話のきっかけがつかみやすくなります。<br><span style="color:var(--muted2)">※一度解禁すると、以降すべての相手について見られます／デモのため実際の請求は発生しません</span></p>
-    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;display:flex;justify-content:space-between" onclick="buyReason(${PRICE.reason})"><span>理由を見られるようにする</span><b>¥${PRICE.reason}</b></button>
-    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closePay()">やめる</button>`;
-  $('#payOverlay').classList.add('show');
-}
-function buyReason(price){
-  if(!confirm('本来なら ¥'+price+' かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
-  billing.reasonUnlocked=true; saveBilling(); closePay(); renderMatches();
-  toast('✅ いいねの理由が見られるようになりました（デモ）');
-}
-function resetBilling(){ billing={day:today(),freeUsed:0,paidLikes:0,msgUnlocked:false,reasonUnlocked:false}; saveBilling(); toast('課金状態をリセットしました（デモ）'); }
 async function doLike(uid,reason){
   if(isTest(uid)){ liked.add(uid);closeSheet();renderNearby();createMatch(uid,true); return; }
-  if(freeLeft()<=0 && billing.paidLikes<=0){ closeSheet(); pendingLikeReason=reason||null; showLikePaywall(uid); return; }
-  if(freeLeft()>0) billing.freeUsed++; else billing.paidLikes--;
-  saveBilling();
-  liked.add(uid);closeSheet();renderNearby();
+  liked.add(uid);closeSheet();renderNearby();   // いいねの回数制限なし（全機能解放）
   if(!sb){ toast('バックエンド未接続です'); return; }
   // いいねした時点で何が共通していたかを残す（どの種類の共通点がマッチにつながったかを後で集計するため）
   const tu=findUser(uid)||curSheetUser||{};
-  const matched={common:commonWith(tu),same:sameAnswers(tu).map(q=>q.id)};
+  const matched={common:commonWith(tu),sameCourse:sameCourse(tu)?(attrsOf(tu).course||''):null};
   const {error:le}=await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:reason||null,matched});
   if(le&&/matched/.test(le.message)){
     console.warn('[attrs] tama_likes に matched 列がありません。supabase/tama_tables.sql を実行してください:',le.message);
@@ -1715,7 +1616,7 @@ async function doLike(uid,reason){
   }
   const {data}=await sb.from(T('likes')).select('from_id').eq('from_id',uid).eq('to_id',myId).maybeSingle();
   if(data){ createMatch(uid,true); }
-  else{ notifyPush(uid,'いいねが届きました💌','気になる人があなたにいいねしました。プロフィールを確認してみて！'); toast('いいねを送りました（今日の残り '+likeRemainText()+'）'); }
+  else{ notifyPush(uid,'いいねが届きました💌','気になる人があなたにいいねしました。プロフィールを確認してみて！'); toast('いいねを送りました'); }
 }
 
 /* ---------- matches ---------- */
@@ -1734,7 +1635,7 @@ function notifyPush(uid,title,body){
     .catch(err=>console.error('[push] 送信失敗',err));
 }
 function showMatchPop(u,theirReason){const mp=$('#matchpop');
-  const rtxt=theirReason?(billing.reasonUnlocked?`<br><span class="whylike">あなたの「${esc(theirReason)}」に惹かれたそうです</span>`:`<br><span class="whylike locked" onclick="closePop();go('me');showReasonPaywall()">🔒 相手が惹かれたポイントを見る</span>`):'';
+  const rtxt=theirReason?`<br><span class="whylike">あなたの「${esc(theirReason)}」に惹かれたそうです</span>`:'';
   mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました${rtxt}</p>
     <div class="avs"><div class="a" style="background:${profile?gr(profile.emoji):'#f78b3c'}">${profile?profile.emoji:'😀'}</div><span class="heart">💛</span><div class="a" style="background:${gr(u.emoji)}">${u.emoji}</div></div>
     <div class="mbtns"><button class="btn btn-rose" onclick="closePop();openChat('${u.id}')">メッセージを送る</button><button class="btn later" onclick="closePop()">あとで</button></div>
@@ -1748,7 +1649,7 @@ function renderMatches(){
   if(!ids.length){list.innerHTML=`<div class="empty"><div class="big">♥</div><p>まだ有効なマッチはありません。<br>近くの人に「いいね」して、<br>両想いになると表示されます。<br><span style="color:var(--rose);font-weight:700">※マッチは24時間で消えます</span></p></div>`;return;}
   list.innerHTML=ids.map((id,i)=>{const m=matches[id];const last=m.msgs[m.msgs.length-1];const ms=matchLeftMs(m);const warn=ms<3600000;
     return `<div class="mrow" onclick="openChat('${id}')"><div class="av" style="background:${gr(m.u.emoji)}">${m.u.emoji}<span class="on"></span></div>
-      <div class="info"><div class="nm">${esc(m.u.name)} ${m.matchedAt&&!isTest(id)?(isUnlocked(id)?'<span class="keeptag">♾ 期限なし</span>':`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`):''}</div><div class="last">${last?(last.from===myId?'あなた: ':'')+esc(last.text):(m.theirReason?(billing.reasonUnlocked?('🎯「'+esc(m.theirReason)+'」に惹かれたそうです'):'🔒 惹かれたポイントは解禁すると見られます'):'マッチしました！24時間以内に話しかけて！')}</div></div></div>${i<ids.length-1?'<div class="sep"></div>':''}`;}).join('');
+      <div class="info"><div class="nm">${esc(m.u.name)} ${m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`:''}</div><div class="last">${last?(last.from===myId?'あなた: ':'')+esc(last.text):(m.theirReason?('🎯「'+esc(m.theirReason)+'」に惹かれたそうです'):'マッチしました！24時間以内に話しかけて！')}</div></div></div>${i<ids.length-1?'<div class="sep"></div>':''}`;}).join('');
 }
 
 /* ---------- chat (Supabase messages) ---------- */
@@ -1764,9 +1665,8 @@ function renderChat(){const m=matches[chatPeer];if(!m)return;const box=$('#msgs'
   const expired=isExpired(m); const ms=matchLeftMs(m);
   let banner='';
   if(m.matchedAt&&!isTest(chatPeer)){
-    if(isUnlocked(chatPeer)) banner='<div class="ttlbar keep">♾ このマッチは期限なしで話せます</div>';
-    else if(expired) banner='<div class="ttlbar over">⌛ このマッチは終了しました。もう話せません…</div>';
-    else banner='<div class="ttlbar'+(ms<3600000?' warn':'')+'">⏳ あと <b>'+leftText(ms)+'</b> で話せなくなります <span class="extendbtn" onclick="showExtendPaywall(\''+chatPeer+'\')">期限をなくす</span></div>';
+    if(expired) banner='<div class="ttlbar over">⌛ このマッチは終了しました。もう話せません…</div>';
+    else banner='<div class="ttlbar'+(ms<3600000?' warn':'')+'">⏳ あと <b>'+leftText(ms)+'</b> で話せなくなります</div>';
   }
   box.innerHTML=banner+'<div class="day">今日</div>'+m.msgs.map(x=>`<div class="bub ${x.from===myId?'me':'them'}">${esc(x.text)}</div>`).join('');box.scrollTop=box.scrollHeight;
   // 入力欄のロック
@@ -1777,7 +1677,6 @@ function renderChat(){const m=matches[chatPeer];if(!m)return;const box=$('#msgs'
 async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!t||!chatPeer)return;
   if(isExpired(matches[chatPeer])){ toast('このマッチは24時間を過ぎたので、もう話せません'); return; }
   if(ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください。'); return; }
-  if(!isTest(chatPeer) && !billing.msgUnlocked){ showMsgPaywall(); return; }
   inp.value='';
   if(isTest(chatPeer)){matches[chatPeer].msgs.push({from:myId,text:t});renderChat();
     const rep=['ほんとだ、近いですね😊','どこかでお茶でもどうですか？','その辺よく行きます！','会えたらうれしいです','わかります〜'];
@@ -1877,10 +1776,10 @@ function renderRooms(){ const arr=sortedRooms(); const el=$('#roomList'); if(el)
 }
 function createRoom(){
   $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">コミュニティを作成</h2>
-    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:14px">部屋の作成は有料です（¥500）。作った部屋には<b style="color:var(--ink)">誰でも無料で参加</b>できます。<br><span style="color:var(--muted2)">※デモのため実際の請求は発生しません</span></p>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:14px">作った部屋には<b style="color:var(--ink)">誰でも参加</b>できます。</p>
     <div class="field"><label>コミュニティ名</label><input id="newRoomName" maxlength="20" placeholder="例：カフェ好き集まれ"></div>
     <div class="field"><label>ひとこと（任意）</label><input id="newRoomTopic" maxlength="40" placeholder="どんな部屋？"></div>
-    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="confirmCreateRoom()">作成する（¥500）</button>
+    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="confirmCreateRoom()">作成する</button>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closePay()">やめる</button>`;
   $('#payOverlay').classList.add('show');
 }
@@ -1888,13 +1787,12 @@ async function confirmCreateRoom(){
   const name=$('#newRoomName').value.trim(); if(!name){toast('コミュニティ名を入れてね');return;}
   const topic=$('#newRoomTopic').value.trim();
   if(ngCheck(name)||ngCheck(topic)){ toast('⚠️ 部屋名かひとことに不適切な言葉が含まれています。'); return; }
-  if(!confirm('本来なら ¥500 かかりますが、よろしいですか？\n（デモのため実際の請求はありません）'))return;
   if(sb){try{
     const {data,error}=await sb.from(T('rooms')).insert({name,topic,owner_id:myId}).select().maybeSingle();
     if(error){toast('作成に失敗: '+error.message);return;}
     if(data)await joinRoom(data.id); // 作った本人は自動で参加状態にする（空の自室に入れないのを防ぐ）
   }catch(e){toast('作成に失敗しました');return;}}
-  closePay(); toast('✅ コミュニティを作成しました（デモ）'); loadRooms();
+  closePay(); toast('✅ コミュニティを作成しました'); loadRooms();
 }
 async function openRoom(id){ const k=rid(id);
   // onclick経由でidは文字列になる。rooms.idがbigintだと===で一致しないため正規化して比較する
@@ -1982,10 +1880,10 @@ async function doInstall(){
 }
 /* ---------- はじめての方向けガイド ---------- */
 const GUIDE=[
-  {icon:'📍',title:'近くにいる人が<br>見えます',body:'いま多摩キャンパスでこのアプリを開いている人のうち、学部・今日の目的・目標のどれかが同じ人が、地図と一覧に表示されます。',note:'アプリを開いている間だけ位置を共有します。閉じれば止まります。'},
-  {icon:'♥',title:'気になる人に<br>いいねを送る',body:'プロフィールを開いて「いいね」を押し、どこに惹かれたかを選んで送ります。お互いに送り合うとマッチが成立します。',note:'いいねは1日3回まで無料です。'},
-  {icon:'💬',title:'マッチしたら<br>24時間以内に話す',body:'マッチすると、その相手とメッセージができます。ただし24時間が過ぎると話せなくなるので、気になったら早めに声をかけてみてください。',note:'期限が切れる前なら、課金で「ずっと話せる」ようにもできます。'},
-  {icon:'👥',title:'コミュニティで<br>みんなと話す',body:'「コミュ」タブでは、部屋に参加してみんなで話せます。参加は無料です。参加者のプロフィールも見られます。',note:'困ったときは、相手のプロフィールから通報・ブロックができます。'},
+  {icon:'📍',title:'近くにいる人が<br>見えます',body:'いま多摩キャンパスでこのアプリを開いている人のうち、学部・いま探していること・目標のどれかが同じ人が、地図と一覧に表示されます。',note:'アプリを開いている間だけ位置を共有します。閉じれば止まります。'},
+  {icon:'♥',title:'気になる人に<br>いいねを送る',body:'プロフィールを開いて「いいね」を押し、どこに惹かれたかを選んで送ります。お互いに送り合うとマッチが成立します。',note:'いいねの回数に制限はありません。相手が何に惹かれたかも見られます。'},
+  {icon:'💬',title:'マッチしたら<br>24時間以内に話す',body:'マッチすると、その相手とメッセージができます。ただし24時間が過ぎると話せなくなるので、気になったら早めに声をかけてみてください。',note:'メッセージは何通でも送れます。'},
+  {icon:'👥',title:'コミュニティで<br>みんなと話す',body:'「コミュ」タブでは、部屋に参加してみんなで話せます。部屋を作るのも参加するのも自由です。参加者のプロフィールも見られます。',note:'困ったときは、相手のプロフィールから通報・ブロックができます。'},
   {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'毎回QRコードを読まなくても、ホーム画面のアイコンから開けるようになります。通知も受け取れます。',note:'追加のしかたは、設定の「ホーム画面に追加する方法」から見られます。',action:true}
 ];
 let guideIdx=0;
@@ -2417,6 +2315,7 @@ async function saveEdit(){
   if(ng){ w.textContent='⚠️ 名前かひとことに不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
   const miss=attrMissing(edAttr);
   if(miss){ w.textContent='⚠️ '+miss; w.classList.add('show'); return; }
+  if(ngCheck(edAttr.course)){ w.textContent='⚠️ 科目名に不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
   w.classList.remove('show');
   profile.name=name; profile.bio=bio;
   const newAge=parseInt($('#edAge').value)||profile.age;
@@ -2454,7 +2353,7 @@ function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t)
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='friends')loadFriends();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=pushHintText();}}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
-  publishMe();loadBlocks().then(()=>pollUsers());loadMatchUnlocks();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();loadMatchUnlocks();}},6000);
+  publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);
   loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden)presenceTick();},60000);}
 
