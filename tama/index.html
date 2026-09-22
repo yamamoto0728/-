@@ -1011,6 +1011,16 @@ async function publishMe(){
   }
 }
 let fesAttrColMissing=false;
+// 属性（いま探していること・いまの状態）だけをプロフィールに書き戻す。
+// publishMe() は位置が取れていない時・キャンパスの外・共有オフだと何も送らないので、
+// それに任せると「保存しました」と出たのに消えている、という状態になる。
+// 行がまだ無い人（登録したが一度も位置を取れていない人）にはここでは書かないが、
+// profile.fa は更新済みなので、最初の publishMe() でそのまま保存される
+async function saveMyAttrs(){
+  if(!sb||!myId||!profile||fesAttrColMissing)return;
+  const {error}=await sb.from(T('profiles')).update({fes_attrs:profile.fa||{}}).eq('id',myId);
+  if(error)console.warn('[attrs] 属性を保存できませんでした',error.message);
+}
 async function pollUsers(){
   let out=[];
   if(sb&&!fesOutside){
@@ -1061,9 +1071,9 @@ function toggleArr(a,v){ const i=a.indexOf(v); if(i>=0)a.splice(i,1); else a.pus
 const keepKnown=(arr,opts)=>[...(arr||[])].filter(x=>opts.includes(x));
 function attrStateFrom(fa){ fa=fa||{}; return {faculty:FA.faculties.some(f=>f.v===fa.faculty)?fa.faculty:'',dept:fa.dept||'',grade:fa.grade||'',purposes:keepKnown(fa.purposes,FA.purposes),goals:keepKnown(fa.goals,FA.goals),hometown:fa.hometown||'',course:fa.course||''}; }
 function attrToFa(st){ return {faculty:st.faculty,dept:st.dept,grade:st.grade,purposes:[...st.purposes],goals:[...st.goals],hometown:st.hometown,course:st.course.trim()}; }
+// 「いま探していること」はここでは聞かない（友達タブの「いまどこ？」で設定する。任意）
 function attrMissing(st){
   if(!st.faculty)return '学部・所属を選んでください';
-  if(!st.purposes.length)return 'いま探していることを1つ以上選んでください';
   if(!st.course.trim())return '今季絶対取りたい科目を入れてください';
   return null;
 }
@@ -1071,7 +1081,6 @@ function attrMissing(st){
 function attrFieldsHTML(p){
   return `<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意・見せるだけ）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>
-    <div class="field"><label>いま探していること（複数OK）<span class="req">必須</span></label><div class="chips" id="${p}Purpose"></div></div>
     <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field"><label>出身（任意・見せるだけ）</label><select id="${p}Home"><option value="">選ばない</option>${PREFS.map(x=>`<option>${x}</option>`).join('')}</select></div>`;
@@ -1088,7 +1097,8 @@ function bindAttrForm(p,st){
     $('#'+p+'DeptWrap').style.display=student?'':'none';
     chips('Dept',f?f.depts:[],o=>st.dept===o,o=>{ st.dept=st.dept===o?'':o; });
     chips('Grade',FA.grades,o=>st.grade===o,o=>{ st.grade=st.grade===o?'':o; });
-    chips('Purpose',FA.purposes,o=>st.purposes.includes(o),o=>toggleArr(st.purposes,o));
+    // 「いま探していること」（st.purposes）はこの画面には出さない。
+    // 保存のときは attrToFa がそのまま書き戻すので、いまの値は消えない
     chips('Goals',FA.goals,o=>st.goals.includes(o),o=>toggleArr(st.goals,o));
   }
   // 科目は入力のたびに render() を呼ぶと打っている途中でカーソルが飛ぶので、値だけ拾う
@@ -1131,7 +1141,7 @@ function renderStatusRow(){
 function setStatus(s){
   if(!profile)return;
   profile.fa=profile.fa||{}; profile.fa.status=profile.fa.status===s?'':s;
-  renderStatusRow(); publishMe();
+  renderStatusRow(); publishMe(); saveMyAttrs();
 }
 /* ---------- render nearby ---------- */
 function renderNearby(){
@@ -1148,7 +1158,7 @@ function renderNearby(){
   }
   if(!list.length){
     ul.innerHTML=all.length
-      ?`<div class="empty"><div class="big">🔎</div><p>近くに<b>${all.length}人</b>いますが、<br>共通点のある人はまだいません。<br>いま探していることや目標を<br>増やすと見つかりやすくなります。</p><button class="btn btn-primary" onclick="openEdit()">プロフィールを見直す</button></div>`
+      ?`<div class="empty"><div class="big">🔎</div><p>近くに<b>${all.length}人</b>いますが、<br>共通点のある人はまだいません。<br>「いま探していること」を<br>増やすと見つかりやすくなります。</p><button class="btn btn-primary" onclick="openPlaceEdit(false)">いま探していることを選ぶ</button></div>`
       :`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「友達」タブのQR・リンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('friends')">QR・リンクを開く</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;
     return;
   }
@@ -2130,7 +2140,9 @@ function renderMyPresence(){
   el.innerHTML=`<div class="mphead">いまの自分</div>
     <div class="mpwhere">📍 <b>${esc(where)}</b>${act&&p.note?` <span class="stchip">${esc(p.note)}</span>`:''}</div>
     <div class="mpsub">${act&&p.expires_at?`教室とひとことは ${hhmm(p.expires_at)} ごろに消えます`:'建物に入ると、いる教室を聞きます'}</div>
-    <button class="btn btn-primary mpedit" onclick="openPlaceEdit(false)">✏️ いまどこを編集</button>
+    <div class="mphead" style="margin-top:12px">いま探していること<span style="font-weight:400;color:var(--muted2)">（近くの人みんなに見えます）</span></div>
+    <div class="mpwhere">${(attrsOf(profile).purposes||[]).length?(attrsOf(profile).purposes||[]).map(x=>`<span class="stchip">${esc(x)}</span>`).join(' '):'<span style="font-size:12.5px;color:var(--muted)">まだ選んでいません</span>'}</div>
+    <button class="btn btn-primary mpedit" onclick="openPlaceEdit(false)">✏️ いまどこ・探していることを編集</button>
     <div class="mphead" style="margin-top:12px">友達にどこまで見せる？</div>
     <div class="chips mpvis">${Object.entries(VIS_LABEL).map(([k,v])=>`<span class="c${p.visibility===k?' sel':''}" onclick="setVisibility('${k}')">${v}</span>`).join('')}</div>
     <div class="mpnote">「近くの人」への表示は、設定の「位置情報を共有」で切り替えます</div>`;
@@ -2205,17 +2217,30 @@ function drawFriendMarkers(){
   });
 }
 // 「いまどこ？」の入力シート（建物に入った時に自動で開く／いつでも自分で開ける）
+// 「いま探していること」はこのシートで設定するが、置き場所は tama_presence ではなく
+// プロフィール（fes_attrs.purposes）のまま。建物・教室・ひとことは友達だけ・90分で消えるのに対し、
+// こちらは全員に見えて消えず、近くの人一覧の絞り込み（共通点の判定）に使われる
+let psPurposes=[];
+function renderPsPurposes(){
+  const el=$('#psPurposes'); if(!el)return;
+  el.innerHTML=FA.purposes.map(o=>`<span class="c${psPurposes.includes(o)?' sel':''}" onclick="psTogglePurpose('${o}')">${esc(o)}</span>`).join('');
+}
+function psTogglePurpose(v){ toggleArr(psPurposes,v); renderPsPurposes(); }
 function openPlaceEdit(auto){
   const p=myPresence, act=presenceActive(p);
   const opts=campusPlaces().map(x=>x.name);
+  psPurposes=[...(attrsOf(profile).purposes||[])].filter(x=>FA.purposes.includes(x));
   $('#placeSheet').innerHTML=`<h2 class="pstitle">${auto?`🏢 ${esc(p.place)}に入りました`:'📍 いまどこ？'}</h2>
-    <p class="psdesc">${auto?'いる教室や場所を入れると、友達に表示されます。':'友達に表示する場所を編集します。'}${FES.roomExpireMin}分たつか、建物を出ると消えます。</p>
+    <p class="psdesc">${auto?'いる教室や場所を入れると、友達に表示されます。':'友達に表示する場所を編集します。'}建物・教室・ひとことは${FES.roomExpireMin}分たつか、建物を出ると消えます。</p>
     <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
     <div class="field"><label>教室・場所（任意）</label><input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
     <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、ひまです" value="${act?esc(p.note||''):''}">
       <div class="chips psquick">${['授業中','ひまです','休憩中','勉強中','ごはん中'].map(s=>`<span class="c" onclick="$('#psNote').value='${s}'">${s}</span>`).join('')}</div></div>
     <div class="psvis">友達への公開：<b>${VIS_LABEL[p.visibility]}</b>（「友達」タブで変更）</div>
+    <div class="field" style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px"><label>いま探していること（任意・複数OK）</label><div class="chips" id="psPurposes"></div>
+      <div class="hint">これだけは<b>消えず、近くの人みんなに見えます</b>。同じものを選んだ人が「近くの人」や地図に出るようになります。</div></div>
     <div class="psbtns"><button class="btn btn-ghost" onclick="closePlaceEdit()">${auto?'あとで':'閉じる'}</button><button class="btn btn-primary" onclick="savePlaceEdit()">保存する</button></div>`;
+  renderPsPurposes();
   $('#placeOverlay').classList.add('show');
 }
 function closePlaceEdit(){ $('#placeOverlay').classList.remove('show'); }
@@ -2225,8 +2250,11 @@ function savePlaceEdit(){
   myPresence.place=place; curPlace=place; placeCand=place; placeCandSince=Date.now();
   myPresence.room=room; myPresence.note=note;
   myPresence.expires_at=(room||note)?new Date(Date.now()+FES.roomExpireMin*60000).toISOString():null;
-  savePresence(); renderMyPresence(); closePlaceEdit();
-  toast(myPresence.visibility==='hidden'?'保存しました（いまは「友達にも見せない」設定です）':'保存しました。友達に表示されます');
+  savePresence();
+  // 「いま探していること」はプロフィール側に保存する（近くの人の絞り込みに使うため）
+  if(profile){ profile.fa=profile.fa||{}; profile.fa.purposes=[...psPurposes]; publishMe(); saveMyAttrs(); renderNearby(); renderCross(); }
+  renderMyPresence(); closePlaceEdit();
+  toast(myPresence.visibility==='hidden'?'保存しました（場所はいま「友達にも見せない」設定です）':'保存しました。友達に表示されます');
 }
 
 /* ---------- settings ---------- */
@@ -2328,7 +2356,8 @@ async function saveEdit(){
   const ewd=$('#edWorkDetail').value.trim();
   profile.work=editWorkCat?(ewd?editWorkCat+'・'+ewd:editWorkCat):ewd;
   profile.interests=editInterests.map(x=>({cat:x.cat,detail:x.detail}));
-  profile.fa={...attrToFa(edAttr),status:(profile.fa||{}).status||''};   // いまの状態は編集画面では変えないので引き継ぐ
+  // いまの状態と「いま探していること」はこの画面では変えないので、いまの値を引き継ぐ
+  profile.fa={...attrToFa(edAttr),purposes:[...(attrsOf(profile).purposes||[]).filter(x=>FA.purposes.includes(x))],status:(profile.fa||{}).status||''};
   renderNearby(); renderCross();
   $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;
   $('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
