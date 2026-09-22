@@ -455,6 +455,17 @@
     <div class="dots" id="guideDots"></div>
     <div class="gnav"><button class="btn btn-ghost" id="guidePrev" onclick="guideMove(-1)">戻る</button><button class="btn btn-primary" id="guideNext" onclick="guideMove(1)">次へ</button></div>
   </div>
+  <!-- 開いた時点で通知の許可を聞く画面。iPhoneは画面を触った直後しか許可画面を出せないので、どこを触っても出るようにしている -->
+  <div class="guide" id="pushGate" style="z-index:90;background:linear-gradient(180deg,#ffffff,#eef3ff)" onclick="pushGateTap()">
+    <div class="gtop"><button class="skip" id="pushGateSkip" style="visibility:hidden" onclick="event.stopPropagation();skipPushGate()">あとで</button></div>
+    <div class="gbody">
+      <div class="gicon">🔔</div>
+      <h3>通知をオンに<br>してください</h3>
+      <p>近くに気になる人がいたときや、いいね・マッチ・コミュニティの投稿があったときに、アプリを閉じていてもお知らせします。</p>
+      <div class="note2" id="pushGateNote">端末の確認画面が出たら「許可」を選んでください。</div>
+    </div>
+    <div class="gnav"><button class="btn btn-primary" id="pushGateBtn" onclick="event.stopPropagation();pushGateTap()">通知をオンにする</button></div>
+  </div>
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -528,6 +539,7 @@ async function tryResumeSession(){
     $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;$('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
     $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
     startGeo();buildInvite();startLoops();
+    syncPushSubscription();   // 許可済みなら購読を登録し直す（通知は常にオンのままにする）
     maybeShowGuide(data.guide_seen===true);
     return true;
   }catch(e){ return false; }
@@ -584,6 +596,7 @@ async function enablePush(){
     }
     const { error } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
     if(error){ console.error('[push] 購読情報の保存に失敗', error); toast('通知の登録に失敗しました'); return false; }
+    setPushOptOut(false);
     return true;
   }catch(e){ console.error('[push] 通知の有効化に失敗', e); toast('通知を有効にできませんでした'); return false; }
 }
@@ -593,7 +606,95 @@ async function disablePush(){
     const sub = swReg ? await swReg.pushManager.getSubscription() : null;
     if(sub) await sub.unsubscribe();
     if(sb && myId) await sb.from('push_subscriptions').delete().eq('id', myId);
+    setPushOptOut(true);
   }catch(e){}
+}
+
+/* ---------- 開いた時点で通知の許可を聞く ---------- */
+// 設定の通知スイッチを自分で押してもらうのをやめ、ホーム画面から開いた時点でこちらから端末の許可画面を出す。
+//  ・Android / PC: 読み込み直後に Notification.requestPermission() を呼べば、そのまま許可画面が出る
+//  ・iPhone: WebKitの制約で「画面を触った直後」でないと許可画面を出せない（触らずに呼ぶと NotAllowedError で即失敗する）。
+//    そこで先に説明の画面 #pushGate を出しておき、そこを1回タップした瞬間に許可画面を出す（実質タップ1回で済む）
+// 一度「拒否」されると端末の設定からしか戻せないので、説明の画面を必ず先に見せてから聞いている。
+const pushSupported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&('PushManager' in window);
+let pushGateTimer=null, pushAsking=false, pushGateSkipped=false;
+// 設定のスイッチで自分でオフにした人には、開くたびに聞き直さない
+function setPushOptOut(v){ try{ localStorage.setItem('pushOff', v?'1':'0'); }catch(e){} }
+function isPushOptOut(){ try{ return localStorage.getItem('pushOff')==='1'; }catch(e){ return false; } }
+
+// 許可済みなら、購読が消えていても黙って登録し直す（通知が「常にオン」の状態を保つ）
+async function syncPushSubscription(){
+  if(!pushSupported()||Notification.permission!=='granted') return false;
+  if(!sb||!myId) return false;
+  if(isPushOptOut()) return false;
+  try{
+    if(!swReg) swReg = await navigator.serviceWorker.getRegistration() || await registerSW();
+    if(!swReg) return false;
+    let sub = await swReg.pushManager.getSubscription();
+    if(!sub) sub = await swReg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+    const { error } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
+    if(error){ console.warn('[push] 購読情報の保存に失敗', error.message); return false; }
+    refreshPushToggle();
+    return true;
+  }catch(e){ console.warn('[push] 購読の登録し直しに失敗', e); return false; }
+}
+
+async function autoAskPush(){
+  // iPhoneでSafariのタブのまま開いている場合は Notification 自体が無いので、ここで止まる（ホーム画面への追加案内は別にある）
+  if(!pushSupported()) return;
+  if(isIOS()&&!isStandalone()) return;
+  if(isPushOptOut()) return;
+  if(Notification.permission==='granted'){ syncPushSubscription(); return; }
+  if(Notification.permission==='denied') return;   // 端末の設定からしか戻せないので、ここでは何もしない
+  if(pushGateSkipped) return;
+  openPushGate();
+  requestPushPermission();   // まず触らずに出せるか試す。Androidはこれで出る。iPhoneは失敗するのでタップを待つ
+}
+function openPushGate(){
+  const g=$('#pushGate'); if(!g||g.classList.contains('show')) return;
+  const s=$('#pushGateSkip'); if(s) s.style.visibility='hidden';
+  g.classList.add('show');
+  clearTimeout(pushGateTimer);
+  // すぐ閉じられると通知が付かないままになるので、「あとで」は少し待ってから出す
+  pushGateTimer=setTimeout(()=>{ const b=$('#pushGateSkip'); if(b) b.style.visibility='visible'; },4000);
+}
+function closePushGate(){ clearTimeout(pushGateTimer); const g=$('#pushGate'); if(g) g.classList.remove('show'); }
+function skipPushGate(){ pushGateSkipped=true; closePushGate(); }
+// 説明の画面はどこを触っても許可画面が出る（iPhoneは「触った直後」しか出せないため）
+function pushGateTap(){ requestPushPermission(); }
+
+async function requestPushPermission(){
+  if(pushAsking) return;
+  pushAsking=true;
+  let perm='default';
+  try{
+    // await を挟まずに呼ぶ（タップの直後でないとiPhoneでは出せないため）
+    perm = await Notification.requestPermission();
+  }catch(e){
+    // iPhoneで、画面を触っていない状態から呼んだとき。説明の画面をタップしてもらうのを待つ
+    pushAsking=false;
+    const n=$('#pushGateNote'); if(n) n.textContent='下の「通知をオンにする」（または画面のどこか）をタップすると、端末の確認画面が出ます。';
+    return;
+  }
+  pushAsking=false;
+  if(perm==='granted'){
+    setPushOptOut(false);
+    closePushGate();
+    await syncPushSubscription();
+    toast('🔔 通知をオンにしました');
+  }else if(perm==='denied'){
+    closePushGate();
+    toast('通知はオフのままです。端末の設定から許可できます');
+  }
+  refreshPushToggle();
+}
+// アプリに戻ってきた時にも、許可がまだなら聞き直し、許可済みなら購読が消えていないか確かめる
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') autoAskPush(); });
+// 設定の通知スイッチの下に出す説明
+function pushHintText(){
+  if(isIOS()&&!isStandalone()) return 'iPhoneはホーム画面に追加すると使えます';
+  if(pushSupported()&&Notification.permission==='denied') return '端末の設定→通知から「ちかく」を許可してください';
+  return 'マッチしたらスマホに通知';
 }
 
 /* ---------- state ---------- */
@@ -645,6 +746,7 @@ async function onStart(){
   $('#meAv').style.background=gr(selEmoji);$('#meAv').textContent=selEmoji;$('#meName').textContent=name+(age?' '+age:'');
   $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
   startGeo();buildInvite();startLoops();
+  syncPushSubscription();   // 登録が終わってから購読をDBに保存する（許可だけ先に取れている場合がある）
   maybeShowGuide(false);   // 新規登録なので必ず出す
 }
 
@@ -1499,13 +1601,14 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 /* ---------- misc ---------- */
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
-  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=(isIOS()&&!isStandalone())?'iPhoneはホーム画面に追加すると使えます':'マッチしたらスマホに通知';}}
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=pushHintText();}}
 function startLoops(){publishMe();loadBlocks().then(()=>pollUsers());loadMatchUnlocks();loadEncounters();loadBilling();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();loadMatchUnlocks();}},6000);}
 
 /* ---------- boot ---------- */
 buildOnboard();
 $('#obGo').onclick=onStart;
 registerSW();
+setTimeout(autoAskPush,600);   // 開いた時点で端末の通知の許可画面を出す（画面が出てから聞く）
 (async()=>{ if(await initBackend()){ await tryResumeSession(); } })();
 
 </script>
