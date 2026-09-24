@@ -124,6 +124,18 @@
   .psquick{margin-top:8px;gap:6px}.psquick .c{font-size:12px;padding:6px 11px}
   .psvis{font-size:11.5px;color:var(--muted);margin:-4px 0 12px}
   .psbtns{display:flex;gap:10px}.psbtns .btn{flex:1;padding:13px;font-size:14px}
+  /* プロフィールの折りたたみ（あるある・出身） */
+  details.fold{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+  details.fold>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;font-size:13.5px;color:var(--ink)}
+  details.fold>summary::-webkit-details-marker{display:none}
+  details.fold .fsel{flex:1;min-width:0;line-height:1.6}
+  details.fold .fnone{color:var(--muted)}
+  details.fold .fopen{flex-shrink:0;font-size:12px;font-weight:700;color:var(--signal)}
+  details.fold .fopen::after{content:attr(data-l) ' ▼'}
+  details.fold[open] .fopen::after{content:'閉じる ▲'}
+  details.fold[open]>summary{border-bottom:1px solid var(--line)}
+  details.fold>.chips,details.fold>.hint,details.fold>select{margin:10px 12px}
+  details.fold>select{width:calc(100% - 24px)}
   /* チャットの話題カード */
   .topics{padding:8px 12px 2px;border-top:1px solid var(--line);background:rgba(255,255,255,.6);flex-shrink:0}
   .topics:empty{display:none}
@@ -1194,11 +1206,16 @@ function attrFieldsHTML(p){
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意・見せるだけ）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>
     <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
     <div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">同じアーティストの人は「共通点」になります。知る人ぞ知る名前ほど、一致した時にレアな出会いになります</div></div>
-    <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span></label><div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></div>
+    <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span></label>
+      <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
+        <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
-    <div class="field"><label>出身（任意・見せるだけ）</label><select id="${p}Home"><option value="">選ばない</option>${PREFS.map(x=>`<option>${x}</option>`).join('')}</select></div>`;
+    <div class="field"><label>出身（任意・見せるだけ）</label>
+      <details class="fold" id="${p}HomeBox"><summary><span class="fsel" id="${p}HomeSel"></span><span class="fopen"></span></summary>
+        <select id="${p}Home"><option value="">選ばない</option>${PREFS.map(x=>`<option>${x}</option>`).join('')}</select></details></div>`;
 }
 function bindAttrForm(p,st){
+  let aruaruWasFull=st.aruaru.length>=FA.aruaruPick;
   const chips=(id,opts,isSel,onTap)=>{ const el=$('#'+p+id); if(!el)return;
     el.innerHTML=opts.map(o=>`<div class="c ${isSel(o)?'sel':''}" data-v="${esc(o)}">${esc(o)}</div>`).join('');
     [...el.children].forEach(c=>c.onclick=()=>{ onTap(c.dataset.v); render(); }); };
@@ -1214,13 +1231,24 @@ function bindAttrForm(p,st){
     // 保存のときは attrToFa がそのまま書き戻すので、いまの値は消えない
     chips('Goals',FA.goals,o=>st.goals.includes(o),o=>toggleArr(st.goals,o));
     // あるあるは3つまで。4つ目を押したら一番前に選んだものと入れ替える
-    chips('Aruaru',FA.aruaru,o=>st.aruaru.includes(o),o=>{ if(st.aruaru.includes(o))toggleArr(st.aruaru,o); else{ if(st.aruaru.length>=FA.aruaruPick)st.aruaru.shift(); st.aruaru.push(o); } });
+    // 3つ選び終わったら閉じる（選び直す時は「選び直す ▼」で開く）
+    chips('Aruaru',FA.aruaru,o=>st.aruaru.includes(o),o=>{ if(st.aruaru.includes(o))toggleArr(st.aruaru,o); else{ if(st.aruaru.length>=FA.aruaruPick)st.aruaru.shift(); st.aruaru.push(o);
+      if(st.aruaru.length===FA.aruaruPick&&!aruaruWasFull){ const b=$('#'+p+'AruaruBox'); if(b)setTimeout(()=>b.open=false,250); } } });
+    aruaruWasFull=st.aruaru.length>=FA.aruaruPick;
     const ah=$('#'+p+'AruaruHint'); if(ah)ah.textContent=`${st.aruaru.length}/${FA.aruaruPick}　同じものを選んだ人は「共通点」になります`;
+    const as=$('#'+p+'AruaruSel');
+    if(as)as.innerHTML=st.aruaru.length?st.aruaru.map(x=>`<div>✓ ${esc(x)}</div>`).join(''):'<div class="fnone">まだ選んでいません</div>';
+    const ao=$('#'+p+'AruaruBox .fopen'); if(ao)ao.dataset.l=st.aruaru.length?'選び直す':'選ぶ';
   }
   // 科目は入力のたびに render() を呼ぶと打っている途中でカーソルが飛ぶので、値だけ拾う
   const course=$('#'+p+'Course'); course.value=st.course||''; course.oninput=e=>{ st.course=e.target.value; };
   const artist=$('#'+p+'Artist'); artist.value=st.artist||''; artist.oninput=e=>{ st.artist=e.target.value; };
-  const home=$('#'+p+'Home'); home.value=st.hometown||''; home.onchange=e=>{ st.hometown=e.target.value; };
+  // 出身は折りたたみの中。閉じている時は選んだ県だけ出す
+  const home=$('#'+p+'Home'), homeSel=()=>{ const s=$('#'+p+'HomeSel'); if(s)s.innerHTML=st.hometown?`<div>${esc(st.hometown)}</div>`:'<div class="fnone">選ばない</div>';
+    const o=$('#'+p+'HomeBox .fopen'); if(o)o.dataset.l='変更'; };
+  home.value=st.hometown||''; home.onchange=e=>{ st.hometown=e.target.value; homeSel(); const b=$('#'+p+'HomeBox'); if(b)b.open=false; }; homeSel();
+  // あるあるが3つそろっていない人（新規登録・選び直しの人）には最初から開いて見せる
+  const ab=$('#'+p+'AruaruBox'); if(ab)ab.open=st.aruaru.length<FA.aruaruPick;
   render();
 }
 // 共通点。key は「同じ値を持つ人」を数えるためのもの（めずらしさの重みづけに使う）、label は画面に出す文字
