@@ -124,8 +124,27 @@
   .psquick{margin-top:8px;gap:6px}.psquick .c{font-size:12px;padding:6px 11px}
   .psvis{font-size:11.5px;color:var(--muted);margin:-4px 0 12px}
   .psbtns{display:flex;gap:10px}.psbtns .btn{flex:1;padding:13px;font-size:14px}
+  /* 今日のお題 */
+  .daily{margin:2px 16px 8px;padding:13px 15px;border-radius:18px;background:linear-gradient(135deg,rgba(255,176,102,.16),rgba(120,140,255,.10));border:1px solid rgba(245,151,47,.35)}
+  .daily:empty{display:none}
+  .daily .dh{font-size:11.5px;font-weight:700;color:#b0651a;display:flex;justify-content:space-between}
+  .daily .dq{font-size:15.5px;font-weight:900;margin:4px 0 10px;line-height:1.5}
+  .daily .chips{gap:6px}.daily .chips .c{font-size:13px;padding:8px 13px}
+  .daily .drow{display:flex;gap:8px}.daily .drow input{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}.daily .drow .btn{padding:10px 16px;font-size:13.5px;flex-shrink:0}
+  .daily .dmine{font-size:14px}.daily .dmine b{color:var(--amber-deep)}
+  .daily .dcount{font-size:12.5px;color:var(--ink);margin-top:6px;line-height:1.7}.daily .dcount b{color:var(--signal);font-size:15px}
+  .daily .dnote{font-size:10.5px;color:var(--muted);margin-top:6px}
+  /* 時間割 */
+  .ttgrid{display:grid;grid-template-columns:40px repeat(5,1fr);gap:4px}
+  .ttgrid .tth{text-align:center;font-size:12px;font-weight:700;color:var(--muted)}
+  .ttgrid .ttp{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;line-height:1.1}
+  .ttgrid .ttp small{font-size:9px;font-weight:500;color:var(--muted)}
+  .ttgrid .ttc{height:44px;border-radius:10px;border:1px solid var(--line);background:var(--glass);display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;line-height:1.2;padding:2px;overflow:hidden;word-break:break-all;cursor:pointer;color:#fff;font-weight:700}
+  .ttgrid .ttc.on{background:linear-gradient(135deg,#ffb066,#f5972f);border-color:#f5972f}
+  .ttrow{display:flex;align-items:center;gap:8px;margin-bottom:6px}.ttrow span{width:30px;font-size:13px;font-weight:700;flex-shrink:0}.ttrow input{flex:1}
   .pmk{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid #fff;box-shadow:0 2px 6px rgba(30,40,90,.35)}
-  .pmk.me{border-radius:10px;font-size:18px}
+  .pmk.me{border-radius:10px;font-size:16px}
+  .pmk.closed{opacity:.55;filter:grayscale(.4)}
   .listhead{display:flex;align-items:center;gap:8px;padding:12px 22px 8px;font-size:12.5px;font-weight:700;color:var(--muted)}
   .listhead .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:blink 1.6s infinite}
   @keyframes blink{50%{opacity:.35}}
@@ -449,14 +468,17 @@
     </section>
     <section class="screen" id="s-near">
       <div class="apphead"><h1>近くの人</h1><span class="sub" id="nearSub">&mdash;</span></div>
+      <!-- 見出しより下は画面ごとスクロールする（地図の下の一覧だけがスクロールすると、スマホでは残りが狭くて動かしづらかったため） -->
+      <div class="scroll">
       <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
       <div class="statusrow chips" id="statusRow"></div>
+      <div class="daily" id="dailyCard"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
       <div class="map-wrap" id="mapWrap"><div id="map"></div><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">🏫 <b>多摩キャンパス</b></div>
         <div class="mapzoom"><button onclick="mapZoom(1)" aria-label="拡大">＋</button><button onclick="mapZoom(-1)" aria-label="縮小">－</button><button onclick="mapFitCampus()" aria-label="キャンパス全体を表示">🏫</button></div>
         <button class="maptype" id="mapFullBtn" onclick="toggleMapFull()">⤢ 大きく</button><button class="mapme" onclick="centerOnMe()">📍 自分</button></div>
       <div class="listhead"><span class="live"></span> 位置を共有中の人</div>
-      <div class="scroll"><div class="ulist" id="ulist"></div>
+      <div class="ulist" id="ulist"></div>
         <div class="listhead" style="margin-top:18px">💬 コミュニティ <span onclick="go('comm')" style="margin-left:auto;color:var(--signal);font-weight:700;cursor:pointer;font-size:12px">すべて見る ›</span></div>
         <div class="ulist" id="homeRoomList"></div>
       </div>
@@ -609,7 +631,10 @@ const FES={
   nearbyPushRangeM:80,       // 閉じた後に少し動いていても当たるよう、すれ違いより広め
   nearbyPushStaleMin:15,     // 閉じてからこの分数を過ぎた人には送らない（もう移動しているはずなので）
   nearbyPushCooldownMin:30,  // 同じ人に送るのはこの分数に1回まで（送る端末が何台あっても）
-  // 友達に見せる教室・ひとことが消えるまでの分数（授業1コマ分）。建物を出た時も消える
+  // 多摩キャンパスの平日の時間割（法政大学の公式の時間割。多摩は6・7限が無い）。[始まり, 終わり]（日本時間）
+  // 「いまどこ？」の教室・ひとことは、授業中に入れたらその時限の終わり、休み時間・昼休み・1限の前なら次の時限の終わりに消える
+  periods:[['9:20','11:00'],['11:10','12:50'],['13:40','15:20'],['15:30','17:10'],['17:20','19:00']],
+  // 5限の後と土日に入れた教室・ひとことが消えるまでの分数。建物を出た時も消える
   roomExpireMin:90,
   // 建物に「入った」「出た」と判定するまで、同じ判定が続く秒数（GPSは建物の中でふらつくので、出る方を長めにする）
   placeEnterSec:20,
@@ -944,7 +969,7 @@ function onPos(p){
   fesCampusGate();
   detectPlace();
   checkBooths();
-  publishMe();
+  publishMeIfNeeded();   // GPSは歩いていると毎秒のように届くので、動いた時・45秒ごとだけ送る
 }
 // 現在地（場所の名前・座標）を画面に出すのは多摩キャンパスの中にいる時だけ。
 // 外（自宅など）では出さず、住所を調べる外部サービス（Nominatim）にも座標を送らない
@@ -986,7 +1011,8 @@ function fesCampusGate(){
     others=others.filter(u=>isTest(u.id));
     // 最後に送ったキャンパス内の位置が、他の人の一覧・参加人数・「近くにいます」通知に使われないようにする
     // （共有スイッチを切った時と同じ。キャンパスに戻ると publishMe が sharing:true で送り直す）
-    if(sb&&myId&&profile) sb.from(T('profiles')).update({sharing:false}).eq('id',myId)
+    // updated_at も入れる（他の端末は「更新があった人」だけを取るので、入れないと外に出たことが伝わらない）
+    if(sb&&myId&&profile) sb.from(T('profiles')).update({sharing:false,updated_at:new Date().toISOString()}).eq('id',myId)
       .then(({error})=>{ if(error)console.warn('[geo] 共有の停止を保存できませんでした:',error.message); });
   }
   renderNearby();
@@ -1002,6 +1028,7 @@ async function publishMe(){
   if(coarse){lat=Math.round(lat*1000)/1000;lng=Math.round(lng*1000)/1000;}
   const row={id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,likes:profile.likes,interests:profile.interests,lat,lng,coarse,sharing:true,updated_at:new Date().toISOString()};
   if(!fesAttrColMissing)row.fes_attrs=profile.fa||{};
+  lastPub={t:Date.now(),lat:myPos.lat,lng:myPos.lng};
   const {error}=await sb.from(T('profiles')).upsert(row);
   // SQL（supabase/tama_tables.sql）の実行前にデプロイされても、位置の共有だけは止めない
   if(error&&/fes_attrs/.test(error.message)){
@@ -1021,17 +1048,54 @@ async function saveMyAttrs(){
   const {error}=await sb.from(T('profiles')).update({fes_attrs:profile.fa||{}}).eq('id',myId);
   if(error)console.warn('[attrs] 属性を保存できませんでした',error.message);
 }
+// 日本時間の今日0時。アプリを閉じた人も、その日のうちは最後にいた位置に表示し続ける（地図にいつも人がいるように）
+function jstTodayStart(ms=Date.now()){ return new Date(ms-(ms+9*3600000)%86400000); }
+/* ---------- 通信量を抑える（Supabase 無料プランの転送量は月5GB） ---------- */
+// 2026-09-24 の見積もり：6秒ごとに全員分のプロフィールを取り直すと、通信量は「開いている人数×キャンパスにいる人数」で増え、
+// 同時30人程度でも昼休み10日ほどで無料枠に届く。そこで次の3つで減らす
+//  ①他の人の情報は手元（userCache）に持っておき、前回から更新があった人の分だけ取る（全員分の取り直しは10分に1回）
+//  ②取る列を画面で使うものだけにする
+//  ③自分の位置は、5m以上動いた時か45秒たった時だけ送る（止まっている人の分を毎回ほかの全員が受け取らないように）
+const PUB_MOVE_M=5, PUB_HEARTBEAT_MS=45000, FULL_REFRESH_MS=10*60000;
+const USER_COLS='id,name,age,emoji,bio,tags,work,looking,likes,interests,fes_attrs,lat,lng,updated_at,sharing';
+let lastPub=null, userCache=new Map(), lastFullPoll=0, pollCursor=0, pollN=0;
+function publishMeIfNeeded(){
+  if(!myPos)return;
+  if(lastPub&&Date.now()-lastPub.t<PUB_HEARTBEAT_MS){ const r=relMeters(lastPub,myPos); if(Math.hypot(r.e,r.n)<PUB_MOVE_M)return; }
+  publishMe();
+}
+// 位置の更新がこれ以上止まっている人を「閉じた人」として薄く表示する（開いている間は最長45秒ごとに送るので、その2倍）
+const CLOSED_AFTER_MS=90000;
+const isClosed=u=>!!u.updated_at&&Date.now()-Date.parse(u.updated_at)>CLOSED_AFTER_MS;
+async function fetchUsers(){
+  const now=Date.now(), today=jstTodayStart(now).getTime();
+  if(!lastFullPoll||now-lastFullPoll>FULL_REFRESH_MS||lastFullPoll<today){
+    const {data,error}=await sb.from(T('profiles')).select(USER_COLS).eq('sharing',true).gt('updated_at',new Date(today).toISOString()).neq('id',myId);
+    if(error||!data)return;
+    userCache=new Map(data.map(u=>[u.id,u])); lastFullPoll=now; pollCursor=now;
+    return;
+  }
+  // 更新があった人だけ。updated_at は書いた端末の時計なので、ずれを見込んで8秒さかのぼる
+  // （長くすると同じ更新を何度も受け取る。時計が大きくずれた端末の更新は、10分ごとの全員分の取り直しで拾う）
+  // （共有を止めた人・キャンパスを出た人も updated_at を入れて sharing:false を書くので、ここで消せる）
+  const since=new Date(Math.min(pollCursor,now)-8000).toISOString();
+  const {data,error}=await sb.from(T('profiles')).select(USER_COLS).gt('updated_at',since).neq('id',myId);
+  if(error||!data)return;
+  data.forEach(u=>{ if(u.sharing)userCache.set(u.id,u); else userCache.delete(u.id); });
+  // 次はここから。自分の時計より先の時刻（時計が進んでいる端末の分）には合わせない
+  pollCursor=Math.min(now,Math.max(pollCursor,...data.map(u=>Date.parse(u.updated_at)||0)));
+}
 async function pollUsers(){
   let out=[];
   if(sb&&!fesOutside){
-    const since=new Date(Date.now()-60000).toISOString();
-    const {data,error}=await sb.from(T('profiles')).select('*').eq('sharing',true).gt('updated_at',since).neq('id',myId);
-    if(!error&&data)out=data.map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},lat:u.lat,lng:u.lng}));
-  }
+    await fetchUsers();
+    out=[...userCache.values()].map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fes_attrs||{},lat:u.lat,lng:u.lng,updated_at:u.updated_at}));
+  }else{ userCache.clear(); lastFullPoll=0; }
   // キャンパス限定の時は、敷地の外から位置を送ってきている人を表示もすれ違いもしない
   others=out.filter(u=>!blocked.has(u.id)&&(!FES.campusOnly||(u.lat!=null&&inCampus(u.lat,u.lng)))).concat(testUsers);renderNearby();
   recordEncounters();
-  if(sb) await refreshMatches();
+  // マッチの確認は3回に1回（18秒ごと）
+  if(sb&&(pollN++)%3===0) await refreshMatches();
 }
 async function refreshMatches(){
   const [{data:a},{data:b}]=await Promise.all([
@@ -1113,6 +1177,10 @@ function commonWith(u){
   if(me.faculty&&me.faculty===th.faculty)out.push(me.faculty);
   (me.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.purposes||[]).includes(x))out.push(x); });
   (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))out.push(x); });
+  // 時間割で同じ曜日・時限に同じ授業名を入れている人（毎週会える人なので、共通点に数える）
+  (samePeers[u.id]||[]).forEach(r=>out.push('同じ授業「'+r.course+'」'));
+  // 今日のお題で同じ答え（その日だけの共通点。偶然の出会いを作るため）
+  if(sameDaily(u))out.push('今日のお題「'+dailyAnswer(u)+'」');
   return out;
 }
 // 取りたい科目が同じか（共通点の判定には使わず、プロフィールに「同じ！」と出すだけ）。
@@ -1121,9 +1189,11 @@ function normCourse(s){ return (s||'').normalize('NFKC').replace(/[\s　]+/g,'')
 function sameCourse(u){ const a=normCourse(attrsOf(profile).course), b=normCourse(attrsOf(u).course); return !!a&&a===b; }
 function attrBlock(u){
   const a=attrsOf(u); if(!a.faculty&&!(a.purposes||[]).length)return '';
-  const common=new Set(commonWith(u)), courseHit=sameCourse(u);
+  const common=new Set(commonWith(u)), courseHit=sameCourse(u), same=samePeers[u.id]||[];
   const chip=x=>`<span class="fchip${common.has(x)?' hit':''}">${esc(x)}</span>`;
   return `<div class="fesattr">
+    ${dailyAnswer(u)?`<div class="frow">🎲 今日のお題「${esc(dailyToday().q)}」 <b>${esc(dailyAnswer(u))}</b>${sameDaily(u)?' <span class="same">同じ！</span>':''}</div>`:''}
+    ${same.length?`<div class="frow">📚 同じ授業 ${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')} <span class="same">同じ！</span></div>`:''}
     ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${common.has(a.faculty)?' <span class="same">同じ！</span>':''}</div>`:''}
     ${a.status?`<div class="frow">💬 いま <b>${esc(a.status)}</b></div>`:''}
     ${(a.purposes||[]).length?`<div class="fh">いま探していること</div><div class="fchips">${a.purposes.map(chip).join('')}</div>`:''}
@@ -1145,6 +1215,7 @@ function setStatus(s){
 }
 /* ---------- render nearby ---------- */
 function renderNearby(){
+  renderDaily();
   const all=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}return {u,d,r:(myPos&&u.lat!=null)?relMeters(myPos,u):null,common:commonWith(u)};});
   // すれ違いの記録は全員分とるが、画面（一覧・地図）に出すのは共通点がある人だけ。テスト用の人は動作確認のため常に出す
   const list=all.filter(x=>x.common.length||isTest(x.u.id))
@@ -1167,7 +1238,7 @@ function renderNearby(){
     <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div>
       ${common.length?`<div class="common">🎯 共通 ${common.slice(0,3).map(esc).join('・')}${common.length>3?' 他':''}</div>`:''}
       <div class="b">${a.status?`<span class="stchip">${esc(a.status)}</span> `:''}${a.faculty?esc(a.faculty)+' · ':''}${esc(u.bio)}</div></div>
-    <div class="d"><div class="m">${d!=null?Math.round(d)+'m':'—'}</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`; }).join('');
+    <div class="d"><div class="m">${d!=null?Math.round(d)+'m':'—'}</div>${isClosed(u)?`<div class="frago">${agoText(u.updated_at)}</div>`:''}${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`; }).join('');
 }
 /* ---------- 地図（多摩キャンパスだけを映す。campus-geo.js の図形で描くイラスト地図、Leaflet） ---------- */
 // 建物名は OpenStreetMap に登録されている名前（2026-09-13取得）。
@@ -1292,10 +1363,11 @@ function toggleMapFull(){
   // 大きさが変わったことを地図に伝えて、見えている範囲と建物名を置き直す
   if(fesMap)setTimeout(()=>{ fesMap.invalidateSize(); layoutLabels(); },60);
 }
-function mapIcon(emoji,me){
-  const s=me?34:28;
+// closed：アプリを閉じた人（最後にいた位置に薄く出す）
+function mapIcon(emoji,me,closed){
+  const s=me?30:28;
   return L.divIcon({className:'',iconSize:[s,s],iconAnchor:[s/2,s/2],
-    html:`<div class="pmk${me?' me':''}" style="background:${me?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${emoji}</div>`});
+    html:`<div class="pmk${me?' me':''}${closed?' closed':''}" style="background:${me?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${emoji}</div>`});
 }
 function centerOnMe(){
   if(!fesMap)return;
@@ -1309,7 +1381,7 @@ function drawMap(list){
     fesLayer.clearLayers();
     // 地図はキャンパスだけを映すので、キャンパスの外にいる人（自分も）のアイコンは出さない
     list.forEach(({u,d})=>{ if(u.lat==null||!inCampus(u.lat,u.lng))return;
-      L.marker([u.lat,u.lng],{icon:mapIcon(u.emoji,false)}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
+      L.marker([u.lat,u.lng],{icon:mapIcon(u.emoji,false,isClosed(u))}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
     if(myPos&&inCampus(myPos.lat,myPos.lng)){
       const ll=[myPos.lat,myPos.lng], icon=mapIcon(profile?profile.emoji:'📍',true);
       if(!fesMe){
@@ -1335,12 +1407,9 @@ async function checkClosedNearby(){
   if(myPos.acc>FES.maxAccuracyM)return;
   try{
     const now=Date.now();
-    // 「閉じた人」＝位置の更新が90秒以上止まっているが、止まってからまだ FES.nearbyPushStaleMin 分以内の人
-    const {data,error}=await sb.from(T('profiles')).select('*').eq('sharing',true)
-      .lt('updated_at',new Date(now-90000).toISOString())
-      .gt('updated_at',new Date(now-FES.nearbyPushStaleMin*60000).toISOString())
-      .neq('id',myId);
-    if(error||!data)return;
+    // 「閉じた人」＝位置の更新が90秒以上止まっているが、止まってからまだ FES.nearbyPushStaleMin 分以内の人。
+    // 通信量を抑えるため、別に問い合わせず手元の others（今日キャンパスにいた人）から選ぶ
+    const data=others.filter(u=>!isTest(u.id)&&u.updated_at&&isClosed(u)&&now-Date.parse(u.updated_at)<FES.nearbyPushStaleMin*60000);
     const cands=data.filter(u=>!blocked.has(u.id)&&u.lat!=null&&(!FES.campusOnly||inCampus(u.lat,u.lng)))
       .map(u=>{ const r=relMeters(myPos,u); return {u,d:Math.hypot(r.e,r.n),common:commonWith(u)}; })
       .filter(x=>x.d<=FES.nearbyPushRangeM&&x.common.length)
@@ -1967,7 +2036,7 @@ async function openUserById(uid){
 }
 /* ---------- 友達・いまどこ（建物・教室） ---------- */
 // 友達は「申請 → 承認」でなる（tama_friends）。建物は位置から自動で入り、教室とひとことは本人が入れる（tama_presence）。
-// 教室とひとことは、建物を出るか FES.roomExpireMin 分たつと消える。友達にどこまで見せるかは本人が選ぶ。
+// 教室とひとことは、建物を出るか授業の終わり（roomExpiryAt）に消える。友達にどこまで見せるかは本人が選ぶ。
 // 読める人はデータベース側（RLS）でも「本人と承認済みの友達」に絞っている（supabase/tama_friends.sql）
 const VIS_LABEL={map:'地図の位置も見せる',building:'建物と教室だけ',hidden:'友達にも見せない'};
 let friendRows=[], friendProfiles={}, friendPresence={}, friendTablesMissing=false;
@@ -2004,9 +2073,9 @@ function placeAt(lat,lng){
 // 建物に入った・出たの判定。GPSは建物の中でふらつくので、同じ判定が続いた時だけ切り替える
 // （入る：FES.placeEnterSec 秒、出る：FES.placeLeaveSec 秒。位置が止まっていても10秒ごとに呼ぶ）
 function detectPlace(){
-  if(!myPos||!profile)return;
+  if(!myPos||!profile||!myPresenceLoaded)return;   // 前回の「いまどこ」を読み戻すまでは判定しない（空のまま上書きしないように）
+  if(myPos.acc>FES.maxAccuracyM)return;   // 位置のずれが大きい時は判定しない（起動直後のずれた位置で「外に出た」にしないように）
   if(fesOutside||!inCampus(myPos.lat,myPos.lng)){ if(myPresence.place||curPlace)leavePlace(); placeCand=undefined; return; }
-  if(myPos.acc>FES.maxAccuracyM)return;   // 位置のずれが大きい時は判定しない
   const p=placeAt(myPos.lat,myPos.lng), now=Date.now();
   if(p!==placeCand){ placeCand=p; placeCandSince=now; return; }
   const stable=now-placeCandSince;
@@ -2033,6 +2102,22 @@ function presenceTick(){
   if(myPresence.expires_at&&Date.parse(myPresence.expires_at)<=Date.now()){
     myPresence.room=''; myPresence.note=''; myPresence.expires_at=null; savePresence(); renderMyPresence();
   }else if(myPresence.place&&Date.now()-lastPresenceSave>120000) savePresence();
+}
+// 起動時に前回の「いまどこ」を読み戻す。これが無いと、アプリを閉じて開き直した時に空の状態から始まり、
+// 建物に入ったと判定された時点で教室・ひとことを空のまま保存して消してしまっていた（2026-09-24 多摩キャンでの実機確認で発覚）
+async function restoreMyPresence(){
+  try{
+    if(!sb||!myId||String(myId).startsWith('local-'))return;
+    const {data:me,error}=await sb.from(T('presence')).select('*').eq('id',myId).maybeSingle();
+    if(error||!me)return;
+    if(me.visibility)myPresence.visibility=me.visibility;   // 公開範囲は前回の選択を引き継ぐ
+    // 建物は、友達の画面にまだ出ている間（presenceStale でない間）なら引き継ぐ
+    if(me.place&&me.updated_at&&!presenceStale(me)){
+      myPresence.place=me.place; curPlace=me.place; placePromptedFor=me.place;
+      if(presenceActive(me)){ myPresence.room=me.room||''; myPresence.note=me.note||''; myPresence.expires_at=me.expires_at; }
+    }
+  }catch(e){ console.warn('[friends] 前回のいまどこを読み込めません',e); }
+  finally{ myPresenceLoaded=true; renderMyPresence(); }
 }
 async function savePresence(){
   if(!sb||!myId||String(myId).startsWith('local-')||friendTablesMissing)return;
@@ -2063,11 +2148,6 @@ async function loadFriends(){
     friendProfiles={}; (ps||[]).forEach(u=>{ friendProfiles[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},lat:u.lat,lng:u.lng}; });
     friendPresence={}; (pr||[]).forEach(p=>{ friendPresence[p.id]=p; });
   }else{ friendProfiles={}; friendPresence={}; }
-  if(!myPresenceLoaded){
-    myPresenceLoaded=true;
-    const {data:me}=await sb.from(T('presence')).select('visibility').eq('id',myId).maybeSingle();
-    if(me&&me.visibility)myPresence.visibility=me.visibility;   // 公開範囲は前回の選択を引き継ぐ
-  }
   renderFriends(); renderNearby(); updateFriendDot();
   if(curSheetUser&&$('#overlay').classList.contains('show'))refreshSheetFriendBtn(curSheetUser.id);
 }
@@ -2110,16 +2190,30 @@ function testFriendAccept(id){
   if(!testFriendRows.some(r=>r.to_id===id)) testFriendRows.push({id:-(testFriendRows.length+1),from_id:myId,to_id:id,status:'accepted'});
   const now=Date.now();
   testFriendData[id]={u,p:{id,place:'社会学部A棟',room:'401',note:'授業中',visibility:'map',
-    expires_at:new Date(now+FES.roomExpireMin*60000).toISOString(),updated_at:new Date(now-3*60000).toISOString()}};
+    expires_at:new Date(roomExpiryAt(now)).toISOString(),updated_at:new Date(now-3*60000).toISOString()}};
   toast('🧪 テスト：'+esc(u.name)+'さんと友達になりました'); renderFriends(); renderNearby(); refreshSheetFriendBtn(id);
 }
 
 /* 表示 */
 function presenceActive(p){ return !!p&&(!p.expires_at||Date.parse(p.expires_at)>Date.now()); }
-// 「社会学部A棟・401「授業中」」の形。最後の保存から FES.roomExpireMin 分たった人は、もういないとみなして出さない
+// 教室・ひとことが消える時刻。平日は、授業中ならその時限の終わり、休み時間・昼休み・1限の前なら次の時限の終わり。
+// 5限の後と土日は FES.roomExpireMin 分後（時刻はすべて日本時間）
+function roomExpiryAt(ms=Date.now()){
+  const day=jstTodayStart(ms).getTime(), min=(ms-day)/60000, dow=new Date(ms+9*3600000).getUTCDay();
+  const hm=s=>{ const [h,m]=s.split(':').map(Number); return h*60+m; };
+  if(dow>=1&&dow<=5){ const p=FES.periods.find(([,end])=>min<hm(end)); if(p)return day+hm(p[1])*60000; }
+  return ms+FES.roomExpireMin*60000;
+}
+// アプリを閉じたまま時間がたった「いまどこ」は、もういないとみなす。
+// 最後の保存から FES.roomExpireMin 分か、教室・ひとことが消える時刻（授業の終わり）の遅い方まで出す
+function presenceStale(p){
+  if(!p||!p.updated_at)return false;
+  return Date.now()>Math.max(Date.parse(p.updated_at)+FES.roomExpireMin*60000,p.expires_at?Date.parse(p.expires_at):0);
+}
+// 「社会学部A棟・401「授業中」」の形。閉じたまま時間がたった人（presenceStale）は出さない
 function presenceText(p){
   if(!p||!p.place||p.visibility==='hidden')return '';
-  if(p.updated_at&&Date.now()-Date.parse(p.updated_at)>FES.roomExpireMin*60000)return '';
+  if(presenceStale(p))return '';
   const act=presenceActive(p);
   return p.place+(act&&p.room?'・'+p.room:'')+(act&&p.note?'「'+p.note+'」':'');
 }
@@ -2145,7 +2239,10 @@ function renderMyPresence(){
     <button class="btn btn-primary mpedit" onclick="openPlaceEdit(false)">✏️ いまどこ・探していることを編集</button>
     <div class="mphead" style="margin-top:12px">友達にどこまで見せる？</div>
     <div class="chips mpvis">${Object.entries(VIS_LABEL).map(([k,v])=>`<span class="c${p.visibility===k?' sel':''}" onclick="setVisibility('${k}')">${v}</span>`).join('')}</div>
-    <div class="mpnote">「近くの人」への表示は、設定の「位置情報を共有」で切り替えます</div>`;
+    <div class="mpnote">「近くの人」への表示は、設定の「位置情報を共有」で切り替えます</div>
+    <div class="mphead" style="margin-top:14px">🗓 時間割<span style="font-weight:400;color:var(--muted2)">（任意・自分にだけ見えます）</span></div>
+    <div class="mpsub">${timetableMissing?'準備中です':Object.keys(myTimetable).length?Object.keys(myTimetable).length+'コマ登録済み。授業のある時限の始まりにだけ通知が届きます':'入れると、授業のない時間には通知が来なくなります。同じ授業の人も分かります'}</div>
+    <button class="btn btn-ghost mpedit" onclick="openTimetable()"${timetableMissing?' disabled':''}>🗓 時間割を${Object.keys(myTimetable).length?'編集':'入れる'}</button>`;
 }
 function setVisibility(k){ myPresence.visibility=k; savePresence(); renderMyPresence(); toast('友達への公開：'+VIS_LABEL[k]); }
 function renderFriends(){
@@ -2231,7 +2328,7 @@ function openPlaceEdit(auto){
   const opts=campusPlaces().map(x=>x.name);
   psPurposes=[...(attrsOf(profile).purposes||[])].filter(x=>FA.purposes.includes(x));
   $('#placeSheet').innerHTML=`<h2 class="pstitle">${auto?`🏢 ${esc(p.place)}に入りました`:'📍 いまどこ？'}</h2>
-    <p class="psdesc">${auto?'いる教室や場所を入れると、友達に表示されます。':'友達に表示する場所を編集します。'}建物・教室・ひとことは${FES.roomExpireMin}分たつか、建物を出ると消えます。</p>
+    <p class="psdesc">${auto?'いる教室や場所を入れると、友達に表示されます。':'友達に表示する場所を編集します。'}教室・ひとことは<b>${hhmm(roomExpiryAt())}ごろ</b>か、建物を出ると消えます。</p>
     <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
     <div class="field"><label>教室・場所（任意）</label><input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
     <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、ひまです" value="${act?esc(p.note||''):''}">
@@ -2249,7 +2346,7 @@ function savePlaceEdit(){
   if(ngCheck(room)||ngCheck(note)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
   myPresence.place=place; curPlace=place; placeCand=place; placeCandSince=Date.now();
   myPresence.room=room; myPresence.note=note;
-  myPresence.expires_at=(room||note)?new Date(Date.now()+FES.roomExpireMin*60000).toISOString():null;
+  myPresence.expires_at=(room||note)?new Date(roomExpiryAt()).toISOString():null;
   savePresence();
   // 「いま探していること」はプロフィール側に保存する（近くの人の絞り込みに使うため）
   if(profile){ profile.fa=profile.fa||{}; profile.fa.purposes=[...psPurposes]; publishMe(); saveMyAttrs(); renderNearby(); renderCross(); }
@@ -2257,9 +2354,150 @@ function savePlaceEdit(){
   toast(myPresence.visibility==='hidden'?'保存しました（場所はいま「友達にも見せない」設定です）':'保存しました。友達に表示されます');
 }
 
+/* ---------- 時間割（履修） ---------- */
+// 月〜金×1〜5限のどこに授業があるか（授業名は任意）。任意で登録してもらい、
+// ①授業のある時限の始まりにだけ「いまどこ？」の通知を送る（Edge Function tama-remind。登録していない人には昼休みの1回だけ）
+// ②同じ曜日・時限に同じ授業名を入れた人を「同じ授業」として共通点に出す
+// 時間割は「毎週いつどこにいるか」が分かる情報なので、本人しか読めない（supabase/tama_timetable.sql の RLS）。
+// 他の人について分かるのは、同じ授業を入れている人だけ（関数 tama_same_course_peers が返す）
+const TT_DAYS=['月','火','水','木','金'];
+let myTimetable={}, ttDraft={}, timetableMissing=false, samePeers={};   // slots のキーは「曜日(1=月〜5=金)-時限」、値は授業名（空なら名前なし）
+async function loadTimetable(){
+  if(!sb||!myId||String(myId).startsWith('local-'))return;
+  const {data,error}=await sb.from(T('timetable')).select('slots').eq('id',myId).maybeSingle();
+  if(error){ timetableMissing=true; console.warn('[timetable] tama_timetable を読み込めません。supabase/tama_timetable.sql を実行してください:',error.message); renderMyPresence(); return; }
+  myTimetable=(data&&data.slots)||{};
+  renderMyPresence(); loadSamePeers();
+}
+async function loadSamePeers(){
+  if(!sb||timetableMissing)return;
+  const {data,error}=await sb.rpc('tama_same_course_peers');
+  if(error){ console.warn('[timetable] 同じ授業の人を読み込めません',error.message); return; }
+  samePeers={}; (data||[]).forEach(r=>{ (samePeers[r.other_id]=samePeers[r.other_id]||[]).push(r); });
+  renderNearby(); renderCross();
+}
+const slotLabel=k=>{ const [d,p]=k.split('-'); return TT_DAYS[d-1]+p; };
+const slotKeys=o=>Object.keys(o).sort((a,b)=>{ const [ad,ap]=a.split('-').map(Number),[bd,bp]=b.split('-').map(Number); return ad-bd||ap-bp; });
+function openTimetable(){ ttDraft={...myTimetable}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
+function renderTimetable(){
+  const keys=slotKeys(ttDraft);
+  let grid='<div class="ttgrid"><div></div>'+TT_DAYS.map(d=>`<div class="tth">${d}</div>`).join('');
+  FES.periods.forEach(([s,e],i)=>{
+    grid+=`<div class="ttp">${i+1}<small>${s}</small></div>`;
+    for(let d=1;d<=5;d++){ const k=d+'-'+(i+1), on=k in ttDraft;
+      grid+=`<div class="ttc${on?' on':''}" onclick="ttToggle('${k}')">${on?(ttDraft[k]?esc(ttDraft[k]):'●'):''}</div>`; }
+  });
+  grid+='</div>';
+  $('#placeSheet').innerHTML=`<h2 class="pstitle">🗓 時間割</h2>
+    <p class="psdesc">授業のあるコマを押してください。<b>自分にだけ見えます</b>。授業のある時限の始まりにだけ「いまどこ？」の通知が届き、授業のない時間には届かなくなります。</p>
+    ${grid}
+    ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名（任意）</label>
+      <div class="hint" style="margin:0 0 8px">入れると、同じ授業を取っている人が「共通点」に出ます（相手に見えるのは、同じ授業を入れている人だけ）</div>
+      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input maxlength="24" placeholder="例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value"></div>`).join('')}</div>`:''}
+    <div class="psbtns" style="margin-top:16px"><button class="btn btn-ghost" onclick="closePlaceEdit()">閉じる</button><button class="btn btn-primary" onclick="saveTimetable()">保存する</button></div>`;
+}
+function ttToggle(k){ if(k in ttDraft)delete ttDraft[k]; else ttDraft[k]=''; renderTimetable(); }
+async function saveTimetable(){
+  const slots={}; for(const k of slotKeys(ttDraft)) slots[k]=(ttDraft[k]||'').trim();
+  if(Object.values(slots).some(ngCheck)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  if(!sb||String(myId).startsWith('local-')||timetableMissing){ toast('時間割はまだ準備中です'); return; }
+  const {error}=await sb.from(T('timetable')).upsert({id:myId,slots,updated_at:new Date().toISOString()});
+  if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
+  myTimetable=slots; closePlaceEdit(); renderMyPresence(); loadSamePeers();
+  toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました（通知は昼休みの1回だけになります）');
+}
+
+/* ---------- 今日のお題（偶然のマッチング） ---------- */
+// 1日1問。同じ答えの人を「共通点」に数えるので、学部などが違う人もその日だけ近くの人に出る。
+// 選択式（2〜4択）は一致しやすく話しかける口実に、自由記述はめったに一致しないぶん一致した時の価値が大きい。
+// お題は下の DAILY_QS に並べておき、日付（日本時間）で自動的に順番に出す（毎日の作業は要らない。一周したら最初に戻る）。
+// ⚠️ 仮のお題（2026-09-24 に作成）。アイデア班が作ったら差し替える。並べ替えると今日のお題も変わるので、足す時は末尾に
+// 答えはプロフィール（fes_attrs.daily = {d:日付, q:お題の番号, a:答え}）に入れるので、SQLの追加は要らない。
+// 相手に合わせて変えられないよう、答えはその日のうちは変更できない
+const DAILY_QS=[
+  {q:'学食に行くなら？',o:['食堂A棟','食堂B棟','コンビニ','お弁当持参']},
+  {q:'好きなアーティストは？',free:'例：ヨルシカ'},
+  {q:'犬派？猫派？',o:['犬派','猫派','どっちも好き']},
+  {q:'課題はいつやる？',o:['出たその日','締切の前日','締切当日','気づいたら過ぎてる']},
+  {q:'最近ハマっているものは？',free:'例：サウナ、ポケポケ'},
+  {q:'朝型？夜型？',o:['朝型','夜型']},
+  {q:'目玉焼きには何をかける？',o:['しょうゆ','ソース','塩こしょう','何もかけない']},
+  {q:'好きな漫画・アニメは？',free:'例：葬送のフリーレン'},
+  {q:'休みの日は？',o:['インドア','アウトドア','その日の気分']},
+  {q:'いちばん見るSNSは？',o:['Instagram','X','TikTok','YouTube']},
+  {q:'好きな食べ物は？',free:'例：からあげ'},
+  {q:'1限の授業、どう思う？',o:['平気','つらい','取らない主義']},
+  {q:'きのこの山？たけのこの里？',o:['きのこの山','たけのこの里']},
+  {q:'行ってみたい国は？',free:'例：アイスランド'},
+  {q:'昼休みの過ごし方は？',o:['友達と','ひとりでゆっくり','課題・勉強','寝る']},
+  {q:'ラーメンは何味？',o:['しょうゆ','味噌','塩','とんこつ']},
+  {q:'好きなYouTuber・配信者は？',free:'例：QuizKnock'},
+  {q:'夏と冬、どっちが好き？',o:['夏','冬']},
+  {q:'連休にいちばんしたいことは？',o:['旅行','バイト','ひたすら寝る','友達と遊ぶ']},
+  {q:'最近観た映画・ドラマは？',free:'例：ラストマイル'},
+  {q:'映画はどこで観る？',o:['映画館','配信','あまり観ない']},
+  {q:'好きなスポーツ（観る・やる）は？',free:'例：バレーボール'},
+  {q:'朝ごはん、食べる？',o:['毎日食べる','ときどき','食べない']},
+  {q:'旅行に行くなら？',o:['国内','海外']},
+  {q:'好きなお菓子は？',free:'例：じゃがりこ'},
+  {q:'カラオケでまず歌うのは？',o:['最近の曲','懐メロ','アニソン','聴く専門']},
+  {q:'好きな季節のイベントは？',o:['花見','夏祭り','ハロウィン','クリスマス']},
+  {q:'いまいちばん欲しいものは？',o:['お金','時間','睡眠','友達']},
+  {q:'地元の好きなところは？',free:'例：海が近い'},
+  {q:'雨の日の多摩キャン、どうする？',o:['それでも行く','オンラインがいい','休みたい']},
+];
+const DAILY_EPOCH=Date.parse('2026-09-01T00:00:00+09:00');
+function dailyToday(){
+  const ms=Date.now(), d=new Date(ms+9*3600000).toISOString().slice(0,10);
+  const n=((Math.floor((jstTodayStart(ms).getTime()-DAILY_EPOCH)/86400000))%DAILY_QS.length+DAILY_QS.length)%DAILY_QS.length;
+  return {d,n,...DAILY_QS[n]};
+}
+// 自由記述の答えは、全角・半角、大文字・小文字、ひらがな・カタカナ、空白や記号の違いをそろえてから比べる
+function normAns(s){ return (s||'').normalize('NFKC').toLowerCase().replace(/[\s・,.、。!?！？'"「」『』()（）\-ー]/g,'').replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60)); }
+// 今日のお題の答え（今日の分でなければ null）
+function dailyAnswer(u){ const t=dailyToday(), x=attrsOf(u).daily; return x&&x.d===t.d&&x.q===t.n&&x.a?x.a:null; }
+function sameDaily(u){ const a=dailyAnswer(profile), b=dailyAnswer(u); return !!a&&!!b&&normAns(a)===normAns(b); }
+// 同じ答えの人の数（近く＝100m以内、今日すれ違った人、キャンパス全体（今日キャンパスにいた人））
+function dailyCounts(){
+  const today=jstTodayStart().getTime(), near=[], all=[];
+  others.forEach(u=>{ if(isTest(u.id)||!sameDaily(u))return; all.push(u);
+    if(myPos&&u.lat!=null){ const r=relMeters(myPos,u); if(Math.hypot(r.e,r.n)<=100)near.push(u); } });
+  const crossed=Object.values(encMap).filter(e=>(e.last_at||0)>=today&&!blocked.has(e.id)&&sameDaily(others.find(o=>o.id===e.id)||e));
+  return {near:near.length,crossed:crossed.length,all:all.length};
+}
+let dailyShown=null;   // 入力中に6秒ごとの再描画で消えないよう、まだ答えていない間は、お題が変わった時だけ描き直す
+function renderDaily(){
+  const el=$('#dailyCard'); if(!el)return;
+  if(!profile){ el.innerHTML=''; return; }
+  const t=dailyToday(), mine=dailyAnswer(profile), key=t.d+'/'+(mine?'a':'q');
+  if(!mine&&dailyShown===key)return;
+  dailyShown=key;
+  const head=`<div class="dh"><span>🎲 今日のお題</span><span>${t.free?'自由に答える':'えらぶ'}</span></div><div class="dq">${esc(t.q)}</div>`;
+  if(!mine){
+    el.innerHTML=head+(t.free
+      ?`<div class="drow"><input id="dailyIn" maxlength="24" placeholder="${esc(t.free)}"><button class="btn btn-primary" onclick="answerDaily($('#dailyIn').value)">答える</button></div>`
+      :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="answerDaily('${o}')">${esc(o)}</span>`).join('')}</div>`)
+      +`<div class="dnote">答えは今日1回だけ・プロフィールに表示されます。同じ答えの人が「近くの人」に出ます</div>`;
+    return;
+  }
+  const c=dailyCounts();
+  el.innerHTML=head+`<div class="dmine">あなたの答え：<b>${esc(mine)}</b></div>
+    <div class="dcount">同じ答えの人　近くに <b>${c.near}</b>人 ・ 今日すれ違った人に <b>${c.crossed}</b>人 ・ キャンパスに <b>${c.all}</b>人</div>
+    <div class="dnote">${c.all?'同じ答えの人は「近くの人」に「今日のお題」の共通点つきで出ます':t.free?'まだ同じ答えの人はいません。一致したらレアな出会いです':'まだ同じ答えの人はいません。お昼どきに増えていきます'}</div>`;
+}
+function answerDaily(a){
+  a=(a||'').trim(); if(!a||!profile)return;
+  if(ngCheck(a)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  const t=dailyToday();
+  if(dailyAnswer(profile))return;
+  profile.fa=profile.fa||{}; profile.fa.daily={d:t.d,q:t.n,a};
+  publishMe(); saveMyAttrs(); renderDaily(); renderNearby(); renderCross();
+  toast('🎲 答えました。同じ答えの人を探しています');
+}
+
 /* ---------- settings ---------- */
 function toggleShare(el){sharing=!el.classList.contains('on');el.classList.toggle('on');geoState('ok');
-  if(sharing){publishMe();}else if(sb){sb.from(T('profiles')).update({sharing:false}).eq('id',myId);}}
+  if(sharing){publishMe();}else if(sb){sb.from(T('profiles')).update({sharing:false,updated_at:new Date().toISOString()}).eq('id',myId);}}
 function toggleCoarse(el){coarse=!el.classList.contains('on');el.classList.toggle('on');publishMe();}
 async function leaveAll(){sharing=false;stopGeo();if(sb)await sb.from(T('profiles')).delete().eq('id',myId);toast('位置の共有を停止し、プロフィールを消しました');$('#tgShare').classList.remove('on');geoState('','停止');}
 
@@ -2357,7 +2595,7 @@ async function saveEdit(){
   profile.work=editWorkCat?(ewd?editWorkCat+'・'+ewd:editWorkCat):ewd;
   profile.interests=editInterests.map(x=>({cat:x.cat,detail:x.detail}));
   // いまの状態と「いま探していること」はこの画面では変えないので、いまの値を引き継ぐ
-  profile.fa={...attrToFa(edAttr),purposes:[...(attrsOf(profile).purposes||[]).filter(x=>FA.purposes.includes(x))],status:(profile.fa||{}).status||''};
+  profile.fa={...attrToFa(edAttr),purposes:[...(attrsOf(profile).purposes||[]).filter(x=>FA.purposes.includes(x))],status:(profile.fa||{}).status||'',daily:(profile.fa||{}).daily||null};
   renderNearby(); renderCross();
   $('#meAv').style.background=gr(profile.emoji);$('#meAv').textContent=profile.emoji;
   $('#meName').textContent=profile.name+(profile.age?' '+profile.age:'');
@@ -2382,8 +2620,8 @@ function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t)
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='friends')loadFriends();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=pushHintText();}}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
-  publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMe();pollUsers();}},6000);
-  loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
+  publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
+  restoreMyPresence();loadTimetable();loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden)presenceTick();},60000);}
 
 /* ---------- 多摩キャン版：開催時間・参加人数・アンケート ---------- */
@@ -2411,7 +2649,7 @@ let fesLive=null, fesLastState=null;
 async function fesRefreshCount(){
   if(!sb)return;
   try{
-    const since=new Date(Date.now()-60000).toISOString();
+    const since=new Date(Date.now()-CLOSED_AFTER_MS).toISOString();   // 閉じていない人（開いている間は最長45秒ごとに位置を送る）
     const {count,error}=await sb.from(T('profiles')).select('id',{count:'exact',head:true}).eq('sharing',true).gt('updated_at',since);
     if(!error&&count!=null)fesLive=count;
   }catch(e){}
@@ -2451,7 +2689,7 @@ function renderFesClosed(ph){
 // 開催中に時間切れになったら位置の共有を止める（閉じた画面の裏で位置を送り続けないように）
 async function fesClose(){
   sharing=false; stopGeo();
-  if(sb&&myId&&profile){ try{ await sb.from(T('profiles')).update({sharing:false}).eq('id',myId); }catch(e){} }
+  if(sb&&myId&&profile){ try{ await sb.from(T('profiles')).update({sharing:false,updated_at:new Date().toISOString()}).eq('id',myId); }catch(e){} }
 }
 function fesTick(){
   const ph=fesPhase();
