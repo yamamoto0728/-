@@ -124,6 +124,18 @@
   .psquick{margin-top:8px;gap:6px}.psquick .c{font-size:12px;padding:6px 11px}
   .psvis{font-size:11.5px;color:var(--muted);margin:-4px 0 12px}
   .psbtns{display:flex;gap:10px}.psbtns .btn{flex:1;padding:13px;font-size:14px}
+  /* プロフィールの折りたたみ（あるある・出身） */
+  details.fold{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+  details.fold>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;font-size:13.5px;color:var(--ink)}
+  details.fold>summary::-webkit-details-marker{display:none}
+  details.fold .fsel{flex:1;min-width:0;line-height:1.6}
+  details.fold .fnone{color:var(--muted)}
+  details.fold .fopen{flex-shrink:0;font-size:12px;font-weight:700;color:var(--signal)}
+  details.fold .fopen::after{content:attr(data-l) ' ▼'}
+  details.fold[open] .fopen::after{content:'閉じる ▲'}
+  details.fold[open]>summary{border-bottom:1px solid var(--line)}
+  details.fold>.chips,details.fold>.hint,details.fold>select{margin:10px 12px}
+  details.fold>select{width:calc(100% - 24px)}
   /* チャットの話題カード */
   .topics{padding:8px 12px 2px;border-top:1px solid var(--line);background:rgba(255,255,255,.6);flex-shrink:0}
   .topics:empty{display:none}
@@ -385,6 +397,29 @@
   details.more{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:11px 14px;background:var(--surface2)}
   details.more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--muted)}
   details.more[open] summary{margin-bottom:10px}
+  /* 「いまの自分」1行（近くの人の上） */
+  .nowbar{margin:0 16px 8px;padding:10px 13px;border-radius:14px;background:var(--glass);border:1px solid var(--line);display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+  .nowbar:empty{display:none}
+  .nowbar .nw{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nowbar .nw b{color:var(--ink)}.nowbar .nw .dim{color:var(--muted)}
+  .nowbar .ed{flex-shrink:0;font-size:12px;font-weight:700;color:var(--signal)}
+  /* 現在地のバーは、うまく取れている時は出さない（取得中・キャンパスの外・エラーの時だけ出す） */
+  .locbar.okhide{display:none}
+  /* トークの「個人／コミュニティ」 */
+  .seg{display:flex;gap:6px;margin:0 16px 8px;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line);flex-shrink:0}
+  .seg button{flex:1;border:0;background:none;padding:8px;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(30,40,90,.12)}
+  .seg .sdot{min-width:16px;height:16px;line-height:16px;font-size:10px;background:var(--rose);color:#fff;border-radius:8px;padding:0 4px}
+  .cmsub{padding:4px 22px 6px;font-size:11.5px;color:var(--muted)}
+  .mrow .frtag{font-size:10.5px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.12);border-radius:8px;padding:1px 6px;margin-left:4px}
+  /* 友達タブの「＋ コードで友達を追加」 */
+  details.fradd>summary.frsum{list-style:none;cursor:pointer;font-size:14px;font-weight:700;color:var(--signal)}
+  details.fradd>summary.frsum::-webkit-details-marker{display:none}
+  details.fradd[open]>summary.frsum{margin-bottom:6px}
+  /* 「いまの自分」シートの2つの段（みんなに見える／友達だけに見える） */
+  .pssec{border:1px solid var(--line);border-radius:16px;padding:12px 13px 4px;margin-bottom:12px;background:rgba(255,255,255,.6)}
+  .pssec .psh{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px}
+  .pssec .psh span{font-weight:500;color:var(--muted);font-size:11px}
   .statusrow{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;overflow-x:auto;padding:0 16px 8px;flex-shrink:0}
   .statusrow::-webkit-scrollbar{height:0}
   .statusrow .sl{font-size:11px;color:var(--muted);white-space:nowrap;font-weight:700}
@@ -493,7 +528,8 @@
       <!-- 見出しより下は画面ごとスクロールする（地図の下の一覧だけがスクロールすると、スマホでは残りが狭くて動かしづらかったため） -->
       <div class="scroll">
       <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
-      <div class="statusrow chips" id="statusRow"></div>
+      <!-- 「いまの自分」1行。押すと「いまどこ・いまの状態・探していること」をまとめて編集できる（2026-09-24 に3か所から1つにまとめた） -->
+      <div class="nowbar" id="nowBar" onclick="openPlaceEdit(false)"></div>
       <div class="daily" id="dailyCard"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
       <div class="map-wrap" id="mapWrap"><div id="map"></div><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">🏫 <b>多摩キャンパス</b></div>
@@ -510,20 +546,22 @@
       <div style="padding:2px 22px 12px;font-size:12px;color:var(--muted)"><span class="encR">50</span>m以内に入った人を記録します。会うほど回数が増えます。（アプリを開いている間）</div>
       <div class="scroll"><div class="ulist" id="crossList"></div></div>
     </section>
+    <!-- トーク：マッチした相手と友達の1対1のチャット、コミュニティ（グループ）を1つのタブにまとめた（2026-09-24） -->
     <section class="screen" id="s-match">
-      <div class="apphead"><h1>マッチ</h1><span class="sub" id="matchCount">0</span></div>
+      <div class="apphead"><h1>トーク</h1><span class="sub" id="matchCount">0</span></div>
+      <div class="seg"><button id="segDm" class="on" onclick="setTalkTab('dm')">個人</button><button id="segComm" onclick="setTalkTab('comm')">コミュニティ<span class="sdot" id="dotComm" style="display:none"></span></button></div>
       <div class="scroll" id="matchList"></div>
+      <div class="scroll" id="commPane" hidden>
+        <div style="padding:2px 16px 6px"><button class="btn btn-primary" style="width:100%;padding:13px;font-size:14px" onclick="createRoom()">＋ コミュニティを作る</button></div>
+        <div class="cmsub" id="commSub"></div>
+        <div class="ulist" id="roomList"></div>
+      </div>
     </section>
     <section class="screen" id="s-chat">
       <div class="chathead"><button class="back" onclick="go(chatReturn)">‹</button><div class="av" id="chatAv"></div><div style="flex:1;min-width:0"><div class="nm" id="chatNm"></div><div class="st" id="chatSt">位置を共有中</div></div><div id="chatFr"></div></div>
       <div class="msgs" id="msgs"></div>
       <div class="topics" id="chatTopics"></div>
       <div class="chatbar"><input id="chatInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">↑</button></div>
-    </section>
-    <section class="screen" id="s-comm">
-      <div class="apphead"><h1>コミュニティ</h1><span class="sub" id="commSub">みんなの部屋</span></div>
-      <div style="padding:2px 16px 10px"><button class="btn btn-primary" style="width:100%;padding:13px;font-size:14px" onclick="createRoom()">＋ コミュニティを作る</button></div>
-      <div class="scroll"><div class="ulist" id="roomList"></div></div>
     </section>
     <section class="screen" id="s-room">
       <div class="chathead"><button class="back" onclick="go('comm')">‹</button><div class="av" id="roomAv" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div style="flex:1;min-width:0"><div class="nm" id="roomNm"></div><div class="st" id="roomSt"></div></div><button class="joinbtn" id="roomJoinBtn" onclick="toggleRoomJoin()">参加</button><button class="membtn" onclick="openMembers()" title="参加者を見る">👥</button></div>
@@ -535,26 +573,31 @@
       <div class="apphead"><h1>友達</h1><span class="sub" id="friendSub">0人</span></div>
       <div class="scroll">
         <!-- コードで友達追加（入力中に20秒ごとの描き直しで消えないよう、friendBox とは別の入れ物にする） -->
-        <div class="mypres fradd">
-          <div class="mphead">🔢 コードで友達になる</div>
+        <!-- ふだんはたたんでおき、友達がまだいない人にだけ最初から開いて見せる（renderFriends） -->
+        <details class="mypres fradd" id="frAddBox">
+          <summary class="frsum">＋ コードで友達を追加</summary>
           <div id="frCodeBox"></div>
           <div class="frrow2"><input id="frCodeIn" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="相手の4桁のコード" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')addFriendByCode()"><button class="btn btn-primary" onclick="addFriendByCode()">追加</button></div>
-          <div class="mpnote">コードを入れると、すぐに友達になります（承認は要りません）。<b>目の前にいる人とだけ</b>交換してください。コードは5分で使えなくなります。</div>
-        </div>
+          <div class="mpnote">コードを入れると、すぐに友達になります（承認は要りません）。<b>目の前にいる人とだけ</b>交換してください。コードは5分で使えなくなります。「近くの人」や「すれ違い」でプロフィールを開いて「友達申請する」こともできます。</div>
+        </details>
         <div class="mypres" id="myPresence"></div>
         <div id="friendBox"></div>
+      </div>
+    </section>
+    <section class="screen" id="s-me">
+      <div class="scroll">
+        <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
+        <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="h" id="meLoc">📍 &mdash;</div></div>
+        <button class="btn btn-primary" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
+        <div class="listhead" style="margin-top:10px">🗓 時間割</div>
+        <div class="mypres" id="ttCard"></div>
         <div class="listhead" style="margin-top:6px">📨 アプリに誘う</div>
         <div class="inv">
           <p>このQRを読むか、リンクを開いた人が<br>同じ「近くの人」に表示されます。</p>
           <div class="qrbox" id="qrbox"></div>
           <div class="urlbox"><input id="shareUrl"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
-          <div class="steps"><h4>友達になるには</h4><ol><li>相手にも、上の<b>QRコード</b>からアプリを開いてもらう</li><li>「近くの人」や「すれ違い」で相手のプロフィールを開き、<b>「友達申請する」</b></li><li>相手が承認すると友達になり、<b>いまいる建物や教室</b>が見られます</li></ol></div>
         </div>
-      </div>
-    </section>
-    <section class="screen" id="s-me">
-      <div class="scroll">
-        <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="h" id="meLoc">📍 &mdash;</div></div>
+        <div class="listhead" style="margin-top:6px">⚙️ 設定</div>
         <div class="setting">
           <div class="setrow"><div class="lab">位置情報を共有<small>OFFにすると他の人に表示されません</small></div><div class="toggle on" id="tgShare" onclick="toggleShare(this)"><div class="k"></div></div></div>
           <div class="setrow"><div class="lab">おおまかな位置にする<small>正確な地点をぼかして共有（約100m）</small></div><div class="toggle" id="tgCoarse" onclick="toggleCoarse(this)"><div class="k"></div></div></div>
@@ -564,7 +607,6 @@
         <div style="margin:6px 16px 0;text-align:center;font-size:11.5px;color:var(--muted2)">参加者番号 <b id="fesNo" style="font-family:'JetBrains Mono',monospace;color:var(--muted)">&mdash;</b></div>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
-        <button class="btn btn-primary" style="margin:8px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <button class="btn stopbtn" onclick="leaveAll()">共有をやめてプロフィールを消す</button>
         <div class="setting" style="border-color:rgba(99,214,232,.3)">
           <div class="setrow" style="border:0"><div class="lab">🧪 テストモード<small>1台だけで動作確認できます。近くにテスト用の人が現れ、いいねするとマッチ→チャットまで試せます</small></div><button class="btn btn-primary" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="spawnTest()">試す</button></div>
@@ -576,10 +618,9 @@
   <nav class="nav" id="nav" style="display:none">
     <button class="active" data-t="near" onclick="go('near')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-5-6-10a6 6 0 1 1 12 0c0 5-6 10-6 10z"/><circle cx="12" cy="11" r="2.3"/></svg>近くの人</button>
     <button data-t="cross" onclick="go('cross')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6c0 2-1 3-1 5s1 3 3 3M16 4c0 2 1 3 1 5s-1 3-3 4"/><circle cx="7" cy="19" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg>すれ違い<span class="ndot" id="dotCross" style="display:none"></span></button>
-    <button data-t="match" onclick="go('match')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.4-7 10-7 10z"/></svg>マッチ<span class="ndot" id="dotMatch" style="display:none"></span></button>
-    <button data-t="comm" onclick="go('comm')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.5a4 4 0 0 1 0 7"/></svg>コミュ<span class="ndot" id="dotComm" style="display:none"></span></button>
+    <button data-t="match" onclick="go('match')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/></svg>トーク<span class="ndot" id="dotMatch" style="display:none"></span></button>
     <button data-t="friends" onclick="go('friends')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.2 4.5 2.1 4.5 4.9"/></svg>友達<span class="ndot" id="dotFriends" style="display:none"></span></button>
-    <button data-t="me" onclick="go('me')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>設定</button>
+    <button data-t="me" onclick="go('me')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>マイページ</button>
   </nav>
   <div id="configNotice" style="position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px">
     <div style="font-size:42px;margin-bottom:14px">🔌</div>
@@ -713,7 +754,12 @@ const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形
 const T=name=>'tama_'+name;
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const EMO=['🌙','⭐','🌸','🔥','🐱','🎧','☕','📷','🍜','🌿','🎨','🏃'];
+// アイコンの絵文字。2026-09-24 に12→38種類に増やした（足す時は GRADS に背景の色も足す。無いと青緑の既定色になる）
+const EMO=['🌙','⭐','🌸','🔥','🐱','🎧','☕','📷','🍜','🌿','🎨','🏃',
+  '🐶','🐰','🐻','🦊','🐼','🐧','🐸','🦄','🐳',
+  '🌻','🍀','🌈','🌊','⚡',
+  '🍓','🍩','🍙',
+  '🎮','🎸','🎤','🎬','📚','⚽','🏀','✈️','👾'];
 const TAGS=['カフェ','音楽','映画','読書','写真','ランニング','ゲーム','料理','旅行','アート','犬','猫','お酒','散歩'];
 const WORKCATS=['学生','会社員','フリーランス','経営者','その他'];
 const LOOKING=['友達','話し相手','暇つぶし','趣味仲間','起業仲間','飲み仲間','挑戦仲間'];
@@ -744,7 +790,12 @@ const NGWORDS=[
   'ホテル行','泊まって','お酒飲ませ','クスリ'
 ];
 function ngCheck(text){ if(!text)return null; const low=text.toLowerCase(); const hit=NGWORDS.filter(w=>low.includes(w.toLowerCase())); return hit.length?hit:null; }
-const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#ff7e9d','#ffb0c8'],'🔥':['#ff6b4a','#ffb066'],'🐱':['#ffb066','#ffd166'],'🎧':['#a78bfa','#63d6e8'],'☕':['#c89b6b','#8b6b4a'],'📷':['#63d6e8','#4b8bf0'],'🍜':['#ff9d70','#ffcf6b'],'🌿':['#7be0b0','#4bc0d9'],'🎨':['#ff7e9d','#a78bfa'],'🏃':['#63d6e8','#7be0b0']};
+const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#ff7e9d','#ffb0c8'],'🔥':['#ff6b4a','#ffb066'],'🐱':['#ffb066','#ffd166'],'🎧':['#a78bfa','#63d6e8'],'☕':['#c89b6b','#8b6b4a'],'📷':['#63d6e8','#4b8bf0'],'🍜':['#ff9d70','#ffcf6b'],'🌿':['#7be0b0','#4bc0d9'],'🎨':['#ff7e9d','#a78bfa'],'🏃':['#63d6e8','#7be0b0'],
+  '🐶':['#ffcf8a','#ff9d70'],'🐰':['#ffc2d6','#d6b8ff'],'🐻':['#c89b6b','#ffcf8a'],'🦊':['#ff9d4a','#ffd166'],'🐼':['#b8c4d6','#8b9dff'],'🐧':['#63b0f0','#8be0f0'],
+  '🐸':['#7be0b0','#c6f06b'],'🦄':['#d6b8ff','#ff9dd6'],'🐳':['#4b8bf0','#63d6e8'],'🌻':['#ffd166','#ffb066'],'🍀':['#6bd98b','#c6f06b'],'🌈':['#ff9d70','#8b9dff'],
+  '🌊':['#4b8bf0','#7be0b0'],'⚡':['#ffe066','#ffb066'],'🍓':['#ff6b8a','#ffb0c8'],'🍩':['#ffb0c8','#c89b6b'],'🍙':['#9fe0c0','#63c0a0'],'🎮':['#8b9dff','#a78bfa'],
+  '🎸':['#ff7e6b','#a78bfa'],'🎤':['#ff7e9d','#ff9d70'],'🎬':['#8b9dff','#ff7e9d'],'📚':['#63d6e8','#8b9dff'],'⚽':['#7be0b0','#63b0f0'],'🏀':['#ff9d4a','#ff6b4a'],
+  '✈️':['#63d6e8','#8b9dff'],'👾':['#a78bfa','#ff7e9d']};
 const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
 const gr=e=>`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
 function uuid(){return (crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(36).slice(2));}
@@ -1018,6 +1069,7 @@ function onPos(p){
 function showPlace(){
   const lb=$('#locbar'); lb.className='locbar';
   if(inCampus(myPos.lat,myPos.lng)){
+    lb.className='locbar okhide';   // キャンパスの中で取れていれば出さない（座標の数字は使う人には意味がないため）
     placeName='多摩キャンパス';
     $('#locPlace').textContent='法政大学 多摩キャンパス';
     $('#locCoord').textContent=myPos.lat.toFixed(5)+', '+myPos.lng.toFixed(5)+(coarse?'（ぼかし共有中）':'');
@@ -1030,6 +1082,7 @@ function showPlace(){
     $('#locAcc').textContent='';
   }
   $('#meLoc').textContent=placeName?'📍 '+placeName:'📍 キャンパスの外';
+  renderStatusRow();
 }
 /* ---------- 多摩キャンパス限定 ---------- */
 // 点が敷地の多角形の内側にあるか（レイキャスティング法）
@@ -1194,11 +1247,16 @@ function attrFieldsHTML(p){
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意・見せるだけ）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>
     <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
     <div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">同じアーティストの人は「共通点」になります。知る人ぞ知る名前ほど、一致した時にレアな出会いになります</div></div>
-    <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span></label><div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></div>
+    <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span></label>
+      <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
+        <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
-    <div class="field"><label>出身（任意・見せるだけ）</label><select id="${p}Home"><option value="">選ばない</option>${PREFS.map(x=>`<option>${x}</option>`).join('')}</select></div>`;
+    <div class="field"><label>出身（任意・見せるだけ）</label>
+      <details class="fold" id="${p}HomeBox"><summary><span class="fsel" id="${p}HomeSel"></span><span class="fopen"></span></summary>
+        <select id="${p}Home"><option value="">選ばない</option>${PREFS.map(x=>`<option>${x}</option>`).join('')}</select></details></div>`;
 }
 function bindAttrForm(p,st){
+  let aruaruWasFull=st.aruaru.length>=FA.aruaruPick;
   const chips=(id,opts,isSel,onTap)=>{ const el=$('#'+p+id); if(!el)return;
     el.innerHTML=opts.map(o=>`<div class="c ${isSel(o)?'sel':''}" data-v="${esc(o)}">${esc(o)}</div>`).join('');
     [...el.children].forEach(c=>c.onclick=()=>{ onTap(c.dataset.v); render(); }); };
@@ -1214,13 +1272,24 @@ function bindAttrForm(p,st){
     // 保存のときは attrToFa がそのまま書き戻すので、いまの値は消えない
     chips('Goals',FA.goals,o=>st.goals.includes(o),o=>toggleArr(st.goals,o));
     // あるあるは3つまで。4つ目を押したら一番前に選んだものと入れ替える
-    chips('Aruaru',FA.aruaru,o=>st.aruaru.includes(o),o=>{ if(st.aruaru.includes(o))toggleArr(st.aruaru,o); else{ if(st.aruaru.length>=FA.aruaruPick)st.aruaru.shift(); st.aruaru.push(o); } });
+    // 3つ選び終わったら閉じる（選び直す時は「選び直す ▼」で開く）
+    chips('Aruaru',FA.aruaru,o=>st.aruaru.includes(o),o=>{ if(st.aruaru.includes(o))toggleArr(st.aruaru,o); else{ if(st.aruaru.length>=FA.aruaruPick)st.aruaru.shift(); st.aruaru.push(o);
+      if(st.aruaru.length===FA.aruaruPick&&!aruaruWasFull){ const b=$('#'+p+'AruaruBox'); if(b)setTimeout(()=>b.open=false,250); } } });
+    aruaruWasFull=st.aruaru.length>=FA.aruaruPick;
     const ah=$('#'+p+'AruaruHint'); if(ah)ah.textContent=`${st.aruaru.length}/${FA.aruaruPick}　同じものを選んだ人は「共通点」になります`;
+    const as=$('#'+p+'AruaruSel');
+    if(as)as.innerHTML=st.aruaru.length?st.aruaru.map(x=>`<div>✓ ${esc(x)}</div>`).join(''):'<div class="fnone">まだ選んでいません</div>';
+    const ao=$('#'+p+'AruaruBox .fopen'); if(ao)ao.dataset.l=st.aruaru.length?'選び直す':'選ぶ';
   }
   // 科目は入力のたびに render() を呼ぶと打っている途中でカーソルが飛ぶので、値だけ拾う
   const course=$('#'+p+'Course'); course.value=st.course||''; course.oninput=e=>{ st.course=e.target.value; };
   const artist=$('#'+p+'Artist'); artist.value=st.artist||''; artist.oninput=e=>{ st.artist=e.target.value; };
-  const home=$('#'+p+'Home'); home.value=st.hometown||''; home.onchange=e=>{ st.hometown=e.target.value; };
+  // 出身は折りたたみの中。閉じている時は選んだ県だけ出す
+  const home=$('#'+p+'Home'), homeSel=()=>{ const s=$('#'+p+'HomeSel'); if(s)s.innerHTML=st.hometown?`<div>${esc(st.hometown)}</div>`:'<div class="fnone">選ばない</div>';
+    const o=$('#'+p+'HomeBox .fopen'); if(o)o.dataset.l='変更'; };
+  home.value=st.hometown||''; home.onchange=e=>{ st.hometown=e.target.value; homeSel(); const b=$('#'+p+'HomeBox'); if(b)b.open=false; }; homeSel();
+  // あるあるが3つそろっていない人（新規登録・選び直しの人）には最初から開いて見せる
+  const ab=$('#'+p+'AruaruBox'); if(ab)ab.open=st.aruaru.length<FA.aruaruPick;
   render();
 }
 // 共通点。key は「同じ値を持つ人」を数えるためのもの（めずらしさの重みづけに使う）、label は画面に出す文字
@@ -1302,11 +1371,13 @@ function attrBlock(u){
     ${a.course?`<div class="qline"><span class="qt">今季絶対取りたい科目</span><b>${esc(a.course)}</b>${courseHit?'<span class="same">同じ！</span>':''}</div>`:''}
   </div>`;
 }
+// 近くの人の上の「いまの自分」1行（いまどこ・いまの状態）。押すと openPlaceEdit でまとめて編集する
 function renderStatusRow(){
-  const el=$('#statusRow'); if(!el)return;
+  const el=$('#nowBar'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
-  const cur=attrsOf(profile).status||'';
-  el.innerHTML='<span class="sl">いまの状態</span>'+FA.statuses.map(s=>`<span class="c${cur===s?' sel':''}" onclick="setStatus('${s}')">${s}</span>`).join('');
+  const a=attrsOf(profile), p=myPresence, act=presenceActive(p);
+  const where=p.place?esc(p.place)+(act&&p.room?'・'+esc(p.room):''):(myPos&&inCampus(myPos.lat,myPos.lng)?'建物の外':'キャンパスの外');
+  el.innerHTML=`<span class="nw">📍 <b>${where}</b>　${a.status?'💬 <b>'+esc(a.status)+'</b>':'<span class="dim">💬 いまの状態を選ぶ</span>'}</span><span class="ed">✏️ いまの自分</span>`;
 }
 function setStatus(s){
   if(!profile)return;
@@ -1821,14 +1892,33 @@ function showMatchPop(u,theirReason){const mp=$('#matchpop');
     <button class="fessurvey" onclick="openSurvey()">📝 アンケートにも答えてもらえると助かります</button>`;
   mp.classList.add('show');confettiBurst();setTimeout(confettiBurst,350);}
 function closePop(){$('#matchpop').classList.remove('show');}
+// トークの「個人」：マッチした相手（24時間）と友達（期限なし）のチャットを、LINEのトーク一覧のように1つに並べる（新しい順）
+let talkPreview={};   // 友達とのチャットの最後のメッセージ（開いていないチャットの分。loadTalkPreviews で読む）
+async function loadTalkPreviews(){
+  if(!sb)return;
+  const keys=allFriendRows().filter(r=>r.status==='accepted'&&!isTest(otherIdOf(r))).map(r=>chatKey(otherIdOf(r)));
+  if(!keys.length)return;
+  const {data,error}=await sb.from(T('messages')).select('match_key,from_id,text,created_at').in('match_key',keys).order('created_at',{ascending:false}).limit(300);
+  if(error||!data)return;
+  talkPreview={}; data.forEach(x=>{ if(!talkPreview[x.match_key])talkPreview[x.match_key]={from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0}; });
+  renderMatches();
+}
 function renderMatches(){
-  const all=Object.keys(matches);
-  const ids=all.filter(id=>!isExpired(matches[id]) && !blocked.has(id));   // 期限切れ・ブロック済みは非表示
-  $('#matchCount').textContent=ids.length;const list=$('#matchList');
-  if(!ids.length){list.innerHTML=`<div class="empty"><div class="big">♥</div><p>まだ有効なマッチはありません。<br>近くの人に「いいね」して、<br>両想いになると表示されます。<br><span style="color:var(--rose);font-weight:700">※マッチは24時間で消えます</span></p></div>`;return;}
-  list.innerHTML=ids.map((id,i)=>{const m=matches[id];const last=m.msgs[m.msgs.length-1];const ms=matchLeftMs(m);const warn=ms<3600000;
-    return `<div class="mrow" onclick="openChat('${id}')"><div class="av" style="background:${gr(m.u.emoji)}">${m.u.emoji}<span class="on"></span></div>
-      <div class="info"><div class="nm">${esc(m.u.name)} ${m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`:''}</div><div class="last">${last?(last.from===myId?'あなた: ':'')+esc(last.text):(m.theirReason?('🎯「'+esc(m.theirReason)+'」に惹かれたそうです'):'マッチしました！24時間以内に話しかけて！')}</div></div></div>${i<ids.length-1?'<div class="sep"></div>':''}`;}).join('');
+  const items=[];
+  Object.keys(matches).forEach(id=>{ const m=matches[id]; if(isExpired(m)||blocked.has(id))return;   // 期限切れ・ブロック済みは非表示
+    const last=m.msgs[m.msgs.length-1]; items.push({id,u:m.u,m,last,at:(last&&last.at)||m.matchedAt||0}); });
+  const friendIds=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf);
+  friendIds.forEach(id=>{ if(matches[id]||blocked.has(id))return; const u=friendUser(id); if(!u)return;
+    const c=friendChats[id], last=(c&&c.msgs[c.msgs.length-1])||talkPreview[chatKey(id)]; items.push({id,u,m:null,last,at:(last&&last.at)||0}); });
+  items.sort((a,b)=>b.at-a.at);
+  $('#matchCount').textContent=items.length?items.length+'件':'';const list=$('#matchList');
+  if(!items.length){list.innerHTML=`<div class="empty"><div class="big">💬</div><p>まだトークはありません。<br>近くの人に「いいね」して両想いになるか、<br>友達になると話せます。<br><span style="color:var(--rose);font-weight:700">※マッチしただけの相手とは24時間で話せなくなります</span></p></div>`;return;}
+  list.innerHTML=items.map(({id,u,m,last},i)=>{
+    const fr=isFriend(id), ms=m?matchLeftMs(m):0, warn=ms<3600000;
+    const tag=fr?'<span class="frtag">👥 友達</span>':(m&&m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`:'');
+    const sub=last?(last.from===myId?'あなた: ':'')+esc(last.text):(m?(m.theirReason?('🎯「'+esc(m.theirReason)+'」に惹かれたそうです'):'マッチしました！24時間以内に話しかけて！'):'メッセージを送ってみよう');
+    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}<span class="on"></span></div>
+      <div class="info"><div class="nm">${esc(u.name)} ${tag}</div><div class="last">${sub}</div></div></div>${i<items.length-1?'<div class="sep"></div>':''}`;}).join('');
 }
 
 /* ---------- 話題カード（マッチした後の「で、なに？」を防ぐ） ---------- */
@@ -2145,9 +2235,9 @@ async function doInstall(){
 const GUIDE=[
   {icon:'📍',title:'近くにいる人が<br>見えます',body:'今日多摩キャンパスでこのアプリを使った人が、地図と一覧に表示されます。よく聴くアーティストや「あるある」など、<b>めずらしい共通点</b>がある人ほど上に「✨レアな共通点」つきで出ます。',note:'キャンパスの中にいる間だけ位置を共有します。閉じた人は、その日のうちは最後にいた場所に薄く表示されます。'},
   {icon:'♥',title:'気になる人に<br>いいねを送る',body:'プロフィールを開いて「いいね」を押し、どこに惹かれたかを選んで送ります。お互いに送り合うとマッチが成立します。',note:'いいねの回数に制限はありません。相手が何に惹かれたかも見られます。'},
-  {icon:'💬',title:'マッチしたら<br>24時間以内に話す',body:'マッチすると、その相手とメッセージができます。ただし24時間が過ぎると話せなくなるので、気になったら早めに声をかけてみてください。',note:'メッセージは何通でも送れます。'},
-  {icon:'👥',title:'コミュニティで<br>みんなと話す',body:'「コミュ」タブでは、部屋に参加してみんなで話せます。部屋を作るのも参加するのも自由です。参加者のプロフィールも見られます。',note:'困ったときは、相手のプロフィールから通報・ブロックができます。'},
-  {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'毎回QRコードを読まなくても、ホーム画面のアイコンから開けるようになります。通知も受け取れます。',note:'追加のしかたは、設定の「ホーム画面に追加する方法」から見られます。',action:true}
+  {icon:'💬',title:'マッチしたら<br>24時間以内に話す',body:'マッチすると「トーク」でメッセージができます。最初の一言に迷ったら、共通点から作った「話題」を押すだけで送れます。24時間が過ぎると話せなくなるので、早めに声をかけてみてください。',note:'もっと話したい相手は、チャットの「👥 友達に誘う」から友達になれます。'},
+  {icon:'👥',title:'友達になると<br>いつでも話せる',body:'友達とは期限なしでメッセージができ、いまいる建物や教室も見られます。目の前の人とは「友達」タブの4桁のコードで、すぐ友達になれます。',note:'「トーク」の「コミュニティ」では、部屋に参加してみんなで話せます。困ったときは、相手のプロフィールから通報・ブロックができます。'},
+  {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'毎回QRコードを読まなくても、ホーム画面のアイコンから開けるようになります。通知も受け取れます。',note:'追加のしかたは、マイページの「ホーム画面に追加する方法」から見られます。',action:true}
 ];
 let guideIdx=0;
 function openGuide(){ guideIdx=0; renderGuide(); $('#guide').classList.add('show'); }
@@ -2411,22 +2501,26 @@ function friendOnMap(id){
   const o=others.find(x=>x.id===id);
   return o&&o.lat!=null&&inCampus(o.lat,o.lng)?o:null;
 }
+// 友達タブの「いまの自分」（友達にどう見えているか＋公開範囲だけ。編集は「いまの自分」のシートにまとめた）
 function renderMyPresence(){
+  renderStatusRow(); renderTtCard();
   const el=$('#myPresence'); if(!el)return;
   const p=myPresence, act=presenceActive(p);
   const where=p.place?p.place+(act&&p.room?'・'+p.room:''):(myPos&&inCampus(myPos.lat,myPos.lng)?'建物の外':'キャンパスの外');
-  el.innerHTML=`<div class="mphead">いまの自分</div>
-    <div class="mpwhere">📍 <b>${esc(where)}</b>${act&&p.note?` <span class="stchip">${esc(p.note)}</span>`:''}</div>
+  el.innerHTML=`<div class="mphead">友達から見たいまの自分</div>
+    <div class="mpwhere">📍 <b>${esc(p.visibility==='hidden'?'（友達にも見せていません）':where)}</b>${act&&p.note&&p.visibility!=='hidden'?` <span class="stchip">${esc(p.note)}</span>`:''}</div>
     <div class="mpsub">${act&&p.expires_at?`教室とひとことは ${hhmm(p.expires_at)} ごろに消えます`:'建物に入ると、いる教室を聞きます'}</div>
-    <div class="mphead" style="margin-top:12px">いま探していること<span style="font-weight:400;color:var(--muted2)">（近くの人みんなに見えます）</span></div>
-    <div class="mpwhere">${(attrsOf(profile).purposes||[]).length?(attrsOf(profile).purposes||[]).map(x=>`<span class="stchip">${esc(x)}</span>`).join(' '):'<span style="font-size:12.5px;color:var(--muted)">まだ選んでいません</span>'}</div>
-    <button class="btn btn-primary mpedit" onclick="openPlaceEdit(false)">✏️ いまどこ・探していることを編集</button>
+    <button class="btn btn-primary mpedit" onclick="openPlaceEdit(false)">✏️ いまの自分を編集</button>
     <div class="mphead" style="margin-top:12px">友達にどこまで見せる？</div>
     <div class="chips mpvis">${Object.entries(VIS_LABEL).map(([k,v])=>`<span class="c${p.visibility===k?' sel':''}" onclick="setVisibility('${k}')">${v}</span>`).join('')}</div>
-    <div class="mpnote">「近くの人」への表示は、設定の「位置情報を共有」で切り替えます</div>
-    <div class="mphead" style="margin-top:14px">🗓 時間割<span style="font-weight:400;color:var(--muted2)">（任意・自分にだけ見えます）</span></div>
-    <div class="mpsub">${timetableMissing?'準備中です':Object.keys(myTimetable).length?Object.keys(myTimetable).length+'コマ登録済み。授業のある時限の始まりにだけ通知が届きます':'入れると、授業のない時間には通知が来なくなります。同じ授業の人も分かります'}</div>
-    <button class="btn btn-ghost mpedit" onclick="openTimetable()"${timetableMissing?' disabled':''}>🗓 時間割を${Object.keys(myTimetable).length?'編集':'入れる'}</button>`;
+    <div class="mpnote">「近くの人」への表示は、マイページの「位置情報を共有」で切り替えます</div>`;
+}
+// マイページの時間割カード（2026-09-24 に友達タブから移した）
+function renderTtCard(){
+  const el=$('#ttCard'); if(!el)return;
+  const n=Object.keys(myTimetable).length;
+  el.innerHTML=`<div class="mpsub" style="margin-top:0">${timetableMissing?'準備中です':n?n+'コマ登録済み。授業のある時限の始まりにだけ「いまどこ？」の通知が届きます':'入れると、授業のない時間には通知が来なくなります。同じ授業の人も分かります（自分にだけ見えます）'}</div>
+    <button class="btn btn-ghost mpedit" onclick="openTimetable()"${timetableMissing?' disabled':''}>🗓 時間割を${n?'編集':'入れる'}</button>`;
 }
 function setVisibility(k){ myPresence.visibility=k; savePresence(); renderMyPresence(); toast('友達への公開：'+VIS_LABEL[k]); }
 function renderFriends(){
@@ -2459,7 +2553,9 @@ function renderFriends(){
         <div class="frbtns"><button class="btn btn-ghost" onclick="removeFriendRow(${r.id},false)">取り消す</button></div></div>`; }).join('')+`</div>`;
   }
   box.innerHTML=h;
-  renderMyPresence(); renderFrCode(); checkFrCodeNewFriends();
+  renderMyPresence(); renderFrCode(); checkFrCodeNewFriends(); renderMatches();
+  // 「＋ コードで友達を追加」は、友達がまだいない人にだけ最初から開いて見せる（1回だけ。あとは本人の開け閉めに任せる）
+  const ab=$('#frAddBox'); if(ab&&!ab.dataset.init){ ab.dataset.init='1'; ab.open=!friends.length; }
   if($('#s-chat').classList.contains('active'))renderChatHead();   // チャット中に友達になった・承認された時に上のボタンを直す
 }
 // プロフィールのシートに出す友達ボタン
@@ -2503,25 +2599,34 @@ function drawFriendMarkers(){
 // 「いま探していること」はこのシートで設定するが、置き場所は tama_presence ではなく
 // プロフィール（fes_attrs.purposes）のまま。建物・教室・ひとことは友達だけ・90分で消えるのに対し、
 // こちらは全員に見えて消えず、近くの人一覧の絞り込み（共通点の判定）に使われる
-let psPurposes=[];
+// 2026-09-24：以前は「いまの状態」（近くの人の上のチップ）・「いまどこ」・「いま探していること」が別々の場所にあり分かりにくかったので、
+// このシート1枚にまとめ、見える相手ごとに「みんなに見える」「友達だけに見える」の2段に分けた
+let psPurposes=[], psStatus='';
 function renderPsPurposes(){
-  const el=$('#psPurposes'); if(!el)return;
-  el.innerHTML=FA.purposes.map(o=>`<span class="c${psPurposes.includes(o)?' sel':''}" onclick="psTogglePurpose('${o}')">${esc(o)}</span>`).join('');
+  const el=$('#psPurposes'); if(el) el.innerHTML=FA.purposes.map(o=>`<span class="c${psPurposes.includes(o)?' sel':''}" onclick="psTogglePurpose('${o}')">${esc(o)}</span>`).join('');
+  const st=$('#psStatus'); if(st) st.innerHTML=FA.statuses.map(o=>`<span class="c${psStatus===o?' sel':''}" onclick="psSetStatus('${o}')">${esc(o)}</span>`).join('');
 }
 function psTogglePurpose(v){ toggleArr(psPurposes,v); renderPsPurposes(); }
+function psSetStatus(v){ psStatus=psStatus===v?'':v; renderPsPurposes(); }
 function openPlaceEdit(auto){
   const p=myPresence, act=presenceActive(p);
   const opts=campusPlaces().map(x=>x.name);
   psPurposes=[...(attrsOf(profile).purposes||[])].filter(x=>FA.purposes.includes(x));
-  $('#placeSheet').innerHTML=`<h2 class="pstitle">${auto?`🏢 ${esc(p.place)}に入りました`:'📍 いまどこ？'}</h2>
-    <p class="psdesc">${auto?'いる教室や場所を入れると、友達に表示されます。':'友達に表示する場所を編集します。'}教室・ひとことは<b>${hhmm(roomExpiryAt())}ごろ</b>か、建物を出ると消えます。</p>
-    <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
-    <div class="field"><label>教室・場所（任意）</label><input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
-    <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、ひまです" value="${act?esc(p.note||''):''}">
-      <div class="chips psquick">${['授業中','ひまです','休憩中','勉強中','ごはん中'].map(s=>`<span class="c" onclick="$('#psNote').value='${s}'">${s}</span>`).join('')}</div></div>
-    <div class="psvis">友達への公開：<b>${VIS_LABEL[p.visibility]}</b>（「友達」タブで変更）</div>
-    <div class="field" style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px"><label>いま探していること（任意・複数OK）</label><div class="chips" id="psPurposes"></div>
-      <div class="hint">これだけは<b>消えず、近くの人みんなに見えます</b>。同じものを選んだ人が「近くの人」や地図に出るようになります。</div></div>
+  psStatus=FA.statuses.includes(attrsOf(profile).status)?attrsOf(profile).status:'';
+  const everyone=`<div class="pssec"><div class="psh">👀 みんなに見える <span>（近くの人・すれ違いの一覧に出ます。消えません）</span></div>
+      <div class="field"><label>いまの状態（1つ）</label><div class="chips" id="psStatus"></div></div>
+      <div class="field"><label>いま探していること（複数OK）</label><div class="chips" id="psPurposes"></div>
+        <div class="hint">同じものを選んだ人は「共通点」になります</div></div></div>`;
+  const friends=`<div class="pssec"><div class="psh">👥 友達だけに見える <span>（いまの公開：${VIS_LABEL[p.visibility]}。「友達」タブで変更）</span></div>
+      <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
+      <div class="field"><label>教室・場所（任意）</label><input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
+      <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、ひまです" value="${act?esc(p.note||''):''}">
+        <div class="chips psquick">${['授業中','ひまです','休憩中','勉強中','ごはん中'].map(s=>`<span class="c" onclick="$('#psNote').value='${s}'">${s}</span>`).join('')}</div>
+        <div class="hint">教室・ひとことは <b>${hhmm(roomExpiryAt())}ごろ</b>か、建物を出ると消えます</div></div></div>`;
+  // 建物に入って自動で開いた時は、聞きたいこと（教室）が先に見えるよう「友達だけ」の段を上にする
+  $('#placeSheet').innerHTML=`<h2 class="pstitle">${auto?`🏢 ${esc(p.place)}に入りました`:'✏️ いまの自分'}</h2>
+    <p class="psdesc">${auto?'いる教室を入れると、友達に表示されます。':'いまどこにいて、何をしているかを、見せる相手ごとに設定します。'}</p>
+    ${auto?friends+everyone:everyone+friends}
     <div class="psbtns"><button class="btn btn-ghost" onclick="closePlaceEdit()">${auto?'あとで':'閉じる'}</button><button class="btn btn-primary" onclick="savePlaceEdit()">保存する</button></div>`;
   renderPsPurposes();
   $('#placeOverlay').classList.add('show');
@@ -2534,10 +2639,10 @@ function savePlaceEdit(){
   myPresence.room=room; myPresence.note=note;
   myPresence.expires_at=(room||note)?new Date(roomExpiryAt()).toISOString():null;
   savePresence();
-  // 「いま探していること」はプロフィール側に保存する（近くの人の絞り込みに使うため）
-  if(profile){ profile.fa=profile.fa||{}; profile.fa.purposes=[...psPurposes]; publishMe(); saveMyAttrs(); renderNearby(); renderCross(); }
+  // 「いまの状態」「いま探していること」はプロフィール側に保存する（みんなに見え、共通点の判定にも使うため）
+  if(profile){ profile.fa=profile.fa||{}; profile.fa.purposes=[...psPurposes]; profile.fa.status=psStatus; publishMe(); saveMyAttrs(); renderNearby(); renderCross(); }
   renderMyPresence(); closePlaceEdit();
-  toast(myPresence.visibility==='hidden'?'保存しました（場所はいま「友達にも見せない」設定です）':'保存しました。友達に表示されます');
+  toast(myPresence.visibility==='hidden'?'保存しました（場所はいま「友達にも見せない」設定です）':'保存しました');
 }
 
 /* ---------- コードで友達になる（2026-09-24） ---------- */
@@ -2986,7 +3091,17 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 
 /* ---------- misc ---------- */
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
-function go(t){$$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
+// トーク：「個人」（マッチ・友達のチャット）と「コミュニティ」を切り替える。コミュニティは以前は別のタブだった
+let talkTab='dm';
+function setTalkTab(k){
+  talkTab=k; $('#segDm').classList.toggle('on',k==='dm'); $('#segComm').classList.toggle('on',k==='comm');
+  $('#matchList').hidden=k!=='dm'; $('#commPane').hidden=k!=='comm';
+  if(k==='comm')loadRooms(); else { renderMatches(); loadTalkPreviews(); }
+}
+function go(t){
+  // コミュニティの一覧は「トーク」の中にある（部屋から戻る時などに go('comm') が呼ばれる）
+  if(t==='comm'){ t='match'; setTalkTab('comm'); } else if(t==='match') setTalkTab(talkTab);
+  $$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
   if(t==='near'&&fesMap)setTimeout(()=>fesMap.invalidateSize(),60);   // 非表示の間にサイズが変わっても地図が崩れないように
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));if(t==='match')$('#dotMatch').style.display='none';if(t==='cross'&&$('#dotCross'))$('#dotCross').style.display='none';if(t==='comm'||t==='near')loadRooms();if(t==='friends')loadFriends();if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=pushHintText();}}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
