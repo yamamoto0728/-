@@ -2074,7 +2074,7 @@ async function saveEdit(){
   if(newAge<18){ w.textContent='⚠️ このアプリは18歳以上の方のみご利用いただけます。'; w.classList.add('show'); return; }
   profile.age=newAge;
   const se=$('#edEmojis .em.sel'); if(se)profile.emoji=se.dataset.e;
-  profile.looking=[...$('#edLooking .c.sel')].map(el=>el.dataset.l);
+  profile.looking=[...$$('#edLooking .c.sel')].map(el=>el.dataset.l);
   profile.likes=[...editLikes];
   profile.tags=[...editTags];
   const ewd=$('#edWorkDetail').value.trim();
