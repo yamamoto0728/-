@@ -462,8 +462,9 @@
   .urow.closed{opacity:.62}
   .urow.closed .av{filter:grayscale(.35)}
   .urow .info .n .gr{font-size:11.5px;color:var(--muted);font-weight:500;margin-left:4px}
-  #s-near .map-wrap.mapview{height:62vh;min-height:380px;max-height:560px}
-  #s-near .map-wrap.mapview.full{height:auto;max-height:none}
+  /* 地図はスマホ1画面の中に収まる高さにする（上の帯・タイル・お題の下にスクロールせずに見えるように） */
+  #s-near .map-wrap{height:340px}
+  #s-near .map-wrap.full{height:auto}
   /* 「いまの自分」「時間割」は1行に小さく（人の一覧を先に見せる） */
   .nowbar{gap:8px;margin-bottom:8px}
   .ntile{min-height:0;padding:9px 11px;border-radius:14px;gap:1px}
@@ -629,16 +630,14 @@
       <div class="nowbar" id="nowBar"></div>
       <div class="daily" id="dailyCard"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
-      <!-- 一覧と地図は切り替えにする（最初は一覧。地図が上にあると、開いても人が見えなかった） -->
-      <div class="seg viewseg"><button id="vsList" class="on" onclick="setNearView('list')">👥 一覧</button><button id="vsMap" onclick="setNearView('map')">🗺 地図</button></div>
-      <div id="nearListView">
-        <div class="ulist" id="ulist"></div>
-        <div class="listhead" style="margin-top:18px">💬 コミュニティ <span onclick="go('comm')" style="margin-left:auto;color:var(--signal);font-weight:700;cursor:pointer;font-size:12px">すべて見る ›</span></div>
-        <div class="ulist" id="homeRoomList"></div>
-      </div>
-      <div class="map-wrap mapview" id="mapWrap" hidden><div id="map"></div><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">🏫 <b>多摩キャンパス</b></div>
+      <!-- 地図は開いた時点でスクロールせずに見える位置に置き、人の一覧はその下に続ける
+           （2026-09-24 に一度「一覧／地図」の切り替えにしたが、あおの希望で切り替えをやめて地図を常に出す形に戻した） -->
+      <div class="map-wrap" id="mapWrap"><div id="map"></div><div class="nearest" id="nearest">&mdash;</div><div class="maplbl">🏫 <b>多摩キャンパス</b></div>
         <div class="mapzoom"><button onclick="mapZoom(1)" aria-label="拡大">＋</button><button onclick="mapZoom(-1)" aria-label="縮小">－</button><button onclick="mapFitCampus()" aria-label="キャンパス全体を表示">🏫</button></div>
         <button class="maptype" id="mapFullBtn" onclick="toggleMapFull()">⤢ 大きく</button><button class="mapme" onclick="centerOnMe()">📍 自分</button></div>
+      <div class="ulist" id="ulist"></div>
+      <div class="listhead" style="margin-top:18px">💬 コミュニティ <span onclick="go('comm')" style="margin-left:auto;color:var(--signal);font-weight:700;cursor:pointer;font-size:12px">すべて見る ›</span></div>
+      <div class="ulist" id="homeRoomList"></div>
       </div>
     </section>
     <section class="screen" id="s-cross">
@@ -1569,7 +1568,7 @@ function relTag(id){
   return '';
 }
 /* ---------- render nearby ---------- */
-let nearView='list', lastNearList=[];
+let lastNearList=[];
 function nearRow({u,d,common,closed}){
   const st=statusOf(u);
   return `<div class="urow${closed?' closed':''}" onclick="openNear('${String(u.id).replace(/[^\w-]/g,'')}')">
@@ -1608,17 +1607,8 @@ function renderNearby(){
       :`<div class="nearsec">いまアプリを開いている人はいません</div>`)
     +(closed.length?`<div class="nearsec" style="margin-top:6px">🕘 さっきまでいた人 <span class="cnt">アプリを閉じた人・${closed.length}人</span></div>`+closed.map(nearRow).join(''):'');
 }
-// 近くの人の「一覧／地図」の切り替え。地図は最初に開いた時に作る（隠れたまま作ると大きさが0で表示が崩れるため）
-function setNearView(v){
-  nearView=v;
-  $('#vsList').classList.toggle('on',v==='list'); $('#vsMap').classList.toggle('on',v==='map');
-  $('#nearListView').hidden=v!=='list'; $('#mapWrap').hidden=v!=='map';
-  if(v==='map'){ drawMap(lastNearList); if(fesMap)setTimeout(()=>{ fesMap.invalidateSize();
-    // 初めて開いた時は、大きさが決まってから自分の位置に寄せ直す（作った直後だと中心がずれていた）
-    if(!mapCentered){ mapCentered=true; if(myPos&&inCampus(myPos.lat,myPos.lng))fesMap.setView([myPos.lat,myPos.lng],18); else mapFitCampus(); }
-    layoutLabels(); },60); }
-}
-let mapCentered=false;
+// 地図の場所までスクロールする（友達・出店を「地図で見る」時）
+function showMapArea(){ const w=$('#mapWrap'); if(w)w.scrollIntoView({behavior:'smooth',block:'center'}); }
 /* ---------- 地図（多摩キャンパスだけを映す。campus-geo.js の図形で描くイラスト地図、Leaflet） ---------- */
 // 建物名は OpenStreetMap に登録されている名前（2026-09-13取得）。
 // 4つ目の値は優先度（1=主要な建物。名前どうしが重なる時は優先度の高い方を残す）
@@ -1756,7 +1746,7 @@ function centerOnMe(){
   fesMap.setView([myPos.lat,myPos.lng],18);
 }
 function drawMap(list){
-  if(nearView==='map')initMap();
+  initMap();
   if(fesMap){
     fesLayer.clearLayers();
     // 地図はキャンパスだけを映すので、キャンパスの外にいる人（自分も）のアイコンは出さない
@@ -1864,7 +1854,7 @@ function showBoothPop(b,auto,d){
 function closeBoothPop(){ $('#boothPop').classList.remove('show'); }
 function focusBooth(id){
   const b=booths.find(x=>String(x.id)===id); if(!b)return;
-  closeBoothPop(); go('near'); setNearView('map'); setTimeout(()=>{ if(fesMap)fesMap.setView([b.lat,b.lng],19); },120);
+  closeBoothPop(); go('near'); showMapArea(); setTimeout(()=>{ if(fesMap)fesMap.setView([b.lat,b.lng],19); },120);
 }
 
 /* ---------- すれ違い（FES.encounterRangeM以内・毎回カウント・入ったら即記録） ---------- */
@@ -2906,7 +2896,7 @@ function openFriend(id){
 }
 function showFriendOnMap(id){
   const o=friendOnMap(id); if(!o)return;
-  closeSheet(); go('near'); setNearView('map'); setTimeout(()=>{ if(fesMap)fesMap.setView([o.lat,o.lng],19); },120);
+  closeSheet(); go('near'); showMapArea(); setTimeout(()=>{ if(fesMap)fesMap.setView([o.lat,o.lng],19); },120);
 }
 // 地図に友達を出す（「地図の位置も見せる」にしている友達だけ。緑のふちと名前付き）
 function drawFriendMarkers(){
