@@ -124,6 +124,16 @@
   .psquick{margin-top:8px;gap:6px}.psquick .c{font-size:12px;padding:6px 11px}
   .psvis{font-size:11.5px;color:var(--muted);margin:-4px 0 12px}
   .psbtns{display:flex;gap:10px}.psbtns .btn{flex:1;padding:13px;font-size:14px}
+  /* チャットの話題カード */
+  .topics{padding:8px 12px 2px;border-top:1px solid var(--line);background:rgba(255,255,255,.6);flex-shrink:0}
+  .topics:empty{display:none}
+  .topics .th{font-size:11px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:6px}
+  .topics .th button{background:none;border:0;color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit;padding:0}
+  .topics .tl{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}
+  .topics .tl::-webkit-scrollbar{height:0}
+  .topics .tc{flex-shrink:0;max-width:78%;white-space:normal;text-align:left;font-size:12.5px;line-height:1.45;padding:8px 11px;border-radius:14px;border:1px solid rgba(245,151,47,.45);background:#fff7ee;color:var(--ink);cursor:pointer;font-family:inherit}
+  .topics .tc.rare{border-color:#f0a030;background:linear-gradient(135deg,#fff3dc,#ffe7cf)}
+  .topics .tshow{border:0;background:none;color:var(--signal);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:2px 0 8px}
   /* 今日のお題 */
   .daily{margin:2px 16px 8px;padding:13px 15px;border-radius:18px;background:linear-gradient(135deg,rgba(255,176,102,.16),rgba(120,140,255,.10));border:1px solid rgba(245,151,47,.35)}
   .daily:empty{display:none}
@@ -242,6 +252,17 @@
   .chathead .back{background:none;border:0;color:var(--ink);font-size:24px;cursor:pointer;padding:0 4px}
   .chathead .av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
   .chathead .nm{font-size:15px;font-weight:700}.chathead .st{font-size:11px;color:var(--ok)}
+  .chathead .frinv{flex-shrink:0;border:1px solid rgba(32,180,131,.5);background:rgba(32,180,131,.1);color:#0f8f6f;border-radius:14px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .chathead .frinv:disabled{opacity:.6;cursor:default}
+  /* コードで友達追加 */
+  .fradd .frcode{display:flex;align-items:center;gap:12px;margin:6px 0 10px}
+  .fradd .frcode .num{font-family:"JetBrains Mono",monospace;font-size:34px;font-weight:700;letter-spacing:8px;color:var(--ink)}
+  .fradd .frcode .left{font-size:11.5px;color:var(--muted)}
+  .fradd .frrow2{display:flex;gap:8px;margin:4px 0 2px}
+  .fradd .frrow2 input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:16px;letter-spacing:4px;font-family:inherit;background:#fff;color:var(--ink)}
+  .fradd .frrow2 .btn{padding:10px 18px;font-size:14px;flex-shrink:0}
+  .fradd .showbtn{width:100%;padding:11px;font-size:14px;margin:6px 0 10px}
+  .urow .d .frchat{border:1px solid var(--line);background:#fff;border-radius:12px;padding:6px 9px;font-size:15px;cursor:pointer;margin-top:4px}
   .msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:9px}.msgs::-webkit-scrollbar{width:0}
   .msgs .day{align-self:center;font-size:10.5px;color:var(--muted2);background:var(--surface);padding:4px 12px;border-radius:20px;margin-bottom:4px}
   .bub{max-width:74%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;animation:slidein .3s ease both}
@@ -271,6 +292,7 @@
   .ttlbar.warn{background:rgba(226,87,79,.14);color:var(--bad);border-color:rgba(226,87,79,.4)}
   .ttlbar.over{background:rgba(120,130,160,.14);color:var(--muted);border-color:rgba(120,130,160,.3)}
   .common{display:inline-block;font-size:11px;font-weight:700;color:#0f8f6f;background:rgba(32,180,131,.14);border:1px solid rgba(32,180,131,.35);border-radius:20px;padding:2px 9px;margin:3px 0}
+  .common.rare{color:#9a4b00;background:linear-gradient(135deg,rgba(255,214,120,.35),rgba(255,160,90,.25));border-color:rgba(240,150,40,.6)}
   .joinbtn{flex-shrink:0;padding:7px 15px;border:0;border-radius:20px;background:var(--signal);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
   .joinbtn.joined{background:var(--surface2);color:var(--muted)}
   /* ようこそ画面 */
@@ -493,8 +515,9 @@
       <div class="scroll" id="matchList"></div>
     </section>
     <section class="screen" id="s-chat">
-      <div class="chathead"><button class="back" onclick="go('match')">‹</button><div class="av" id="chatAv"></div><div><div class="nm" id="chatNm"></div><div class="st">位置を共有中</div></div></div>
+      <div class="chathead"><button class="back" onclick="go(chatReturn)">‹</button><div class="av" id="chatAv"></div><div style="flex:1;min-width:0"><div class="nm" id="chatNm"></div><div class="st" id="chatSt">位置を共有中</div></div><div id="chatFr"></div></div>
       <div class="msgs" id="msgs"></div>
+      <div class="topics" id="chatTopics"></div>
       <div class="chatbar"><input id="chatInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">↑</button></div>
     </section>
     <section class="screen" id="s-comm">
@@ -511,6 +534,13 @@
     <section class="screen" id="s-friends">
       <div class="apphead"><h1>友達</h1><span class="sub" id="friendSub">0人</span></div>
       <div class="scroll">
+        <!-- コードで友達追加（入力中に20秒ごとの描き直しで消えないよう、friendBox とは別の入れ物にする） -->
+        <div class="mypres fradd">
+          <div class="mphead">🔢 コードで友達になる</div>
+          <div id="frCodeBox"></div>
+          <div class="frrow2"><input id="frCodeIn" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="相手の4桁のコード" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')addFriendByCode()"><button class="btn btn-primary" onclick="addFriendByCode()">追加</button></div>
+          <div class="mpnote">コードを入れると、すぐに友達になります（承認は要りません）。<b>目の前にいる人とだけ</b>交換してください。コードは5分で使えなくなります。</div>
+        </div>
         <div class="mypres" id="myPresence"></div>
         <div id="friendBox"></div>
         <div class="listhead" style="margin-top:6px">📨 アプリに誘う</div>
@@ -664,6 +694,18 @@ const FA={
   statuses:['一緒にごはん行ける','ひまです','勉強中','授業・移動中','これから帰る'],
   // 一致しても共通点として数えない選択肢（誰とでも一致してしまい、表示を絞る意味がないため）
   weak:['いまはひとりがいい','まだ考え中'],
+  // 「わかる！あるある」（必須・3つ選ぶ。2026-09-24 追加）。同じ体験・感じ方をしていると分かると、
+  // 初対面でもつながりを感じやすい（I-sharing、Pinel）。軽い「苦手」「あるある」を中心にしている（Bosson et al., 2006）
+  // ⚠️ 文言を変えると、その項目を選んでいた人の選択は消えて選び直しになる（keepKnown）
+  aruaru:['映画のエンドロールは最後まで見る','エレベーターの閉ボタンを連打しがち','バスが目の前で出発しがち','課題は締切ギリギリでエンジンがかかる',
+    '寝る前のスマホがやめられない','イヤホンを忘れると一日つらい','好きな曲を延々リピートする','コンビニの新作をつい買う',
+    'やる気は夜になってから出る','写真フォルダがスクショだらけ','既読のまま返信を忘れがち','電話が鳴るとちょっと身構える',
+    '休みの日はほぼ家から出ない','気づくと同じものばかり食べている','学食のメニューがいつも同じ','多摩キャンの坂で毎回息が切れる',
+    '雨の日は大学に行くか本気で迷う','ひとりでごはん、全然平気','初対面だとかなり人見知り','話し始めるとけっこうしゃべる',
+    'よく道を聞かれる','方向音痴','傘をよくなくす','推しの話になると止まらない',
+    '朝は本当に起きられない','計画を立てるのは好き、守るのは苦手','カフェだと勉強がはかどる','目的のない散歩が好き',
+    '季節の限定メニューに弱い','布団に入ってから考えごとが止まらない'],
+  aruaruPick:3,
 };
 const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県','海外'];
 // 多摩キャン版のデータは tama_ 付きの別テーブルに保存する（supabase/tama_tables.sql）。
@@ -946,7 +988,7 @@ async function onStart(){
   const ng=ngCheck(name)||ngCheck(bioVal);
   if(ng){ toast('⚠️ 名前かひとことに不適切な言葉が含まれています。修正してください。'); return; }
   const miss=attrMissing(obAttr); if(miss){ toast('⚠️ '+miss); return; }
-  if(ngCheck(obAttr.course)){ toast('⚠️ 科目名に不適切な言葉が含まれています。修正してください。'); return; }
+  if(ngCheck(obAttr.course)||ngCheck(obAttr.artist)){ toast('⚠️ 科目名・アーティスト名に不適切な言葉が含まれています。修正してください。'); return; }
   profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[...selTags],work,looking:[...selLooking],likes:myLikes,interests:myInterests,fa:{...attrToFa(obAttr),status:''}};
   $('#meAv').style.background=gr(selEmoji);$('#meAv').textContent=selEmoji;$('#meName').textContent=name+(age?' '+age:'');
   $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
@@ -1121,6 +1163,7 @@ function matchLeftMs(m){ if(!m||!m.matchedAt)return MATCH_TTL; return MATCH_TTL-
 function isExpired(m){
   if(!m||!m.matchedAt)return false;
   if(isTest(m.u.id))return false;
+  if(isFriend(m.u.id))return false;   // 友達になった相手とは、マッチの24時間を過ぎても話せる
   return matchLeftMs(m)<=0;
 }
 function leftText(ms){ if(ms<=0)return '終了'; const h=Math.floor(ms/3600000); const mi=Math.floor((ms%3600000)/60000); return h>0?(h+'時間'+mi+'分'):(mi+'分'); }
@@ -1133,12 +1176,16 @@ function toggleArr(a,v){ const i=a.indexOf(v); if(i>=0)a.splice(i,1); else a.pus
 // そうすると学園祭向けの古い値（「食べ歩き」など）が残っている人は必須が空になり、
 // 起動時に attrMissing が効いて編集画面が開き、選び直してもらえる
 const keepKnown=(arr,opts)=>[...(arr||[])].filter(x=>opts.includes(x));
-function attrStateFrom(fa){ fa=fa||{}; return {faculty:FA.faculties.some(f=>f.v===fa.faculty)?fa.faculty:'',dept:fa.dept||'',grade:fa.grade||'',purposes:keepKnown(fa.purposes,FA.purposes),goals:keepKnown(fa.goals,FA.goals),hometown:fa.hometown||'',course:fa.course||''}; }
-function attrToFa(st){ return {faculty:st.faculty,dept:st.dept,grade:st.grade,purposes:[...st.purposes],goals:[...st.goals],hometown:st.hometown,course:st.course.trim()}; }
+function attrStateFrom(fa){ fa=fa||{}; return {faculty:FA.faculties.some(f=>f.v===fa.faculty)?fa.faculty:'',dept:fa.dept||'',grade:fa.grade||'',purposes:keepKnown(fa.purposes,FA.purposes),goals:keepKnown(fa.goals,FA.goals),hometown:fa.hometown||'',course:fa.course||'',
+  artist:fa.artist||'',aruaru:keepKnown(fa.aruaru,FA.aruaru).slice(0,FA.aruaruPick)}; }
+function attrToFa(st){ return {faculty:st.faculty,dept:st.dept,grade:st.grade,purposes:[...st.purposes],goals:[...st.goals],hometown:st.hometown,course:st.course.trim(),artist:st.artist.trim(),aruaru:[...st.aruaru]}; }
 // 「いま探していること」はここでは聞かない（友達タブの「いまどこ？」で設定する。任意）
+// よく聴くアーティスト・わかる！あるあるは 2026-09-24 に必須にした。前に登録した人は起動時に編集画面が開いて入れてもらう
 function attrMissing(st){
   if(!st.faculty)return '学部・所属を選んでください';
   if(!st.course.trim())return '今季絶対取りたい科目を入れてください';
+  if(!st.artist.trim())return 'いちばんよく聴くアーティストを入れてください';
+  if(st.aruaru.length<FA.aruaruPick)return '「わかる！あるある」を'+FA.aruaruPick+'つ選んでください';
   return null;
 }
 // 登録画面と編集画面で同じ入力欄を使う（p は id の頭につける文字: 'ob' / 'ed'）
@@ -1146,6 +1193,8 @@ function attrFieldsHTML(p){
   return `<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意・見せるだけ）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>
     <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
+    <div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">同じアーティストの人は「共通点」になります。知る人ぞ知る名前ほど、一致した時にレアな出会いになります</div></div>
+    <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span></label><div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field"><label>出身（任意・見せるだけ）</label><select id="${p}Home"><option value="">選ばない</option>${PREFS.map(x=>`<option>${x}</option>`).join('')}</select></div>`;
 }
@@ -1164,24 +1213,72 @@ function bindAttrForm(p,st){
     // 「いま探していること」（st.purposes）はこの画面には出さない。
     // 保存のときは attrToFa がそのまま書き戻すので、いまの値は消えない
     chips('Goals',FA.goals,o=>st.goals.includes(o),o=>toggleArr(st.goals,o));
+    // あるあるは3つまで。4つ目を押したら一番前に選んだものと入れ替える
+    chips('Aruaru',FA.aruaru,o=>st.aruaru.includes(o),o=>{ if(st.aruaru.includes(o))toggleArr(st.aruaru,o); else{ if(st.aruaru.length>=FA.aruaruPick)st.aruaru.shift(); st.aruaru.push(o); } });
+    const ah=$('#'+p+'AruaruHint'); if(ah)ah.textContent=`${st.aruaru.length}/${FA.aruaruPick}　同じものを選んだ人は「共通点」になります`;
   }
   // 科目は入力のたびに render() を呼ぶと打っている途中でカーソルが飛ぶので、値だけ拾う
   const course=$('#'+p+'Course'); course.value=st.course||''; course.oninput=e=>{ st.course=e.target.value; };
+  const artist=$('#'+p+'Artist'); artist.value=st.artist||''; artist.oninput=e=>{ st.artist=e.target.value; };
   const home=$('#'+p+'Home'); home.value=st.hometown||''; home.onchange=e=>{ st.hometown=e.target.value; };
   render();
 }
-// 共通点＝学部・いま探していること・目標のどれかが一致。画面に出すかどうかはこれで決める（データは全員分記録する）
-function commonWith(u){
+// 共通点。key は「同じ値を持つ人」を数えるためのもの（めずらしさの重みづけに使う）、label は画面に出す文字
+function commonDetail(u){
   if(!profile)return [];
-  const me=attrsOf(profile), th=attrsOf(u), out=[];
-  if(me.faculty&&me.faculty===th.faculty)out.push(me.faculty);
-  (me.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.purposes||[]).includes(x))out.push(x); });
-  (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))out.push(x); });
+  const me=attrsOf(profile), th=attrsOf(u), out=[], add=(key,label)=>out.push({key,label});
+  if(me.faculty&&me.faculty===th.faculty)add('fac:'+me.faculty,me.faculty);
+  (me.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.purposes||[]).includes(x))add('pur:'+x,x); });
+  (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))add('goal:'+x,x); });
+  const ma=normAns(me.artist); if(ma&&ma===normAns(th.artist))add('art:'+ma,'同じアーティスト「'+th.artist+'」');
+  (me.aruaru||[]).forEach(x=>{ if((th.aruaru||[]).includes(x))add('aru:'+x,'わかる「'+x+'」'); });
+  if(sameCourse(u))add('crs:'+normCourse(me.course),'取りたい科目「'+th.course+'」');
   // 時間割で同じ曜日・時限に同じ授業名を入れている人（毎週会える人なので、共通点に数える）
-  (samePeers[u.id]||[]).forEach(r=>out.push('同じ授業「'+r.course+'」'));
+  (samePeers[u.id]||[]).forEach(r=>add('cls:'+r.slot+':'+normAns(r.course),'同じ授業「'+r.course+'」'));
   // 今日のお題で同じ答え（その日だけの共通点。偶然の出会いを作るため）
-  if(sameDaily(u))out.push('今日のお題「'+dailyAnswer(u)+'」');
+  if(sameDaily(u))add('day:'+normAns(dailyAnswer(u)),'今日のお題「'+dailyAnswer(u)+'」');
   return out;
+}
+function commonWith(u){ return commonDetail(u).map(x=>x.label); }
+// めずらしさの重みづけ（2026-09-24。めずらしい好みの一致ほど強く惹かれる：Alves, 2018）。
+// 今日キャンパスにいた人のうち、同じ値を持つ人の割合が小さい共通点ほど重くし、並び順と「✨レアな共通点」の表示に使う。
+// 「同じ学部」は4人に1人でも一致するので軽く、「同じアーティスト」は数十人に1人なので重くなる
+function keysOf(u){
+  const a=attrsOf(u), k=[];
+  if(a.faculty)k.push('fac:'+a.faculty);
+  (a.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x))k.push('pur:'+x); });
+  (a.goals||[]).forEach(x=>{ if(!FA.weak.includes(x))k.push('goal:'+x); });
+  const ar=normAns(a.artist); if(ar)k.push('art:'+ar);
+  (a.aruaru||[]).forEach(x=>k.push('aru:'+x));
+  const c=normCourse(a.course); if(c)k.push('crs:'+c);
+  const d=dailyAnswer(u); if(d)k.push('day:'+normAns(d));
+  return k;
+}
+const RARE_SHARE=0.2;   // 同じ値の人がこの割合以下なら「レア」
+let rarePop={n:0,count:new Map()};
+function updateRarity(){
+  if(!profile)return;
+  const pop=[profile,...others.filter(u=>!isTest(u.id))], m=new Map();
+  pop.forEach(u=>new Set(keysOf(u)).forEach(k=>m.set(k,(m.get(k)||0)+1)));
+  // 同じ授業は他の人の時間割が読めないので、自分と「同じ授業の人」の数で数える
+  Object.values(samePeers).flat().forEach(r=>{ const k='cls:'+r.slot+':'+normAns(r.course); m.set(k,(m.get(k)||1)+1); });
+  rarePop={n:pop.length,count:m};
+}
+function rarityOf(key){ const n=Math.max(rarePop.n,2), c=Math.min(Math.max(rarePop.count.get(key)||2,2),n); return Math.log2(n/c); }
+// レア＝同じ値の人が全体の2割以下か、今日のキャンパスで「自分と相手の2人だけ」の一致。
+// 人数がごく少ない（3人未満）うちは割合があてにならないので、もともと一致しにくい自由記述の項目だけをレアとする
+function isRare(key){
+  const n=rarePop.n, c=rarePop.count.get(key)||2;
+  if(n<3)return /^(art|crs|cls):/.test(key);
+  return c<=2||c/n<=RARE_SHARE;
+}
+const commonScore=cd=>cd.reduce((s,x)=>s+rarityOf(x.key),0)+cd.length*0.01;
+// 一覧に出す共通点の1行（レアなものがあれば、それを優先して目立たせる）
+function commonLine(cd){
+  if(!cd.length)return '';
+  const rare=cd.filter(x=>isRare(x.key)), rest=cd.filter(x=>!isRare(x.key));
+  if(rare.length)return `<div class="common rare">✨ レアな共通点 ${rare.slice(0,2).map(x=>esc(x.label)).join('・')}${rare.length>2||rest.length?' 他':''}</div>`;
+  return `<div class="common">🎯 共通 ${cd.slice(0,3).map(x=>esc(x.label)).join('・')}${cd.length>3?' 他':''}</div>`;
 }
 // 取りたい科目が同じか（共通点の判定には使わず、プロフィールに「同じ！」と出すだけ）。
 // 「 マーケティング論 」「ﾏｰｹﾃｨﾝｸﾞ論」のような書き方のゆれを吸収してから比べる
@@ -1189,9 +1286,12 @@ function normCourse(s){ return (s||'').normalize('NFKC').replace(/[\s　]+/g,'')
 function sameCourse(u){ const a=normCourse(attrsOf(profile).course), b=normCourse(attrsOf(u).course); return !!a&&a===b; }
 function attrBlock(u){
   const a=attrsOf(u); if(!a.faculty&&!(a.purposes||[]).length)return '';
-  const common=new Set(commonWith(u)), courseHit=sameCourse(u), same=samePeers[u.id]||[];
+  const common=new Set(commonWith(u)), courseHit=sameCourse(u), same=samePeers[u.id]||[], me=attrsOf(profile);
   const chip=x=>`<span class="fchip${common.has(x)?' hit':''}">${esc(x)}</span>`;
+  const artistHit=!!normAns(me.artist)&&normAns(me.artist)===normAns(a.artist);
   return `<div class="fesattr">
+    ${a.artist?`<div class="frow">🎧 よく聴く <b>${esc(a.artist)}</b>${artistHit?' <span class="same">同じ！</span>':''}</div>`:''}
+    ${(a.aruaru||[]).length?`<div class="fh">わかる！あるある</div><div class="fchips">${a.aruaru.map(x=>`<span class="fchip${(me.aruaru||[]).includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>`:''}
     ${dailyAnswer(u)?`<div class="frow">🎲 今日のお題「${esc(dailyToday().q)}」 <b>${esc(dailyAnswer(u))}</b>${sameDaily(u)?' <span class="same">同じ！</span>':''}</div>`:''}
     ${same.length?`<div class="frow">📚 同じ授業 ${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')} <span class="same">同じ！</span></div>`:''}
     ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${common.has(a.faculty)?' <span class="same">同じ！</span>':''}</div>`:''}
@@ -1216,11 +1316,13 @@ function setStatus(s){
 /* ---------- render nearby ---------- */
 function renderNearby(){
   renderDaily();
-  const all=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}return {u,d,r:(myPos&&u.lat!=null)?relMeters(myPos,u):null,common:commonWith(u)};});
-  // すれ違いの記録は全員分とるが、画面（一覧・地図）に出すのは共通点がある人だけ。テスト用の人は動作確認のため常に出す
-  const list=all.filter(x=>x.common.length||isTest(x.u.id))
-    .sort((x,y)=>{ if(y.common.length!==x.common.length)return y.common.length-x.common.length; return (x.d??1e9)-(y.d??1e9); });
-  $('#nearSub').textContent=list.length?list.length+'人（共通点あり）':(all.length?'共通点のある人はまだ':'まだ誰もいません');
+  updateRarity();
+  // 全員を出す（2026-09-24 に変更。以前は共通点のある人だけ出していたが、たまたま近くにいた人が見えず、すれ違いの偶然が最初から絞られてしまうため）。
+  // 並び順は共通点のめずらしさ（commonScore）→ 距離。めずらしい共通点のある人が上に来る
+  const all=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}const cd=commonDetail(u);return {u,d,r:(myPos&&u.lat!=null)?relMeters(myPos,u):null,common:cd,score:commonScore(cd)};});
+  const list=all.slice().sort((x,y)=>(y.score-x.score)||((x.d??1e9)-(y.d??1e9)));
+  const nCommon=all.filter(x=>x.common.length).length;
+  $('#nearSub').textContent=list.length?list.length+'人'+(nCommon?'（共通点あり'+nCommon+'人）':''):'まだ誰もいません';
   drawMap(list);const ul=$('#ulist');
   if(fesOutside&&!list.length){
     $('#nearSub').textContent='キャンパスの外では表示しません';
@@ -1228,15 +1330,13 @@ function renderNearby(){
     return;
   }
   if(!list.length){
-    ul.innerHTML=all.length
-      ?`<div class="empty"><div class="big">🔎</div><p>近くに<b>${all.length}人</b>いますが、<br>共通点のある人はまだいません。<br>「いま探していること」を<br>増やすと見つかりやすくなります。</p><button class="btn btn-primary" onclick="openPlaceEdit(false)">いま探していることを選ぶ</button></div>`
-      :`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「友達」タブのQR・リンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('friends')">QR・リンクを開く</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;
+    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>まだ他の人がいません。<br>「友達」タブのQR・リンクを共有して、<br>近くの人にこのURLを開いてもらいましょう。</p><button class="btn btn-primary" onclick="go('friends')">QR・リンクを開く</button><br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button></div>`;
     return;
   }
   ul.innerHTML=list.map(({u,d,common})=>{ const a=attrsOf(u); return `<div class="urow" onclick='openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':Math.round(d)})'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
     <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div>
-      ${common.length?`<div class="common">🎯 共通 ${common.slice(0,3).map(esc).join('・')}${common.length>3?' 他':''}</div>`:''}
+      ${commonLine(common)}
       <div class="b">${a.status?`<span class="stchip">${esc(a.status)}</span> `:''}${a.faculty?esc(a.faculty)+' · ':''}${esc(u.bio)}</div></div>
     <div class="d"><div class="m">${d!=null?Math.round(d)+'m':'—'}</div>${isClosed(u)?`<div class="frago">${agoText(u.updated_at)}</div>`:''}${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`; }).join('');
 }
@@ -1501,8 +1601,10 @@ async function addEncounter(u){
   const prev=encMap[u.id]; const count=(prev?prev.count:0)+1; const place=placeName||'この付近';
   encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},count,last_place:place,last_at:Date.now()};
   renderCross();
-  // 記録は全員分とるが、共通点のない人とのすれ違いは名前を出さない（画面上は隠している人なので）
-  if(commonWith(u).length){ toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`); const dc=$('#dotCross'); if(dc){dc.style.display='block';dc.textContent=crossShown().length;} }
+  // 共通点が無くても知らせる（2026-09-24 から全員を画面に出すため）。レアな共通点があればそれも添える
+  const rare=commonDetail(u).filter(x=>isRare(x.key));
+  toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`+(rare.length?`<br>✨ ${esc(rare[0].label)}`:''));
+  const dc=$('#dotCross'); if(dc){dc.style.display='block';dc.textContent=crossShown().length;}
   if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from(T('encounters')).upsert(rec); }catch(e){} }
 }
 async function loadEncounters(){
@@ -1513,19 +1615,17 @@ async function loadEncounters(){
   }
   renderCross(); const dc=$('#dotCross'); const n=crossShown().length; if(dc&&n){dc.style.display='block';dc.textContent=n;}
 }
-// すれ違いは全員分記録しているが、一覧に出すのは共通点がある人だけ
-function crossShown(){ return Object.values(encMap).filter(u=>!blocked.has(u.id)&&commonWith(u).length); }
+// すれ違った人は全員出す（2026-09-24 から。以前は共通点のある人だけ）。新しい順
+function crossShown(){ return Object.values(encMap).filter(u=>!blocked.has(u.id)); }
 function renderCross(){
-  const total=Object.values(encMap).filter(u=>!blocked.has(u.id)).length;
+  updateRarity();
   const arr=crossShown().sort((a,b)=>(b.last_at||0)-(a.last_at||0));
   $('#crossSub').textContent=arr.length?arr.length+'人とすれ違い':'まだ0人';
   const ul=$('#crossList');
-  if(!arr.length){ul.innerHTML=total
-    ?`<div class="empty"><div class="big">🚶</div><p>${total}人とすれ違いましたが、<br>共通点のある人はまだいません。</p></div>`
-    :`<div class="empty"><div class="big">🚶</div><p>まだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`;return;}
+  if(!arr.length){ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>まだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`;return;}
   ul.innerHTML=arr.map(u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/'/g,"&#39;")},null)'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-    <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div><div class="common">🎯 共通 ${commonWith(u).slice(0,3).map(esc).join('・')}</div><div class="b">${esc(u.last_place||'')} ですれ違い</div></div>
+    <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span></div>${commonLine(commonDetail(u))}<div class="b">${esc(u.last_place||'')} ですれ違い</div></div>
     <div class="d"><div class="m">${u.count}回</div>${liked.has(u.id)?'<div class="lk">♥ いいね済</div>':''}</div></div>`).join('');
 }
 function confettiBurst(){
@@ -1731,19 +1831,86 @@ function renderMatches(){
       <div class="info"><div class="nm">${esc(m.u.name)} ${m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`:''}</div><div class="last">${last?(last.from===myId?'あなた: ':'')+esc(last.text):(m.theirReason?('🎯「'+esc(m.theirReason)+'」に惹かれたそうです'):'マッチしました！24時間以内に話しかけて！')}</div></div></div>${i<ids.length-1?'<div class="sep"></div>':''}`;}).join('');
 }
 
+/* ---------- 話題カード（マッチした後の「で、なに？」を防ぐ） ---------- */
+// チャットを開くと、2人の共通点から最初の一言を3つ出し、押すだけで送れるようにする（2026-09-24）。
+// 人は相手が自分と話したがっている度合いを低く見積もり、最初の一言で止まりがち（Epley & Schroeder, 2014）なので、
+// 最初の一歩をアプリが用意する。めずらしい共通点（Alves, 2018）から優先して出し、共通点が無ければ相手のプロフィールから作る
+let chatTopics=[], topicsOpen={};
+function topicsFor(u){
+  const me=attrsOf(profile), th=attrsOf(u), out=[], seen=new Set();
+  const add=(text,rare)=>{ if(text&&!seen.has(text)){ seen.add(text); out.push({text,rare:!!rare}); } };
+  // 共通点（めずらしい順）
+  const cd=commonDetail(u).sort((a,b)=>rarityOf(b.key)-rarityOf(a.key));
+  for(const c of cd){
+    const rare=isRare(c.key), [kind]=c.key.split(':');
+    if(kind==='art') add(`${th.artist}、自分もよく聴きます！いちばん好きな曲ってなんですか？`,rare);
+    else if(kind==='aru'){ const x=c.key.slice(4); add(`「${x}」、自分もです笑　わかる人がいてうれしい`,rare); }
+    else if(kind==='cls'){ const r=(samePeers[u.id]||[]).find(r=>c.key==='cls:'+r.slot+':'+normAns(r.course)); if(r)add(`${slotLabel(r.slot)}の${r.course}、同じ授業ですよね！あの授業どうですか？`,rare); }
+    else if(kind==='crs') add(`${th.course}、自分も取りたいんです！気になってる理由ってありますか？`,rare);
+    else if(kind==='day') add(`今日のお題、同じ「${dailyAnswer(u)}」でしたね！`,rare);
+    else if(kind==='fac') add(`同じ${th.faculty}ですね！何年生ですか？`,rare);
+    else if(kind==='pur') add(c.label==='一緒にごはん'?'学食ってよく行きますか？おすすめのメニューあったら知りたいです':`「${c.label}」、自分もです！`,rare);
+    else if(kind==='goal') add(`${c.label}、どんなことしてるんですか？`,rare);
+  }
+  // 共通点でなくても、相手のプロフィールから聞けること
+  const td=dailyAnswer(u), md=dailyAnswer(profile);
+  if(td&&md&&!sameDaily(u)) add(`今日のお題、「${td}」なんですね！自分は「${md}」でした。なんでですか？`);
+  if(th.artist&&normAns(th.artist)!==normAns(me.artist)) add(`${th.artist}よく聴くんですね！はじめて聴くならおすすめの曲ありますか？`);
+  if(th.course) add(`${th.course}、取りたいんですね！どんな授業なんですか？`);
+  (th.aruaru||[]).forEach(x=>{ if(!(me.aruaru||[]).includes(x)) add(`「${x}」ってどういうときですか？笑`); });
+  if(th.artist&&normAns(th.artist)===normAns(me.artist)) add(`${th.artist}のライブって行ったことありますか？`);
+  add('はじめまして！すれ違ったみたいですね😊');
+  add('多摩キャンでよくいる場所ってどこですか？');
+  return out.slice(0,3);
+}
+// 話し始めて少しの間だけ出す（自分が2通送るまで）。あとは「💡 話題」で出し直せる
+function renderTopics(){
+  const el=$('#chatTopics'), m=chatOf(chatPeer); if(!el)return;
+  // チャットは2.5秒ごとに描き直されるので、中身が変わった時だけ差し替える（横にスクロール中の位置が戻らないように）
+  const set=h=>{ if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; } };
+  if(!m||isExpired(m)||!profile){ set(''); return; }
+  const mine=m.msgs.filter(x=>x.from===myId).length;
+  if(mine>=2&&!topicsOpen[chatPeer]){ set(`<button class="tshow" onclick="topicsOpen[chatPeer]=true;renderTopics()">💡 話題に困ったら</button>`); return; }
+  chatTopics=topicsFor(m.u);
+  set(`<div class="th"><span>💡 話題に困ったら（押すと送信）</span>${mine>=2?'<button onclick="topicsOpen[chatPeer]=false;renderTopics()">閉じる</button>':''}</div>
+    <div class="tl">${chatTopics.map((t,i)=>`<button class="tc${t.rare?' rare':''}" onclick="sendTopic(${i})">${t.rare?'✨ ':''}${esc(t.text)}</button>`).join('')}</div>`);
+}
+function sendTopic(i){ const t=chatTopics[i]; if(!t)return; topicsOpen[chatPeer]=false; $('#chatInput').value=t.text; sendMsg(); }
+
 /* ---------- chat (Supabase messages) ---------- */
 function chatKey(uid){return [myId,uid].sort().join('__');}
-async function loadChat(uid){ if(isTest(uid)||!sb)return; const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at'); if(data)matches[uid].msgs=data.map(x=>({from:x.from_id,text:x.text})); }
-function openChat(uid){
-  chatPeer=uid;const m=matches[uid];
+// チャットはマッチした相手（matches、24時間）と友達（friendChats、期限なし）の両方で使う。
+// 友達の会話もマッチと同じ tama_messages・同じ match_key なので、マッチした相手と友達になると同じ会話が期限なしで続く
+let friendChats={}, chatReturn='match';
+const chatOf=uid=>matches[uid]||friendChats[uid];
+async function loadChat(uid){ if(isTest(uid)||!sb)return; const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at'); const c=chatOf(uid); if(data&&c)c.msgs=data.map(x=>({from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0})); }
+async function openChat(uid,from){
+  if(!matches[uid]){
+    if(!isFriend(uid))return;
+    if(!friendChats[uid]){ friendChats[uid]={u:friendUser(uid),msgs:[],matchedAt:null}; await loadChat(uid); }
+  }
+  chatPeer=uid; chatReturn=from||(matches[uid]?'match':'friends'); const m=chatOf(uid);
   $('#chatAv').style.background=gr(m.u.emoji);$('#chatAv').textContent=m.u.emoji;$('#chatNm').textContent=m.u.name;renderChat();go('chat');
   clearInterval(chatPoll);if(isTest(uid)||!sb)return;
-  chatPoll=setInterval(async()=>{if(chatPeer!==uid)return;const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at');if(data){matches[uid].msgs=data.map(x=>({from:x.from_id,text:x.text}));renderChat();}},2500);
+  chatPoll=setInterval(async()=>{if(chatPeer!==uid)return;const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at');const c=chatOf(uid);if(data&&c){c.msgs=data.map(x=>({from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0}));renderChat();}},2500);
 }
-function renderChat(){const m=matches[chatPeer];if(!m)return;const box=$('#msgs');
+// チャットの上の友達ボタン。マッチしただけでは友達にならず、ここから誘う（申請 → 相手が承認）
+function renderChatHead(){
+  const el=$('#chatFr'); if(!el||!chatPeer)return;
+  const id=chatPeer, m=chatOf(id); if(!m){ el.innerHTML=''; return; }
+  const r=friendRowWith(id), nm=esc(m.u.name).replace(/'/g,'&#39;');
+  $('#chatSt').textContent=isFriend(id)?'👥 友達':'位置を共有中';
+  if(r&&r.status==='accepted') el.innerHTML='';
+  else if(r&&r.to_id===myId) el.innerHTML=`<button class="frinv" onclick="acceptFriend(${r.id},'${id}','${nm}')">👥 承認する</button>`;
+  else if(r) el.innerHTML=`<button class="frinv" disabled>👥 申請中</button>`;
+  else el.innerHTML=`<button class="frinv" onclick="requestFriend('${id}','${nm}')">👥 友達に誘う</button>`;
+}
+function renderChat(){const m=chatOf(chatPeer);if(!m)return;const box=$('#msgs');
   const expired=isExpired(m); const ms=matchLeftMs(m);
+  renderChatHead();
   let banner='';
-  if(m.matchedAt&&!isTest(chatPeer)){
+  if(isFriend(chatPeer)) banner='';
+  else if(m.matchedAt&&!isTest(chatPeer)){
     if(expired) banner='<div class="ttlbar over">⌛ このマッチは終了しました。もう話せません…</div>';
     else banner='<div class="ttlbar'+(ms<3600000?' warn':'')+'">⏳ あと <b>'+leftText(ms)+'</b> で話せなくなります</div>';
   }
@@ -1752,17 +1919,34 @@ function renderChat(){const m=matches[chatPeer];if(!m)return;const box=$('#msgs'
   const ci=$('#chatInput'); const cbtn=document.querySelector('.chatbar .send');
   if(ci){ ci.disabled=expired; ci.placeholder=expired?'マッチが終了しました':'メッセージを入力…'; }
   if(cbtn){ cbtn.style.opacity=expired?0.4:1; cbtn.style.pointerEvents=expired?'none':'auto'; }
-  renderMatches();}
+  renderTopics(); renderMatches();}
 async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!t||!chatPeer)return;
-  if(isExpired(matches[chatPeer])){ toast('このマッチは24時間を過ぎたので、もう話せません'); return; }
+  const c=chatOf(chatPeer); if(!c)return;
+  if(isExpired(c)){ toast('このマッチは24時間を過ぎたので、もう話せません（友達になると期限なしで話せます）'); return; }
   if(ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください。'); return; }
   inp.value='';
-  if(isTest(chatPeer)){matches[chatPeer].msgs.push({from:myId,text:t});renderChat();
+  if(isTest(chatPeer)){c.msgs.push({from:myId,text:t});renderChat();
     const rep=['ほんとだ、近いですね😊','どこかでお茶でもどうですか？','その辺よく行きます！','会えたらうれしいです','わかります〜'];
-    setTimeout(()=>{if(matches[chatPeer]){matches[chatPeer].msgs.push({from:chatPeer,text:rep[Math.floor(Math.random()*rep.length)]});if(isTest(chatPeer))renderChat();}},1100);return;}
+    setTimeout(()=>{const cc=chatOf(chatPeer);if(cc){cc.msgs.push({from:chatPeer,text:rep[Math.floor(Math.random()*rep.length)]});if(isTest(chatPeer))renderChat();}},1100);return;}
   if(!sb)return;
-  matches[chatPeer].msgs.push({from:myId,text:t});renderChat();
+  c.msgs.push({from:myId,text:t});renderChat();
+  notifyMsg(chatPeer,c,t);
   await sb.from(T('messages')).insert({match_key:chatKey(chatPeer),from_id:myId,text:t});
+}
+
+// メッセージのプッシュ通知（マッチ・友達のチャット共通。2026-09-24）。アプリを閉じていても気づけるようにする。
+// うるさくならないよう、①相手が1分以内に書いている（＝いまチャットを開いていそう）時は送らない
+// ②同じ相手には2分に1回まで（続けて何通送っても通知は1回）。既存の Edge Function send-match-push をそのまま使う
+const MSG_PUSH_GAP_MS=120000, MSG_ACTIVE_MS=60000;
+let lastMsgPush={};
+function notifyMsg(uid,c,text){
+  const now=Date.now();
+  const theirLast=Math.max(0,...c.msgs.filter(x=>x.from===uid).map(x=>x.at||0));
+  if(theirLast&&now-theirLast<MSG_ACTIVE_MS)return;
+  if(lastMsgPush[uid]&&now-lastMsgPush[uid]<MSG_PUSH_GAP_MS)return;
+  lastMsgPush[uid]=now;
+  const body=text.length>40?text.slice(0,40)+'…':text;
+  notifyPush(uid,'💬 '+(profile?profile.name:'だれか')+'さんからメッセージ',body);
 }
 
 /* ---------- コミュニティ（グループチャット） ---------- */
@@ -1959,7 +2143,7 @@ async function doInstall(){
 }
 /* ---------- はじめての方向けガイド ---------- */
 const GUIDE=[
-  {icon:'📍',title:'近くにいる人が<br>見えます',body:'いま多摩キャンパスでこのアプリを開いている人のうち、学部・いま探していること・目標のどれかが同じ人が、地図と一覧に表示されます。',note:'アプリを開いている間だけ位置を共有します。閉じれば止まります。'},
+  {icon:'📍',title:'近くにいる人が<br>見えます',body:'今日多摩キャンパスでこのアプリを使った人が、地図と一覧に表示されます。よく聴くアーティストや「あるある」など、<b>めずらしい共通点</b>がある人ほど上に「✨レアな共通点」つきで出ます。',note:'キャンパスの中にいる間だけ位置を共有します。閉じた人は、その日のうちは最後にいた場所に薄く表示されます。'},
   {icon:'♥',title:'気になる人に<br>いいねを送る',body:'プロフィールを開いて「いいね」を押し、どこに惹かれたかを選んで送ります。お互いに送り合うとマッチが成立します。',note:'いいねの回数に制限はありません。相手が何に惹かれたかも見られます。'},
   {icon:'💬',title:'マッチしたら<br>24時間以内に話す',body:'マッチすると、その相手とメッセージができます。ただし24時間が過ぎると話せなくなるので、気になったら早めに声をかけてみてください。',note:'メッセージは何通でも送れます。'},
   {icon:'👥',title:'コミュニティで<br>みんなと話す',body:'「コミュ」タブでは、部屋に参加してみんなで話せます。部屋を作るのも参加するのも自由です。参加者のプロフィールも見られます。',note:'困ったときは、相手のプロフィールから通報・ブロックができます。'},
@@ -2266,7 +2450,7 @@ function renderFriends(){
   h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
       return `<div class="urow" onclick="openFriend('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
         <div class="info"><div class="n">${esc(u.name)}</div><div class="b">${t?'📍 '+esc(t):'いまどこは表示されていません'}</div></div>
-        <div class="d">${t&&p.updated_at?`<div class="frago">${agoText(p.updated_at)}</div>`:''}${map?'<div class="frmap">🗺 地図</div>':''}</div></div>`; }).join('')
+        <div class="d">${t&&p.updated_at?`<div class="frago">${agoText(p.updated_at)}</div>`:''}${map?'<div class="frmap">🗺 地図</div>':''}<button class="frchat" onclick="event.stopPropagation();openChat('${id}','friends')" aria-label="メッセージ">💬</button></div></div>`; }).join('')
     :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>「近くの人」や「すれ違い」でプロフィールを開き、<br>「友達申請する」を押しましょう。</p></div>`;
   h+=`</div>`;
   if(sent.length){
@@ -2275,7 +2459,8 @@ function renderFriends(){
         <div class="frbtns"><button class="btn btn-ghost" onclick="removeFriendRow(${r.id},false)">取り消す</button></div></div>`; }).join('')+`</div>`;
   }
   box.innerHTML=h;
-  renderMyPresence();
+  renderMyPresence(); renderFrCode(); checkFrCodeNewFriends();
+  if($('#s-chat').classList.contains('active'))renderChatHead();   // チャット中に友達になった・承認された時に上のボタンを直す
 }
 // プロフィールのシートに出す友達ボタン
 function friendBtnHTML(u){
@@ -2284,6 +2469,7 @@ function friendBtnHTML(u){
   if(r&&r.status==='accepted'){
     const t=presenceText(friendPres(u.id));
     inner=`<div class="fr-on">👥 友達${t?' · 📍 '+esc(t):''}</div>`
+      +`<button class="btn btn-primary frbtn" onclick="closeSheet();openChat('${u.id}','friends')">💬 メッセージ</button>`
       +(friendOnMap(u.id)?`<button class="btn btn-ghost frbtn" onclick="showFriendOnMap('${u.id}')">🗺 地図で見る</button>`:'')
       +`<button class="frquit" onclick="removeFriendRow(${r.id},true)">友達をやめる</button>`;
   }else if(r&&r.to_id===myId) inner=`<button class="btn btn-primary frbtn" onclick="acceptFriend(${r.id},'${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">👥 友達申請を承認する</button>`;
@@ -2352,6 +2538,60 @@ function savePlaceEdit(){
   if(profile){ profile.fa=profile.fa||{}; profile.fa.purposes=[...psPurposes]; publishMe(); saveMyAttrs(); renderNearby(); renderCross(); }
   renderMyPresence(); closePlaceEdit();
   toast(myPresence.visibility==='hidden'?'保存しました（場所はいま「友達にも見せない」設定です）':'保存しました。友達に表示されます');
+}
+
+/* ---------- コードで友達になる（2026-09-24） ---------- */
+// LINEのQRのように、マッチと関係なく友達になれる。自分の4桁のコードを出し、相手が入れるとその場で友達（承認なし）。
+// QRにしなかったのは、iPhoneのホーム画面アプリは標準カメラでQRを読むとSafariの方で開き、別人扱いになるため（あおの判断で4桁のコード）。
+// 4桁は1万通りしかないので、総当たりで知らない人と友達にならないよう、
+//  ・コードは表示してから5分で使えなくなる ・入力は1人10分に10回まで（サーバー側の関数で数える）
+// 発行と追加は supabase/tama_friend_code.sql の関数だけが行い、コードの表はアプリから直接読めない
+let myFrCode=null, frCodeTimer=null, frCodeFriendsBefore=null;
+function renderFrCode(){
+  const el=$('#frCodeBox'); if(!el)return;
+  if(myFrCode&&Date.parse(myFrCode.expires_at)>Date.now()){
+    const s=Math.ceil((Date.parse(myFrCode.expires_at)-Date.now())/1000);
+    el.innerHTML=`<div class="frcode"><span class="num">${esc(myFrCode.code)}</span><span class="left">あなたのコード<br>あと${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}</span></div>`;
+  }else{
+    if(myFrCode){ myFrCode=null; clearInterval(frCodeTimer); frCodeFriendsBefore=null; }
+    el.innerHTML=`<button class="btn btn-ghost showbtn" onclick="showFrCode()">自分のコードを表示する</button>`;
+  }
+}
+async function showFrCode(){
+  if(!sb||String(myId).startsWith('local-')){ toast('友達機能はまだ準備中です'); return; }
+  const {data,error}=await sb.rpc('tama_issue_friend_code');
+  const row=Array.isArray(data)?data[0]:data;
+  if(error||!row){ console.warn('[friends] コードを発行できません。supabase/tama_friend_code.sql を実行してください:',error&&error.message); toast('コードを出せませんでした（準備中）'); return; }
+  myFrCode=row;
+  frCodeFriendsBefore=new Set(allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf));
+  clearInterval(frCodeTimer);
+  // コードを出している間は、相手が入れたらすぐ分かるよう5秒ごとに友達を読み直す
+  let n=0; frCodeTimer=setInterval(()=>{ renderFrCode(); if(myFrCode&&(++n)%5===0)loadFriends(); },1000);
+  renderFrCode();
+}
+// コードを出している間に友達が増えたら知らせる
+function checkFrCodeNewFriends(){
+  if(!frCodeFriendsBefore)return;
+  allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).forEach(id=>{
+    if(frCodeFriendsBefore.has(id))return; frCodeFriendsBefore.add(id);
+    const u=friendUser(id); toast('🎉 '+esc(u?u.name:'だれか')+'さんと友達になりました');
+  });
+}
+async function addFriendByCode(){
+  const inp=$('#frCodeIn'), code=(inp.value||'').trim();
+  if(!/^\d{4}$/.test(code)){ toast('4桁の数字を入れてください'); return; }
+  if(!sb||String(myId).startsWith('local-')){ toast('友達機能はまだ準備中です'); return; }
+  const {data,error}=await sb.rpc('tama_add_friend_by_code',{p_code:code});
+  const row=Array.isArray(data)?data[0]:data;
+  if(error||!row){ console.warn('[friends] コードで追加できません。supabase/tama_friend_code.sql を実行してください:',error&&error.message); toast('追加できませんでした（準備中）'); return; }
+  const msg={not_found:'そのコードは見つからないか、期限が切れています',self:'それはあなたのコードです',too_many:'入力が多すぎます。10分ほど待ってからもう一度どうぞ'}[row.status];
+  if(msg){ toast(msg); return; }
+  inp.value='';
+  if(frCodeFriendsBefore)frCodeFriendsBefore.add(row.friend_id);   // 自分のコードを出していても「友達になりました」を二重に出さない
+  await loadFriends();
+  const u=friendUser(row.friend_id);
+  toast('🎉 '+esc(u?u.name:'')+'さんと友達になりました');
+  notifyPush(row.friend_id,'👥 友達になりました',(profile?profile.name:'だれか')+'さんとコードで友達になりました');
 }
 
 /* ---------- 時間割（履修） ---------- */
@@ -2712,7 +2952,7 @@ async function saveEdit(){
   if(ng){ w.textContent='⚠️ 名前かひとことに不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
   const miss=attrMissing(edAttr);
   if(miss){ w.textContent='⚠️ '+miss; w.classList.add('show'); return; }
-  if(ngCheck(edAttr.course)){ w.textContent='⚠️ 科目名に不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
+  if(ngCheck(edAttr.course)||ngCheck(edAttr.artist)){ w.textContent='⚠️ 科目名・アーティスト名に不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
   w.classList.remove('show');
   profile.name=name; profile.bio=bio;
   const newAge=parseInt($('#edAge').value)||profile.age;
