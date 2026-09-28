@@ -538,6 +538,25 @@
   .reportbtn{padding:12px 10px;min-height:44px}
   .mtime{font-size:10px;color:var(--muted2);margin-top:3px}
   .matchpop{background:linear-gradient(180deg,#eefafc,#ffffff 60%)}
+  /* 話しかける → トーク → 友達 の段階（プロフィールの下） */
+  .ladder{display:flex;align-items:stretch;gap:4px;padding:14px 16px 4px;background:#fff}
+  .ladder i{align-self:center;color:var(--muted2);font-style:normal;font-weight:700}
+  .lstep{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:7px 6px;text-align:center;background:var(--surface2);opacity:.75}
+  .lstep b{display:block;font-size:12px;white-space:nowrap}
+  .lstep span{display:block;font-size:9.5px;color:var(--muted);margin-top:2px;line-height:1.35}
+  .lstep.on{opacity:1;background:rgba(15,176,205,.1);border-color:rgba(15,176,205,.55)}
+  .lstep.on b{color:#0a7f96}
+  .lstep.done{opacity:.55}
+  .ladnote{font-size:11px;color:var(--muted);text-align:center;padding:4px 20px 0;background:#fff}
+  /* 時間割：授業名と教室の2つの欄 */
+  .ttrow input.room{flex:0 0 34%}
+  .psroom{margin:-4px 0 10px;gap:6px}
+  .psroom .c{border-color:rgba(245,151,47,.55);background:#fff7ee;color:#9a5a10;font-weight:700}
+  /* 友達の時間割 */
+  .frtt{margin:8px 0 0;font-size:12px;color:var(--ink)}
+  .sharerow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+  .sharerow .lab{font-size:13px;font-weight:700}.sharerow .lab small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
+  .nearsec.cls{color:#9a5a10}
   .crosswhen{font-size:11px;color:var(--muted)}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
 </style>
@@ -648,7 +667,8 @@
     <!-- トーク：マッチした相手と友達の1対1のチャット、コミュニティ（グループ）を1つのタブにまとめた（2026-09-24） -->
     <section class="screen" id="s-match">
       <div class="apphead"><h1>トーク</h1><span class="sub" id="matchCount">0</span></div>
-      <div class="seg"><button id="segDm" class="on" onclick="setTalkTab('dm')">個人</button><button id="segComm" onclick="setTalkTab('comm')">コミュニティ<span class="sdot" id="dotComm" style="display:none"></span></button></div>
+      <!-- 2026-09-28：「個人」を「友達」（期限なし）と「24時間トーク」（話しかけから始まった相手）に分けた -->
+      <div class="seg"><button id="segFr" onclick="setTalkTab('fr')">👥 友達<span class="sdot" id="dotFrTalk" style="display:none"></span></button><button id="segDm" class="on" onclick="setTalkTab('dm')">💬 24時間<span class="sdot" id="dotDm" style="display:none"></span></button><button id="segComm" onclick="setTalkTab('comm')">コミュニティ<span class="sdot" id="dotComm" style="display:none"></span></button></div>
       <div class="scroll" id="matchList"></div>
       <div class="scroll" id="commPane" hidden>
         <div class="cmsub" id="commSub"></div>
@@ -1523,16 +1543,18 @@ function attrBlock(u){
 }
 // 近くの人の一番上に「いまの自分」と「時間割」の2枚のタイル（2026-09-24。ちかくの強みなので、いちばん目立つ所に大きく置いた）。
 // 左：いまどこ・いまの状態（押すと openPlaceEdit）／右：今日の授業と次の授業（押すと openTimetable）
-function ttTodayText(){
-  if(timetableMissing)return {main:'準備中',sub:''};
-  const n=Object.keys(myTimetable).length;
-  if(!n)return {main:'まだ入れていません',sub:'入れると同じ授業の人が分かります',empty:true};
+// tt：{slots,rooms}（友達が見せてくれた時間割）。省略すると自分の時間割
+function ttTodayText(tt){
+  const mine=!tt, slots=mine?myTimetable:(tt.slots||{}), rooms=mine?myRooms:(tt.rooms||{});
+  if(mine&&timetableMissing)return {main:'準備中',sub:''};
+  const n=Object.keys(slots).length;
+  if(!n)return {main:mine?'まだ入れていません':'時間割なし',sub:mine?'入れると同じ授業の人が分かります':'',empty:true};
   const ms=Date.now(), dow=new Date(ms+9*3600000).getUTCDay(), min=(ms-jstTodayStart(ms).getTime())/60000;
   const hm=s=>{ const [h,m]=s.split(':').map(Number); return h*60+m; };
-  const today=FES.periods.map((p,i)=>({i:i+1,p,k:dow+'-'+(i+1)})).filter(x=>dow>=1&&dow<=5&&x.k in myTimetable);
+  const today=FES.periods.map((p,i)=>({i:i+1,p,k:dow+'-'+(i+1)})).filter(x=>dow>=1&&dow<=5&&x.k in slots);
   if(!today.length)return {main:dow>=1&&dow<=5?'今日は授業なし':'今日は休み',sub:n+'コマ登録済み'};
   const now=today.find(x=>min>=hm(x.p[0])&&min<hm(x.p[1])), next=today.find(x=>min<hm(x.p[0]));
-  const nm=x=>x.i+'限'+(myTimetable[x.k]?' '+myTimetable[x.k]:'');
+  const nm=x=>x.i+'限'+(slots[x.k]?' '+slots[x.k]:'')+(!mine&&rooms[x.k]?'（'+rooms[x.k]+'）':'');   // 教室は友達の時間割の時だけ出す
   return {main:now?'いま '+nm(now):next?'次は '+nm(next):'今日の授業は終わり',sub:next&&!now?next.p[0]+'〜':('今日 '+today.map(x=>x.i+'限').join('・'))};
 }
 function renderStatusRow(){
@@ -1603,8 +1625,13 @@ function renderNearby(){
     ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>まだ近くに使っている人がいません。<br>友達にQRを見せて、<br>このアプリを開いてもらいましょう。</p><button class="btn btn-primary" onclick="openInvite()">📨 アプリに誘う（QRを出す）</button>${debugMode()?`<br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button>`:''}</div>`;
     return;
   }
-  ul.innerHTML=(open.length?`<div class="nearsec"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span>いまキャンパスにいる人 <span class="cnt">${open.length}人</span></div>`+open.map(nearRow).join('')
-      :`<div class="nearsec">いまアプリを開いている人はいません</div>`)
+  // 授業中は、同じ授業（同じ曜日・時限・授業名）を時間割に入れている人を一番上にまとめる（2026-09-28）
+  const cs=ttCurrentSlot(), inCls=x=>cs&&cs.inClass&&(samePeers[x.u.id]||[]).some(r=>r.slot===cs.k);
+  const clsNow=open.filter(inCls);
+  if(clsNow.length){ for(const x of clsNow)open.splice(open.indexOf(x),1); }
+  ul.innerHTML=(clsNow.length?`<div class="nearsec cls">📚 いま同じ授業「${esc(myTimetable[cs.k]||'')}」 <span class="cnt">${clsNow.length}人</span></div>`+clsNow.map(nearRow).join(''):'')
+    +(open.length?`<div class="nearsec"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span>いまキャンパスにいる人 <span class="cnt">${open.length}人</span></div>`+open.map(nearRow).join('')
+      :clsNow.length?'':`<div class="nearsec">いまアプリを開いている人はいません</div>`)
     +(closed.length?`<div class="nearsec" style="margin-top:6px">🕘 さっきまでいた人 <span class="cnt">アプリを閉じた人・${closed.length}人</span></div>`+closed.map(nearRow).join(''):'');
 }
 // 地図の場所までスクロールする（友達・出店を「地図で見る」時）
@@ -2104,12 +2131,22 @@ function openSheet(u,d){
     <div class="body">${reply&&!fr?`<div class="wavein"><div class="wh">👋 ${esc(u.name)} さんが話しかけています</div>${esc(reply.text||'')}</div>`:''}
       ${attrBlock(u)}<div class="bio">${esc(u.bio||'')}</div></div>
     ${fr?friendBtnHTML(u):''}
+    ${fr?'':ladderHTML(id)}
     <div class="actions">${main}</div>
-    ${fr?'':friendBtnHTML(u)}
+    ${!fr&&friendRowWith(id)?friendBtnHTML(u):''}
     <div style="padding:0 20px 16px;text-align:center"><button class="reportbtn" onclick="openReport('${id}','${nm}')">⚠ この人を通報・ブロックする</button></div>`;
   $('#overlay').classList.add('show');
 }
 function closeSheet(){$('#overlay').classList.remove('show');}
+// 「トーク」と「友達」の線引き（2026-09-28 あおの決定）。知らない人とはいきなり友達にならず、段階をふむ：
+//   ①👋 話しかける → ②💬 トーク（24時間・居場所は見えない）→ ③👥 友達（期限なし・いる建物や教室が見える）
+// 友達になるのは「トークの中から誘う（相手が承認）」か「目の前で4桁のコード」だけ。知らない人のプロフィールには友達申請のボタンを出さない
+function ladderHTML(id){
+  const m=matches[id], step=m&&!isExpired(m)?2:(liked.has(id)||wavesIn[id])?1:0;
+  const s=(i,t,d)=>`<div class="lstep${i===step?' on':i<step?' done':''}"><b>${t}</b><span>${d}</span></div>`;
+  return `<div class="ladder">${s(0,'👋 話しかける','共通点の話題を送る')}<i>›</i>${s(1,'💬 トーク','返事が来たら24時間')}<i>›</i>${s(2,'👥 友達','トークの中から誘う')}</div>
+    <div class="ladnote">友達になると期限なしで話せて、いる建物・教室も見えるようになります</div>`;
+}
 // 多摩キャン版の実証実験は全機能解放。課金デモ（メッセージ解禁・いいねの追加購入・いいねの理由の解禁・
 // マッチの期限をなくす・部屋の作成料）は撤去してあり、いいねは無制限・メッセージといいねの理由は最初から使える。
 // #payOverlay / #paySheet はコミュニティ作成の入力シートで引き続き使っている。
@@ -2155,29 +2192,47 @@ async function loadTalkPreviews(){
   talkPreview={}; data.forEach(x=>{ if(!talkPreview[x.match_key])talkPreview[x.match_key]={from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0}; });
   renderMatches();
 }
+// トークの「👥 友達」：最後のメッセージと、いまいる場所（見せてくれている友達だけ）を並べる
+function renderFriendTalks(frItems){
+  const inc=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length;
+  let h=inc?`<div class="mrow" onclick="go('friends')"><div class="av" style="background:#e8f7fb">📩</div><div class="info"><div class="nm">友達申請が${inc}件届いています</div><div class="last">「友達」タブで承認できます ›</div></div></div><div class="sep"></div>`:'';
+  if(!frItems.length) return h+`<div class="empty"><div class="big">👥</div><p>まだ友達がいません。<br>24時間トークの中の「👥 友達に誘う」か、<br>目の前の人とは4桁のコードで友達になれます。<br>友達とは期限なしで話せます。</p><button class="btn btn-primary" onclick="go('friends');openFrAdd()">＋ 友達を追加</button></div>`;
+  return h+frItems.map(({id,u,last},i)=>{
+    const pt=presenceText(friendPres(id)), o=findUser(id), online=!!o&&!isClosed(o);
+    const sub=last?(last.from===myId?'あなた: ':'')+esc(last.text):'メッセージを送ってみよう';
+    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
+      <div class="info"><div class="nm">${esc(u.name)}${last&&last.at?`<span class="gr" style="font-size:11px;color:var(--muted2);font-weight:500;margin-left:6px">${esc(dayLabel(last.at)==='今日'?hhmm(last.at):dayLabel(last.at))}</span>`:''}</div>
+        <div class="last">${sub}</div>${pt?`<div class="mtime" style="color:#0a7f96">📍 ${esc(pt)}</div>`:''}</div></div>${i<frItems.length-1?'<div class="sep"></div>':''}`; }).join('');
+}
+// トークの一覧。2026-09-28 から「👥 友達」（期限なし）と「💬 24時間」（話しかけから始まったトーク）を別の切り替えに分けた
 function renderMatches(){
+  const lastOf=id=>{ const c=chatOf(id); return (c&&c.msgs[c.msgs.length-1])||talkPreview[chatKey(id)]||null; };
+  // 友達（マッチから友達になった人も含む）
+  const frItems=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>!blocked.has(id)&&(friendUser(id)||matches[id]))
+    .map(id=>{ const last=lastOf(id); return {id,u:friendUser(id)||matches[id].u,last,at:(last&&last.at)||0}; }).sort((a,b)=>b.at-a.at);
+  // 24時間トーク（友達でない相手。期限切れ・ブロック済みは出さない）
   const items=[];
-  Object.keys(matches).forEach(id=>{ const m=matches[id]; if(isExpired(m)||blocked.has(id))return;   // 期限切れ・ブロック済みは非表示
+  Object.keys(matches).forEach(id=>{ const m=matches[id]; if(isFriend(id)||isExpired(m)||blocked.has(id))return;
     const last=m.msgs[m.msgs.length-1]; items.push({id,u:m.u,m,last,at:(last&&last.at)||m.matchedAt||0}); });
-  const friendIds=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf);
-  friendIds.forEach(id=>{ if(matches[id]||blocked.has(id))return; const u=friendUser(id); if(!u)return;
-    const c=friendChats[id], last=(c&&c.msgs[c.msgs.length-1])||talkPreview[chatKey(id)]; items.push({id,u,m:null,last,at:(last&&last.at)||0}); });
   items.sort((a,b)=>b.at-a.at);
+  const ins=Object.keys(wavesIn).filter(id=>!blocked.has(id)).map(id=>({id,u:anyUser(id),w:wavesIn[id]})).filter(x=>x.u).sort((a,b)=>b.w.at-a.w.at);
+  const dd=$('#dotDm'); if(dd){ dd.style.display=ins.length?'':'none'; dd.textContent=ins.length||''; }
+  if(talkTab==='fr')$('#matchCount').textContent=frItems.length?frItems.length+'人':'';
   if(talkTab==='dm')$('#matchCount').textContent=items.length?items.length+'件':'';
   const list=$('#matchList'); if(!list)return;
-  // 話しかけられていて、まだ返事していない人（いちばん上に出す）
-  const ins=Object.keys(wavesIn).filter(id=>!blocked.has(id)).map(id=>({id,u:anyUser(id),w:wavesIn[id]})).filter(x=>x.u).sort((a,b)=>b.w.at-a.w.at);
-  let h='';
+  if(talkTab==='fr'){ list.innerHTML=renderFriendTalks(frItems); return; }
+  let h=`<div class="cmsub">友達でない人とのトークは24時間で終わります。続けたい相手はトークの中から「👥 友達に誘う」</div>`;
   if(ins.length){
     h+=`<div class="wavehead">👋 話しかけられています（${ins.length}人）</div>`+ins.map(({id,u,w})=>`<div class="mrow" onclick="openUserSheet('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
       <div class="info"><div class="nm">${esc(u.name)}<span class="gr" style="font-size:11px;color:var(--muted);font-weight:500;margin-left:5px">${esc(facLine(u))}</span></div><div class="last unread">${esc(w.text||'👋')}</div><div class="mtime">${agoText(w.at)}</div></div>
       <div style="display:flex;flex-direction:column;align-items:center"><button class="wavebtn btn-wave" onclick="event.stopPropagation();openUserSheet('${id}');setTimeout(openWave,50)">返事する</button><button class="later2" onclick="event.stopPropagation();hideWave('${id}')">見送る</button></div></div>`).join('')
       +'<div class="sep" style="margin-top:4px"></div>';
   }
-  if(!items.length&&!ins.length){list.innerHTML=`<div class="empty"><div class="big">💬</div><p>まだトークはありません。<br>「近くの人」でプロフィールを開いて<br>「👋 話しかける」を押してみましょう。<br>相手が返事をするとトークが始まります。<br><span style="color:var(--muted2)">※友達でない人とのトークは24時間で終わります</span></p></div>`;return;}
+  const waitingN=Object.keys(myWaves).filter(id=>!matches[id]&&!isFriend(id)&&!blocked.has(id)&&anyUser(id)).length;
+  if(!items.length&&!ins.length&&!waitingN){list.innerHTML=`<div class="empty"><div class="big">💬</div><p>まだトークはありません。<br>「近くの人」でプロフィールを開いて<br>「👋 話しかける」を押してみましょう。<br>相手が返事をするとトークが始まります（24時間）。</p></div>`;return;}
   h+=items.map(({id,u,m,last},i)=>{
-    const fr=isFriend(id), ms=m?matchLeftMs(m):0, warn=ms<3600000;
-    const tag=fr?'<span class="frtag">👥 友達</span>':(m&&m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'#0a7f96'}">⏳残り${leftText(ms)}</span>`:'');
+    const ms=m?matchLeftMs(m):0, warn=ms<3600000;
+    const tag=m&&m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'#0a7f96'}">⏳残り${leftText(ms)}</span>`:'';
     const op=m&&m.opener&&m.opener[m.opener.length-1];
     const sub=last?(last.from===myId?'あなた: ':'')+esc(last.text):op?(op.from===myId?'あなた: ':'')+'👋 '+esc(op.text):(m?'トークが始まりました':'メッセージを送ってみよう');
     // 緑の点は、いまアプリを開いている人だけ
@@ -2542,7 +2597,7 @@ async function doInstall(){
 const GUIDE=[
   {icon:'📍',title:'近くの<br>共通点のある人が見える',body:'今日多摩キャンパスでこのアプリを使った人が表示されます。よく聴くアーティストや「あるある」など、<b>めずらしい共通点</b>がある人ほど上に「✨レアな共通点」つきで出ます。',note:'恋愛目的のアプリではありません。キャンパスの中にいる間だけ位置を共有します。'},
   {icon:'👋',title:'共通点をきっかけに<br>話しかける',body:'プロフィールを開いて「👋 話しかける」を押し、共通点から作った話題を選ぶだけで送れます。<b>相手が返事をしたらトークが始まります。</b>',note:'話しかけられたら「トーク」タブの一番上に出ます。'},
-  {icon:'💬',title:'トークは<br>24時間',body:'トークは24時間で終わります。もっと話したい相手は、トークの上の「👥 友達に誘う」から友達になると、期限なしで話せます。',note:'目の前の人とは「友達」タブの「＋ 追加」から、4桁のコードですぐ友達になれます。'},
+  {icon:'👥',title:'話しかける → トーク<br>→ 友達',body:'知らない人とは、まず<b>👋 話しかけて</b>、返事が来たら<b>💬 トーク（24時間）</b>。もっと話したい相手は、トークの上の「👥 友達に誘う」から<b>友達</b>になると、期限なしで話せて、いる建物・教室も見えるようになります。',note:'目の前の人とは「友達」タブの「＋ 追加」から、4桁のコードですぐ友達になれます。'},
   {icon:'🗓',title:'いまの自分・時間割・<br>今日のお題',body:'「近くの人」の上から、いる教室や「ひまです」などの状態、時間割を入れられます。今日のお題に答えると、<b>同じ答えの人</b>がその日だけの共通点として見つかります。',note:'時間割を入れると、同じ授業の人が分かります。時間割はあなたにしか見えません。'},
   {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'毎回QRコードを読まなくても、ホーム画面のアイコンから開けるようになります。通知も受け取れます。',note:'追加のしかたは、マイページの「ホーム画面に追加する方法」から見られます。',action:true}
 ];
@@ -2736,7 +2791,10 @@ async function loadFriends(){
   }else{ friendProfiles={}; friendPresence={}; }
   renderFriends(); renderNearby(); updateFriendDot();
   if(curSheetUser&&$('#overlay').classList.contains('show'))refreshSheetFriendBtn(curSheetUser.id);
+  // 時間割を見せ合う設定は、友達が分かってから読む（友達でない人の分は使わない）。通信を抑えるため2分に1回まで
+  if(Date.now()-lastTTShareLoad>120000){ lastTTShareLoad=Date.now(); loadTTShares(); }
 }
+let lastTTShareLoad=0;
 function updateFriendDot(){
   const n=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length, dot=$('#dotFriends');
   if(dot){ dot.style.display=n?'':'none'; dot.textContent=n||''; }
@@ -2840,6 +2898,7 @@ function renderTtCard(){
 function setVisibility(k){ myPresence.visibility=k; savePresence(!sharing); renderMyPresence(); const el=$('#psVis'); if(el)renderPsVis(); toast('友達に見せる範囲：'+VIS_LABEL[k]); }
 function renderFriends(){
   const box=$('#friendBox'); if(!box)return;
+  if(Object.keys(friendTT).some(id=>!isFriend(id))){ friendTT={}; loadTTShares(); }   // 友達をやめた人の時間割は手元からも消す
   const rows=allFriendRows();
   const incoming=rows.filter(r=>r.status==='pending'&&r.to_id===myId);
   const sent=rows.filter(r=>r.status==='pending'&&r.from_id===myId);
@@ -2858,8 +2917,8 @@ function renderFriends(){
   h+=`<div class="listhead">👥 友達はいまどこ？</div><div class="ulist">`;
   h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
       return `<div class="urow" onclick="openFriend('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-        <div class="info"><div class="n">${esc(u.name)}</div><div class="b">${t?'📍 '+esc(t):'いまいる場所は出ていません'}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}</div>
-        <div class="d">${map?`<button class="frmapbtn" onclick="event.stopPropagation();showFriendOnMap('${id}')">🗺 地図</button><br>`:''}<button class="frchat" onclick="event.stopPropagation();openChat('${id}','friends')" aria-label="メッセージ">💬</button></div></div>`; }).join('')
+        <div class="info"><div class="n">${esc(u.name)}</div><div class="b">${t?'📍 '+esc(t):'いまいる場所は出ていません'}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}</div>
+        <div class="d">${map?`<button class="frmapbtn" onclick="event.stopPropagation();showFriendOnMap('${id}')">🗺 地図</button>`:''}</div></div>`; }).join('')
     :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>目の前にいる人とは、4桁のコードで<br>すぐ友達になれます。</p>
        <button class="btn btn-primary" onclick="openFrAdd('show')">自分のコードを見せる</button><br><button class="btn btn-ghost" style="margin-top:8px" onclick="openFrAdd('enter')">相手のコードを入れる</button></div>`;
   h+=`</div>`;
@@ -2881,6 +2940,9 @@ function friendBtnHTML(u){
     inner=`<div class="fr-on">👥 友達${t?' · 📍 '+esc(t):''}</div>`
       +`<button class="btn btn-primary frbtn" onclick="closeSheet();openChat('${u.id}','friends')">💬 メッセージ</button>`
       +(friendOnMap(u.id)?`<button class="btn btn-ghost frbtn" onclick="showFriendOnMap('${u.id}')">🗺 地図で見る</button>`:'')
+      +(friendTT[u.id]?`<button class="btn btn-ghost frbtn" onclick="openFriendTT('${u.id}')">🗓 ${esc(u.name)}さんの時間割を見る</button>`:'')
+      +(ttShareMissing||isTest(u.id)?'':`<div class="sharerow"><div class="lab">🗓 自分の時間割を見せる<small>${hasCourseNames()?'授業名・教室・時限が、この友達にだけ見えます':'時間割に授業名を入れると見せられます'}</small></div>
+        <div class="toggle${ttSharesTo.has(u.id)?' on':''}" onclick="toggleTTShare('${u.id}')"><div class="k"></div></div></div>`)
       +`<button class="frquit" onclick="removeFriendRow(${r.id},true)">友達をやめる</button>`;
   }else if(r&&r.to_id===myId) inner=`<button class="btn btn-primary frbtn" onclick="acceptFriend(${r.id},'${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">👥 友達申請を承認する</button>`;
   else if(r) inner=`<button class="btn btn-ghost frbtn" disabled>👥 友達申請中（承認待ち）</button>`;
@@ -2933,13 +2995,16 @@ function openPlaceEdit(auto){
   psPurposes=[...(attrsOf(profile).purposes||[])].filter(x=>FA.purposes.includes(x));
   psStatus=statusOf(profile);
   const until=hhmm(roomExpiryAt());
+  // いま（または次）の授業の教室を、時間割から候補のボタンで出す（2026-09-28 あおの依頼。押すと教室とひとこと「授業中」が入る）
+  const cs=ttCurrentSlot(), cr=cs&&myRooms[cs.k], cc=cs&&myTimetable[cs.k];
+  const roomCand=cr?`<div class="chips psroom"><span class="c" onclick="psPickRoom()">📚 ${cs.inClass?'':'次の授業 '}${esc(cc||cs.i+'限')}の教室「${esc(cr)}」</span></div>`:'';
   const everyone=`<div class="pssec"><div class="psh">👀 みんなに見える <span>（近くの人・すれ違いの一覧に出ます）</span></div>
       <div class="field"><label>いまの状態（1つ・${until}ごろに消えます）</label><div class="chips" id="psStatus"></div></div>
       <div class="field"><label>いま探していること（複数OK）</label><div class="chips" id="psPurposes"></div>
         <div class="hint">同じものを選んだ人は「共通点」になります</div></div></div>`;
   const friends=`<div class="pssec"><div class="psh">👥 友達だけに見える</div>
       <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
-      <div class="field"><label>教室・場所（任意）</label><input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
+      <div class="field"><label>教室・場所（任意）</label>${roomCand}<input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
       <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、図書館で課題" value="${act?esc(p.note||''):''}">
         <div class="chips psquick">${['授業中','休憩中','ごはん中','課題中'].map(s=>`<span class="c" onclick="$('#psNote').value='${s}'">${s}</span>`).join('')}</div>
         <div class="hint">教室・ひとことは <b>${until}ごろ</b>か、建物を出ると消えます</div></div>
@@ -2954,6 +3019,7 @@ function openPlaceEdit(auto){
   renderPsPurposes(); renderPsVis();
   $('#placeOverlay').classList.add('show');
 }
+function psPickRoom(){ const cs=ttCurrentSlot(); if(!cs||!myRooms[cs.k])return; $('#psRoom').value=myRooms[cs.k]; if(!$('#psNote').value)$('#psNote').value='授業中'; }
 function closePlaceEdit(){ ttOpen=false; $('#placeOverlay').classList.remove('show'); }
 function savePlaceEdit(){
   const place=$('#psPlace').value||null, room=$('#psRoom').value.trim(), note=$('#psNote').value.trim();
@@ -2991,7 +3057,7 @@ function openFrAdd(mode){
       <button class="bigopt" onclick="openFrAdd('enter')"><span class="i">⌨️</span><span class="t"><b>相手のコードを入れる</b><span>相手の画面の4桁を入れます</span></span></button>
       <button class="bigopt" onclick="closeFrAdd();openInvite()"><span class="i">📨</span><span class="t"><b>まだアプリを使っていない友達を誘う</b><span>QRを見せるか、リンクを送ります</span></span></button>
     </div>
-    <div class="psdesc" style="margin:14px 0 0">「近くの人」や「トーク」でプロフィールを開いて「友達申請する」こともできます。</div>${back}`;
+    <div class="psdesc" style="margin:14px 0 0">トーク中の相手とは、トークの上の「👥 友達に誘う」から友達になれます（相手の承認が要ります）。</div>${back}`;
   $('#frSheet').innerHTML=h;
   $('#frOverlay').classList.add('show');
   if(mode==='show'){ renderFrCode(); if(!myFrCode)showFrCode(); }
@@ -3055,12 +3121,72 @@ async function addFriendByCode(){
 // 他の人について分かるのは、同じ授業を入れている人だけ（関数 tama_same_course_peers が返す）
 const TT_DAYS=['月','火','水','木','金'];
 let myTimetable={}, ttDraft={}, timetableMissing=false, samePeers={};   // slots のキーは「曜日(1=月〜5=金)-時限」、値は授業名（空なら名前なし）
+// 教室名（2026-09-28。任意。キーは slots と同じ）。授業のある時限に「いまの自分」を開くと候補のボタンになる。
+// rooms 列は supabase/tama_timetable_share.sql で足す。まだ実行されていない時は、教室名の欄を出さずに今まで通り動かす
+let myRooms={}, roomsDraft={}, roomsColMissing=false;
 async function loadTimetable(){
   if(!sb||!myId||String(myId).startsWith('local-'))return;
-  const {data,error}=await sb.from(T('timetable')).select('slots').eq('id',myId).maybeSingle();
+  let {data,error}=await sb.from(T('timetable')).select('slots,rooms').eq('id',myId).maybeSingle();
+  if(error&&/rooms/.test(error.message)){
+    roomsColMissing=true; console.warn('[timetable] rooms 列がありません。supabase/tama_timetable_share.sql を実行してください:',error.message);
+    ({data,error}=await sb.from(T('timetable')).select('slots').eq('id',myId).maybeSingle());
+  }
   if(error){ timetableMissing=true; console.warn('[timetable] tama_timetable を読み込めません。supabase/tama_timetable.sql を実行してください:',error.message); renderMyPresence(); return; }
-  myTimetable=(data&&data.slots)||{};
+  myTimetable=(data&&data.slots)||{}; myRooms=(data&&data.rooms)||{};
   renderMyPresence(); loadSamePeers();
+}
+// いまの時限（授業中なら今の時限、休み時間・1限の前なら次の時限）の、自分の時間割のコマ。
+// 「いまどこ」の教室・ひとことが消える時刻（roomExpiryAt）と同じ区切り。平日で授業がある時だけ返す
+function ttCurrentSlot(slots=myTimetable){
+  const ms=Date.now(), dow=new Date(ms+9*3600000).getUTCDay(), min=(ms-jstTodayStart(ms).getTime())/60000;
+  if(dow<1||dow>5)return null;
+  const hm=s=>{ const [h,m]=s.split(':').map(Number); return h*60+m; };
+  const i=FES.periods.findIndex(([,end])=>min<hm(end)); if(i<0)return null;
+  const k=dow+'-'+(i+1), inClass=min>=hm(FES.periods[i][0]);
+  return k in slots?{k,i:i+1,inClass}:null;
+}
+
+/* 時間割を友達に見せる（2026-09-28。見せる相手は本人が友達ごとに選ぶ。supabase/tama_timetable_share.sql） */
+let ttSharesTo=new Set(), ttSharedFrom=new Set(), friendTT={}, ttShareMissing=false;
+async function loadTTShares(){
+  if(!sb||!myId||String(myId).startsWith('local-')||ttShareMissing)return;
+  const {data,error}=await sb.from(T('timetable_shares')).select('owner_id,friend_id').or(`owner_id.eq.${myId},friend_id.eq.${myId}`);
+  if(error){ ttShareMissing=true; console.warn('[timetable] tama_timetable_shares を読み込めません。supabase/tama_timetable_share.sql を実行してください:',error.message); return; }
+  ttSharesTo=new Set((data||[]).filter(r=>r.owner_id===myId).map(r=>r.friend_id));
+  ttSharedFrom=new Set((data||[]).filter(r=>r.friend_id===myId).map(r=>r.owner_id).filter(isFriend));
+  friendTT={};
+  if(ttSharedFrom.size){
+    const {data:tt}=await sb.from(T('timetable')).select('id,slots,rooms').in('id',[...ttSharedFrom]);   // 見せてもらっている友達の分だけ RLS で返る
+    (tt||[]).forEach(r=>{ friendTT[r.id]={slots:r.slots||{},rooms:r.rooms||{}}; });
+  }
+  renderFriends(); if(curSheetUser&&$('#overlay').classList.contains('show'))refreshSheetFriendBtn(curSheetUser.id);
+}
+const hasCourseNames=()=>Object.values(myTimetable).some(v=>(v||'').trim());
+async function toggleTTShare(id){
+  if(ttShareMissing||!sb){ toast('時間割を見せる機能はまだ準備中です'); return; }
+  const on=!ttSharesTo.has(id);
+  if(on&&!hasCourseNames()){ toast('時間割に授業名を入れると、友達に見せられます'); return; }
+  const q=on?sb.from(T('timetable_shares')).insert({owner_id:myId,friend_id:id}):sb.from(T('timetable_shares')).delete().eq('owner_id',myId).eq('friend_id',id);
+  const {error}=await q;
+  if(error){ console.warn('[timetable] 見せる設定を保存できません',error.message); toast('保存できませんでした'); return; }
+  if(on)ttSharesTo.add(id); else ttSharesTo.delete(id);
+  const u=friendUser(id); toast(on?'🗓 '+esc(u?u.name:'')+'さんに時間割を見せるようにしました':'時間割を見せるのをやめました');
+  if(on&&u)notifyPush(id,'🗓 時間割が見られるようになりました',(profile?profile.name:'友達')+'さんが時間割を見せてくれました');
+  refreshSheetFriendBtn(id);
+}
+// 友達の時間割を見る（読むだけ）
+function openFriendTT(id){
+  const tt=friendTT[id], u=friendUser(id); if(!tt||!u)return;
+  let grid='<div class="ttgrid"><div></div>'+TT_DAYS.map(d=>`<div class="tth">${d}</div>`).join('');
+  FES.periods.forEach(([s],i)=>{ grid+=`<div class="ttp">${i+1}<small>${s}</small></div>`;
+    for(let d=1;d<=5;d++){ const k=d+'-'+(i+1), on=k in tt.slots, mine=k in myTimetable, same=on&&mine&&normCourse(tt.slots[k])&&normCourse(tt.slots[k])===normCourse(myTimetable[k]);
+      grid+=`<div class="ttc${on?' on':''}" style="cursor:default;${same?'box-shadow:0 0 0 2px #20b483 inset':''}">${on?(tt.slots[k]?esc(tt.slots[k]):'●'):''}</div>`; } });
+  grid+='</div>';
+  const list=slotKeys(tt.slots).map(k=>`<div class="frow" style="font-size:13px;margin:4px 0">${slotLabel(k)} <b>${esc(tt.slots[k]||'（授業名なし）')}</b>${tt.rooms[k]?' ・ '+esc(tt.rooms[k]):''}</div>`).join('');
+  $('#invSheet').innerHTML=`<h2 class="pstitle">🗓 ${esc(u.name)} さんの時間割</h2>
+    <p class="psdesc">${esc(u.name)}さんが見せてくれています。緑のふちは、あなたと同じ授業です。</p>${grid}<div style="margin-top:12px">${list}</div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closeInvite()">閉じる</button>`;
+  $('#invOverlay').classList.add('show');
 }
 async function loadSamePeers(){
   if(!sb||timetableMissing)return;
@@ -3072,7 +3198,7 @@ async function loadSamePeers(){
 const slotLabel=k=>{ const [d,p]=k.split('-'); return TT_DAYS[d-1]+p; };
 const slotKeys=o=>Object.keys(o).sort((a,b)=>{ const [ad,ap]=a.split('-').map(Number),[bd,bp]=b.split('-').map(Number); return ad-bd||ap-bp; });
 let ttOpen=false;   // 同じシート（#placeSheet）を「いまの自分」と共用しているので、どちらが開いているか
-function openTimetable(){ ttOpen=true; ttDraft={...myTimetable}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
+function openTimetable(){ ttOpen=true; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
 function renderTimetable(){
   const keys=slotKeys(ttDraft);
   let grid='<div class="ttgrid"><div></div>'+TT_DAYS.map(d=>`<div class="tth">${d}</div>`).join('');
@@ -3083,11 +3209,11 @@ function renderTimetable(){
   });
   grid+='</div>';
   $('#placeSheet').innerHTML=`<h2 class="pstitle">🗓 時間割</h2>
-    <p class="psdesc">授業のあるコマを押してください。<b>自分にだけ見えます</b>。授業のある時限の始まりにだけ「いまどこ？」の通知が届き、授業のない時間には届かなくなります。</p>
+    <p class="psdesc">授業のあるコマを押してください。<b>あなたにしか見えません</b>（見せると決めた友達だけは見られます）。授業のある時限の始まりにだけ「いまどこ？」の通知が届きます。</p>
     ${grid}
-    ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名（任意）</label>
-      <div class="hint" style="margin:0 0 8px">入れると、同じ授業を取っている人が「共通点」に出ます（相手に見えるのは、同じ授業を入れている人だけ）</div>
-      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input maxlength="24" placeholder="例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value"></div>`).join('')}</div>`:''}
+    ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
+      <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
+      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input maxlength="24" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>`).join('')}</div>`:''}
     <div class="edbar"><button class="btn btn-ghost" onclick="closeTimetable()">閉じる</button><button class="btn btn-primary" onclick="saveTimetable()">保存する</button></div>`;
 }
 // 授業名を入れたコマを押した時は、名前ごと消えてしまうので確かめる
@@ -3098,17 +3224,18 @@ function ttToggle(k){
 }
 // 保存せずに閉じる時は、変更を捨ててよいか確かめる
 function closeTimetable(){
-  const a=JSON.stringify(slotKeys(ttDraft).map(k=>[k,(ttDraft[k]||'').trim()])), b=JSON.stringify(slotKeys(myTimetable).map(k=>[k,myTimetable[k]||'']));
-  if(a!==b&&!confirm('時間割の変更を保存せずに閉じますか？'))return;
+  const sig=(s,r)=>JSON.stringify(slotKeys(s).map(k=>[k,(s[k]||'').trim(),(r[k]||'').trim()]));
+  if(sig(ttDraft,roomsDraft)!==sig(myTimetable,myRooms)&&!confirm('時間割の変更を保存せずに閉じますか？'))return;
   closePlaceEdit();
 }
 async function saveTimetable(){
-  const slots={}; for(const k of slotKeys(ttDraft)) slots[k]=(ttDraft[k]||'').trim();
-  if(Object.values(slots).some(ngCheck)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  const slots={}, rooms={}; for(const k of slotKeys(ttDraft)){ slots[k]=(ttDraft[k]||'').trim(); const r=(roomsDraft[k]||'').trim(); if(r)rooms[k]=r; }
+  if(Object.values(slots).concat(Object.values(rooms)).some(ngCheck)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
   if(!sb||String(myId).startsWith('local-')||timetableMissing){ toast('時間割はまだ準備中です'); return; }
-  const {error}=await sb.from(T('timetable')).upsert({id:myId,slots,updated_at:new Date().toISOString()});
+  const row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=rooms;
+  const {error}=await sb.from(T('timetable')).upsert(row);
   if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
-  myTimetable=slots; closePlaceEdit(); renderMyPresence(); loadSamePeers();
+  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers();
   toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました（通知は昼休みの1回だけになります）');
 }
 
@@ -3470,8 +3597,8 @@ let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classLi
 // トーク：「個人」（マッチ・友達のチャット）と「コミュニティ」を切り替える。コミュニティは以前は別のタブだった
 let talkTab='dm';
 function setTalkTab(k){
-  talkTab=k; $('#segDm').classList.toggle('on',k==='dm'); $('#segComm').classList.toggle('on',k==='comm');
-  $('#matchList').hidden=k!=='dm'; $('#commPane').hidden=k!=='comm';
+  talkTab=k; $('#segFr').classList.toggle('on',k==='fr'); $('#segDm').classList.toggle('on',k==='dm'); $('#segComm').classList.toggle('on',k==='comm');
+  $('#matchList').hidden=k==='comm'; $('#commPane').hidden=k!=='comm';
   if(k==='comm'){ renderRooms(); loadRooms(); } else { renderMatches(); loadTalkPreviews(); }
 }
 function go(t){
