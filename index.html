@@ -305,7 +305,7 @@
             </div>
           </div>
           <div class="shot">
-            <div class="sh">♥ いいねが両想いでマッチ</div>
+            <div class="sh">♥ おたがいに「いいね」でマッチ</div>
             <div class="sd">気になる人にいいねを送り、お互いに送り合うと話せるようになります。</div>
             <div class="mini" style="text-align:center;padding:16px 9px">
               <div style="display:flex;align-items:center;justify-content:center;margin-bottom:9px">
@@ -314,7 +314,7 @@
                 <div class="mav" style="width:40px;height:40px;font-size:20px;background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div>
               </div>
               <div style="font-family:'Zen Maru Gothic';font-size:15px;font-weight:900;color:var(--rose)">マッチ！</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:3px">ゆい さんと両想いになりました</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">ゆい さんとマッチしました</div>
             </div>
           </div>
           <div class="shot">
@@ -1169,7 +1169,7 @@ async function createMatch(uid,announce,matchedAt,theirReason){
   if(!u)u={id:uid,name:'相手',emoji:'⭐',bio:''};
   matches[uid]={u,msgs:[],matchedAt:matchedAt||Date.now(),theirReason:theirReason||null};await loadChat(uid);renderMatches();
   const dm=$('#dotMatch');dm.style.display='block';dm.textContent=Object.keys(matches).length;
-  if(announce){ showMatchPop(u,theirReason); notifyPush(uid,'マッチしました！',(profile?profile.name:'誰か')+'さんと両想いになりました'); }
+  if(announce){ showMatchPop(u,theirReason); notifyPush(uid,'マッチしました！',(profile?profile.name:'誰か')+'さんと、おたがいに「いいね」しました'); }
 }
 function notifyPush(uid,title,body){
   if(!sb||isTest(uid))return;
@@ -1178,7 +1178,7 @@ function notifyPush(uid,title,body){
 }
 function showMatchPop(u,theirReason){const mp=$('#matchpop');
   const rtxt=theirReason?(billing.reasonUnlocked?`<br><span class="whylike">あなたの「${esc(theirReason)}」に惹かれたそうです</span>`:`<br><span class="whylike locked" onclick="closePop();go('me');showReasonPaywall()">🔒 相手が惹かれたポイントを見る</span>`):'';
-  mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと両想いになりました${rtxt}</p>
+  mp.innerHTML=`<h2>マッチ！</h2><p><b style="color:var(--amber)">${esc(u.name)}</b> さんと、おたがいに「いいね」しました${rtxt}</p>
     <div class="avs"><div class="a" style="background:${profile?gr(profile.emoji):'#f78b3c'}">${profile?profile.emoji:'😀'}</div><span class="heart">💛</span><div class="a" style="background:${gr(u.emoji)}">${u.emoji}</div></div>
     <div class="mbtns"><button class="btn btn-rose" onclick="closePop();openChat('${u.id}')">メッセージを送る</button><button class="btn later" onclick="closePop()">あとで</button></div>`;
   mp.classList.add('show');confettiBurst();setTimeout(confettiBurst,350);}
@@ -1187,7 +1187,7 @@ function renderMatches(){
   const all=Object.keys(matches);
   const ids=all.filter(id=>!isExpired(matches[id]) && !blocked.has(id));   // 期限切れ・ブロック済みは非表示
   $('#matchCount').textContent=ids.length;const list=$('#matchList');
-  if(!ids.length){list.innerHTML=`<div class="empty"><div class="big">♥</div><p>まだ有効なマッチはありません。<br>近くの人に「いいね」して、<br>両想いになると表示されます。<br><span style="color:var(--rose);font-weight:700">※マッチは24時間で消えます</span></p></div>`;return;}
+  if(!ids.length){list.innerHTML=`<div class="empty"><div class="big">♥</div><p>まだ有効なマッチはありません。<br>近くの人に「いいね」して、<br>おたがいに「いいね」すると表示されます。<br><span style="color:var(--rose);font-weight:700">※マッチは24時間で消えます</span></p></div>`;return;}
   list.innerHTML=ids.map((id,i)=>{const m=matches[id];const last=m.msgs[m.msgs.length-1];const ms=matchLeftMs(m);const warn=ms<3600000;
     return `<div class="mrow" onclick="openChat('${id}')"><div class="av" style="background:${gr(m.u.emoji)}">${m.u.emoji}<span class="on"></span></div>
       <div class="info"><div class="nm">${esc(m.u.name)} ${m.matchedAt&&!isTest(id)?(isUnlocked(id)?'<span class="keeptag">♾ 期限なし</span>':`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'var(--rose)'}">⏳残り${leftText(ms)}</span>`):''}</div><div class="last">${last?(last.from===myId?'あなた: ':'')+esc(last.text):(m.theirReason?(billing.reasonUnlocked?('🎯「'+esc(m.theirReason)+'」に惹かれたそうです'):'🔒 惹かれたポイントは解禁すると見られます'):'マッチしました！24時間以内に話しかけて！')}</div></div></div>${i<ids.length-1?'<div class="sep"></div>':''}`;}).join('');
