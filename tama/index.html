@@ -2941,7 +2941,7 @@ function friendBtnHTML(u){
       +`<button class="btn btn-primary frbtn" onclick="closeSheet();openChat('${u.id}','friends')">💬 メッセージ</button>`
       +(friendOnMap(u.id)?`<button class="btn btn-ghost frbtn" onclick="showFriendOnMap('${u.id}')">🗺 地図で見る</button>`:'')
       +(friendTT[u.id]?`<button class="btn btn-ghost frbtn" onclick="openFriendTT('${u.id}')">🗓 ${esc(u.name)}さんの時間割を見る</button>`:'')
-      +(ttShareMissing||isTest(u.id)?'':`<div class="sharerow"><div class="lab">🗓 自分の時間割を見せる<small>${hasCourseNames()?'授業名・教室・時限が、この友達にだけ見えます':'時間割に授業名を入れると見せられます'}</small></div>
+      +(ttShareMissing||isTest(u.id)?'':`<div class="sharerow"><div class="lab">🗓 自分の時間割を見せる<small>${hasCourseNames()?'授業名・教室・時限が、この友達にだけ見えます':'時間割に授業名か教室を入れると見せられます'}</small></div>
         <div class="toggle${ttSharesTo.has(u.id)?' on':''}" onclick="toggleTTShare('${u.id}')"><div class="k"></div></div></div>`)
       +`<button class="frquit" onclick="removeFriendRow(${r.id},true)">友達をやめる</button>`;
   }else if(r&&r.to_id===myId) inner=`<button class="btn btn-primary frbtn" onclick="acceptFriend(${r.id},'${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">👥 友達申請を承認する</button>`;
@@ -3161,11 +3161,12 @@ async function loadTTShares(){
   }
   renderFriends(); if(curSheetUser&&$('#overlay').classList.contains('show'))refreshSheetFriendBtn(curSheetUser.id);
 }
-const hasCourseNames=()=>Object.values(myTimetable).some(v=>(v||'').trim());
+// 見せられるのは、授業名か教室のどちらか1つでも入れている人（2026-09-28 あおの希望で教室だけでもよくした）
+const hasCourseNames=()=>Object.values(myTimetable).some(v=>(v||'').trim())||Object.values(myRooms).some(v=>(v||'').trim());
 async function toggleTTShare(id){
   if(ttShareMissing||!sb){ toast('時間割を見せる機能はまだ準備中です'); return; }
   const on=!ttSharesTo.has(id);
-  if(on&&!hasCourseNames()){ toast('時間割に授業名を入れると、友達に見せられます'); return; }
+  if(on&&!hasCourseNames()){ toast('時間割に授業名か教室を入れると、友達に見せられます'); return; }
   const q=on?sb.from(T('timetable_shares')).insert({owner_id:myId,friend_id:id}):sb.from(T('timetable_shares')).delete().eq('owner_id',myId).eq('friend_id',id);
   const {error}=await q;
   if(error){ console.warn('[timetable] 見せる設定を保存できません',error.message); toast('保存できませんでした'); return; }
