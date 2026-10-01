@@ -1,10 +1,13 @@
 // Supabase ダッシュボード → Edge Functions → 新規関数 "tama-remind" として
 // このファイルの内容をそのまま貼り付けてデプロイしてください（Verify JWT は ON のままでよい）。
 //
-// 多摩キャン版の「いまどこ？を入れよう」の通知。pg_cron が平日の決まった時刻に呼ぶ（supabase/tama_remind.sql）。
-//   { "kind": "period", "period": 1〜5 } … その時限に授業がある人（tama_timetable に登録した人）にだけ送る。授業の始まりから5分後
-//   { "kind": "lunch" }                  … 多摩キャン版の参加者全員に送る（時間割を登録していない人に届くのはこの1回だけ）
-// 通知がうるさくて切られないよう、授業のない時間・全休の日には送らない（あおの判断、2026-09-24）。
+// 多摩キャン版の決まった時刻の通知。pg_cron が平日の決まった時刻に呼ぶ（supabase/tama_remind.sql）。
+//   { "kind": "period", "period": 1〜5 } … その日最初の授業がこの時限で、友達が1人以上いる人にだけ送る（授業の始まりから5分後）
+//   { "kind": "lunch" }                  … 今日のお題にまだ答えていない人にだけ、お題の文面を入れて送る
+// 自動の通知は1人1日2通まで（その日最初の授業の1通＋昼休みの1通）。あおの決定（2026-10-01）。
+// 以前は授業ごと（最大5通）＋昼休みに全員（もう答えた人にも）で、1日最大6通届いていた。
+// 通知の数が多いと切られる・使われなくなる（週6〜10通で32%が使うのをやめるという調査がある）ため。
+// 授業の通知は「いまどこ？」に教室を入れると友達に見える、という案内なので、友達がいない人には送らない。
 //
 // Secrets は send-match-push と同じ VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY を使う（プロジェクト共通なので追加設定は不要）。
 
@@ -14,12 +17,36 @@ import webpush from "npm:web-push@3.6.7";
 const json = (obj: unknown, status = 200) =>
   new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json" } });
 
+// 今日のお題の一覧はアプリと同じファイルを本番のURLから読む（2つに分けて書くと、片方だけ直して食い違うため）
+const DAILY_QS_URL = "https://chikaku-hosei.vercel.app/tama/daily-qs.js";
+// 今日のお題の文面。読めなかった時は null（その時は文面なしの通知にする）
+async function todaysQuestion(jstMs: number): Promise<{ d: string; q: string } | null> {
+  try {
+    const res = await fetch(DAILY_QS_URL);
+    if (!res.ok) return null;
+    const src = await res.text();
+    const start = src.indexOf("DAILY_QS=[");
+    const epoch = /DAILY_EPOCH=Date\.parse\('([^']+)'\)/.exec(src);
+    if (start < 0 || !epoch) return null;
+    const qs = [...src.slice(start).matchAll(/\{q:'([^']*)'/g)].map((m) => m[1]);
+    if (!qs.length) return null;
+    // アプリの dailyToday() と同じ数え方（日本時間の0時どうしの日数で順番に出す）
+    const dayStart = jstMs - (jstMs % 86400000);   // 日本時間の今日0時（9時間ずらした時刻のまま）
+    const epochJst = Date.parse(epoch[1]) + 9 * 3600_000;
+    const n = ((Math.floor((dayStart - epochJst) / 86400000) % qs.length) + qs.length) % qs.length;
+    return { d: new Date(dayStart).toISOString().slice(0, 10), q: qs[n] };
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   let body: { kind?: string; period?: number } = {};
   try { body = await req.json(); } catch { /* 空のまま */ }
 
-  // 日本時間の曜日（cron でも平日に絞っているが、念のためここでも確かめる）
-  const dow = new Date(Date.now() + 9 * 3600_000).getUTCDay();
+  // 日本時間（cron でも平日に絞っているが、念のためここでも確かめる）
+  const jstMs = Date.now() + 9 * 3600_000;
+  const dow = new Date(jstMs).getUTCDay();
   if (dow < 1 || dow > 5) return json({ ok: true, skipped: "weekend" });
 
   const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
@@ -41,19 +68,37 @@ Deno.serve(async (req) => {
   if (body.kind === "period") {
     const period = Number(body.period);
     if (!(period >= 1 && period <= 5)) return json({ ok: false, reason: "bad period" });
-    const key = `${dow}-${period}`;
+    const key = (p: number) => `${dow}-${p}`;
     const { data, error } = await supabase.from("tama_timetable").select("id,slots");
     if (error) return json({ ok: false, reason: error.message });
-    ids = (data ?? []).filter((r) => r.slots && Object.prototype.hasOwnProperty.call(r.slots, key)).map((r) => r.id);
+    // この時限に授業があり、それより前の時限には授業がない人（＝その日最初の授業）
+    const first = (data ?? []).filter((r) => {
+      const s = r.slots ?? {};
+      if (!Object.prototype.hasOwnProperty.call(s, key(period))) return false;
+      for (let p = 1; p < period; p++) if (Object.prototype.hasOwnProperty.call(s, key(p))) return false;
+      return true;
+    }).map((r) => String(r.id));
+    if (first.length) {
+      // そのうち、承認済みの友達が1人以上いる人
+      const { data: fr, error: frErr } = await supabase.from("tama_friends").select("from_id,to_id").eq("status", "accepted");
+      if (frErr) return json({ ok: false, reason: frErr.message });
+      const hasFriend = new Set<string>();
+      for (const f of fr ?? []) { hasFriend.add(String(f.from_id)); hasFriend.add(String(f.to_id)); }
+      ids = first.filter((id) => hasFriend.has(id));
+    }
     title = `📍 ${period}限が始まりました`;
     text = "「いまどこ？」に教室を入れると、友達に表示されます";
   } else if (body.kind === "lunch") {
-    const { data, error } = await supabase.from("tama_profiles").select("id");
+    const today = await todaysQuestion(jstMs);
+    const todayStr = today?.d ?? new Date(jstMs - (jstMs % 86400000)).toISOString().slice(0, 10);
+    const { data, error } = await supabase.from("tama_profiles").select("id,daily:fes_attrs->daily");
     if (error) return json({ ok: false, reason: error.message });
-    ids = (data ?? []).map((r) => r.id);
-    // 今日のお題（アプリの DAILY_QS）の中身はアプリ側にあるので、ここでは誘うだけにする
-    title = "🎲 今日のお題、もう答えた？";
-    text = "昼休み、同じ答えの人が近くにいるかも。「いまどこ？」も更新しよう";
+    // 今日のお題にまだ答えていない人だけ（答えた人には送らない）
+    ids = (data ?? []).filter((r) => !(r.daily && r.daily.d === todayStr && r.daily.a)).map((r) => String(r.id));
+    title = "🎲 今日のお題";
+    text = today
+      ? `「${today.q}」答えると、みんなの答えと同じ答えの人が見られます`
+      : "答えると、みんなの答えと同じ答えの人が見られます";
   } else {
     return json({ ok: false, reason: "bad kind" });
   }

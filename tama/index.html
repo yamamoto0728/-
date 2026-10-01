@@ -557,6 +557,49 @@
   .sharerow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff}
   .sharerow .lab{font-size:13px;font-weight:700}.sharerow .lab small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
   .nearsec.cls{color:#9a5a10}
+  /* スマホのブラウザで開いた時の「ホーム画面に追加してね」画面 */
+  .homegate{position:absolute;inset:0;z-index:99;background:linear-gradient(180deg,#ffffff,#eef6ff);display:none;flex-direction:column;overflow-y:auto;padding:26px 22px 30px}
+  .homegate.show{display:flex}
+  .homegate .hglogo{font-family:"Zen Maru Gothic";font-weight:900;font-size:34px;text-align:center;background:linear-gradient(90deg,var(--amber),var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .homegate .hgtag{text-align:center;font-size:13px;color:var(--muted);line-height:1.7;margin:6px 0 16px}
+  .homegate .hgh{font-family:"Zen Maru Gothic";font-size:19px;font-weight:900;text-align:center;margin-bottom:6px;line-height:1.5}
+  .homegate .hgd{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:16px}
+  .homegate .hgstep{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:10px}
+  .homegate .hgstep .no{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--signal);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .homegate .hgstep .tx{font-size:14px;line-height:1.65;color:var(--ink)}
+  .homegate .hgstep .tx small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+  .homegate .hgicon{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border:1.5px solid var(--signal);border-radius:7px;color:var(--signal);font-weight:700;font-size:14px;padding:0 5px;vertical-align:middle;margin:0 2px;background:#fff}
+  .homegate .hgwarn{font-size:12.5px;line-height:1.7;background:rgba(240,81,123,.08);border:1px solid rgba(240,81,123,.35);color:#8a1d3d;border-radius:14px;padding:11px 13px;margin-bottom:12px}
+  .homegate .hgnote{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:6px;text-align:center}
+  .homegate .hgbtn{width:100%;padding:16px;font-size:16px;margin:4px 0 12px}
+  .homegate .hgarrow{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);font-size:26px;color:var(--signal);animation:hgb 1.2s infinite}
+  @keyframes hgb{50%{transform:translate(-50%,6px)}}
+  /* iOS 26 の Safari は、共有ボタンが右下の「…」の中にある */
+  .homegate .hgarrow.r{left:auto;right:18px;transform:none;animation:hgbr 1.2s infinite}
+  @keyframes hgbr{50%{transform:translateY(6px)}}
+  .homegate>*{flex-shrink:0}   /* 縦に並べた中身が縮んで、見本がつぶれないように */
+  .homegate .hgcount{text-align:center;font-size:13px;color:var(--ink);margin:-6px 0 12px}.homegate .hgcount:empty{display:none}
+  .homegate .hgcount b{color:var(--signal);font-size:15px}
+  .homegate .shots{margin:0 -22px;padding:4px 22px 8px;scroll-padding:0 22px}
+  .homegate .hgswipe{font-size:11px;color:var(--muted2);text-align:center;margin:0 0 18px}
+  .homegate .hgapp{width:22px;height:22px;border-radius:6px;vertical-align:middle;margin:0 2px}
+  /* 登録直後の使い方のまとめ（1枚） */
+  .guide .introl{text-align:left;display:flex;flex-direction:column;gap:12px;margin:4px 0 6px;font-size:13.5px;line-height:1.7;color:var(--ink)}
+  .guide .introl>div{display:flex;gap:10px;align-items:flex-start}.guide .introl span{font-size:20px;line-height:1.3}
+  /* 近くに誰もいない時の「来たら知らせて」 */
+  .empty .emptyhint{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.7}
+  /* 今日のお題の「みんなの答え」 */
+  .daily .ddist{margin-top:8px}
+  .daily .dbar{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:5px 0}
+  .daily .dbar .dl{flex:0 0 8.6em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .daily .dbar .dt{flex:1;height:8px;border-radius:5px;background:rgba(120,140,255,.15);overflow:hidden}
+  .daily .dbar .dt i{display:block;height:100%;background:var(--signal);border-radius:5px}
+  .daily .dbar.me .dl{font-weight:900;color:var(--amber-deep)}.daily .dbar.me .dt i{background:var(--amber)}
+  .daily .dbar .dp{flex:0 0 2.8em;text-align:right;font-weight:700}
+  .daily .dtot,.daily .dwait{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.6}
+  .daily .dfree{font-size:12.5px;line-height:1.7}.daily .dfree b{color:var(--signal)}
+  .daily .dyday{font-size:11.5px;color:var(--ink);background:rgba(255,255,255,.65);border-radius:10px;padding:6px 9px;margin:0 0 8px;line-height:1.6}
+  .daily .dyday:empty{display:none}
   .crosswhen{font-size:11px;color:var(--muted)}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
 </style>
@@ -564,6 +607,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/fes/campus-geo.js"></script>
+<script src="/tama/daily-qs.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -735,6 +779,8 @@
     <p style="font-size:13px;color:#6b7291;line-height:1.9">ただいま接続できませんでした。<br>電波の良い場所で、<b style="color:#0a6b85">少し時間をおいてから</b><br>もう一度お試しください。<br><br>解決しない場合は、お手数ですが<br>運営（法政大学 糸久ゼミ）までお知らせください。</p>
   </div>
   <div class="fesclosed" id="fesClosed"></div>
+  <!-- スマホのブラウザで開いた時の画面（2026-09-28 あおの決定：スマホはホーム画面に追加したアプリでしか使えない。PCはそのまま使える） -->
+  <div class="homegate" id="homeGate"></div>
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
   <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
@@ -760,8 +806,8 @@
     <div class="gtop"><button class="skip" id="pushGateSkip" onclick="event.stopPropagation();skipPushGate()">あとで</button></div>
     <div class="gbody">
       <div class="gicon">🔔</div>
-      <h3>返事が来たら<br>通知で知らせます</h3>
-      <p>話しかけへの返事・メッセージ・友達申請が届いたときに、アプリを閉じていてもお知らせします。</p>
+      <h3 id="pushGateH">返事が来たら<br>通知で知らせます</h3>
+      <p id="pushGateP">話しかけへの返事・メッセージ・友達申請が届いたときに、アプリを閉じていてもお知らせします。</p>
       <div class="note2" id="pushGateNote">端末の確認画面が出たら「許可」を選んでください。</div>
     </div>
     <div class="gnav"><button class="btn btn-primary" id="pushGateBtn" onclick="event.stopPropagation();pushGateTap()">通知をオンにする</button></div>
@@ -949,6 +995,7 @@ async function tryResumeSession(){
     // 属性を追加する前に登録した人は必須項目が空で、誰とも共通点が出ないので入力してもらう
     if(attrMissing(attrStateFrom(profile.fa))) setTimeout(()=>{ toast('多摩キャン版のプロフィール項目が増えました。入力をお願いします'); openEdit(); },900);
     maybeShowGuide(data.guide_seen===true);
+    visitOpen();
     return true;
   }catch(e){ return false; }
 }
@@ -1050,7 +1097,27 @@ async function syncPushSubscription(){
 // 通知の許可を聞いてよいか。2026-09-24 のUXテストで「何のアプリか分かる前に通知を聞かれて怪しい」と指摘されたので、
 // 登録した直後には聞かず、はじめて話しかけた・友達になった時（askPushSoon）から聞く。登録済みで開き直した人は聞いてよい
 function pushAskReady(){ try{ return localStorage.getItem('tama_pushReady')==='1'; }catch(e){ return false; } }
-function askPushSoon(){ try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} setTimeout(autoAskPush,1200); }
+// 説明の画面の文は、聞く場面に合わせて変える（2026-10-01。話しかけた時だけでなく、お題に答えた・時間割を入れた・
+// 近くに誰もいない時の「来たら知らせて」でも聞くようにした。初日に何もせず閉じた人に、その後なにも届かなかったため）
+const PUSH_WHY={
+  wave:['返事が来たら<br>通知で知らせます','話しかけへの返事・メッセージ・友達申請が届いたときに、アプリを閉じていてもお知らせします。'],
+  near:['共通点のある人が<br>近くに来たら知らせます','アプリを閉じていても、キャンパスで共通点のある人が近くに来たときにお知らせします。話しかけへの返事・友達申請も届きます。'],
+  daily:['明日のお題を<br>お知らせします','平日の昼休みに、まだ答えていないお題を1日1回だけお知らせします。話しかけへの返事・友達申請も届きます。'],
+  tt:['通知で<br>お知らせします','話しかけへの返事・友達申請と、平日の昼休みのお題（まだ答えていない日だけ）をお知らせします。友達がいれば、その日最初の授業のはじめに「いまどこ？」の確認も届きます。'],
+};
+function setPushWhy(k){ const [h,p]=PUSH_WHY[k]||PUSH_WHY.wave; const H=$('#pushGateH'), P=$('#pushGateP'); if(H)H.innerHTML=h; if(P)P.textContent=p; }
+function askPushSoon(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} setTimeout(autoAskPush,1200); }
+// ボタンを押した直後に聞く（押した直後なので、iPhoneでもそのまま端末の許可画面を出せる）
+function askPushNow(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} pushGateSkipped=false; openPushGate(); requestPushPermission(); }
+// まだ許可も拒否もしていない（＝聞いてよい）か
+function pushCanAsk(){ return pushSupported()&&!(isIOS()&&!isStandalone())&&!isPushOptOut()&&Notification.permission==='default'; }
+function pushOk(){ return pushSupported()&&Notification.permission==='granted'&&!isPushOptOut(); }
+// 近くに誰もいない時の画面に出す「来たら知らせて」（その日に誰にも会えなかった人にも、次に開くきっかけを残す）
+function emptyPushHTML(){
+  if(pushOk())return `<div class="emptyhint">🔔 共通点のある人が近くに来たら、通知でお知らせします</div>`;
+  if(pushCanAsk())return `<div><button class="btn btn-ghost" onclick="askPushNow('near')">🔔 共通点のある人が来たら知らせて</button></div>`;
+  return '';
+}
 async function autoAskPush(){
   // iPhoneでSafariのタブのまま開いている場合は Notification 自体が無いので、ここで止まる（ホーム画面への追加案内は別にある）
   if(!pushSupported()) return;
@@ -1060,7 +1127,7 @@ async function autoAskPush(){
   if(Notification.permission==='granted'){ syncPushSubscription(); return; }
   if(Notification.permission==='denied') return;   // 端末の設定からしか戻せないので、ここでは何もしない
   if(pushGateSkipped||!pushAskReady()) return;
-  if($('#guide').classList.contains('show')) return;   // 使い方ガイドの上には重ねない（ガイドを閉じた時に聞き直す）
+  if(introPending||$('#guide').classList.contains('show')) return;   // 使い方の上には重ねない（閉じた時に聞き直す）
   openPushGate();
   requestPushPermission();   // まず触らずに出せるか試す。Androidはこれで出る。iPhoneは失敗するのでタップを待つ
 }
@@ -1092,6 +1159,7 @@ async function requestPushPermission(){
     closePushGate();
     await syncPushSubscription();
     toast('🔔 通知をオンにしました');
+    if(profile)renderNearby();   // 近くに誰もいない時の「来たら知らせて」ボタンを、すぐ「お知らせします」に変える
   }else if(perm==='denied'){
     closePushGate();
     toast('通知はオフのままです。端末の設定から許可できます');
@@ -1107,8 +1175,35 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 function pushHintText(){
   if(isIOS()&&!isStandalone()) return 'iPhoneはホーム画面に追加すると使えます';
   if(pushSupported()&&Notification.permission==='denied') return '端末の設定→通知から「ちかく」を許可してください';
-  return '話しかけ・メッセージ・友達申請と、授業のはじめの「いまどこ？」を通知';
+  return '話しかけ・メッセージ・友達申請と、昼休みのお題（まだ答えていない日）・その日最初の授業の「いまどこ？」（友達がいる人）を通知';
 }
+
+/* ---------- 開いた日の記録（続けて使われているかを測る。2026-10-01） ---------- */
+// 1人1日1行（tama_visits、supabase/tama_retention.sql）。位置は記録しない（あおの決定。利用規約の第4条に記載）。
+// それまでのDBは上書きされる値しか無く、「初日に来た人が何日目に戻ってきたか」が分からなかった。
+// 開いた回数は、5分以上あけて開き直したら1回と数える。キャンパスにいた・近くの人数・通知・お題は、良くなった時だけ送り直す
+const APP_VER='2026-10-01';
+let visitsMissing=false, visitDay=null, visitSent=null, visitLastOpen=0, visitTimer=null, lastOpenCount=0;
+const jstDateStr=()=>new Date(Date.now()+9*3600000).toISOString().slice(0,10);
+function visitNow(){ return {on:!!myPos&&!fesOutside&&inCampus(myPos.lat,myPos.lng), near:lastOpenCount, push:pushOk(), daily:!!(profile&&dailyAnswer(profile))}; }
+async function sendVisit(open){
+  if(!sb||!myId||String(myId).startsWith('local-')||!profile||profileDeleted||debugMode()||visitsMissing)return;
+  const day=jstDateStr(); if(visitDay!==day){ visitDay=day; visitSent={on:false,near:0,push:false,daily:false}; open=true; }   // 開いたまま日付が変わったら、その日の1回目
+  const s=visitNow(); if(open)visitLastOpen=Date.now();
+  visitSent={on:visitSent.on||s.on,near:Math.max(visitSent.near,s.near),push:visitSent.push||s.push,daily:visitSent.daily||s.daily};
+  try{
+    const {error}=await sb.rpc('tama_log_visit',{p_open:!!open,p_on_campus:s.on,p_nearby:s.near,p_push:s.push,p_standalone:isStandalone(),p_daily:s.daily,p_ver:APP_VER});
+    if(error){ if(error.code==='PGRST202'||/schema cache|does not exist/i.test(error.message))visitsMissing=true; console.warn('[visit] 記録できませんでした',error.message); }
+  }catch(e){}
+}
+function visitOpen(){ if(Date.now()-visitLastOpen<5*60000)return; sendVisit(true); }
+function visitMaybeUpdate(){
+  if(!visitDay||visitTimer)return;   // まだ開いた記録をしていない（登録前など）／送る予定がもうある
+  const s=visitNow();
+  if(jstDateStr()!==visitDay||(s.on&&!visitSent.on)||s.near>visitSent.near||(s.push&&!visitSent.push)||(s.daily&&!visitSent.daily))
+    visitTimer=setTimeout(()=>{ visitTimer=null; sendVisit(false); },20000);   // 人数が数秒ごとに増えていく間は、まとめて1回
+}
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&visitDay)visitOpen(); });
 
 /* ---------- state ---------- */
 let profile=null, myPos=null, origin=null, sharing=true, coarse=false, watchId=null;
@@ -1190,9 +1285,27 @@ async function onStart(){
   profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[],work:'',looking:[],likes:[],interests:[],fa:{...attrToFa(obAttr),status:''}};
   renderMeHero();
   $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
-  startGeo();buildInvite();startLoops();renderStatusRow();
-  syncPushSubscription();   // 登録が終わってから購読をDBに保存する（許可だけ先に取れている場合がある）
+  // 「位置情報を共有して始める」を押したので共有ON（プロフィールを消した後に登録し直した時、前のOFFが残らないように）
+  sharing=true; profileDeleted=false; saveLocPrefs(); $('#tgShare').classList.add('on');
+  buildInvite();renderStatusRow();
   maybeShowGuide(false);   // 新規登録なので必ず出す
+  await saveNewProfile();   // 位置を取り始める前に保存する（後だと、遅れて届いた sharing:false が本当の位置を上書きする）
+  startGeo();startLoops();
+  syncPushSubscription();   // 登録が終わってから購読をDBに保存する（許可だけ先に取れている場合がある）
+  visitOpen();
+}
+// 登録した内容を、位置が取れなくても（許可しなかった・キャンパスの外）すぐ保存する。
+// publishMe() は位置が取れるまで何も送らないので、以前はそういう人が開き直すと、ようこそ画面に戻って登録し直しになっていた。
+// 位置はまだ無いので、キャンパスの中心を入れて sharing:false にする（近くの人の一覧・地図には出ない）。
+// 位置が取れたら publishMe() が本当の位置と sharing:true で上書きする
+async function saveNewProfile(){
+  if(!sb||!myId||String(myId).startsWith('local-')||!profile)return;
+  const row={id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,likes:profile.likes,interests:profile.interests,
+    lat:CAMPUS_CENTER.lat,lng:CAMPUS_CENTER.lng,coarse,sharing:false,updated_at:new Date().toISOString()};
+  if(!fesAttrColMissing)row.fes_attrs=profile.fa||{};
+  let {error}=await sb.from(T('profiles')).upsert(row);
+  if(error&&/fes_attrs/.test(error.message)){ fesAttrColMissing=true; delete row.fes_attrs; ({error}=await sb.from(T('profiles')).upsert(row)); }
+  if(error)console.warn('[profile] 登録内容を保存できませんでした',error.message);
 }
 // マイページの一番上（名前と学部。年齢は恋愛アプリっぽく見えるので出さない）
 function renderMeHero(){
@@ -1210,13 +1323,14 @@ function startGeo(){
 }
 function stopGeo(){if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}}
 function onPos(p){
-  myPos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};
+  myPos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy}; geoDenied=false;
   if(!origin)origin={...myPos};geoState('ok');
   showPlace();
   fesCampusGate();
   detectPlace();
   checkBooths();
   publishMeIfNeeded();   // GPSは歩いていると毎秒のように届くので、動いた時・45秒ごとだけ送る
+  geoSettled();          // 登録の直後なら、位置の許可が終わったので使い方のまとめを出す
 }
 // 現在地（場所の名前・座標）を画面に出すのは多摩キャンパスの中にいる時だけ。
 // 外（自宅など）では出さず、住所を調べる外部サービス（Nominatim）にも座標を送らない
@@ -1266,9 +1380,13 @@ function fesCampusGate(){
   }
   renderNearby();
 }
-function onErr(e){geoState('bad');onGeoFail(e.code===1?'位置情報が拒否されました':'現在地を取得できません');}
-function onGeoFail(msg){const lb=$('#locbar');lb.className='locbar bad';$('#locPlace').textContent=msg;
-  $('#locCoord').textContent='ブラウザで位置情報を「許可」してください（HTTPS必須）';$('#locAcc').innerHTML='<button class="retry" onclick="startGeo()">再試行</button>';}
+let geoDenied=false;   // 位置情報を許可しなかった（「キャンパスの外」と出すと、外にいると勘違いされるので分ける）
+function onErr(e){ geoDenied=e.code===1; geoState('bad'); onGeoFail(geoDenied?'位置情報がオフになっています':'現在地を取得できません'); renderStatusRow(); }
+function onGeoFail(msg){geoSettled();const lb=$('#locbar');lb.className='locbar bad';$('#locPlace').textContent=msg;
+  $('#meLoc').textContent='📍 位置情報オフ';
+  // 近くの人・すれ違いだけ使えない。オンにする場所は端末で違う（ホーム画面のアプリはブラウザの設定に従う）
+  $('#locCoord').textContent=!geoDenied?'電波の良い所で「再試行」を押してください':isIOS()?'近くの人を見るには、iPhoneの「設定 → プライバシーとセキュリティ → 位置情報サービス → Safari Webサイト」を「使用中のみ」に':'近くの人を見るには、Chromeの「設定 → サイトの設定 → 位置情報」で許可してください';
+  $('#locAcc').innerHTML='<button class="retry" onclick="startGeo()">再試行</button>';}
 function geoState(cls,t){const c=$('#gpsChip');c.className='g '+(cls==='ok'?'on':cls==='bad'?'err':'');$('#gpsTxt').textContent=cls==='ok'?(sharing?'共有中':'停止中'):t||'GPS';}
 
 /* ---------- presence (Supabase profiles) ---------- */
@@ -1297,7 +1415,7 @@ async function saveMyAttrs(){
   const {error}=await sb.from(T('profiles')).update({fes_attrs:profile.fa||{}}).eq('id',myId);
   if(error)console.warn('[attrs] 属性を保存できませんでした',error.message);
 }
-// 日本時間の今日0時。アプリを閉じた人も、その日のうちは最後にいた位置に表示し続ける（地図にいつも人がいるように）
+// 日本時間の今日0時。アプリを閉じた人は、その日のうちで閉じてから2時間（SHOW_CLOSED_MS）まで、最後にいた位置に表示し続ける（地図にいつも人がいるように）
 function jstTodayStart(ms=Date.now()){ return new Date(ms-(ms+9*3600000)%86400000); }
 /* ---------- 通信量を抑える（Supabase 無料プランの転送量は月5GB） ---------- */
 // 2026-09-24 の見積もり：6秒ごとに全員分のプロフィールを取り直すと、通信量は「開いている人数×キャンパスにいる人数」で増え、
@@ -1316,10 +1434,14 @@ function publishMeIfNeeded(){
 // 位置の更新がこれ以上止まっている人を「閉じた人」として薄く表示する（開いている間は最長45秒ごとに送るので、その2倍）
 const CLOSED_AFTER_MS=90000;
 const isClosed=u=>!!u.updated_at&&Date.now()-Date.parse(u.updated_at)>CLOSED_AFTER_MS;
+// アプリを閉じた人を「さっきまでいた人」として最後の場所に出しておく時間（2026-09-28 にあおが「2時間」に決めた。
+// 以前はその日の終わりまで出していたが、UXテストで「家に帰った後もキャンパスの最後の場所が残るのが不安」と言われた）
+const SHOW_CLOSED_MS=2*3600000;
+const shownSince=(now=Date.now())=>Math.max(jstTodayStart(now).getTime(),now-SHOW_CLOSED_MS);
 async function fetchUsers(){
   const now=Date.now(), today=jstTodayStart(now).getTime();
   if(!lastFullPoll||now-lastFullPoll>FULL_REFRESH_MS||lastFullPoll<today){
-    const {data,error}=await sb.from(T('profiles')).select(USER_COLS).eq('sharing',true).gt('updated_at',new Date(today).toISOString()).neq('id',myId);
+    const {data,error}=await sb.from(T('profiles')).select(USER_COLS).eq('sharing',true).gt('updated_at',new Date(shownSince(now)).toISOString()).neq('id',myId);
     if(error||!data)return;
     userCache=new Map(data.map(u=>[u.id,u])); lastFullPoll=now; pollCursor=now;
     return;
@@ -1338,7 +1460,9 @@ async function pollUsers(){
   let out=[];
   if(sb&&!fesOutside){
     await fetchUsers();
-    out=[...userCache.values()].map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fes_attrs||{},lat:u.lat,lng:u.lng,updated_at:u.updated_at}));
+    // 手元に持っている人も、閉じてから SHOW_CLOSED_MS たったら出さない（全員分の取り直しは10分ごとなので、それまで残らないように）
+    const since=shownSince();
+    out=[...userCache.values()].filter(u=>(Date.parse(u.updated_at)||0)>since).map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fes_attrs||{},lat:u.lat,lng:u.lng,updated_at:u.updated_at}));
   }else{ userCache.clear(); lastFullPoll=0; }
   // キャンパス限定の時は、敷地の外から位置を送ってきている人を表示もすれ違いもしない
   others=out.filter(u=>!blocked.has(u.id)&&(!FES.campusOnly||(u.lat!=null&&inCampus(u.lat,u.lng)))).concat(testUsers);renderNearby();
@@ -1561,7 +1685,7 @@ function renderStatusRow(){
   const el=$('#nowBar'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
   const p=myPresence, act=presenceActive(p), st=statusOf(profile);
-  const where=!sharing?'共有を止めています':p.place?esc(p.place)+(act&&p.room?'・'+esc(p.room):''):(myPos&&inCampus(myPos.lat,myPos.lng)?'建物の外':'キャンパスの外');
+  const where=!sharing?'共有を止めています':p.place?esc(p.place)+(act&&p.room?'・'+esc(p.room):''):noPlaceText();
   const tt=ttTodayText();
   el.innerHTML=`<button class="ntile now" onclick="openPlaceEdit(false)">
       <span class="nh">📍 いまの自分<span class="ne">編集 ›</span></span>
@@ -1614,15 +1738,16 @@ function renderNearby(){
   const all=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}const cd=commonDetail(u);return {u,d,common:cd,score:commonScore(cd),closed:isClosed(u)};});
   const byScore=(x,y)=>(y.score-x.score)||((x.d??1e9)-(y.d??1e9));
   const open=all.filter(x=>!x.closed).sort(byScore), closed=all.filter(x=>x.closed).sort(byScore);
+  lastOpenCount=open.filter(x=>!isTest(x.u.id)).length; visitMaybeUpdate();
   $('#nearSub').textContent=open.length||closed.length?(open.length?'いま'+open.length+'人':'')+(closed.length?(open.length?' · ':'')+'さっきまで'+closed.length+'人':''):'まだ誰もいません';
   lastNearList=open.concat(closed); drawMap(lastNearList); const ul=$('#ulist');
   if(fesOutside&&!all.length){
     $('#nearSub').textContent='キャンパスの外では表示しません';
-    ul.innerHTML=`<div class="empty"><div class="big">🏫</div><p>いまは多摩キャンパスの外にいます。<br>キャンパスに入ると、近くの人の表示と<br>すれ違いの記録が始まります。<br><br>プロフィール・トーク・友達は<br>このまま使えます。</p></div>`;
+    ul.innerHTML=`<div class="empty"><div class="big">🏫</div><p>いまは多摩キャンパスの外にいます。<br>キャンパスに入ると、近くの人の表示と<br>すれ違いの記録が始まります。<br><br>プロフィール・トーク・友達は<br>このまま使えます。</p>${emptyPushHTML()}</div>`;
     return;
   }
   if(!all.length){
-    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>まだ近くに使っている人がいません。<br>友達にQRを見せて、<br>このアプリを開いてもらいましょう。</p><button class="btn btn-primary" onclick="openInvite()">📨 アプリに誘う（QRを出す）</button>${debugMode()?`<br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button>`:''}</div>`;
+    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>まだ近くに使っている人がいません。<br>平日の昼休み（12:50〜13:40）に、<br>食堂のあたりで開いてみてください。</p>${emptyPushHTML()}<button class="btn btn-primary" onclick="openInvite()">📨 友達をアプリに誘う（QRを出す）</button>${debugMode()?`<br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button>`:''}</div>`;
     return;
   }
   // 授業中は、同じ授業（同じ曜日・時限・授業名）を時間割に入れている人を一番上にまとめる（2026-09-28）
@@ -2039,6 +2164,7 @@ const TERMS_HTML=`
 <p>本サービスは、利用者が許可した場合にのみ位置情報を取得し、同じサービスを利用している他の利用者に共有します。共有は設定からいつでも停止でき、おおまかな位置（約100m）で共有することも選べます。アプリを閉じている間は位置情報を取得しません。</p>
 <h4>第4条（登録情報）</h4>
 <p>氏名・電話番号・メールアドレス・住所などの個人情報は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
+<p>また、研究のため、利用状況（アプリを開いた日と回数、その日キャンパスの中にいたか、近くに表示された人数、通知とホーム画面のアプリを使っているか、今日のお題に答えたか）を記録します。この記録に位置は含みません。</p>
 <h4>第5条（禁止事項）</h4>
 <p>次の行為を禁止します。</p>
 <p>・他の利用者への迷惑行為、つきまとい、脅迫、差別的言動<br>
@@ -2551,8 +2677,96 @@ function goOnboard(){
   $('#s-onboard').classList.add('active');
 }
 const isAndroid=()=>/Android/i.test(navigator.userAgent);
+/* ---------- スマホはホーム画面に追加したアプリでだけ使う（2026-09-28 あおの決定） ---------- */
+// ホーム画面から開いたかどうかは端末の中で分かる（display-mode: standalone / navigator.standalone）ので、データベースには記録しない。
+// iPhone は Safari とホーム画面のアプリで保存場所が別々で、同じ人でも別人として登録されてしまう。アプリだけにすると通知も確実に届く。
+// PC はホーム画面に追加できないので、今まで通りブラウザで使える。運営の動作確認は URL の末尾に #debug を付ければブラウザでも使える
+const isInAppBrowser=()=>/Line\/|Instagram|FBAN|FBAV|Twitter|TikTok/i.test(navigator.userAgent);
+function needHomeGate(){ return (isIOS()||isAndroid())&&!isStandalone()&&!debugMode(); }
+// iPhone の Safari の版（iOS 26 から、共有ボタンが右下の「…」の中に入った）
+function iosSafariVer(){ const m=/Version\/(\d+)/.exec(navigator.userAgent); return m?+m[1]:0; }
+// iPhone で Safari 以外のブラウザ（Chrome など）。手順がブラウザごとに違うので、Safari で開いてもらう
+const isIOSOtherBrowser=()=>isIOS()&&/CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(navigator.userAgent);
+// 2026-10-01：追加をお願いする前に「入れると何が見えるか」を見せる（ようこそ画面の見本3枚と、登録した人数）。
+// 以前は手順だけで、本人にとっての得（誰が見つかるか）が書かれていなかった
+let gateCount=null;   // { total:登録した人, today:今日使った人 }（tama_public_count）
+function gateCountHTML(){
+  if(!gateCount||!(gateCount.total>=10))return '';   // 少ない数をそのまま見せると逆効果なので、10人未満なら出さない
+  return `👥 多摩キャンで <b>${gateCount.total}人</b>が登録${gateCount.today>=10?` ・ 今日 <b>${gateCount.today}人</b>が利用`:''}`;
+}
+async function loadGateCount(){
+  if(!configured||!window.supabase)return;
+  try{
+    // ログインはしない（ホーム画面のアプリで登録してもらうため）。端末に残っているログイン情報も読まない・書かない
+    const c=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+    const {data,error}=await c.rpc('tama_public_count');
+    if(error||!data)return;   // supabase/tama_retention.sql の実行前は出さないだけ
+    gateCount=data; const el=$('#hgCount'); if(el)el.innerHTML=gateCountHTML();
+  }catch(e){}
+}
+async function copyGateUrl(btn){
+  const u=OFFICIAL_URL;
+  try{ await navigator.clipboard.writeText(u); btn.textContent='✅ コピーしました。Safariのアドレス欄に貼り付けてください'; }
+  catch(e){ prompt('このURLをコピーして、Safariで開いてください',u); }
+}
+function renderHomeGate(){
+  const g=$('#homeGate'); if(!g)return;
+  const ios=isIOS(), inApp=isInAppBrowser(), other=!inApp&&isIOSOtherBrowser(), ios26=iosSafariVer()>=26;
+  // このブラウザで前に使っていた人（ログイン情報が残っている）には、アプリでは登録し直しになることを伝える
+  let usedHere=false; try{ usedHere=Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k)); }catch(e){}
+  const step=(n,t,s)=>`<div class="hgstep"><div class="no">${n}</div><div class="tx">${t}${s?`<small>${s}</small>`:''}</div></div>`;
+  const icon=`<img class="hgapp" src="/icons/icon-192.png" alt="">`;
+  let steps='', arrow='';
+  if(inApp){
+    steps=`<div class="hgwarn">いまLINEなどのアプリの中で開いています。ここからは追加できません。</div>`
+      +step(1,`右上（または右下）の <span class="hgicon">…</span> を押す`)
+      +step(2,`<b>「${ios?'Safariで開く':'ブラウザで開く'}」</b>を選ぶ`,'開いたら、もう一度この画面が出ます');
+  }else if(other){
+    steps=`<div class="hgwarn">いまSafari以外のブラウザで開いています。<b>Safari</b>で開くと確実に追加できます。</div>`
+      +`<button class="btn btn-primary hgbtn" onclick="copyGateUrl(this)">🔗 URLをコピーする</button>`
+      +step(1,`<b>Safari</b>を開いて、アドレス欄にURLを貼り付けて開く`,'開いたら、追加の手順が出ます');
+  }else if(ios){
+    // iOS 26 の Safari（標準のコンパクト表示）は共有ボタンが「…」の中。追加の画面に「Webアプリとして開く」のスイッチがあり、切るとSafariで開いてしまう
+    steps=(ios26
+        ?step(1,`画面の右下の <span class="hgicon">…</span> を押して、<b>「共有」</b>を選ぶ`,'下に <span class="hgicon">⬆︎</span>（共有ボタン）が見えている時は、それを押してもOK')
+        :step(1,`画面の下の <span class="hgicon">⬆︎</span> <b>共有ボタン</b>を押す`,'四角から上向きの矢印が出ているマーク。見当たらない時は、下の <span class="hgicon">…</span> から「共有」'))
+      +step(2,`<b>「ホーム画面に追加」</b>を押す`,'見当たらない時は、メニューを下にスクロールするか「さらに表示」を押す')
+      +step(3,ios26?`<b>「Webアプリとして開く」はオンのまま</b>、右上の<b>「追加」</b>を押す`:`右上の<b>「追加」</b>を押す`)
+      +step(4,`ホーム画面にできた ${icon}<b>「ちかく多摩キャン」</b>から開く`,'このブラウザの画面は閉じてOKです');
+    arrow=`<div class="hgarrow${ios26?' r':''}">⬇︎</div>`;
+  }else{
+    steps=(deferredInstall?`<button class="btn btn-primary hgbtn" onclick="doGateInstall()">📲 ホーム画面に追加する</button><div class="hgnote" style="margin:-4px 0 12px">うまくいかない時は、下の手順でも追加できます</div>`:'')
+      +step(1,`画面右上の <span class="hgicon">⋮</span> を押す`)
+      +step(2,`<b>「アプリをインストール」</b>または<b>「ホーム画面に追加」</b>を押す`)
+      +step(3,`<b>「インストール」</b>（または「追加」）を押す`)
+      +step(4,`ホーム画面にできた ${icon}<b>「ちかく多摩キャン」</b>から開く`,'このブラウザの画面は閉じてOKです');
+  }
+  // 見本はようこそ画面と同じもの（作りものの人なので、登録前に見せても誰の情報も出ない）
+  const shots=$('#s-welcome .shots');
+  g.innerHTML=`<div class="hglogo">ちかく</div>
+    <div class="hgtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と気軽につながる。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
+    <div class="hgcount" id="hgCount">${gateCountHTML()}</div>
+    ${shots?shots.outerHTML+'<div class="hgswipe">← 横にスワイプできます →</div>':''}
+    <div class="hgh">📲 ホーム画面に追加すると<br>使えます（30秒）</div>
+    <div class="hgd">ホーム画面のアイコンから開くと、返事や友達申請の通知が届き、登録もこのスマホに残ります。</div>
+    ${steps}
+    ${usedHere?`<div class="hgnote">※ このブラウザで登録した内容は、アプリには引き継がれません。アプリで登録し直してください。</div>`:''}
+    ${arrow}`;
+  g.classList.add('show');
+}
+async function doGateInstall(){
+  if(!deferredInstall){ renderHomeGate(); return; }
+  deferredInstall.prompt();
+  try{ await deferredInstall.userChoice; }catch(e){}
+  deferredInstall=null; renderHomeGate();
+}
+// Android でインストールが終わったら、アイコンから開くよう案内する
+window.addEventListener('appinstalled',()=>{ const g=$('#homeGate'); if(g&&g.classList.contains('show'))
+  g.innerHTML=`<div class="hglogo">ちかく</div><div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center">
+    <div style="font-size:52px;margin-bottom:14px">✅</div><div class="hgh">ホーム画面に追加しました</div>
+    <div class="hgd">ホーム画面の<b>「ちかく多摩キャン」</b>のアイコンから開いてください。<br>このブラウザの画面は閉じてOKです。</div></div>`; });
 let deferredInstall=null;   // Android/Chrome の「インストール」を受け取る
-window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; });
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; if(typeof needHomeGate==='function'&&needHomeGate())renderHomeGate(); });
 function openAddHome(){
   let body='';
   if(isStandalone()){
@@ -2598,20 +2812,38 @@ const GUIDE=[
   {icon:'📍',title:'近くの<br>共通点のある人が見える',body:'今日多摩キャンパスでこのアプリを使った人が表示されます。よく聴くアーティストや「あるある」など、<b>めずらしい共通点</b>がある人ほど上に「✨レアな共通点」つきで出ます。',note:'恋愛目的のアプリではありません。キャンパスの中にいる間だけ位置を共有します。'},
   {icon:'👋',title:'共通点をきっかけに<br>話しかける',body:'プロフィールを開いて「👋 話しかける」を押し、共通点から作った話題を選ぶだけで送れます。<b>相手が返事をしたらトークが始まります。</b>',note:'話しかけられたら「トーク」タブの一番上に出ます。'},
   {icon:'👥',title:'話しかける → トーク<br>→ 友達',body:'知らない人とは、まず<b>👋 話しかけて</b>、返事が来たら<b>💬 トーク（24時間）</b>。もっと話したい相手は、トークの上の「👥 友達に誘う」から<b>友達</b>になると、期限なしで話せて、いる建物・教室も見えるようになります。',note:'目の前の人とは「友達」タブの「＋ 追加」から、4桁のコードですぐ友達になれます。'},
-  {icon:'🗓',title:'いまの自分・時間割・<br>今日のお題',body:'「近くの人」の上から、いる教室や「ひまです」などの状態、時間割を入れられます。今日のお題に答えると、<b>同じ答えの人</b>がその日だけの共通点として見つかります。',note:'時間割を入れると、同じ授業の人が分かります。時間割はあなたにしか見えません。'},
+  {icon:'🗓',title:'いまの自分・時間割・<br>今日のお題',body:'「近くの人」の上から、いる教室や「ひまです」などの状態、時間割を入れられます。今日のお題に答えると、<b>みんなの答え</b>が見られ、<b>同じ答えの人</b>がその日だけの共通点として見つかります。',note:'時間割を入れると、同じ授業の人が分かります。時間割はあなたにしか見えません。'},
   {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'毎回QRコードを読まなくても、ホーム画面のアイコンから開けるようになります。通知も受け取れます。',note:'追加のしかたは、マイページの「ホーム画面に追加する方法」から見られます。',action:true}
 ];
 let guideIdx=0;
-function openGuide(){ guideIdx=0; renderGuide(); $('#guide').classList.add('show'); }
+// 'intro'＝登録の直後に自動で出す1枚のまとめ／'full'＝マイページの「使い方を見る」から開く全部（GUIDE）。
+// 2026-10-01 あおの決定で、登録の直後は4枚を出さず、位置の許可が終わってから1枚だけにした（人の一覧を見るまでのタップを減らすため）
+let guideMode='full';
+function openGuide(){ guideMode='full'; guideIdx=0; renderGuide(); $('#guide').classList.add('show'); }
+function openIntro(){ guideMode='intro'; renderGuide(); $('#guide').classList.add('show'); }
 function closeGuide(){ $('#guide').classList.remove('show'); markGuideSeen(); setTimeout(autoAskPush,400); }
 function renderGuide(){
+  if(guideMode==='intro'){
+    $('#guideBody').innerHTML=`<div class="gicon">🧭</div><h3>ちかくの使い方</h3>
+      <div class="introl">
+        <div><span>📍</span><div>今日キャンパスにいた人が、地図と一覧に出ます。<b>めずらしい共通点</b>のある人ほど上に。</div></div>
+        <div><span>👋</span><div>気になる人には、共通点から<b>話しかける</b>だけ。返事が来たらトーク（24時間）、もっと話したい人とは友達に。</div></div>
+        <div><span>🎲</span><div><b>今日のお題</b>に答えると、みんなの答えと、同じ答えの人が見つかります。</div></div>
+      </div>
+      <div class="note2">恋愛目的のアプリではありません。位置はキャンパスの中にいる間だけ共有します。</div>`;
+    $('#guideDots').innerHTML='';
+    $('#guidePrev').style.visibility='visible'; $('#guidePrev').textContent='くわしく見る';
+    $('#guideNext').textContent='はじめる';
+    return;
+  }
   const g=GUIDE[guideIdx];
   $('#guideBody').innerHTML=`<div class="gicon">${g.icon}</div><h3>${g.title}</h3><p>${g.body}</p>${g.note?`<div class="note2">${g.note}</div>`:''}${g.action?`<button class="btn btn-ghost" style="margin-top:16px;padding:12px 20px;font-size:13.5px" onclick="openAddHome()">追加のしかたを見る</button>`:''}`;
   $('#guideDots').innerHTML=GUIDE.map((_,i)=>`<i class="${i===guideIdx?'on':''}"></i>`).join('');
-  $('#guidePrev').style.visibility=guideIdx===0?'hidden':'visible';
+  $('#guidePrev').style.visibility=guideIdx===0?'hidden':'visible'; $('#guidePrev').textContent='戻る';
   $('#guideNext').textContent=guideIdx===GUIDE.length-1?'はじめる':'次へ';
 }
 function guideMove(d){
+  if(guideMode==='intro'){ if(d<0)openGuide(); else closeGuide(); return; }
   const n=guideIdx+d;
   if(n<0)return;
   if(n>=GUIDE.length){ closeGuide(); return; }
@@ -2624,11 +2856,15 @@ function markGuideSeen(){
   if(sb&&myId){ sb.from(T('profiles')).update({guide_seen:true}).eq('id',myId).then(({error})=>{ if(error)console.warn('[guide] 見た記録を保存できませんでした',error.message); }); }
 }
 function guideSeenLocally(){ try{ return localStorage.getItem('tama_guideSeen')==='1'; }catch(e){ return false; } }
+// 位置の許可の画面と重ならないよう、位置が取れた（または断られた）後に1枚のまとめを出す。
+// 位置の返事がいつまでも来ない時のために、15秒たったら出す
+let introPending=false;
 function maybeShowGuide(seenFromDb){
   if(seenFromDb===true) return;
   if(guideSeenLocally()) return;
-  setTimeout(openGuide,600);   // 画面が切り替わってから出す
+  introPending=true; setTimeout(geoSettled,15000);
 }
+function geoSettled(){ if(!introPending)return; introPending=false; setTimeout(openIntro,700); }
 /* ---------- コミュニティの参加者を見る ---------- */
 async function openMembers(){
   if(!curRoom){toast('部屋が選ばれていません');return;}
@@ -2876,7 +3112,12 @@ function myPresenceWhere(){
   const p=myPresence, act=presenceActive(p);
   if(!sharing)return '位置情報の共有を止めています';
   if(p.visibility==='hidden')return '建物・教室は友達にも見せていません';
-  return p.place?p.place+(act&&p.room?'・'+p.room:'')+(act&&p.note?'「'+p.note+'」':''):(myPos&&inCampus(myPos.lat,myPos.lng)?'建物の外':'キャンパスの外');
+  return p.place?p.place+(act&&p.room?'・'+p.room:'')+(act&&p.note?'「'+p.note+'」':''):noPlaceText();
+}
+// 建物が決まっていない時の「いまの自分」の場所
+function noPlaceText(){
+  if(!myPos)return geoDenied?'位置情報オフ':'現在地を確認中…';
+  return inCampus(myPos.lat,myPos.lng)?'建物の外':'キャンパスの外';
 }
 function renderMyPresence(){
   renderStatusRow(); renderTtCard();
@@ -3115,7 +3356,7 @@ async function addFriendByCode(){
 
 /* ---------- 時間割（履修） ---------- */
 // 月〜金×1〜5限のどこに授業があるか（授業名は任意）。任意で登録してもらい、
-// ①授業のある時限の始まりにだけ「いまどこ？」の通知を送る（Edge Function tama-remind。登録していない人には昼休みの1回だけ）
+// ①その日最初の授業の始まりに「いまどこ？」の通知を送る（Edge Function tama-remind。友達が1人以上いる人だけ。2026-10-01 から1日1回まで）
 // ②同じ曜日・時限に同じ授業名を入れた人を「同じ授業」として共通点に出す
 // 時間割は「毎週いつどこにいるか」が分かる情報なので、本人しか読めない（supabase/tama_timetable.sql の RLS）。
 // 他の人について分かるのは、同じ授業を入れている人だけ（関数 tama_same_course_peers が返す）
@@ -3210,7 +3451,7 @@ function renderTimetable(){
   });
   grid+='</div>';
   $('#placeSheet').innerHTML=`<h2 class="pstitle">🗓 時間割</h2>
-    <p class="psdesc">授業のあるコマを押してください。<b>あなたにしか見えません</b>（見せると決めた友達だけは見られます）。授業のある時限の始まりにだけ「いまどこ？」の通知が届きます。</p>
+    <p class="psdesc">授業のあるコマを押してください。<b>あなたにしか見えません</b>（見せると決めた友達だけは見られます）。友達がいる人には、その日最初の授業の始まりに「いまどこ？」の通知が1回だけ届きます。</p>
     ${grid}
     ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
       <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
@@ -3237,185 +3478,24 @@ async function saveTimetable(){
   const {error}=await sb.from(T('timetable')).upsert(row);
   if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
   myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers();
-  toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました（通知は昼休みの1回だけになります）');
+  toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました');
+  if(Object.keys(slots).length)askPushSoon('tt');
 }
 
 /* ---------- 今日のお題（偶然のマッチング） ---------- */
 // 1日1問。同じ答えの人を「共通点」に数えるので、学部などが違う人もその日だけ近くの人に出る。
 // 選択式（2〜4択）は一致しやすく話しかける口実に、自由記述はめったに一致しないぶん一致した時の価値が大きい。
-// お題は下の DAILY_QS に並べておき、日付（日本時間）で自動的に順番に出す（毎日の作業は要らない。一周したら最初に戻る）。
-// 150問（2択20・3択30・4択50・自由記述50。約5か月で一周）。Claude が作成（2026-09-24）。アイデア班が作ったら差し替えてよい。
-// ⚠️ 並べ替えると今日のお題も変わるので、足す時は末尾に
-// 作るときに参考にした心理学の知見（あおの依頼で調べたもの）:
-//  ・ささいな一致（誕生日が同じ等）でも好感が上がる（Burger et al., 2004）→ 軽い選択式にも意味がある
-//  ・似ていることが効くのは、特に初対面・短い会話の段階（Montoya et al., 2008 のメタ分析）→ すれ違いの場面に合う
-//  ・めずらしい好みの一致は、よくある好みの一致より強く惹かれる（Alves, 2018）→ 自由記述は「最近リピートしてる曲」のように具体的に
-//  ・軽い「苦手」の一致は「好き」の一致より距離を縮める（Bosson et al., 2006）→ 人ではなく物・あるあるの「苦手」を入れる
-//  ・同じ瞬間に同じことを感じた体験の共有（I-sharing、Pinel）→「地味にうれしい瞬間」「坂」など
-//  ・初対面の会話でいちばん多い話題は音楽（Rentfrow & Gosling, 2006）→ 音楽の質問を多めに
-//  ・少し踏み込んだ質問の方が会話は楽しく、人はそれを過小評価する（Aron et al., 1997; Kardas et al., 2021）→「最近うれしかったこと」等
-//  恋愛・政治・宗教・容姿・家族・収入・健康、住む場所・バイト先など本人が特定される質問は入れない
-// 答えはプロフィール（fes_attrs.daily = {d:日付, q:お題の番号, a:答え}）に入れるので、SQLの追加は要らない。
+// お題の一覧（DAILY_QS）と始まりの日（DAILY_EPOCH）は /tama/daily-qs.js にある（昼休みの通知 tama-remind もそこからお題の文面を読む）
+// 答えはプロフィール（fes_attrs.daily = {d:日付, q:お題の番号, a:答え, n:そろえた答え}）に入れる。
+// 次の日に答えると、前の日の答えは daily_prev に移す（「昨日の結果」を数えるため。2026-10-01）。
 // 相手に合わせて変えられないよう、答えはその日のうちは変更できない
-const DAILY_QS=[
-  {q:'学食に行くなら？',o:['食堂A棟','食堂B棟','コンビニ','お弁当持参']},
-  {q:'好きなアーティストは？',free:'例：ヨルシカ'},
-  {q:'犬派？猫派？',o:['犬派','猫派','どっちも好き']},
-  {q:'課題はいつやる？',o:['出たその日','締切の前日','締切当日','気づいたら過ぎてる']},
-  {q:'最近ハマっているものは？',free:'例：サウナ、ポケポケ'},
-  {q:'朝型？夜型？',o:['朝型','夜型']},
-  {q:'目玉焼きには何をかける？',o:['しょうゆ','ソース','塩こしょう','何もかけない']},
-  {q:'好きな漫画・アニメは？',free:'例：葬送のフリーレン'},
-  {q:'休みの日は？',o:['インドア','アウトドア','その日の気分']},
-  {q:'いちばん見るSNSは？',o:['Instagram','X','TikTok','YouTube']},
-  {q:'好きな食べ物は？',free:'例：からあげ'},
-  {q:'1限の授業、どう思う？',o:['平気','つらい','取らない主義']},
-  {q:'きのこの山？たけのこの里？',o:['きのこの山','たけのこの里']},
-  {q:'行ってみたい国は？',free:'例：アイスランド'},
-  {q:'昼休みの過ごし方は？',o:['友達と','ひとりでゆっくり','課題・勉強','寝る']},
-  {q:'ラーメンは何味？',o:['しょうゆ','味噌','塩','とんこつ']},
-  {q:'好きなYouTuber・配信者は？',free:'例：QuizKnock'},
-  {q:'夏と冬、どっちが好き？',o:['夏','冬']},
-  {q:'連休にいちばんしたいことは？',o:['旅行','バイト','ひたすら寝る','友達と遊ぶ']},
-  {q:'最近観た映画・ドラマは？',free:'例：ラストマイル'},
-  {q:'映画はどこで観る？',o:['映画館','配信','あまり観ない']},
-  {q:'好きなスポーツ（観る・やる）は？',free:'例：バレーボール'},
-  {q:'朝ごはん、食べる？',o:['毎日食べる','ときどき','食べない']},
-  {q:'旅行に行くなら？',o:['国内','海外']},
-  {q:'好きなお菓子は？',free:'例：じゃがりこ'},
-  {q:'カラオケでまず歌うのは？',o:['最近の曲','懐メロ','アニソン','聴く専門']},
-  {q:'好きな季節のイベントは？',o:['花見','夏祭り','ハロウィン','クリスマス']},
-  {q:'いまいちばん欲しいものは？',o:['お金','時間','睡眠','友達']},
-  {q:'地元の好きなところは？',free:'例：海が近い'},
-  {q:'雨の日の多摩キャン、どうする？',o:['それでも行く','オンラインがいい','休みたい']},
-  // ---- 2026-09-24 追加の120問（心理学の知見をもとに作成。上のコメント参照） ----
-  {q:'最近リピートしてる曲は？',free:'例：Bling-Bang-Bang-Born'},
-  {q:'好きな音楽のジャンルは？',o:['J-POP','K-POP','ロック・バンド','アニソン・ボカロ']},
-  {q:'コーヒー・紅茶・お茶、どれ派？',o:['コーヒー','紅茶','お茶']},
-  {q:'カラオケの十八番は？',free:'例：マリーゴールド'},
-  {q:'音楽を聴くのはいつ？',o:['通学中','勉強中','寝る前','いつでも']},
-  {q:'エスカレーター、歩く？立ち止まる？',o:['歩く','立ち止まる']},
-  {q:'ライブに行ってみたいアーティストは？',free:'例：King Gnu'},
-  {q:'旅行でいちばん楽しみなのは？',o:['ごはん','景色','温泉','買い物']},
-  {q:'いちばん集中できる場所は？',o:['家','図書館','カフェ']},
-  {q:'いちばん聴いたアルバムは？',free:'例：ヨルシカ「だから僕は音楽を辞めた」'},
-  {q:'コンビニでつい買うのは？',o:['スイーツ','ホットスナック','飲み物','お菓子']},
-  {q:'お風呂は夜派？朝シャワー派？',o:['夜派','朝シャワー派']},
-  {q:'好きな映画は？',free:'例：千と千尋の神隠し'},
-  {q:'アイスを選ぶなら？',o:['バニラ','チョコ','抹茶','フルーツ系']},
-  {q:'寝る前についやるのは？',o:['SNS','動画','すぐ寝る']},
-  {q:'何度も観返している作品は？',free:'例：SPY×FAMILY'},
-  {q:'休日の朝は？',o:['昼まで寝る','いつも通り起きる','早起きして出かける','二度寝して後悔']},
-  {q:'ご飯・パン・麺、ひとつ選ぶなら？',o:['ご飯','パン','麺']},
-  {q:'推しのキャラクターは？',free:'例：五条悟'},
-  {q:'いちばん苦手な授業の形は？',o:['グループワーク','プレゼン','レポート','テスト']},
-  {q:'LINEの返信、早い？遅い？',o:['早い','遅い']},
-  {q:'好きなゲームは？',free:'例：スプラトゥーン'},
-  {q:'国内で行ってみたいのは？',o:['北海道','沖縄','京都','九州']},
-  {q:'グループワーク、どの役になりがち？',o:['まとめ役','アイデア出し','ついていく']},
-  {q:'好きなコンビニの商品は？',free:'例：ファミチキ'},
-  {q:'好きなコンビニは？',o:['セブン','ファミマ','ローソン','こだわらない']},
-  {q:'予定はきっちり立てる？ノリで決める？',o:['きっちり','ノリ']},
-  {q:'多摩キャンのお気に入りの場所は？',free:'例：図書館の窓ぎわ'},
-  {q:'動物園・水族館で見たいのは？',o:['ペンギン','パンダ','イルカ','カピバラ']},
-  {q:'初対面の人とは？',o:['自分から話す','話しかけられたら話す','様子を見る']},
-  {q:'八王子・多摩のおすすめのお店は？',free:'例：駅前のラーメン屋'},
-  {q:'いちばんリラックスできるのは？',o:['お風呂','音楽','散歩','ゴロゴロ']},
-  {q:'いちばん好きな時間帯は？',o:['朝','昼','夜']},
-  {q:'地元の名物は？',free:'例：宇都宮餃子'},
-  {q:'もし丸1日自由なら？',o:['旅行','ずっと寝る','推し活','友達と遊ぶ']},
-  {q:'目覚ましは1回で起きる？スヌーズ派？',o:['1回で起きる','スヌーズ何回も']},
-  {q:'いちばん好きな飲み物は？',free:'例：いろはす'},
-  {q:'誕生日にうれしいのは？',o:['プレゼント','メッセージ','ごはんに行く','何もなくていい']},
-  {q:'お金が入ったら？',o:['すぐ使う','貯める','推しに使う']},
-  {q:'苦手な食べ物は？',free:'例：パクチー'},
-  {q:'好きなパンは？',o:['メロンパン','クロワッサン','カレーパン','食パン']},
-  {q:'映画は字幕？吹替？',o:['字幕','吹替']},
-  {q:'地味に苦手なものは？',free:'例：高いところ'},
-  {q:'好きな丼は？',o:['カツ丼','親子丼','牛丼','海鮮丼']},
-  {q:'からあげにレモン、どうする？',o:['かける','かけない','聞いてからかける']},
-  {q:'最近うれしかったことは？',free:'例：課題が1日早く終わった'},
-  {q:'子どものころ好きだった遊びは？',o:['鬼ごっこ','ゲーム','お絵かき','秘密基地づくり']},
-  {q:'スマホの充電、何％で焦る？',o:['50%','20%','ほぼ0%まで平気']},
-  {q:'最近笑ったことは？',free:'例：友達の寝ぐせ'},
-  {q:'学園祭でいちばん楽しみなのは？',o:['模擬店','ステージ','友達と回る','行かない派']},
-  {q:'ノートは紙？デジタル？',o:['紙','デジタル']},
-  {q:'子どものころの夢は？',free:'例：ケーキ屋さん'},
-  {q:'ひとりの時間、何してる？',o:['動画','ゲーム','音楽','寝る']},
-  {q:'多摩キャンの坂、どう思う？',o:['もう慣れた','毎日つらい','いい運動']},
-  {q:'人生で一度はやってみたいことは？',free:'例：オーロラを見る'},
-  {q:'いま大事にしたいのは？',o:['友達','趣味','勉強','バイト・お金']},
-  {q:'甘いものとしょっぱいもの、どっち？',o:['甘いもの','しょっぱいもの']},
-  {q:'いまいちばん行きたい場所は？',free:'例：箱根'},
-  {q:'行くならどれ？',o:['ライブ','スポーツ観戦','美術館','テーマパーク']},
-  {q:'駅へのバスが混んでたら？',o:['がんばって乗る','次を待つ','歩く']},
-  {q:'最近買ってよかったものは？',free:'例：ワイヤレスイヤホン'},
-  {q:'やってみたい習いごとは？',o:['楽器','料理','ダンス','語学']},
-  {q:'テンションが上がる天気は？',o:['晴れ','くもり','雨']},
-  {q:'好きな言葉・座右の銘は？',free:'例：なんとかなる'},
-  {q:'好きなお寿司のネタは？',o:['サーモン','マグロ','えび','たまご']},
-  {q:'人混みのイベント、好き？苦手？',o:['好き','苦手']},
-  {q:'小学生のころハマっていたものは？',free:'例：ベイブレード'},
-  {q:'冬に食べたい鍋は？',o:['キムチ鍋','すき焼き','水炊き','もつ鍋']},
-  {q:'ドラマ・アニメの見方は？',o:['一気見','毎週リアルタイム','あまり見ない']},
-  {q:'得意料理は？',free:'例：オムライス'},
-  {q:'気分が上がる色は？',o:['赤・オレンジ','青・水色','緑','白・黒']},
-  {q:'教室の席は前の方？後ろの方？',o:['前の方','後ろの方']},
-  {q:'好きな本は？',free:'例：コンビニ人間'},
-  {q:'自分を動物にたとえると？',o:['犬','猫','うさぎ','ナマケモノ']},
-  {q:'迷ったときは？',o:['直感','じっくり比べる','人に聞く']},
-  {q:'最近気になっていることは？',free:'例：サウナ'},
-  {q:'夜ふかしの原因は？',o:['動画','ゲーム','課題','なんとなく']},
-  {q:'ゲームはする？',o:['よくする','たまに','しない']},
-  {q:'ちょっと自慢できることは？',free:'例：早口言葉が得意'},
-  {q:'地味にうれしい瞬間は？',o:['信号がずっと青','バスにすぐ乗れた','授業が早く終わった','自販機で当たった']},
-  {q:'電話とメッセージ、どっちが楽？',o:['電話','メッセージ']},
-  {q:'ついつい見ちゃう動画のジャンルは？',free:'例：料理動画'},
-  {q:'地味にイヤな瞬間は？',o:['靴下が濡れる','スマホの充電切れ','イヤホンを忘れた','バスが目の前で出発']},
-  {q:'本・漫画は？',o:['紙で読む','電子で読む','あまり読まない']},
-  {q:'好きな季節の食べ物は？',free:'例：秋のさつまいも'},
-  {q:'学食で好きなメニューは？',o:['カレー','丼もの','麺類','定食']},
-  {q:'ひとりカラオケ・ひとり焼肉、いける？',o:['いける','むり']},
-  {q:'好きな動物は？',free:'例：カワウソ'},
-  {q:'将来住みたいのは？',o:['都会','郊外','地方・田舎','海外']},
-  {q:'夏休みに行くなら？',o:['海','山','街']},
-  {q:'好きなスポーツチーム・選手は？',free:'例：大谷翔平'},
-  {q:'挑戦してみたいのは？',o:['留学','起業','資格','ひとり旅']},
-  {q:'ストレス発散は？',o:['寝る','食べる','体を動かす']},
-  {q:'最近始めたこと・始めたいことは？',free:'例：ランニング'},
-  {q:'好きな映画のジャンルは？',o:['アクション','恋愛','ホラー','アニメ']},
-  {q:'たい焼きは頭から？しっぽから？',o:['頭から','しっぽから']},
-  {q:'いま見ているアニメ・ドラマは？',free:'例：薬屋のひとりごと'},
-  {q:'推し活してる？',o:['がっつり','ゆるく','してない','推しを探し中']},
-  {q:'いちばん苦手なのは？',o:['早起き','人混み','待ち時間']},
-  {q:'好きなお笑い芸人は？',free:'例：かまいたち'},
-  {q:'読むならどれ？',o:['小説','漫画','ビジネス・自己啓発','あまり読まない']},
-  {q:'好きなものは最初に食べる？最後にとっておく？',o:['最初に食べる','最後にとっておく']},
-  {q:'好きなお店（チェーン）は？',free:'例：サイゼリヤ'},
-  {q:'夏の思い出にしたいのは？',o:['花火','海','フェス','旅行']},
-  {q:'写真は撮る派？',o:['よく撮る','たまに','撮らない']},
-  {q:'最近ハマっている食べ物は？',free:'例：ギリシャヨーグルト'},
-  {q:'ついやってしまうクセは？',o:['髪をさわる','ペン回し','貧乏ゆすり','スマホを見る']},
-  {q:'スポーツは？',o:['チームでやる','ひとりでやる','観る専門']},
-  {q:'好きなカップ麺は？',free:'例：カップヌードル シーフード'},
-  {q:'自分の部屋は？',o:['きれい','ほどほど','散らかってる','物が少ない']},
-  {q:'テスト前は一夜漬け？コツコツ？',o:['一夜漬け','コツコツ']},
-  {q:'部活・サークルでやっていたことは？',free:'例：吹奏楽'},
-  {q:'家でよく飲むのは？',o:['水・お茶','コーヒー','ジュース・炭酸','エナジードリンク']},
-  {q:'おにぎりの具、ひとつ選ぶなら？',o:['鮭','ツナマヨ','梅']},
-  {q:'もし1か月休みがあったら何する？',free:'例：日本一周'},
-  {q:'好きなスイーツは？',o:['ケーキ','和菓子','アイス','チョコ']},
-  {q:'生まれ変わるなら、また人間？人間以外？',o:['また人間','人間以外']},
-  {q:'小さいころ好きだった絵本・アニメは？',free:'例：ぐりとぐら'},
-  {q:'いちばん会いたいのは？',o:['地元の友達','家族','推し','ペット']},
-  {q:'課題中のBGMは？',o:['音楽あり','無音','動画を流す']},
-];
-const DAILY_EPOCH=Date.parse('2026-09-01T00:00:00+09:00');
-function dailyToday(){
-  const ms=Date.now(), d=new Date(ms+9*3600000).toISOString().slice(0,10);
+function dailyOn(ms){
+  const d=new Date(ms+9*3600000).toISOString().slice(0,10);
   const n=((Math.floor((jstTodayStart(ms).getTime()-DAILY_EPOCH)/86400000))%DAILY_QS.length+DAILY_QS.length)%DAILY_QS.length;
   return {d,n,...DAILY_QS[n]};
 }
+function dailyToday(){ return dailyOn(Date.now()); }
+function dailyYesterday(){ return dailyOn(Date.now()-86400000); }
 // 自由記述の答えは、全角・半角、大文字・小文字、ひらがな・カタカナ、空白や記号の違いをそろえてから比べる
 function normAns(s){ return (s||'').normalize('NFKC').toLowerCase().replace(/[\s・,.、。!?！？'"「」『』()（）\-ー]/g,'').replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60)); }
 // 今日のお題の答え（今日の分でなければ null）
@@ -3429,12 +3509,58 @@ function dailyCounts(){
   const crossed=Object.values(encMap).filter(e=>(e.last_at||0)>=today&&!blocked.has(e.id)&&sameDaily(others.find(o=>o.id===e.id)||e));
   return {near:near.length,crossed:crossed.length,all:all.length};
 }
+/* ---------- 今日のお題の「みんなの答え」と「昨日の結果」（2026-10-01） ---------- */
+// 近くに人が少ない時・キャンパスの外でも、開くたびに新しいものがあるように（答えると見られる＝答える理由にもなる）。
+// 数えるのはサーバーの関数 tama_daily_stats（supabase/tama_retention.sql）。キャンパスにいるかに関係なく、その日に答えた全員を数える。
+// あおの決定：回答が5人未満の間は人数だけ（割合から誰が何と答えたか分かるため）。自由記述は3人以上が同じ答えのものだけ、多い順に3つまで
+let dailyStats={}, dailyStatsMissing=false;   // 'd/n' → {total, groups:[{a,c}], at}
+async function loadDailyStats(t,force){
+  if(!sb||!myId||String(myId).startsWith('local-')||dailyStatsMissing)return;
+  const k=t.d+'/'+t.n, c=dailyStats[k];
+  if(c&&(c.loading||(!force&&Date.now()-c.at<120000)))return;   // 2分に1回まで
+  dailyStats[k]={...(c||{}),loading:true};
+  try{
+    const {data,error}=await sb.rpc('tama_daily_stats',{p_d:t.d,p_q:t.n,p_free:!!t.free});
+    if(error){ if(error.code==='PGRST202'||/schema cache|does not exist/i.test(error.message))dailyStatsMissing=true; dailyStats[k]={at:Date.now(),missing:true}; }
+    else dailyStats[k]={...(data||{}),at:Date.now()};
+  }catch(e){ dailyStats[k]={at:Date.now(),missing:true}; }
+  fillDailyStats();
+}
+function statsOf(t){ const s=dailyStats[t.d+'/'+t.n]; return s&&!s.missing&&s.total!=null?s:null; }
+// 選択式は選択肢ごとの割合（選択肢の順）、自由記述は多かった答え
+function distHTML(t,mine){
+  const s=statsOf(t); if(!s)return '';
+  if(!s.groups)return `<div class="dwait">みんなの答えは、回答が5人になったら見られます（いま${s.total}人）</div>`;
+  if(t.free){
+    if(!s.groups.length)return `<div class="dwait">3人以上が同じ答えのものは、まだありません（回答 ${s.total}人）</div>`;
+    return `<div class="dfree">多かった答え：${s.groups.map(g=>`<b>${esc(g.a)}</b> ${g.c}人`).join('・')}</div><div class="dtot">回答 ${s.total}人</div>`;
+  }
+  const cnt=o=>{ const g=s.groups.find(g=>normAns(g.a)===normAns(o)); return g?g.c:0; };
+  return t.o.map(o=>{ const p=Math.round(cnt(o)/s.total*100), me=mine&&normAns(mine)===normAns(o);
+      return `<div class="dbar${me?' me':''}"><span class="dl">${esc(o)}</span><span class="dt"><i style="width:${p}%"></i></span><span class="dp">${p}%</span></div>`; }).join('')
+    +`<div class="dtot">回答 ${s.total}人</div>`;
+}
+// 自分の昨日の答え（daily か daily_prev のどちらかに入っている）
+function myAnswerOn(t){ const fa=(profile&&profile.fa)||{}; for(const x of [fa.daily,fa.daily_prev]) if(x&&x.d===t.d&&x.q===t.n&&x.a)return x.a; return null; }
+function ydayHTML(){
+  const y=dailyYesterday(), s=statsOf(y); if(!s||!s.groups||!s.groups.length)return '';
+  const my=myAnswerOn(y);
+  const body=y.free
+    ?'多かった答え：'+s.groups.map(g=>`<b>${esc(g.a)}</b>（${g.c}人）`).join('・')
+    :s.groups.slice().sort((a,b)=>b.c-a.c).map(g=>`${esc(g.a)} <b>${Math.round(g.c/s.total*100)}%</b>`).join('・')+`（${s.total}人）`;
+  return `📊 昨日「${esc(y.q)}」→ ${body}${my?`　あなた：${esc(my)}`:''}`;
+}
+function fillDailyStats(){
+  const y=$('#dailyYday'); if(y)y.innerHTML=ydayHTML();
+  const d=$('#dailyDist'); if(d){ const t=dailyToday(); d.innerHTML=distHTML(t,dailyAnswer(profile)); }
+}
 let dailyShown=null;   // 入力中に6秒ごとの再描画で消えないよう、まだ答えていない間は、お題が変わった時だけ描き直す
 let dailyOpen=false;   // 答えた後のカードを広げているか（ふだんは1行にたたむ。人の一覧を先に見せるため）
 function renderDaily(){
   const el=$('#dailyCard'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
   const t=dailyToday(), mine=dailyAnswer(profile), key=t.d+'/'+(mine?'a':'q');
+  loadDailyStats(dailyYesterday());   // 昨日の結果（1日に何度も変わらないが、2分に1回までしか取りに行かない）
   if(!mine&&dailyShown===key)return;
   dailyShown=key;
   el.className='daily'+(mine&&!dailyOpen?' done':'');
@@ -3446,25 +3572,33 @@ function renderDaily(){
     return;
   }
   if(!mine){
-    el.innerHTML=head+(t.free
+    el.innerHTML=`<div class="dyday" id="dailyYday"></div>`+head+(t.free
       ?`<div class="drow"><input id="dailyIn" maxlength="24" placeholder="${esc(t.free)}"><button class="btn btn-primary" onclick="answerDaily($('#dailyIn').value)">答える</button></div>`
       :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="answerDaily('${o}')">${esc(o)}</span>`).join('')}</div>`)
-      +`<div class="dnote">同じ答えの人が、今日だけの共通点として見つかります（答えは1回だけ）</div>`;
+      +`<div class="dnote">答えると、みんなの答えと、同じ答えの人が見られます（答えは1回だけ）</div>`;
+    fillDailyStats();
     return;
   }
+  loadDailyStats(t);
   const c=dailyCounts();
-  el.innerHTML=head+`<div class="dmine">あなたの答え：<b>${esc(mine)}</b></div>
+  el.innerHTML=`<div class="dyday" id="dailyYday"></div>`+head+`<div class="dmine">あなたの答え：<b>${esc(mine)}</b></div>
+    <div class="ddist" id="dailyDist"></div>
     <div class="dcount">同じ答えの人　近くに <b>${c.near}</b>人 ・ 今日すれ違った人に <b>${c.crossed}</b>人 ・ キャンパスに <b>${c.all}</b>人</div>
     <div class="dnote">${c.all?'同じ答えの人は「近くの人」に「今日のお題」の共通点つきで出ます':t.free?'まだ同じ答えの人はいません。一致したらレアな出会いです':'まだ同じ答えの人はいません。お昼どきに増えていきます'}</div>`;
+  fillDailyStats();
 }
 function answerDaily(a){
   a=(a||'').trim(); if(!a||!profile)return;
   if(ngCheck(a)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
   const t=dailyToday();
   if(dailyAnswer(profile))return;
-  profile.fa=profile.fa||{}; profile.fa.daily={d:t.d,q:t.n,a};
-  publishMe(); saveMyAttrs(); renderDaily(); renderNearby(); renderCross();
-  toast('🎲 答えました。同じ答えの人を探しています');
+  profile.fa=profile.fa||{};
+  const prev=profile.fa.daily; if(prev&&prev.d!==t.d)profile.fa.daily_prev=prev;   // 前の日の答えは「昨日の結果」に数えるため残す
+  profile.fa.daily={d:t.d,q:t.n,a,n:normAns(a)};
+  dailyOpen=true;   // 答えたらすぐ「みんなの答え」を見せる
+  publishMe(); saveMyAttrs().then(()=>loadDailyStats(t,true)); renderDaily(); renderNearby(); renderCross();
+  toast('🎲 答えました。みんなの答えを見てみよう');
+  askPushSoon('daily'); visitMaybeUpdate();
 }
 
 /* ---------- settings ---------- */
@@ -3474,7 +3608,7 @@ let profileDeleted=false;   // 「プロフィールを消す」を押した後�
 async function toggleShare(el){
   const on=!el.classList.contains('on');
   if(on&&profileDeleted&&!confirm('プロフィールを作り直して、位置情報の共有を再開しますか？'))return;
-  sharing=on; el.classList.toggle('on',on); geoState('ok');
+  sharing=on; el.classList.toggle('on',on); geoState('ok'); saveLocPrefs();
   if(sharing){ profileDeleted=false; startGeo(); publishMe(); toast('位置情報の共有を再開しました'); return; }
   await stopSharingEverywhere();
   toast('位置情報の共有を止めました。近くの人・友達に表示されなくなります');
@@ -3488,13 +3622,21 @@ async function stopSharingEverywhere(){
   const {error}=await sb.from(T('profiles')).update({sharing:false,updated_at:new Date().toISOString()}).eq('id',myId);
   if(error){ console.warn('[share] 共有の停止を保存できませんでした',error.message); toast('⚠️ 通信できず、共有を止められませんでした。電波の良い所でもう一度OFFにしてください'); }
 }
-function toggleCoarse(el){coarse=!el.classList.contains('on');el.classList.toggle('on');publishMe();}
+function toggleCoarse(el){coarse=!el.classList.contains('on');el.classList.toggle('on');saveLocPrefs();publishMe();}
+// 共有OFF・おおまかな位置は端末に覚えておく。以前は覚えておらず、開き直すと共有ON・正確な位置に戻っていた
+// （止めたつもりの人が、次に開いた時に地図に戻っていた）。DBの sharing はキャンパスの外に出た時も false になるので使えない
+function loadLocPrefs(){
+  try{ sharing=localStorage.getItem('tama_shareOff')!=='1'; coarse=localStorage.getItem('tama_coarse')==='1'; }catch(e){}
+  const s=$('#tgShare'), c=$('#tgCoarse'); if(s)s.classList.toggle('on',sharing); if(c)c.classList.toggle('on',coarse);
+}
+function saveLocPrefs(){ try{ localStorage.setItem('tama_shareOff',sharing?'0':'1'); localStorage.setItem('tama_coarse',coarse?'1':'0'); }catch(e){} }
 // 「プロフィールを消して共有をやめる」。1回押しただけで消えないよう確認する（何が消えて何が残るかも書く）
 async function leaveAll(){
-  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」も消えます\n・トーク・友達・時間割はそのまま残ります\n\n元には戻せません（共有をONにすると、いまの内容でプロフィールを作り直します）'))return;
-  sharing=false; stopGeo();
+  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録も消えます\n・トーク・友達・時間割はそのまま残ります\n\n元には戻せません（共有をONにすると、いまの内容でプロフィールを作り直します）'))return;
+  sharing=false; stopGeo(); saveLocPrefs();
   await stopSharingEverywhere();
-  if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message); }
+  if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message);
+    if(!visitsMissing)sb.rpc('tama_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); }); }
   profileDeleted=true;
   toast('プロフィールを消し、位置の共有を止めました');$('#tgShare').classList.remove('on');geoState('','停止');
 }
@@ -3556,7 +3698,7 @@ async function saveEdit(){
   // タグ・職業・求めている関係・好きなもの・興味は多摩キャン版では編集しない（前から入っている値はそのまま保存し直す）
   // いまの状態と「いま探していること」はこの画面では変えないので、いまの値を引き継ぐ
   const old=profile.fa||{};
-  profile.fa={...attrToFa(edAttr),purposes:[...(old.purposes||[]).filter(x=>FA.purposes.includes(x))],status:old.status||'',status_until:old.status_until||null,daily:old.daily||null};
+  profile.fa={...attrToFa(edAttr),purposes:[...(old.purposes||[]).filter(x=>FA.purposes.includes(x))],status:old.status||'',status_until:old.status_until||null,daily:old.daily||null,daily_prev:old.daily_prev||null};
   renderNearby(); renderCross(); renderMeHero();
   await publishMe();
   // publishMe() は位置が取れていない時・キャンパスの外・共有オフだと何も送らないので、プロフィールだけは別に書き戻す
@@ -3653,12 +3795,8 @@ function renderFesBar(ph){
   const wel=$('#fesLiveWel'); if(wel)wel.textContent=(ph.state==='open'&&fesLive)?'● いま '+fesLive+'人が参加中':'';
   const no=$('#fesNo'); if(no)no.textContent=fesNo()||'—';
   const bar=$('#fesBar'); if(!bar)return;
-  if(ph.state!=='open'){ bar.className='fesbar'; return; }
-  if(ph.end==null){
-    bar.className='fesbar show';
-    bar.innerHTML='🍛 多摩キャン版 · <b>メンバー動作確認中</b>'+(fesLive?' · いま <b>'+fesLive+'人</b>が参加中':'');
-    return;
-  }
+  // 終わりの時刻が無い（いつでも使える）間は帯を出さない
+  if(ph.state!=='open'||ph.end==null){ bar.className='fesbar'; return; }
   const left=ph.end-Date.now();
   if(left<=FES.surveyBeforeEndMin*60000){
     bar.className='fesbar show warn';
@@ -3700,11 +3838,16 @@ buildOnboard();
 $$('.encR').forEach(e=>e.textContent=FES.encounterRangeM);
 registerSW();
 (async()=>{
+  // スマホのブラウザで開いた時は、ホーム画面に追加する手順だけを出す（ログインも位置情報も始めない。別人として登録されないように）
+  if(needHomeGate()){ renderHomeGate(); loadGateCount(); return; }
+  // ホーム画面から開いている時は「ホーム画面に追加すると便利」の案内（ようこそ画面・使い方ガイドの最後の1枚）を出さない
+  if(isStandalone()){ const a=$('.addhome'); if(a)a.remove(); for(let i=GUIDE.length-1;i>=0;i--)if(GUIDE[i].action)GUIDE.splice(i,1); }
   fesTick(); setInterval(fesTick,20000);
   const ph=fesPhase();
   // 開催時間外は位置情報もログインも始めない（終了後だけは、アンケート用の参加者番号を出すためにログインする）
   if(ph.state!=='open'){ if(ph.state==='after'&&await initBackend())renderFesBar(ph); return; }
   // 通知の許可は開いた瞬間には聞かない（登録済みの人は tryResumeSession、新しい人は話しかけた時などに聞く）
+  loadLocPrefs();
   if(await initBackend()){ fesRefreshCount(); await tryResumeSession(); }
 })();
 
