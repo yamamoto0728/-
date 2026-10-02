@@ -141,7 +141,7 @@
   .topics:empty{display:none}
   .topics .th{font-size:11px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:6px}
   .topics .th button{background:none;border:0;color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit;padding:0}
-  .topics .tl{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}
+  .topics .tl{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:8px}
   .topics .tl::-webkit-scrollbar{height:0}
   .topics .tc{flex-shrink:0;max-width:78%;white-space:normal;text-align:left;font-size:12.5px;line-height:1.45;padding:8px 11px;border-radius:14px;border:1px solid rgba(245,151,47,.45);background:#fff7ee;color:var(--ink);cursor:pointer;font-family:inherit}
   .topics .tc.rare{border-color:#f0a030;background:linear-gradient(135deg,#fff3dc,#ffe7cf)}
@@ -195,6 +195,12 @@
   .mrow .info{flex:1;min-width:0}.mrow .info .nm{font-size:15px;font-weight:700}
   .mrow .info .last{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
   .mrow .info .last.unread{color:var(--ink);font-weight:600}
+  /* 1対1のトークの未読（2026-10-03） */
+  .mrow .unbadge{flex-shrink:0;align-self:center;min-width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:700;color:#fff;background:var(--rose);border-radius:10px;padding:0 6px;margin-left:6px}
+  /* 件数が正確に分からない時（まだ開いていないトーク）は数字を出さず、点だけにする */
+  .mrow .unbadge.dot{min-width:10px;width:10px;height:10px;padding:0;border-radius:5px}
+  /* 友達の「ひまです」など、いまの状態（2026-10-03。知らない人には出ていたのに友達には出ていなかった） */
+  .stchip{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;font-size:10.5px;font-weight:700;color:#0a7f96;background:rgba(15,176,205,.12);border:1px solid rgba(15,176,205,.3);vertical-align:middle}
   .sep{height:1px;background:var(--line);margin:0 18px}
   .inv{padding:10px 24px 24px;text-align:center}
   .qrbox{width:230px;height:230px;margin:14px auto;background:#fff;border-radius:20px;padding:14px;display:flex;align-items:center;justify-content:center}
@@ -539,7 +545,7 @@
   .mypres1 .t{flex:1;min-width:0}
   .mypres1 .t .a{font-size:11px;font-weight:700;color:var(--muted)}
   .mypres1 .t .b{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mypres1 .t .c2{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mypres1 .t .c2{font-size:11px;color:var(--muted);line-height:1.6}
   .mypres1 .go{color:var(--signal);font-weight:700;font-size:12px;flex-shrink:0}
   .frmapbtn{border:1px solid rgba(15,176,205,.4);background:#fff;color:var(--signal);border-radius:12px;padding:5px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;font-family:inherit}
   .bigopts{display:flex;flex-direction:column;gap:10px}
@@ -2240,7 +2246,7 @@ function closeWave(){ $('#likeOverlay').classList.remove('show'); }
 // 2026-10-02 あおの希望：押したらそのまま送るのをやめ、入力欄に入れて「送る」で確認してもらう（書き直しもできる）
 function sendWaveOpt(i){
   const o=waveOpts[i], el=$('#waveFree'); if(!o||!el)return;
-  el.value=o.text;
+  if(!putInInput(el,o.text))return;
   el.scrollIntoView({block:'nearest'});
   $$('#likeSheet .waveopt').forEach((b,j)=>b.classList.toggle('picked',j===i));
 }
@@ -2564,9 +2570,44 @@ async function createMatch(uid,announce,matchedAt,theirReason,opener){
   if(announce){ talkNew++; updateTalkDot(); showMatchPop(u); }
 }
 let talkNew=0;   // 「トーク」タブを最後に見てから始まったトークの数
+/* ---------- 1対1のトークの未読（2026-10-03） ----------
+   それまで未読の仕組みはコミュニティにしか無く、友達からメッセージが来ても
+   画面のどこにも印が出なかった（バッジの入れ物 #dotFrTalk はHTMLにあるのに、
+   更新するコードが1行も無い状態だった）。
+   最後に開いた時刻を端末に持ち、それより新しい相手の発言を未読として数える。 */
+function readAtMap(){ try{ return JSON.parse(localStorage.getItem('tama_readAt')||'{}'); }catch(e){ return {}; } }
+function markTalkRead(uid){
+  const m=readAtMap(); m[uid]=Date.now();
+  try{ localStorage.setItem('tama_readAt',JSON.stringify(m)); }catch(e){}
+}
+// その相手からの、まだ読んでいないメッセージ。
+// 一覧では通信量を抑えるため最後の1通しか持っていない（loadTalkPreviews）ので、
+// 正確な件数が分かるのは一度開いたトークだけ。分からない時は数字を出さずに「●」にする
+function unreadOf(uid){
+  const at=readAtMap()[uid]||0, c=chatOf(uid);
+  if(c&&c.msgs&&c.msgs.length) return {n:c.msgs.filter(x=>x.from!==myId&&(x.at||0)>at).length,exact:true};
+  const p=talkPreview[chatKey(uid)];
+  return {n:(p&&p.from!==myId&&(p.at||0)>at)?1:0,exact:false};
+}
+const hasUnread=uid=>unreadOf(uid).n>0;
+// 切り替えと下のタブのバッジは「新しいメッセージが来ているトークの数」。
+// 件数の合計にすると、開くまで正確に数えられないぶん嘘になるため
+function unreadTalks(ids){ return ids.filter(hasUnread).length; }
+// 行の右に出すバッジ（正確に分かる時だけ数字）
+function unreadBadge(uid){ const u=unreadOf(uid); return u.n?`<div class="unbadge${u.exact?'':' dot'}">${u.exact?(u.n>99?'99+':u.n):''}</div>`:''; }
 function updateTalkDot(){
-  const n=talkNew+Object.keys(wavesIn).length, dm=$('#dotMatch'); if(!dm)return;
-  if(n>0&&!$('#s-match').classList.contains('active')){ dm.style.display='block'; dm.textContent=n; } else dm.style.display='none';
+  // 友達・24時間それぞれの未読を、切り替えの点と下のタブのバッジに出す
+  const frIds=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>!blocked.has(id));
+  const dmIds=Object.keys(matches).filter(id=>!isFriend(id)&&!blocked.has(id)&&!isExpired(matches[id]));
+  const frN=unreadTalks(frIds), dmN=unreadTalks(dmIds);
+  const seg=(el,n)=>{ if(!el)return; if(n>0){ el.style.display='block'; el.textContent=n>99?'99+':n; } else el.style.display='none'; };
+  seg($('#dotFrTalk'),frN); seg($('#dotDm'),dmN);
+  const n=talkNew+Object.keys(wavesIn).length+frN+dmN, dm=$('#dotMatch'); if(!dm)return;
+  // トークの画面を開いていても、別の切り替えに未読が残っていれば出す
+  const open=$('#s-match').classList.contains('active');
+  const hidden=open?(talkTab==='fr'?frN:talkTab==='dm'?dmN:0):0;
+  const show=n-hidden;
+  if(show>0){ dm.style.display='block'; dm.textContent=show; } else dm.style.display='none';
 }
 function notifyPush(uid,title,body){
   if(!sb||isTest(uid))return;
@@ -2601,9 +2642,14 @@ function renderFriendTalks(frItems){
   return h+frItems.map(({id,u,last},i)=>{
     const pt=presenceText(friendPres(id)), o=findUser(id), online=!!o&&!isClosed(o);
     const sub=last?(last.from===myId?'あなた: ':'')+esc(last.text):'メッセージを送ってみよう';
+    const un=hasUnread(id);
+    // 「ひまです」などのいまの状態は、知らない人には出ていたのに友達には出ていなかった（2026-10-03 修正）。
+    // 空きコマに声をかけられる相手を探すのが友達タブの目的なので、居場所より先に出す
+    const st=statusOf(friendUser(id)||u);
     return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
-      <div class="info"><div class="nm">${esc(u.name)}${last&&last.at?`<span class="gr" style="font-size:11px;color:var(--muted2);font-weight:500;margin-left:6px">${esc(dayLabel(last.at)==='今日'?hhmm(last.at):dayLabel(last.at))}</span>`:''}</div>
-        <div class="last">${sub}</div>${pt?`<div class="mtime" style="color:#0a7f96">📍 ${esc(pt)}</div>`:''}</div></div>${i<frItems.length-1?'<div class="sep"></div>':''}`; }).join('');
+      <div class="info"><div class="nm">${esc(u.name)}${st?`<span class="stchip">💬 ${esc(st)}</span>`:''}${last&&last.at?`<span class="gr" style="font-size:11px;color:var(--muted2);font-weight:500;margin-left:6px">${esc(dayLabel(last.at)==='今日'?hhmm(last.at):dayLabel(last.at))}</span>`:''}</div>
+        <div class="last${un?' unread':''}">${sub}</div>${pt?`<div class="mtime" style="color:#0a7f96">📍 ${esc(pt)}</div>`:''}</div>
+      ${unreadBadge(id)}</div>${i<frItems.length-1?'<div class="sep"></div>':''}`; }).join('');
 }
 // トークの一覧。2026-09-28 から「👥 友達」（期限なし）と「💬 24時間」（話しかけから始まったトーク）を別の切り替えに分けた
 function renderMatches(){
@@ -2621,7 +2667,7 @@ function renderMatches(){
   if(talkTab==='fr')$('#matchCount').textContent=frItems.length?frItems.length+'人':'';
   if(talkTab==='dm')$('#matchCount').textContent=items.length?items.length+'件':'';
   const list=$('#matchList'); if(!list)return;
-  if(talkTab==='fr'){ list.innerHTML=renderFriendTalks(frItems); return; }
+  if(talkTab==='fr'){ list.innerHTML=renderFriendTalks(frItems); updateTalkDot(); return; }
   let h=`<div class="cmsub">友達でない人とのトークは24時間で終わります。続けたい相手はトークの中から「👥 友達に誘う」</div>`;
   if(ins.length){
     h+=`<div class="wavehead">👋 話しかけられています（${ins.length}人）</div>`+ins.map(({id,u,w})=>`<div class="mrow" onclick="openUserSheet('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
@@ -2631,16 +2677,17 @@ function renderMatches(){
   }
   const waitingN=Object.keys(myWaves).filter(id=>!matches[id]&&!isFriend(id)&&!blocked.has(id)&&anyUser(id)).length;
   const overN=Object.keys(matches).filter(id=>!isFriend(id)&&!blocked.has(id)&&isExpired(matches[id])).length;
-  if(!items.length&&!ins.length&&!waitingN&&!overN){list.innerHTML=`<div class="empty"><div class="big">💬</div><p>まだトークはありません。<br>「近くの人」でプロフィールを開いて<br>「👋 話しかける」を押してみましょう。<br>相手が返事をするとトークが始まります（24時間）。</p></div>`;return;}
+  if(!items.length&&!ins.length&&!waitingN&&!overN){list.innerHTML=`<div class="empty"><div class="big">💬</div><p>まだトークはありません。<br>「近くの人」でプロフィールを開いて<br>「👋 話しかける」を押してみましょう。<br>相手が返事をするとトークが始まります（24時間）。</p></div>`;updateTalkDot();return;}
   h+=items.map(({id,u,m,last},i)=>{
     const ms=m?matchLeftMs(m):0, warn=ms<3600000;
     const tag=m&&m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'#0a7f96'}">⏳残り${leftText(ms)}</span>`:'';
     const op=m&&m.opener&&m.opener[m.opener.length-1];
     const sub=last?(last.from===myId?'あなた: ':'')+esc(last.text):op?(op.from===myId?'あなた: ':'')+'👋 '+esc(op.text):(m?'トークが始まりました':'メッセージを送ってみよう');
     // 緑の点は、いまアプリを開いている人だけ
-    const o=findUser(id), online=!!o&&!isClosed(o);
+    const o=findUser(id), online=!!o&&!isClosed(o), un=hasUnread(id);
     return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
-      <div class="info"><div class="nm">${esc(u.name)} ${tag}</div><div class="last">${sub}</div></div></div>${i<items.length-1?'<div class="sep"></div>':''}`;}).join('');
+      <div class="info"><div class="nm">${esc(u.name)} ${tag}</div><div class="last${un?' unread':''}">${sub}</div></div>
+      ${unreadBadge(id)}</div>${i<items.length-1?'<div class="sep"></div>':''}`;}).join('');
   // 自分が話しかけて返事を待っている人（小さく下に）
   const waiting=Object.keys(myWaves).filter(id=>!matches[id]&&!isFriend(id)&&!blocked.has(id)&&anyUser(id));
   if(waiting.length) h+=`<div class="wavehead" style="color:var(--muted);margin-top:10px">⏳ 返事待ち（${waiting.length}人）</div>`
@@ -2653,6 +2700,7 @@ function renderMatches(){
       return `<div class="mrow endrow" style="padding:8px 18px" onclick="openUserSheet('${id}')"><div class="av" style="width:36px;height:36px;font-size:18px;background:${gr(u.emoji)}">${u.emoji}</div>
         <div class="info"><div class="nm">${esc(u.name)}</div><div class="last">${n?n+'通やりとりしました':'メッセージなし'}・もう一度話せます</div></div></div>`; }).join('');
   list.innerHTML=h;
+  updateTalkDot();   // 新しいメッセージを読み込んだ時に、未読のバッジも一緒に直す
 }
 
 /* ---------- 話題カード（マッチした後の「で、なに？」を防ぐ） ---------- */
@@ -2717,11 +2765,19 @@ function renderTopics(){
   set(head+`<div class="tl col">${chatTopics.map((t,i)=>`<button class="tc${t.rare?' rare':''}" onclick="pickTopic(${i})">${t.rare?'✨ ':''}${esc(t.text)}</button>`).join('')}</div>`);
 }
 // 2026-10-02 あおの希望：押したらそのまま送らず、入力欄に入れるだけにする（書き直して「送る」で確認）
+// 入力欄に入れる時の共通の決まり（2026-10-03）。
+// 書きかけがある時に黙って上書きすると取り消せないので、その時だけ確認する
+function putInInput(el,text){
+  if(!el)return false;
+  const cur=(el.value||'').trim();
+  if(cur&&cur!==text&&!confirm(`入力中の「${cur.slice(0,20)}${cur.length>20?'…':''}」を消して、こちらに置き換えますか？`))return false;
+  el.value=text; return true;
+}
 function pickTopic(i){
   const t=chatTopics[i], el=$('#chatInput'); if(!t||!el)return;
-  el.value=t.text;
+  if(!putInInput(el,t.text))return;
   topicsOpen[chatPeer]=false; renderTopics();
-  toast('入力欄に入れました。内容を確かめて「送る」を押してください');
+  toast('入力欄に入れました。確かめて「送る」を押してください');
 }
 
 /* ---------- chat (Supabase messages) ---------- */
@@ -2745,9 +2801,10 @@ async function openChat(uid,from){
     if(!friendChats[uid]){ friendChats[uid]={u:friendUser(uid),msgs:[],matchedAt:null}; await loadChat(uid); }
   }
   chatPeer=uid; chatReturn=from||(matches[uid]?'match':'friends'); const m=chatOf(uid);
+  markTalkRead(uid); updateTalkDot();
   $('#chatAv').style.background=gr(m.u.emoji);$('#chatAv').textContent=m.u.emoji;$('#chatNm').textContent=m.u.name;renderChat();go('chat');
   clearInterval(chatPoll);if(isTest(uid)||!sb)return;
-  chatPoll=setInterval(async()=>{if(chatPeer!==uid)return;const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at');const c=chatOf(uid);if(data&&c){c.msgs=data.map(x=>({from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0}));renderChat();}},2500);
+  chatPoll=setInterval(async()=>{if(chatPeer!==uid)return;const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at');const c=chatOf(uid);if(data&&c){c.msgs=data.map(x=>({from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0}));markTalkRead(uid);renderChat();}},2500);
 }
 // チャットの上の友達ボタン。マッチしただけでは友達にならず、ここから誘う（申請 → 相手が承認）
 function renderChatHead(){
@@ -3394,6 +3451,16 @@ function presenceText(p){
   const act=presenceActive(p);
   return p.place+(act&&p.room?'・'+p.room:'')+(act&&p.note?'「'+p.note+'」':'');
 }
+// 場所が出せない時の理由（2026-10-03）。
+// それまでは「非公開にしている人」「アプリを開いていない人」「建物の外・キャンパス外の人」が
+// すべて同じ「いまいる場所は出ていません」になり、全員が帰宅した日とアプリが動いていない日を見分けられなかった
+function presenceWhy(p){
+  if(!p)return '場所はまだ出ていません';
+  if(p.visibility==='hidden')return '建物・教室は非公開にしています';
+  if(presenceStale(p))return (p.updated_at?agoText(p.updated_at)+'から':'しばらく')+'アプリを開いていません';
+  if(!p.place)return 'キャンパスか建物の外にいます';
+  return '場所はまだ出ていません';
+}
 function agoText(ts){
   const m=Math.floor((Date.now()-(typeof ts==='number'?ts:Date.parse(ts)))/60000);
   return m<1?'たった今':m<60?m+'分前':Math.floor(m/60)+'時間前';
@@ -3430,7 +3497,12 @@ function renderTtCard(){
   const el=$('#ttCard'); if(!el)return;
   const keys=slotKeys(myTimetable), n=keys.length;
   const list=n?keys.map(k=>slotLabel(k)+(myTimetable[k]?' '+myTimetable[k]:'')).join('・'):'';
-  el.innerHTML=`<div class="mpsub" style="margin-top:0">${timetableMissing?'準備中です':n?`<b style="color:var(--ink)">${esc(list)}</b><br>授業のある時限の始まりにだけ「いまどこ？」の通知が届きます（時間割はあなたにしか見えません）`:'入れると同じ授業の人が分かり、授業のない時間には通知が来なくなります（あなたにしか見えません）'}</div>
+  // 誰に見せているかは事実に合わせて出す（2026-10-03。友達に見せた後も「あなたにしか見えません」と出続けていた）
+  const sh=ttSharesTo.size;
+  const who=ttShareMissing?'あなたにしか見えません'
+    :sh?`<b style="color:#0a7f96">${sh}人の友達に見せています</b>（友達のプロフィールで変えられます）`
+    :'いまは誰にも見せていません（友達のプロフィールから見せられます）';
+  el.innerHTML=`<div class="mpsub" style="margin-top:0">${timetableMissing?'準備中です':n?`<b style="color:var(--ink)">${esc(list)}</b><br>授業のある時限の始まりにだけ「いまどこ？」の通知が届きます。${who}`:`入れると同じ授業の人が分かり、授業のない時間には通知が来なくなります。${who}`}</div>
     <button class="btn btn-ghost mpedit" onclick="openTimetable()"${timetableMissing?' disabled':''}>🗓 時間割を${n?'編集':'入れる'}</button>`;
 }
 function setVisibility(k){ myPresence.visibility=k; savePresence(!sharing); renderMyPresence(); const el=$('#psVis'); if(el)renderPsVis(); toast('友達に見せる範囲：'+VIS_LABEL[k]); }
@@ -3455,7 +3527,7 @@ function renderFriends(){
   h+=`<div class="listhead">👥 友達はいまどこ？</div><div class="ulist">`;
   h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
       return `<div class="urow" onclick="openFriend('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-        <div class="info"><div class="n">${esc(u.name)}</div><div class="b">${t?'📍 '+esc(t):'いまいる場所は出ていません'}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}</div>
+        <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}</div>
         <div class="d">${map?`<button class="frmapbtn" onclick="event.stopPropagation();showFriendOnMap('${id}')">🗺 地図</button>`:''}</div></div>`; }).join('')
     :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>目の前にいる人とは、4桁のコードで<br>すぐ友達になれます。</p>
        <button class="btn btn-primary" onclick="openFrAdd('show')">自分のコードを見せる</button><br><button class="btn btn-ghost" style="margin-top:8px" onclick="openFrAdd('enter')">相手のコードを入れる</button></div>`;
@@ -3549,7 +3621,7 @@ function openPlaceEdit(auto){
       <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
       <div class="field"><label>教室・場所（任意）</label>${roomCand}<input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
       <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、図書館で課題" value="${act?esc(p.note||''):''}">
-        <div class="chips psquick">${['授業中','休憩中','ごはん中','課題中'].map(s=>`<span class="c" onclick="$('#psNote').value='${s}'">${s}</span>`).join('')}</div>
+        <div class="chips psquick">${['授業中','休憩中','ごはん中','課題中'].map(s=>`<span class="c" onclick="putInInput($('#psNote'),'${s}')">${s}</span>`).join('')}</div>
         <div class="hint">教室・ひとことは <b>${until}ごろ</b>か、建物を出ると消えます</div></div>
       ${auto?'':`<div class="field" style="margin-bottom:10px"><label>友達にどこまで見せる？</label><div class="chips mpvis" id="psVis"></div>
         <div class="visnote">「近くの人」の一覧・地図には、友達かどうかに関係なく、あなたの<b>アイコンとおおよその位置</b>が出ます。それも消したい時は、マイページで<b>位置情報の共有をOFF</b>にしてください。</div></div>`}</div>`;
@@ -4041,11 +4113,14 @@ function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigato
 /* ---------- misc ---------- */
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 // トーク：「個人」（マッチ・友達のチャット）と「コミュニティ」を切り替える。コミュニティは以前は別のタブだった
-let talkTab='dm';
+// 前に見ていた切り替えを覚えておく（2026-10-03。友達とだけ使っている人も毎回「💬 24時間」から始まっていた）
+let talkTab=(()=>{ try{ const v=localStorage.getItem('tama_talkTab'); return ['fr','dm','comm'].includes(v)?v:'dm'; }catch(e){ return 'dm'; } })();
 function setTalkTab(k){
-  talkTab=k; $('#segFr').classList.toggle('on',k==='fr'); $('#segDm').classList.toggle('on',k==='dm'); $('#segComm').classList.toggle('on',k==='comm');
+  talkTab=k; try{ localStorage.setItem('tama_talkTab',k); }catch(e){}   // 2026-10-03: 毎回「💬 24時間」に戻っていたので覚える
+  $('#segFr').classList.toggle('on',k==='fr'); $('#segDm').classList.toggle('on',k==='dm'); $('#segComm').classList.toggle('on',k==='comm');
   $('#matchList').hidden=k==='comm'; $('#commPane').hidden=k!=='comm';
   if(k==='comm'){ renderRooms(); loadRooms(); } else { renderMatches(); loadTalkPreviews(); }
+  updateTalkDot();
 }
 function go(t){
   // コミュニティの一覧は「トーク」の中にある（部屋から戻る時などに go('comm') が呼ばれる）
