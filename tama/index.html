@@ -656,6 +656,40 @@
   .daily .dyday{font-size:11.5px;color:var(--ink);background:rgba(255,255,255,.65);border-radius:10px;padding:6px 9px;margin:0 0 8px;line-height:1.6}
   .daily .dyday:empty{display:none}
   .crosswhen{font-size:11px;color:var(--muted)}
+  /* 機能ごとの「?」（押せる範囲は見た目より広くする） */
+  .qhelp{position:relative;display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;margin-left:6px;border-radius:50%;
+    border:1.5px solid var(--muted2);background:#fff;color:var(--muted);font-family:inherit;font-weight:700;font-size:10.5px;line-height:1;cursor:pointer;vertical-align:2px;padding:0;flex-shrink:0}
+  .qhelp::after{content:"";position:absolute;inset:-9px}
+  .apphead h1 .qhelp{width:19px;height:19px;font-size:11.5px;vertical-align:4px}
+  .ntile .nh>span:first-child{display:inline-flex;align-items:center}
+  .daily .dh>span:first-child{display:inline-flex;align-items:center}
+  #helpSheet .hhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  #helpSheet .hicon{font-size:30px}
+  #helpSheet h2{font-family:"Zen Maru Gothic";font-size:20px;font-weight:900}
+  #helpSheet .hlead{font-size:14px;line-height:1.7;margin-bottom:12px}
+  #helpSheet .hsec{border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:10px;background:rgba(255,255,255,.7)}
+  #helpSheet .hh{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+  #helpSheet ul{padding-left:1.2em;font-size:13px;line-height:1.7}#helpSheet li{margin:3px 0}
+  #helpSheet .hsec.see{background:var(--surface2)}#helpSheet .hsec p{font-size:13px;line-height:1.7}
+  #helpSheet .htip{font-size:12.5px;line-height:1.7;color:#8a4d0c;background:#fff4e2;border-radius:12px;padding:9px 12px}
+  /* 初めて見た時だけの吹き出し */
+  .tipbub{position:absolute;z-index:35;width:270px;max-width:calc(100% - 24px);background:#1e2446;color:#fff;border-radius:14px;padding:11px 13px 9px;
+    font-size:13px;line-height:1.6;box-shadow:0 10px 28px rgba(20,25,60,.35);opacity:0;pointer-events:none;transition:opacity .2s}
+  .tipbub.show{opacity:1;pointer-events:auto}
+  .tipbub .ar{position:absolute;top:-6px;width:12px;height:12px;margin-left:-6px;background:#1e2446;transform:rotate(45deg)}
+  .tipbub.up .ar{top:auto;bottom:-6px}
+  .tipbub .tb{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
+  .tipbub .tb button{border:0;border-radius:10px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;background:rgba(255,255,255,.14);color:#fff}
+  .tipbub .tb button.ok{background:var(--signal)}
+  .tipfocus{box-shadow:0 0 0 3px rgba(15,176,205,.55)!important;border-radius:14px}
+  /* 見せる範囲 */
+  .setrow.visrow{cursor:pointer}.setrow.visrow .go{color:var(--muted2);font-size:20px;font-weight:700}
+  .vishint{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:7px}.vishint b{color:var(--ink)}
+  .vishint a,.visnote a,.mpsub a,.frnote a{color:var(--signal);font-weight:700;cursor:pointer;white-space:nowrap}
+  .vislink{display:block;width:100%;text-align:left;border:0;background:none;padding:0 0 10px;color:var(--signal);font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
+  .sharerow.visfr{padding:8px 12px;margin-top:6px}
+  .sharerow.visfr .lab{display:flex;align-items:center;gap:8px}
+  .sharerow .vav{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:15px}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -734,13 +768,13 @@
           <div class="obd">アイコンはあとからマイページで変えられます。</div>
           <div class="emojis" id="obEmojis"></div>
           <div class="field" style="margin-top:16px"><label>ひとこと（任意）</label><textarea id="obBio" rows="2" maxlength="60" placeholder="例：ヨルシカが好きです。学食でよくカレー食べてます"></textarea></div>
-          <div class="privacy">🔒 <b>位置情報について</b><br>「位置情報を共有して始める」を押すと、GPSでのおおよその現在地を、<b>多摩キャンパスの中にいる間だけ</b>、このアプリを使っている人に共有します。キャンパスの外では位置を送りません。共有はいつでもマイページから止められます。</div>
+          <div class="privacy">🔒 <b>位置情報について</b><br>「位置情報を共有して始める」を押すと、スマホのGPSの現在地を、<b>多摩キャンパスの中にいる間だけ</b>、このアプリを使っている人に共有します。キャンパスの外では位置を送りません。約100mぼかす・止めるは、いつでもマイページの「見せる範囲」から選べます。</div>
         </div>
         <div class="obnav"><button class="btn btn-ghost" id="obBack" onclick="obMove(-1)">戻る</button><button class="btn btn-primary" id="obNext" onclick="obMove(1)">次へ</button></div>
       </div>
     </section>
     <section class="screen" id="s-near">
-      <div class="apphead"><h1>近くの人</h1><span class="sub" id="nearSub">&mdash;</span></div>
+      <div class="apphead"><h1>近くの人<button class="qhelp" onclick="openHelp('near')" aria-label="近くの人の説明">?</button></h1><span class="sub" id="nearSub">&mdash;</span></div>
       <!-- 見出しより下は画面ごとスクロールする（地図の下の一覧だけがスクロールすると、スマホでは残りが狭くて動かしづらかったため） -->
       <div class="scroll">
       <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
@@ -759,13 +793,13 @@
       </div>
     </section>
     <section class="screen" id="s-cross">
-      <div class="apphead"><h1>すれ違った人</h1><span class="sub" id="crossSub">&mdash;</span></div>
+      <div class="apphead"><h1>すれ違った人<button class="qhelp" onclick="openHelp('cross')" aria-label="すれ違いの説明">?</button></h1><span class="sub" id="crossSub">&mdash;</span></div>
       <div style="padding:2px 22px 12px;font-size:12px;color:var(--muted)"><span class="encR">50</span>m以内に入った人を記録します。会うほど回数が増えます。（アプリを開いている間）</div>
       <div class="scroll"><div class="ulist" id="crossList"></div></div>
     </section>
     <!-- トーク：マッチした相手と友達の1対1のチャット、コミュニティ（グループ）を1つのタブにまとめた（2026-09-24） -->
     <section class="screen" id="s-match">
-      <div class="apphead"><h1>トーク</h1><span class="sub" id="matchCount">0</span></div>
+      <div class="apphead"><h1>トーク<button class="qhelp" onclick="openHelp('talk')" aria-label="トークの説明">?</button></h1><span class="sub" id="matchCount">0</span></div>
       <!-- 2026-09-28：「個人」を「友達」（期限なし）と「24時間トーク」（話しかけから始まった相手）に分けた -->
       <div class="seg"><button id="segFr" onclick="setTalkTab('fr')">👥 友達<span class="sdot" id="dotFrTalk" style="display:none"></span></button><button id="segDm" class="on" onclick="setTalkTab('dm')">💬 24時間<span class="sdot" id="dotDm" style="display:none"></span></button><button id="segComm" onclick="setTalkTab('comm')">コミュニティ<span class="sdot" id="dotComm" style="display:none"></span></button></div>
       <div class="scroll" id="matchList"></div>
@@ -788,7 +822,7 @@
     </section>
     <section class="screen" id="s-friends">
       <!-- 2026-09-24 作り直し：届いた申請 → 友達のいまの自分 → 自分（1行）の順。追加は右上の「＋ 追加」から -->
-      <div class="apphead"><h1>友達 <span class="sub" id="friendSub" style="font-family:inherit">0人</span></h1><button class="headbtn" onclick="openFrAdd()">＋ 追加</button></div>
+      <div class="apphead"><h1>友達<button class="qhelp" onclick="openHelp('friends')" aria-label="友達の説明">?</button> <span class="sub" id="friendSub" style="font-family:inherit">0人</span></h1><button class="headbtn" onclick="openFrAdd()">＋ 追加</button></div>
       <div class="scroll">
         <div id="friendBox"></div>
         <div id="myPresence"></div>
@@ -804,9 +838,10 @@
         <div class="listhead" style="margin-top:10px">🗓 時間割</div>
         <div class="mypres" id="ttCard"></div>
         <div class="listhead" style="margin-top:6px">⚙️ 設定</div>
+        <!-- 2026-10-04：位置の共有・おおまかな位置（ここ）、建物・教室の公開範囲（友達タブ）、時間割（友達ごと）と4か所に分かれていたのを、
+             「🔒 見せる範囲」の1枚（openVisHub）にまとめた。ここには今の状態を1行で出す -->
         <div class="setting">
-          <div class="setrow"><div class="lab">位置情報を共有<small>OFFにすると「近くの人」の一覧・地図に出なくなり、友達にもいまいる建物が見えなくなります</small></div><div class="toggle on" id="tgShare" onclick="toggleShare(this)"><div class="k"></div></div></div>
-          <div class="setrow"><div class="lab">おおまかな位置にする<small>正確な地点をぼかして共有（約100m）</small></div><div class="toggle" id="tgCoarse" onclick="toggleCoarse(this)"><div class="k"></div></div></div>
+          <div class="setrow visrow" id="visSum" onclick="openVisHub()"><div class="lab">🔒 見せる範囲<small id="visSumTxt">&mdash;</small></div><span class="go">›</span></div>
           <div class="setrow"><div class="lab">通知<small id="pushHint">話しかけ・メッセージ・友達申請をスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
         </div>
         <button class="btn btn-ghost" style="margin:4px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
@@ -856,6 +891,10 @@
   <div class="overlay" id="homeOverlay" onclick="if(event.target===this)closeAddHome()"><div class="sheet" id="homeSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="frOverlay" onclick="if(event.target===this)closeFrAdd()"><div class="sheet" id="frSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="invOverlay" onclick="if(event.target===this)closeInvite()"><div class="sheet" id="invSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="visOverlay" onclick="if(event.target===this)closeVisHub()"><div class="sheet" id="visSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()"><div class="sheet" id="helpSheet" style="padding:24px 22px 28px"></div></div>
+  <!-- 機能を初めて見た時だけ出す吹き出し（showTip） -->
+  <div class="tipbub" id="tipBubble"></div>
   <div class="guide" id="guide">
     <div class="gtop"><button class="skip" onclick="closeGuide()">スキップ</button></div>
     <div class="gbody" id="guideBody"></div>
@@ -1216,6 +1255,7 @@ function pushAskReady(){ try{ return localStorage.getItem('tama_pushReady')==='1
 // 説明の画面の文は、聞く場面に合わせて変える（2026-10-01。話しかけた時だけでなく、お題に答えた・時間割を入れた・
 // 近くに誰もいない時の「来たら知らせて」でも聞くようにした。初日に何もせず閉じた人に、その後なにも届かなかったため）
 const PUSH_WHY={
+  open:['通知をオンにして<br>はじめましょう','話しかけへの返事・友達申請・共通点のある人が近くに来たときに、アプリを閉じていてもお知らせします。'],
   wave:['返事が来たら<br>通知で知らせます','話しかけへの返事・メッセージ・友達申請が届いたときに、アプリを閉じていてもお知らせします。'],
   near:['共通点のある人が<br>近くに来たら知らせます','アプリを閉じていても、キャンパスで共通点のある人が近くに来たときにお知らせします。話しかけへの返事・友達申請も届きます。'],
   daily:['明日のお題を<br>お知らせします','平日の昼休みに、まだ答えていないお題を1日1回だけお知らせします。話しかけへの返事・友達申請も届きます。'],
@@ -1239,10 +1279,13 @@ async function autoAskPush(){
   if(!pushSupported()) return;
   if(isIOS()&&!isStandalone()) return;
   if(isPushOptOut()) return;
-  if(!profile) return;   // 登録前（ようこそ・登録画面）には聞かない
-  if(Notification.permission==='granted'){ syncPushSubscription(); return; }
+  // 2026-10-04 あおの決定：ホーム画面のアプリから開いた時は、登録前（ようこそ画面）でもすぐ聞いてよい。
+  // ブラウザ（PC）で開いた時は、これまで通り登録して話しかけた後などから聞く
+  const app=isStandalone();
+  if(!profile&&!app) return;
+  if(Notification.permission==='granted'){ if(profile)syncPushSubscription(); return; }
   if(Notification.permission==='denied') return;   // 端末の設定からしか戻せないので、ここでは何もしない
-  if(pushGateSkipped||!pushAskReady()) return;
+  if(pushGateSkipped||!(pushAskReady()||app)) return;
   if(introPending||$('#guide').classList.contains('show')) return;   // 使い方の上には重ねない（閉じた時に聞き直す）
   openPushGate();
   requestPushPermission();   // まず触らずに出せるか試す。Androidはこれで出る。iPhoneは失敗するのでタップを待つ
@@ -1402,7 +1445,7 @@ async function onStart(){
   renderMeHero();
   $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
   // 「位置情報を共有して始める」を押したので共有ON（プロフィールを消した後に登録し直した時、前のOFFが残らないように）
-  sharing=true; profileDeleted=false; saveLocPrefs(); $('#tgShare').classList.add('on');
+  sharing=true; profileDeleted=false; saveLocPrefs(); renderVisSummary();
   buildInvite();renderStatusRow();
   maybeShowGuide(false);   // 新規登録なので必ず出す
   await saveNewProfile();   // 位置を取り始める前に保存する（後だと、遅れて届いた sharing:false が本当の位置を上書きする）
@@ -1819,12 +1862,14 @@ function renderStatusRow(){
   const p=myPresence, act=presenceActive(p), st=statusOf(profile);
   const where=!sharing?'共有を止めています':p.place?esc(p.place)+(act&&p.room?'・'+esc(p.room):''):noPlaceText();
   const tt=ttTodayText();
+  // 「?」はタイルのボタンの中にあるので、押してもタイルが開かないように止める（ボタンの中にボタンは置けないので span）
+  const q=k=>`<span class="qhelp" role="button" aria-label="説明" onclick="event.stopPropagation();openHelp('${k}')">?</span>`;
   el.innerHTML=`<button class="ntile now" onclick="openPlaceEdit(false)">
-      <span class="nh">📍 いまの自分<span class="ne">編集 ›</span></span>
+      <span class="nh"><span>📍 いまの自分${q('now')}</span><span class="ne">編集 ›</span></span>
       <span class="nm">${where}</span>
       <span class="ns">${st?'💬 '+esc(st):'いまの状態を選ぶ'}</span></button>
     <button class="ntile tt${tt.empty?' empty':''}" onclick="openTimetable()">
-      <span class="nh">🗓 時間割<span class="ne">${tt.empty?'入れる ›':'編集 ›'}</span></span>
+      <span class="nh"><span>🗓 時間割${q('tt')}</span><span class="ne">${tt.empty?'入れる ›':'編集 ›'}</span></span>
       <span class="nm">${esc(tt.main)}</span>
       <span class="ns">${esc(tt.sub)}</span></button>`;
 }
@@ -2502,17 +2547,17 @@ function openPreview(mode){
     <div class="pvwrap">${card}</div>
     ${fr?`<div class="pvhint"><b>友達には、これも見えます</b><br>
         📍 いる建物・教室：${sharing?(p.visibility==='hidden'?'<b>見せていません</b>（公開範囲の設定）':esc(p.place?p.place+(act&&p.room?'・'+p.room:''):noPlaceText())):'<b>位置情報の共有が止まっています</b>'}<br>
-        🗓 時間割：${ttShareMissing?'準備中です':shared?`${shared}人の友達に見せています`:'<b>まだ誰にも見せていません</b>（友達のプロフィールのスイッチでONにできます）'}<br>
+        🗓 時間割：${ttShareMissing?'準備中です':shared?`${shared}人の友達に見せています`:'<b>まだ誰にも見せていません</b>（マイページの「🔒 見せる範囲」で選べます）'}<br>
         💬 トークは期限なしで続きます<br>
         ${(a.purposes||[]).length?'🤝 「いま、ちょっと困っていること」は、友達でも<b>同じことを選んだ人にだけ</b>見えます':''}</div>`
       :`<div class="pvhint"><b>知らない人には、これは見えません</b><br>
         🚫 年齢・いる建物・教室・ひとこと（友達だけ）<br>
         🚫 時間割（見せると決めた友達だけ）<br>
         ${(a.purposes||[]).length?`🤝 「いま、ちょっと困っていること」（${a.purposes.map(esc).join('・')}）は、<b>同じことを選んだ人にだけ</b>見えます。だからこのプレビューには出ていません<br>`:''}
-        🚫 正確な現在地（地図に出るのはおおよその位置で、${coarse?'いまは「おおまかな位置」設定なので約100mぼかしています':'「おおまかな位置」をONにすると約100mぼかせます'}）<br>
-        👀 見えるのは上のカードと、地図・一覧に出るアイコンと距離です</div>`}
+        👀 見えるのは上のカードと、地図・一覧に出るアイコン・位置・距離です<br>
+        📍 地図の位置は、${coarse?'いまは「ぼかして出す」設定なので<b>約100mぼかしています</b>':'<b>スマホのGPSの位置そのまま</b>です（数m〜数十mの誤差があります）。マイページの「🔒 見せる範囲」で「ぼかして出す」にすると約100mぼかせます'}</div>`}
     ${miss.length?`<div class="pvmiss"><b>まだ入れていない項目</b>：${miss.map(esc).join('・')}<br>入れた項目だけが相手の画面に出ます。共通点が見つかると、相手の一覧であなたが上に出やすくなります。</div>`:''}
-    ${!sharing?`<div class="pvmiss"><b>位置情報の共有が止まっています</b>：いまは「近くの人」の一覧・地図にあなたは出ていません。マイページの設定からONにできます。</div>`:''}
+    ${!sharing?`<div class="pvmiss"><b>位置情報の共有が止まっています</b>：いまは「近くの人」の一覧・地図にあなたは出ていません。マイページの「🔒 見せる範囲」で戻せます。</div>`:''}
     <div class="pvlist" style="display:flex;gap:8px;margin-top:14px">
       <button class="btn btn-ghost" style="flex:1;padding:13px;font-size:14px" onclick="closePreview()">閉じる</button>
       <button class="btn btn-primary" style="flex:1;padding:13px;font-size:14px" onclick="closePreview();openEdit()">編集する</button>
@@ -3159,6 +3204,106 @@ async function doInstall(){
   try{ await deferredInstall.userChoice; }catch(e){}
   deferredInstall=null; closeAddHome();
 }
+/* ---------- 機能ごとの説明（2026-10-04 あおの依頼） ----------
+   ようこそ画面・使い方には書いてあるが、アプリを開いた時に「何ができるアプリか」が伝わりにくかったので、
+   ①各機能の見出しに「?」（いつでも openHelp で説明を開ける） ②その機能を初めて見た時だけ吹き出し（showTip）を出す */
+const HELP={
+  near:{icon:'📍',title:'近くの人',lead:'今日キャンパスでこのアプリを使った人が、地図と一覧に出ます。',
+    can:['共通点（同じアーティスト・あるある・授業・今日のお題の答えなど）がある人ほど上に出ます。めずらしい共通点は「✨ レアな共通点」','人を押すとプロフィール。「👋 話しかける」で、共通点から作った話題を選んで送れます','アプリを閉じた人は「🕘 さっきまでいた人」として下に分かれます'],
+    see:'あなたも、ほかの人の地図・一覧に、アイコン・名前・学部・プロフィールと位置が出ます（キャンパスの中にいる間だけ）。マイページの「🔒 見せる範囲」で、ぼかす・出さないを選べます。',
+    tip:'人が多いのは、平日の昼休み（12:50〜13:40）の食堂のあたりです。'},
+  daily:{icon:'🎲',title:'今日のお題',lead:'毎日1問の、かんたんな質問です。',
+    can:['答えると、みんなの答えが見られます（5人以上が答えると割合が出ます）','同じ答えの人が、その日だけの共通点として「近くの人」に出ます','次の日には、カードの上に昨日の結果が出ます'],
+    see:'あなたの答えは、その日だけプロフィールに出ます。答えられるのは1日1回で、あとから変えられません。',
+    tip:'まだ答えていない日は、昼休みにお題の通知が届くことがあります。'},
+  now:{icon:'📍',title:'いまの自分',lead:'いまの状態と、いる場所を入れておく所です。',
+    can:['「ひまです」「一緒にごはん行ける」などの状態は、近くの人みんなに見えます（授業の時限の終わりで消えます）','いる建物は自動で入ります。教室・ひとことを入れると友達に見えます（建物を出るか、90分で消えます）','「いま、ちょっと困っていること」は、同じことを選んだ人にだけ見えます'],
+    see:'建物・教室が見えるのは友達だけです。どこまで見せるかは、マイページの「🔒 見せる範囲」で変えられます。'},
+  tt:{icon:'🗓',title:'時間割',lead:'自分の授業を入れておく所です。',
+    can:['同じ時限に同じ授業を入れた人が「📚 同じ授業」の共通点で見つかります。授業中は、同じ授業の人が一覧の一番上に出ます','教室を入れておくと、「いまの自分」に教室の候補が出ます','友達がいると、その日最初の授業の始まりに「いまどこ？」の通知が届きます'],
+    see:'時間割はあなたにしか見えません。見せたい友達にだけ、マイページの「🔒 見せる範囲」で見せられます。'},
+  cross:{icon:'🚶',title:'すれ違い',lead:'アプリを開いたままキャンパスを歩くと、近くを通った人が記録されます。',
+    can:[`${FES.encounterRangeM}m以内に入った人が記録され、会うほど回数が増えます`,'何度もすれ違う人は、生活のリズムが近い人かもしれません。プロフィールにも「これまで◯回すれ違っています」と出ます','同じ人は30分以内なら数え直しません'],
+    see:'記録するのは、アプリを開いていて、キャンパスの中にいる間だけです。',
+    tip:'話しかけるきっかけに「よくすれ違いますね」も使えます。'},
+  talk:{icon:'💬',title:'トーク',lead:'話しかけて返事が来た人・友達・コミュニティと話す所です。',
+    can:['💬 24時間：話しかけて、相手が返事をすると始まります。24時間で終わります','👥 友達：期限なしで話せます。24時間のトークの上の「👥 友達に誘う」から友達になれます','コミュニティ：同じ話題の人が集まるグループ。だれでも作れます'],
+    see:'24時間トークの相手には、あなたのいる建物・教室は見えません。'},
+  friends:{icon:'👥',title:'友達',lead:'友達がいまどこにいるかが分かります。',
+    can:['友達のいる建物・教室（本人が見せている時だけ）と、いまの授業（時間割を見せてくれた時だけ）','友達になるには、トークの「👥 友達に誘う」か、目の前で4桁のコードを交換します','「地図の位置も見せる」にしている友達は、地図に緑のふちで出ます'],
+    see:'友達には、あなたのいる建物・教室が見えます。範囲はマイページの「🔒 見せる範囲」で変えられます。'}
+};
+function openHelp(k){
+  const h=HELP[k]; if(!h)return;
+  hideTip();
+  $('#helpSheet').innerHTML=`<div class="hhead"><span class="hicon">${h.icon}</span><h2>${h.title}</h2></div>
+    <p class="hlead">${h.lead}</p>
+    <div class="hsec"><div class="hh">できること</div><ul>${h.can.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="hsec see"><div class="hh">👀 だれに見える？</div><p>${h.see}</p></div>
+    ${h.tip?`<div class="htip">💡 ${h.tip}</div>`:''}
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:16px" onclick="closeHelp()">わかった</button>
+    <button class="btn btn-ghost" style="width:100%;padding:11px;margin-top:8px;font-size:13px;color:var(--muted)" onclick="closeHelp();openGuide()">📖 使い方をぜんぶ見る</button>`;
+  $('#helpOverlay').classList.add('show');
+}
+function closeHelp(){ $('#helpOverlay').classList.remove('show'); }
+
+// 初めて見た時だけの吹き出し。画面ごとに上から順に1つずつ出し、「OK」か「くわしく」を押したら二度と出さない（端末に保存）。
+// ガイド・シート・通知の許可画面などが開いている間は出さない（重なると押せなくなるため）
+const TIPS={
+  near:[{k:'daily',sel:'#dailyCard',t:'🎲 毎日1問のお題です。答えると、みんなの答えと「同じ答えの人」が見られます'},
+        {k:'now',sel:'#nowBar .ntile.now',t:'📍 「ひまです」などの状態を入れると、近くの人に伝わります。教室は友達だけに見えます'},
+        {k:'tt',sel:'#nowBar .ntile.tt',t:'🗓 時間割を入れると、同じ授業を取っている人が見つかります'}],
+  cross:[{k:'cross',sel:'#s-cross .apphead h1',t:`🚶 開いたまま歩くと、${FES.encounterRangeM}m以内に入った人が記録されます。何度も会う人が分かります`}],
+  match:[{k:'talk',sel:'#s-match .seg',t:'💬 話しかけて返事が来ると、ここで24時間話せます。もっと話したい人とは友達に'}],
+  friends:[{k:'friends',sel:'#s-friends .apphead h1',t:'👥 友達になると、いる建物・教室が見えます。目の前の人とは「＋ 追加」の4桁のコードで'}],
+  me:[{k:'vis',help:null,sel:'#visSum',t:'🔒 だれに何を見せるかは、ここでまとめて変えられます'}]
+};
+let tipsSeen=(()=>{ try{ return JSON.parse(localStorage.getItem('tama_tips')||'[]'); }catch(e){ return []; } })();
+let tipCur=null;
+function markTip(k){ if(!tipsSeen.includes(k))tipsSeen.push(k); try{ localStorage.setItem('tama_tips',JSON.stringify(tipsSeen)); }catch(e){} }
+const curScreen=()=>{ const s=$('.screen.active'); return s?s.id.slice(2):''; };
+function tipBlocked(){
+  return !profile||$('#nav').style.display==='none'||$('#guide').classList.contains('show')||$('#pushGate').classList.contains('show')
+    ||$('#homeGate').classList.contains('show')||$('#fesClosed').classList.contains('show')||!!$('.overlay.show')||!!$('.map-wrap.full')||$('#matchpop').classList.contains('show');
+}
+function maybeTip(){
+  if(tipCur){ if(curScreen()!==tipCur.scr||tipBlocked())hideTip(); else placeTip(); return; }
+  if(tipBlocked())return;
+  const scr=curScreen(), t=(TIPS[scr]||[]).find(x=>{ if(tipsSeen.includes(x.k))return false; const el=$(x.sel); return el&&el.offsetParent&&el.textContent.trim(); });
+  if(t)showTip(t,scr);
+}
+function showTip(t,scr){
+  tipCur={...t,scr};
+  const el=$(t.sel); try{ el.scrollIntoView({block:'nearest'}); }catch(e){}
+  const more=t.help===null?'':`<button onclick="tipMore()">くわしく</button>`;
+  $('#tipBubble').innerHTML=`<i class="ar"></i><div class="tt">${t.t}</div><div class="tb">${more}<button class="ok" onclick="tipOk()">OK</button></div>`;
+  $('#tipBubble').classList.add('show'); placeTip();
+}
+// 吹き出しを対象の下（下に入らなければ上）に置き、矢印を対象の真ん中に向ける。スクロールで対象が見えなくなったら隠す
+function placeTip(){
+  const b=$('#tipBubble'), el=tipCur&&$(tipCur.sel);
+  if(!el||!el.offsetParent){ hideTip(); return; }
+  $$('.tipfocus').forEach(x=>{ if(x!==el)x.classList.remove('tipfocus'); }); el.classList.add('tipfocus');   // 2分ごとの描き直しで消えるので毎回付け直す
+  const ph=$('.phone').getBoundingClientRect(), r=el.getBoundingClientRect(), nav=$('#nav').getBoundingClientRect();
+  const bh=b.offsetHeight, bw=b.offsetWidth, bottomLimit=(nav.height?nav.top:ph.bottom)-ph.top;
+  const visible=r.bottom>ph.top+40&&r.top<ph.top+bottomLimit-20;
+  b.style.visibility=visible?'visible':'hidden';
+  const below=r.bottom-ph.top+12, above=r.top-ph.top-bh-12, useBelow=below+bh<=bottomLimit-8||above<8;
+  const left=Math.max(12,Math.min(ph.width-bw-12,r.left-ph.left+r.width/2-bw/2));
+  b.style.top=(useBelow?below:above)+'px'; b.style.left=left+'px'; b.classList.toggle('up',!useBelow);
+  b.querySelector('.ar').style.left=Math.max(18,Math.min(bw-18,r.left-ph.left+r.width/2-left))+'px';
+}
+// OKを押さずに隠れた吹き出し（シートが開いた・画面を切り替えた）は、見たことにせず、また出せる時に出す
+function hideTip(){
+  $('#tipBubble').classList.remove('show'); $$('.tipfocus').forEach(x=>x.classList.remove('tipfocus'));
+  tipCur=null;
+}
+function tipOk(){ if(!tipCur)return; markTip(tipCur.k); hideTip(); setTimeout(maybeTip,450); }
+function tipMore(){ if(!tipCur)return; const k=tipCur.k; markTip(k); hideTip(); openHelp(k); }
+setInterval(maybeTip,1200);
+document.addEventListener('scroll',()=>{ if(tipCur)placeTip(); },true);
+window.addEventListener('resize',()=>{ if(tipCur)placeTip(); });
+
 /* ---------- はじめての方向けガイド ---------- */
 const GUIDE=[
   {icon:'📍',title:'近くの<br>共通点のある人が見える',body:'今日多摩キャンパスでこのアプリを使った人が表示されます。よく聴くアーティストや「あるある」など、<b>めずらしい共通点</b>がある人ほど上に「✨レアな共通点」つきで出ます。',note:'恋愛目的のアプリではありません。キャンパスの中にいる間だけ位置を共有します。'},
@@ -3484,7 +3629,7 @@ function noPlaceText(){
   return inCampus(myPos.lat,myPos.lng)?'建物の外':'キャンパスの外';
 }
 function renderMyPresence(){
-  renderStatusRow(); renderTtCard();
+  renderStatusRow(); renderTtCard(); renderVisSummary();
   const el=$('#myPresence'); if(!el)return;
   const p=myPresence, act=presenceActive(p);
   el.innerHTML=`<div class="listhead" style="margin-top:6px">🙋 友達から見たあなた</div>
@@ -3500,12 +3645,13 @@ function renderTtCard(){
   // 誰に見せているかは事実に合わせて出す（2026-10-03。友達に見せた後も「あなたにしか見えません」と出続けていた）
   const sh=ttSharesTo.size;
   const who=ttShareMissing?'あなたにしか見えません'
-    :sh?`<b style="color:#0a7f96">${sh}人の友達に見せています</b>（友達のプロフィールで変えられます）`
-    :'いまは誰にも見せていません（友達のプロフィールから見せられます）';
-  el.innerHTML=`<div class="mpsub" style="margin-top:0">${timetableMissing?'準備中です':n?`<b style="color:var(--ink)">${esc(list)}</b><br>授業のある時限の始まりにだけ「いまどこ？」の通知が届きます。${who}`:`入れると同じ授業の人が分かり、授業のない時間には通知が来なくなります。${who}`}</div>
+    :sh?`<b style="color:#0a7f96">${sh}人の友達に見せています</b>（<a onclick="openVisHub()">🔒 見せる範囲</a>で変えられます）`
+    :'いまは誰にも見せていません（<a onclick="openVisHub()">🔒 見せる範囲</a>で見せる友達を選べます）';
+  // 通知の説明は tama-remind に合わせる（2026-10-01 から、友達がいる人に、その日最初の授業の時限だけ送る）
+  el.innerHTML=`<div class="mpsub" style="margin-top:0">${timetableMissing?'準備中です':n?`<b style="color:var(--ink)">${esc(list)}</b><br>友達がいると、その日最初の授業の始まりに「いまどこ？」の通知が届きます。${who}`:`入れると、同じ授業の人が見つかります。${who}`}</div>
     <button class="btn btn-ghost mpedit" onclick="openTimetable()"${timetableMissing?' disabled':''}>🗓 時間割を${n?'編集':'入れる'}</button>`;
 }
-function setVisibility(k){ myPresence.visibility=k; savePresence(!sharing); renderMyPresence(); const el=$('#psVis'); if(el)renderPsVis(); toast('友達に見せる範囲：'+VIS_LABEL[k]); }
+function setVisibility(k){ myPresence.visibility=k; savePresence(!sharing); afterVisChange(); toast('友達に見せる範囲：'+VIS_LABEL[k]); }
 function renderFriends(){
   const box=$('#friendBox'); if(!box)return;
   if(Object.keys(friendTT).some(id=>!isFriend(id))){ friendTT={}; loadTTShares(); }   // 友達をやめた人の時間割は手元からも消す
@@ -3598,10 +3744,6 @@ function psTogglePurpose(v){
   toggleArr(psPurposes,v); renderPsPurposes();
 }
 function psSetStatus(v){ psStatus=psStatus===v?'':v; renderPsPurposes(); }
-function renderPsVis(){
-  const el=$('#psVis'); if(!el)return;
-  el.innerHTML=Object.entries(VIS_LABEL).map(([k,v])=>`<span class="c${myPresence.visibility===k?' sel':''}" onclick="setVisibility('${k}')">${v}</span>`).join('');
-}
 function openPlaceEdit(auto){
   ttOpen=false;
   const p=myPresence, act=presenceActive(p);
@@ -3623,15 +3765,14 @@ function openPlaceEdit(auto){
       <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、図書館で課題" value="${act?esc(p.note||''):''}">
         <div class="chips psquick">${['授業中','休憩中','ごはん中','課題中'].map(s=>`<span class="c" onclick="putInInput($('#psNote'),'${s}')">${s}</span>`).join('')}</div>
         <div class="hint">教室・ひとことは <b>${until}ごろ</b>か、建物を出ると消えます</div></div>
-      ${auto?'':`<div class="field" style="margin-bottom:10px"><label>友達にどこまで見せる？</label><div class="chips mpvis" id="psVis"></div>
-        <div class="visnote">「近くの人」の一覧・地図には、友達かどうかに関係なく、あなたの<b>アイコンとおおよその位置</b>が出ます。それも消したい時は、マイページで<b>位置情報の共有をOFF</b>にしてください。</div></div>`}</div>`;
+      ${auto?'':`<div class="visnote" style="margin-bottom:12px">友達に見せる範囲：<b>${esc(VIS_LABEL[p.visibility])}</b>　<a onclick="closePlaceEdit();openVisHub()">🔒 見せる範囲で変える ›</a></div>`}</div>`;
   // 建物に入って自動で開いた時は、教室を入れて保存するだけの小さい版にする（全部出すと保存ボタンが画面の外だった）
   $('#placeSheet').innerHTML=`<h2 class="pstitle">${auto?`🏢 ${esc(p.place)}に入りました`:'✏️ いまの自分'}</h2>
     <p class="psdesc">${auto?'いる教室を入れると、友達に表示されます。':'いまどこにいて、何をしているかを、見せる相手ごとに設定します。'}</p>
-    ${!sharing?'<div class="frnote" style="margin:0 0 12px">位置情報の共有を止めているので、友達には表示されません（マイページでONにできます）</div>':''}
+    ${!sharing?'<div class="frnote" style="margin:0 0 12px">近くの人に「出さない」にしているので、友達には表示されません（<a onclick="closePlaceEdit();openVisHub()">🔒 見せる範囲</a>で戻せます）</div>':''}
     ${auto?friends:everyone+friends}
     <div class="edbar"><button class="btn btn-ghost" onclick="closePlaceEdit()">${auto?'あとで':'閉じる'}</button><button class="btn btn-primary" onclick="savePlaceEdit()">保存する</button></div>`;
-  renderPsPurposes(); renderPsVis();
+  renderPsPurposes();
   $('#placeOverlay').classList.add('show');
 }
 function psPickRoom(){ const cs=ttCurrentSlot(); if(!cs||!myRooms[cs.k])return; $('#psRoom').value=myRooms[cs.k]; if(!$('#psNote').value)$('#psNote').value='授業中'; }
@@ -3660,7 +3801,7 @@ function savePlaceEdit(){
 let myFrCode=null, frCodeTimer=null, frCodeFriendsBefore=null;
 // 友達タブ右上の「＋ 追加」。見せる側と入れる側を分ける（1つの枠に混ざっていて、どちらか分かりにくかった）
 function openFrAdd(mode){
-  const vis=`<div class="visnote">友達になると、あなたのいる<b>建物・教室</b>が相手に見えます（いまの設定：<b>${esc(VIS_LABEL[myPresence.visibility])}</b>。友達タブの「友達から見たあなた」で変えられます）。<br><b>目の前にいる人とだけ</b>交換してください。</div>`;
+  const vis=`<div class="visnote">友達になると、あなたのいる<b>建物・教室</b>が相手に見えます（いまの設定：<b>${esc(VIS_LABEL[myPresence.visibility])}</b>。マイページの「🔒 見せる範囲」で変えられます）。<br><b>目の前にいる人とだけ</b>交換してください。</div>`;
   const back=`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="${mode?'openFrAdd()':'closeFrAdd()'}">${mode?'戻る':'閉じる'}</button>`;
   let h;
   if(mode==='show') h=`<h2 class="pstitle">🔢 自分のコード</h2><p class="psdesc">相手にこの4桁を入れてもらうと、すぐ友達になります（承認は要りません）。コードは5分で使えなくなります。</p><div class="fradd"><div id="frCodeBox"></div></div>${vis}${back}`;
@@ -3788,7 +3929,7 @@ async function toggleTTShare(id){
   if(on)ttSharesTo.add(id); else ttSharesTo.delete(id);
   const u=friendUser(id); toast(on?'🗓 '+esc(u?u.name:'')+'さんに時間割を見せるようにしました':'時間割を見せるのをやめました');
   if(on&&u)notifyPush(id,'🗓 時間割が見られるようになりました',(profile?profile.name:'友達')+'さんが時間割を見せてくれました');
-  refreshSheetFriendBtn(id);
+  refreshSheetFriendBtn(id); afterVisChange();
 }
 // 友達の時間割を見る（読むだけ）
 function openFriendTT(id){
@@ -3939,7 +4080,7 @@ function renderDaily(){
   dailyShown=key;
   el.className='daily'+(mine&&!dailyOpen?' done':'');
   el.onclick=mine?()=>{ dailyOpen=!dailyOpen; renderDaily(); }:null;
-  const head=`<div class="dh"><span>🎲 今日のお題</span><span>${mine?'閉じる ▲':t.free?'自由に答える':'1つ選ぶ'}</span></div><div class="dq">${esc(t.q)}</div>`;
+  const head=`<div class="dh"><span>🎲 今日のお題<span class="qhelp" role="button" aria-label="今日のお題の説明" onclick="event.stopPropagation();openHelp('daily')">?</span></span><span>${mine?'閉じる ▲':t.free?'自由に答える':'1つ選ぶ'}</span></div><div class="dq">${esc(t.q)}</div>`;
   if(mine&&!dailyOpen){
     const c=dailyCounts();
     el.innerHTML=`<div class="dline">🎲 今日のお題「${esc(t.q)}」→ <b>${esc(mine)}</b>　<span class="dc">同じ答え ${c.all}人 ›</span></div>`;
@@ -3979,13 +4120,23 @@ function answerDaily(a){
 // 位置情報の共有のON/OFF。OFFの間は「近くの人」に出ず、友達への「いまの自分」（建物・教室）も送らない。
 // 2026-09-24 のUXテストで、OFFの書き込みに await が無く、supabase-js が一度も送信していなかったのが見つかった（送信は await か then で始まる）
 let profileDeleted=false;   // 「プロフィールを消す」を押した後か（共有をONに戻すとプロフィールが作り直されるので、確認してから）
-async function toggleShare(el){
-  const on=!el.classList.contains('on');
-  if(on&&profileDeleted&&!confirm('プロフィールを作り直して、位置情報の共有を再開しますか？'))return;
-  sharing=on; el.classList.toggle('on',on); geoState('ok'); saveLocPrefs();
-  if(sharing){ profileDeleted=false; startGeo(); publishMe(); toast('位置情報の共有を再開しました'); return; }
-  await stopSharingEverywhere();
-  toast('位置情報の共有を止めました。近くの人・友達に表示されなくなります');
+// 2026-10-04：「位置情報を共有」と「おおまかな位置にする」の2つのスイッチを、近くの人に「出す／ぼかして出す／出さない」の1つの選択にまとめた
+const NEAR_VIS={on:'出す',coarse:'ぼかして出す（約100m）',off:'出さない'};
+const nearVisKey=()=>!sharing?'off':coarse?'coarse':'on';
+async function setNearVis(k){
+  const cur=nearVisKey(); if(k===cur)return;
+  if(k==='off'){
+    sharing=false; geoState('ok'); saveLocPrefs(); afterVisChange();
+    await stopSharingEverywhere();
+    toast('近くの人に出さないようにしました。友達にもいる建物が見えなくなります');
+  }else{
+    if(!sharing&&profileDeleted&&!confirm('プロフィールを作り直して、位置情報の共有を再開しますか？'))return;
+    const wasOff=!sharing;
+    sharing=true; coarse=k==='coarse'; geoState('ok'); saveLocPrefs();
+    if(wasOff){ profileDeleted=false; startGeo(); }
+    publishMe(); afterVisChange();
+    toast(wasOff?'位置情報の共有を再開しました':coarse?'位置を約100mぼかして出すようにしました':'位置をぼかさずに出すようにしました');
+  }
 }
 // 共有を止める時の書き込み（近くの人から消す＋友達に見せている建物・教室を消す）
 async function stopSharingEverywhere(){
@@ -3996,23 +4147,69 @@ async function stopSharingEverywhere(){
   const {error}=await sb.from(T('profiles')).update({sharing:false,updated_at:new Date().toISOString()}).eq('id',myId);
   if(error){ console.warn('[share] 共有の停止を保存できませんでした',error.message); toast('⚠️ 通信できず、共有を止められませんでした。電波の良い所でもう一度OFFにしてください'); }
 }
-function toggleCoarse(el){coarse=!el.classList.contains('on');el.classList.toggle('on');saveLocPrefs();publishMe();}
 // 共有OFF・おおまかな位置は端末に覚えておく。以前は覚えておらず、開き直すと共有ON・正確な位置に戻っていた
 // （止めたつもりの人が、次に開いた時に地図に戻っていた）。DBの sharing はキャンパスの外に出た時も false になるので使えない
 function loadLocPrefs(){
   try{ sharing=localStorage.getItem('tama_shareOff')!=='1'; coarse=localStorage.getItem('tama_coarse')==='1'; }catch(e){}
-  const s=$('#tgShare'), c=$('#tgCoarse'); if(s)s.classList.toggle('on',sharing); if(c)c.classList.toggle('on',coarse);
+  renderVisSummary();
+}
+
+/* ---------- 見せる範囲（2026-10-04 あおの依頼「設定の簡略化」） ----------
+   だれに何が見えるかの設定が、マイページ（位置の共有・おおまかな位置）、友達タブ（建物・教室の公開範囲）、
+   友達のプロフィール（時間割）の4か所に分かれていたので、相手ごとに1枚にまとめた。
+   友達のプロフィールの時間割スイッチは、その場で選べると便利なので残している（同じ tama_timetable_shares を書く） */
+const VIS_SHORT={map:'地図の位置も',building:'建物・教室',hidden:'見せない'};
+function ttShareFriends(){
+  return allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>!isTest(id)).map(id=>({id,u:friendUser(id)})).filter(x=>x.u);
+}
+function renderVisSummary(){
+  const el=$('#visSumTxt'); if(!el)return;
+  const n=ttSharesTo.size;
+  el.textContent=`近くの人：${!sharing?'出さない':coarse?'ぼかして出す':'出す'} ・ 友達：${VIS_SHORT[myPresence.visibility]||'建物・教室'} ・ 時間割：${n?n+'人に見せる':'見せない'}`;
+}
+// 見せる範囲を変えた後に、画面の関係する所をまとめて直す
+function afterVisChange(){
+  renderVisSummary(); renderMyPresence();
+  if($('#visOverlay').classList.contains('show'))renderVisHub();
+}
+function openVisHub(){ renderVisHub(); $('#visOverlay').classList.add('show'); }
+function closeVisHub(){ $('#visOverlay').classList.remove('show'); }
+function renderVisHub(){
+  const a=attrsOf(profile), fr=ttShareFriends(), canTT=hasCourseNames();
+  const chip=(sel,label,on)=>`<span class="c${sel?' sel':''}" onclick="${on}">${label}</span>`;
+  const near=nearVisKey();
+  const ttRows=ttShareMissing?'<div class="vishint">時間割を見せる機能は準備中です</div>'
+    :!fr.length?'<div class="vishint">友達になると、ここで友達ごとに選べます</div>'
+    :(!canTT?'<div class="vishint">時間割に授業名か教室を入れると見せられます</div>':'')
+      +fr.map(({id,u})=>`<div class="sharerow visfr"><div class="lab"><span class="vav" style="background:${gr(u.emoji)}">${u.emoji}</span>${esc(u.name)}</div>
+        <div class="toggle${ttSharesTo.has(id)?' on':''}" onclick="toggleTTShare('${id}')"><div class="k"></div></div></div>`).join('');
+  $('#visSheet').innerHTML=`<h2 class="pstitle">🔒 見せる範囲</h2>
+    <p class="psdesc">だれに何が見えるかを、ここでまとめて変えられます。</p>
+    <div class="pssec"><div class="psh">👀 近くの人 <span>（今日キャンパスにいる、このアプリの人）</span></div>
+      <div class="field"><label>地図・一覧に</label><div class="chips">${Object.entries(NEAR_VIS).map(([k,v])=>chip(near===k,v,`setNearVis('${k}')`)).join('')}</div>
+        <div class="vishint">${near==='off'?'いまは<b>近くの人の地図・一覧に出ていません</b>。友達にも、いる建物・教室は見えません。'
+          :`見えるのは、アイコン・名前・学部・プロフィールと、${near==='coarse'?'約100mぼかした':'スマホのGPSの'}位置・距離です。キャンパスの外では出ません。${near==='coarse'?'<br>⚠️ ぼかしている間は、ほかの人の側で、あなたとのすれ違い（'+FES.encounterRangeM+'m）が正しく記録されません。':''}`}</div></div>
+      <button class="vislink" onclick="closeVisHub();openPreview('near')">👀 プロフィールの見え方を見る ›</button></div>
+    <div class="pssec"><div class="psh">👥 友達</div>
+      <div class="field"><label>いる建物・教室</label><div class="chips">${Object.entries(VIS_LABEL).map(([k,v])=>chip(myPresence.visibility===k,v,`setVisibility('${k}')`)).join('')}</div>
+        ${!sharing?'<div class="vishint">近くの人に「出さない」にしている間は、友達にも見えません</div>':''}</div>
+      <div class="field"><label>時間割（見せる友達を選ぶ）</label>${ttRows}</div></div>
+    <div class="pssec"><div class="psh">🤝 同じことを選んだ人だけ</div>
+      <div class="vishint" style="margin:0 0 10px">「いま、ちょっと困っていること」${(a.purposes||[]).length?`（${a.purposes.map(esc).join('・')}）`:''}は、同じことを選んだ人にだけ見えます。<a onclick="closeVisHub();openPlaceEdit(false)">変更 ›</a></div></div>
+    <div class="pssec"><div class="psh">🚫 だれにも見えないもの</div>
+      <div class="vishint" style="margin:0 0 10px">年齢・キャンパスの外での位置（アプリを閉じている間は位置を取りません）</div></div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:4px;color:var(--muted)" onclick="closeVisHub()">閉じる</button>`;
 }
 function saveLocPrefs(){ try{ localStorage.setItem('tama_shareOff',sharing?'0':'1'); localStorage.setItem('tama_coarse',coarse?'1':'0'); }catch(e){} }
 // 「プロフィールを消して共有をやめる」。1回押しただけで消えないよう確認する（何が消えて何が残るかも書く）
 async function leaveAll(){
-  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録も消えます\n・トーク・友達・時間割はそのまま残ります\n\n元には戻せません（共有をONにすると、いまの内容でプロフィールを作り直します）'))return;
+  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録も消えます\n・トーク・友達・時間割はそのまま残ります\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
   sharing=false; stopGeo(); saveLocPrefs();
   await stopSharingEverywhere();
   if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message);
     if(!visitsMissing)sb.rpc('tama_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); }); }
   profileDeleted=true;
-  toast('プロフィールを消し、位置の共有を止めました');$('#tgShare').classList.remove('on');geoState('','停止');
+  toast('プロフィールを消し、位置の共有を止めました');renderVisSummary();geoState('','停止');
 }
 
 /* ---------- test mode (1台で確認) ---------- */
@@ -4131,7 +4328,8 @@ function go(t){
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='near')loadRooms();if(t==='friends')loadFriends();
-  if(t==='me'){refreshPushToggle();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}}
+  if(t==='me'){refreshPushToggle();renderVisSummary();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
+  if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
   publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
@@ -4224,9 +4422,10 @@ registerSW();
   const ph=fesPhase();
   // 開催時間外は位置情報もログインも始めない（終了後だけは、アンケート用の参加者番号を出すためにログインする）
   if(ph.state!=='open'){ if(ph.state==='after'&&await initBackend())renderFesBar(ph); return; }
-  // 通知の許可は開いた瞬間には聞かない（登録済みの人は tryResumeSession、新しい人は話しかけた時などに聞く）
   loadLocPrefs();
-  if(await initBackend()){ fesRefreshCount(); await tryResumeSession(); }
+  // 通知の許可：登録済みの人は tryResumeSession の中で聞く。新しい人も、ホーム画面のアプリから開いた時はようこそ画面の上ですぐ聞く
+  // （2026-10-04 あおの決定。以前は「何のアプリか分かる前に聞くと怪しい」ので話しかけた時などまで待っていた）
+  if(await initBackend()){ fesRefreshCount(); if(!(await tryResumeSession())&&isStandalone()){ setPushWhy('open'); setTimeout(autoAskPush,800); } }
 })();
 
 </script>
