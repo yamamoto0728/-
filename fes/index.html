@@ -1007,7 +1007,7 @@ function contactRowsHTML(){
 // 多摩キャンパスの敷地。OpenStreetMap（way 597200868）の外周146点を約8m単位で間引いたもの。[緯度, 経度]
 const CAMPUS=[[35.61719,139.28974],[35.61699,139.28978],[35.61728,139.29197],[35.61708,139.29211],[35.61545,139.2918],[35.61519,139.29193],[35.61499,139.29217],[35.61473,139.29381],[35.61255,139.29435],[35.61219,139.29549],[35.61265,139.296],[35.61351,139.29604],[35.61345,139.29642],[35.61295,139.29651],[35.6134,139.29737],[35.61313,139.29768],[35.6134,139.29808],[35.61304,139.2988],[35.6127,139.29908],[35.61253,139.29886],[35.61212,139.29918],[35.61184,139.2989],[35.61222,139.29957],[35.61147,139.29986],[35.6107,139.30198],[35.61081,139.30254],[35.61096,139.30273],[35.61136,139.30283],[35.61146,139.3032],[35.61144,139.30286],[35.61158,139.30257],[35.61221,139.30225],[35.61243,139.30188],[35.61263,139.30044],[35.61235,139.2998],[35.61269,139.30038],[35.61267,139.30069],[35.61297,139.30103],[35.61377,139.30057],[35.6137,139.30032],[35.61331,139.30035],[35.6129,139.29919],[35.61318,139.29926],[35.61382,139.3],[35.61493,139.30047],[35.61498,139.30075],[35.61574,139.30084],[35.61625,139.29967],[35.61608,139.29717],[35.61628,139.2971],[35.61629,139.29661],[35.61656,139.29661],[35.61661,139.29567],[35.61749,139.29475],[35.6176,139.29446],[35.61803,139.29417],[35.6184,139.29426],[35.61847,139.29383],[35.61919,139.2937],[35.6194,139.29248],[35.61971,139.29182],[35.62038,139.29128],[35.62034,139.29021],[35.61988,139.28987],[35.61726,139.29039],[35.61719,139.28974]];
 const CAMPUS_CENTER={lat:35.61559,lng:139.29633};
-// 学園祭版の属性。共通点（＝画面に出すかどうか）の判定に使うのは「学部・いま困っていること・目標」だけ
+// 学園祭版の属性。共通点の判定は commonDetail を参照（2026-10-05 から学部・学科は共通点に数えない）
 const FA={
   // 学科名は法政大学公式サイトで確認（2026-09-13）。スポーツ健康学部は学科ではなくコース。
   // 多摩キャンパスにあるのはこの4学部だけなので、他キャンパス・社会人・卒業生の行は置いていない
@@ -1751,7 +1751,7 @@ function bindAttrForm(p,st){
 function commonDetail(u){
   if(!profile)return [];
   const me=attrsOf(profile), th=attrsOf(u), out=[], add=(key,label)=>out.push({key,label});
-  if(me.faculty&&me.faculty===th.faculty)add('fac:'+me.faculty,me.faculty);
+  // 学部・学科は共通点に数えない（2026-10-05 アイデア班のフィードバック）。プロフィールに表示するだけ
   (me.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.purposes||[]).includes(x))add('pur:'+x,x); });
   (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))add('goal:'+x,x); });
   const ma=normAns(me.artist); if(ma&&ma===normAns(th.artist))add('art:'+ma,'同じアーティスト「'+th.artist+'」');
@@ -1769,7 +1769,6 @@ function commonWith(u){ return commonDetail(u).map(x=>x.label); }
 // 「同じ学部」は4人に1人でも一致するので軽く、「同じアーティスト」は数十人に1人なので重くなる
 function keysOf(u){
   const a=attrsOf(u), k=[];
-  if(a.faculty)k.push('fac:'+a.faculty);
   (a.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x))k.push('pur:'+x); });
   (a.goals||[]).forEach(x=>{ if(!FA.weak.includes(x))k.push('goal:'+x); });
   const ar=normAns(a.artist); if(ar)k.push('art:'+ar);
@@ -1834,7 +1833,7 @@ function attrBlock(u){
     ${(a.aruaru||[]).length?`<div class="fh">わかる！あるある</div><div class="fchips">${a.aruaru.map(x=>`<span class="fchip${(me.aruaru||[]).includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>`:''}
     ${dailyAnswer(u)?`<div class="frow">🎲 今日のお題「${esc(dailyToday().q)}」 <b>${esc(dailyAnswer(u))}</b>${sameDaily(u)?' <span class="same">同じ！</span>':''}</div>`:''}
     ${same.length?`<div class="frow">📚 同じ授業 ${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')} <span class="same">同じ！</span></div>`:''}
-    ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${common.has(a.faculty)?' <span class="same">同じ！</span>':''}</div>`:''}
+    ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${a.faculty===me.faculty?' <span class="same">同じ！</span>':''}</div>`:''}
     ${statusOf(u)?`<div class="frow">💬 いま <b>${esc(statusOf(u))}</b></div>`:''}
     ${sharedPurposes.length?`<div class="fh">いま、おたがいに困っていること</div><div class="fchips">${sharedPurposes.map(x=>`<span class="fchip hit">${esc(x)}</span>`).join('')}</div>`:''}
     ${(a.goals||[]).length?`<div class="fh">これから・目標</div><div class="fchips">${a.goals.map(chip).join('')}</div>`:''}
@@ -2768,7 +2767,6 @@ function topicsFor(u,n=3,exclude=[]){
     else if(kind==='cls'){ const r=(samePeers[u.id]||[]).find(r=>c.key==='cls:'+r.slot+':'+normAns(r.course)); if(r)add(`${slotLabel(r.slot)}の${r.course}、同じ授業ですよね！あの授業どうですか？`,rare); }
     else if(kind==='crs') add(`${th.course}、自分も取りたいんです！気になってる理由ってありますか？`,rare);
     else if(kind==='day') add(`今日のお題、同じ「${dailyAnswer(u)}」でしたね！`,rare);
-    else if(kind==='fac') add(`同じ${th.faculty}ですね！何年生ですか？`,rare);
     else if(kind==='pur') add(FA.purposeTopic[c.label]||`「${c.label}」、自分もです`,rare);
     else if(kind==='goal') add(`${c.label}、どんなことしてるんですか？`,rare);
   }
@@ -4200,25 +4198,79 @@ function renderVisHub(){
       <div class="vishint" style="margin:0 0 10px">「いま、ちょっと困っていること」${(a.purposes||[]).length?`（${a.purposes.map(esc).join('・')}）`:''}は、同じことを選んだ人にだけ見えます。<a onclick="closeVisHub();openPlaceEdit(false)">変更 ›</a></div></div>
     <div class="pssec"><div class="psh">🚫 だれにも見えないもの</div>
       <div class="vishint" style="margin:0 0 10px">年齢・キャンパスの外での位置（アプリを閉じている間は位置を取りません）</div></div>
+    <div class="pssec"><div class="psh">📵 スマホの位置情報そのものを止めたい時</div>
+      <div class="vishint" style="margin:0 0 10px">ちかくはホーム画面に追加したWebアプリなので、iPhoneの「設定 ▶ アプリ」には出てきません。<br>
+        <b>iPhone</b>：設定 ▶ プライバシーとセキュリティ ▶ 位置情報サービス ▶ Safariのサイト ▶「なし」<br>
+        <b>Android</b>：Chrome ▶ ︙ ▶ 設定 ▶ サイトの設定 ▶ 位置情報 で、このサイトをブロック<br>
+        ※ iPhoneのこの設定はSafariで開くほかのサイトにも効きます。ちかくだけ止めるなら、上の「近くの人」を「出さない」にしてください。</div></div>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:4px;color:var(--muted)" onclick="closeVisHub()">閉じる</button>`;
 }
 function saveLocPrefs(){ try{ localStorage.setItem('fes_shareOff',sharing?'0':'1'); localStorage.setItem('fes_coarse',coarse?'1':'0'); }catch(e){} }
 // 「プロフィールを消して共有をやめる」。1回押しただけで消えないよう確認する（何が消えて何が残るかも書く）
+// 2026-10-05 アイデア班のフィードバック：時間割だけ残っていたので一緒に消す。消した後はトーストだけだと何が起きたか分からないので、
+// 消えたもの・残っているもの・また使う時の手順をポップで出す（leaveDoneSheet）
 async function leaveAll(){
-  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録も消えます\n・トーク・友達・時間割はそのまま残ります\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
+  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録も消えます\n・時間割（友達に見せる設定も）も消えます\n・トーク（相手の画面からも）・いいね・友達・コミュニティの参加と投稿も消えます\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
   sharing=false; stopGeo(); saveLocPrefs();
   await stopSharingEverywhere();
+  let talksOk=true;
   if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message);
-    if(!visitsMissing)sb.rpc('fes_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); }); }
+    if(!visitsMissing)sb.rpc('fes_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); });
+    await forgetTimetable(); talksOk=await forgetTalks(); }
   profileDeleted=true;
-  toast('プロフィールを消し、位置の共有を止めました');renderVisSummary();geoState('','停止');
+  renderVisSummary();geoState('','停止');
+  leaveDoneSheet(talksOk);
+}
+// トーク・いいね・友達・コミュニティの参加と投稿を消す（2026-10-05 あおの決定「トークと友達も消せるようにする」）。
+// トークは2人で1つなので、相手の発言は本人の権限では消せない。DBの関数 fes_forget_talks（supabase/forget_talks.sql）でまとめて消す。
+// 関数がまだ無い時は、本人の権限で消せる分（友達・コミュニティの参加・いまどこ）だけ消して false を返す
+async function forgetTalks(){
+  if(!myId||String(myId).startsWith('local-'))return true;
+  let ok=true;
+  const {error}=await sb.rpc('fes_forget_talks');
+  if(error){
+    ok=false; console.warn('[leave] トークを消せませんでした。supabase/forget_talks.sql を実行してください:',error.message);
+    const del=(t,q)=>q.then(({error})=>{ if(error)console.warn('[leave] '+t+'を消せませんでした',error.message); });
+    await Promise.all([
+      del('友達',sb.from(T('friends')).delete().or(`from_id.eq.${myId},to_id.eq.${myId}`)),
+      del('コミュニティの参加',sb.from(T('room_members')).delete().eq('user_id',myId)),
+      del('いまどこ',sb.from(T('presence')).delete().eq('id',myId))]);
+  }
+  // 手元の表示も空にする（テスト用の人は端末の中だけなので残す）
+  Object.keys(matches).filter(id=>!isTest(id)).forEach(id=>delete matches[id]);
+  liked=new Set([...liked].filter(isTest)); myWaves={}; wavesIn={};
+  friendRows=friendRows.filter(r=>isTest(otherIdOf(r))); friendProfiles={}; friendPresence={}; friendTT={}; ttSharedFrom=new Set();
+  myRoomIds=new Set();
+  renderMatches(); renderFriends(); renderRooms(); updateCommDot(); updateTalkDot();
+  return ok;
+}
+// 自分の時間割と「見せる友達」の設定を消す（DBの両方と手元）
+async function forgetTimetable(){
+  if(!myId||String(myId).startsWith('local-'))return;
+  if(!timetableMissing){ const {error}=await sb.from(T('timetable')).delete().eq('id',myId); if(error)console.warn('[leave] 時間割を消せませんでした',error.message); }
+  if(!ttShareMissing){ const {error}=await sb.from(T('timetable_shares')).delete().eq('owner_id',myId); if(error)console.warn('[leave] 時間割の共有を消せませんでした',error.message); }
+  myTimetable={}; myRooms={}; ttSharesTo=new Set(); samePeers={};
+  renderMyPresence(); renderNearby(); renderCross();
+}
+// talksOk=false：DBの関数が無くトークを消せなかった時（友達・コミュニティの参加は消えている）
+function leaveDoneSheet(talksOk){
+  $('#invSheet').innerHTML=`<h2 class="pstitle">✅ プロフィールを消しました</h2>
+    <p class="psdesc">位置情報の共有も止まっています。このままアプリを閉じても大丈夫です。</p>
+    <div class="pssec"><div class="psh">🗑 消えたもの</div>
+      <div class="vishint" style="margin:0 0 10px">近くの人・すれ違いの一覧のあなた ／ 友達に見せていた「いまの自分」 ／ 時間割（友達に見せる設定も） ／ 開いた日の記録 ／ ${talksOk?'トーク・いいね（相手の画面からも） ／ ':''}友達 ／ コミュニティの参加${talksOk?'と投稿':''}</div></div>
+    ${talksOk?'':`<div class="pssec"><div class="psh">⚠️ 消せなかったもの</div>
+      <div class="vishint" style="margin:0 0 10px">トーク・いいね・コミュニティへの投稿（いま準備中です）。消したい時は、マイページの「🆘 困ったとき・お問い合わせ」から連絡してください。</div></div>`}
+    <div class="pssec"><div class="psh">🔁 また使う時は</div>
+      <div class="vishint" style="margin:0 0 10px">マイページ ▶ 🔒 見せる範囲 ▶ 近くの人に「出す」を選ぶと、いまの内容でプロフィールを作り直します。時間割・友達は入れ直しになります。</div></div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:4px" onclick="closeInvite()">わかりました</button>`;
+  $('#invOverlay').classList.add('show');
 }
 
 /* ---------- test mode (1台で確認) ---------- */
 function spawnTest(){
   if(!myId)myId='local-'+uuid();
   if(!myPos){myPos={lat:CAMPUS_CENTER.lat,lng:CAMPUS_CENTER.lng,acc:20};origin={...myPos};geoState('ok');placeName='テスト地点';$('#locPlace').textContent='テスト地点（多摩キャンパス）';$('#meLoc').textContent='📍 テスト地点';}
-  // テスト用の人は、自分と共通点が出るよう、自分のアーティスト・あるある・学部を1つずつ持たせる。
+  // テスト用の人は、自分と共通点が出るよう、自分のアーティスト・あるある・科目を1つずつ持たせる（学部は共通点に数えないが、「同じ！」の表示を試せるよう持たせる）。
   // 「いま、ちょっと困っていること」は同じものを選んだ人にしか見えないので、1人目には自分と同じものを持たせて表示を試せるようにする
   const me=attrsOf(profile), until=new Date(roomExpiryAt()).toISOString(), ar=me.aruaru||[], pu=me.purposes||[];
   const cand=[{name:'ゆい',age:20,emoji:'☕',bio:'学食のカレーが好きです',fa:{faculty:me.faculty||'社会学部',grade:'2年',artist:me.artist||'ヨルシカ',aruaru:[ar[0]||FA.aruaru[0],'方向音痴','傘をよくなくす'],course:'心理学',purposes:[pu[0]||'ひとりでごはんが続いている'],goals:['留学'],status:'ひまです',status_until:until}},

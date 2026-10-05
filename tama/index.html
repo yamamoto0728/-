@@ -63,6 +63,14 @@
   .emojis{display:flex;flex-wrap:wrap;gap:9px}
   .emojis .em{width:46px;height:46px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
   .emojis .em.sel{border-color:var(--amber);background:rgba(255,176,102,.14);transform:scale(1.05)}
+  /* アンケートの特典（限定アイコン・バッジ・マイページの欄） */
+  .emsp{font-size:11.5px;color:var(--muted);margin:12px 0 7px;font-weight:700}
+  .emojis .em.lock{opacity:.4;position:relative}
+  .emojis .em.lock::after{content:'🔒';position:absolute;right:-4px;bottom:-4px;font-size:12px}
+  .surveyperk{margin:7px 16px 0;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.7}
+  .surveyperk a{color:var(--signal);font-weight:700;cursor:pointer}
+  .surveydone{margin:14px 16px 0;padding:12px;border-radius:14px;text-align:center;font-size:13px;font-weight:700;color:#1d8a63;background:rgba(32,180,131,.1);border:1px solid rgba(32,180,131,.3)}
+  .bdg{margin-left:4px;font-style:normal}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
   .chips .c{font-size:12.5px;padding:8px 13px;border-radius:20px;background:var(--surface);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.15s}
   .chips .c.sel{border-color:var(--signal);background:rgba(99,214,232,.12);color:var(--signal);font-weight:700}
@@ -863,7 +871,8 @@
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openTerms()">📄 利用規約を読む</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openInvite()">📨 アプリに誘う（QR・リンク）</button>
-        <button class="btn btn-primary" style="margin:14px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openSurvey()">📝 アンケートに答える</button>
+        <!-- アンケートの欄（答えると特典。中身は renderSurveyBox） -->
+        <div id="surveyBox"></div>
         <div style="margin:6px 16px 0;text-align:center;font-size:11.5px;color:var(--muted2)">参加者番号 <b id="fesNo" style="font-family:'JetBrains Mono',monospace;color:var(--muted)">&mdash;</b></div>
         <!-- テストモードは運営が動作確認する時だけ（URLの末尾に #debug を付けて開く） -->
         <div class="setting" id="debugBox" style="border-color:rgba(99,214,232,.3)" hidden>
@@ -952,7 +961,12 @@ const FES={
   ],
   // アンケート（Googleフォーム）のURL。空のままだと「準備中」と表示する
   // URLの中に {id} と書くと参加者番号に置き換わる（事前入力リンクで回答とアプリのデータを突き合わせられる）
-  surveyUrl:'',
+  surveyUrl:'https://docs.google.com/forms/d/e/1FAIpQLScbjRvZyBV_Y-8qR9itwdOsMp9ZQULQANJVS7de1Oz1tf0RWA/viewform?usp=pp_url&entry.516725058={id}',
+  // アンケートに答えるまで、自分から送るいいねは1日この回数まで（返事のいいね・トークの始め直しは数えない）。0で上限なし。
+  // surveyUrl が空の間・supabase/tama_survey.sql を実行する前は、答えようがないので上限をかけない
+  likeLimitFree:3,
+  // いいねの上限をかけ始める日時（2026-10-05 あおの決定で10/14から）。アンケート自体と限定アイコン・バッジは surveyUrl が入っていれば今すぐ出す
+  likeLimitStart:'2026-10-14T00:00:00+09:00',
   // 終了の何分前から「まもなく終了・アンケートへ」の案内を出すか
   surveyBeforeEndMin:30,
   // true の間は、多摩キャンパスの外では位置の機能だけ止める（位置を送らない・近くの人の一覧と地図・すれ違い・通知・出店の判定をしない）。
@@ -1018,7 +1032,7 @@ function contactRowsHTML(){
 // 多摩キャンパスの敷地。OpenStreetMap（way 597200868）の外周146点を約8m単位で間引いたもの。[緯度, 経度]
 const CAMPUS=[[35.61719,139.28974],[35.61699,139.28978],[35.61728,139.29197],[35.61708,139.29211],[35.61545,139.2918],[35.61519,139.29193],[35.61499,139.29217],[35.61473,139.29381],[35.61255,139.29435],[35.61219,139.29549],[35.61265,139.296],[35.61351,139.29604],[35.61345,139.29642],[35.61295,139.29651],[35.6134,139.29737],[35.61313,139.29768],[35.6134,139.29808],[35.61304,139.2988],[35.6127,139.29908],[35.61253,139.29886],[35.61212,139.29918],[35.61184,139.2989],[35.61222,139.29957],[35.61147,139.29986],[35.6107,139.30198],[35.61081,139.30254],[35.61096,139.30273],[35.61136,139.30283],[35.61146,139.3032],[35.61144,139.30286],[35.61158,139.30257],[35.61221,139.30225],[35.61243,139.30188],[35.61263,139.30044],[35.61235,139.2998],[35.61269,139.30038],[35.61267,139.30069],[35.61297,139.30103],[35.61377,139.30057],[35.6137,139.30032],[35.61331,139.30035],[35.6129,139.29919],[35.61318,139.29926],[35.61382,139.3],[35.61493,139.30047],[35.61498,139.30075],[35.61574,139.30084],[35.61625,139.29967],[35.61608,139.29717],[35.61628,139.2971],[35.61629,139.29661],[35.61656,139.29661],[35.61661,139.29567],[35.61749,139.29475],[35.6176,139.29446],[35.61803,139.29417],[35.6184,139.29426],[35.61847,139.29383],[35.61919,139.2937],[35.6194,139.29248],[35.61971,139.29182],[35.62038,139.29128],[35.62034,139.29021],[35.61988,139.28987],[35.61726,139.29039],[35.61719,139.28974]];
 const CAMPUS_CENTER={lat:35.61559,lng:139.29633};
-// 多摩キャン版の属性。共通点（＝画面に出すかどうか）の判定に使うのは「学部・いま困っていること・目標」だけ
+// 多摩キャン版の属性。共通点の判定は commonDetail を参照（2026-10-05 から学部・学科は共通点に数えない）
 const FA={
   // 学科名は法政大学公式サイトで確認（2026-09-13）。スポーツ健康学部は学科ではなくコース。
   // 多摩キャンパスにあるのはこの4学部だけなので、他キャンパス・社会人・卒業生の行は置いていない
@@ -1119,7 +1133,15 @@ const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#
   '🐸':['#7be0b0','#c6f06b'],'🦄':['#d6b8ff','#ff9dd6'],'🐳':['#4b8bf0','#63d6e8'],'🌻':['#ffd166','#ffb066'],'🍀':['#6bd98b','#c6f06b'],'🌈':['#ff9d70','#8b9dff'],
   '🌊':['#4b8bf0','#7be0b0'],'⚡':['#ffe066','#ffb066'],'🍓':['#ff6b8a','#ffb0c8'],'🍩':['#ffb0c8','#c89b6b'],'🍙':['#9fe0c0','#63c0a0'],'🎮':['#8b9dff','#a78bfa'],
   '🎸':['#ff7e6b','#a78bfa'],'🎤':['#ff7e9d','#ff9d70'],'🎬':['#8b9dff','#ff7e9d'],'📚':['#63d6e8','#8b9dff'],'⚽':['#7be0b0','#63b0f0'],'🏀':['#ff9d4a','#ff6b4a'],
-  '✈️':['#63d6e8','#8b9dff'],'👾':['#a78bfa','#ff7e9d']};
+  '✈️':['#63d6e8','#8b9dff'],'👾':['#a78bfa','#ff7e9d'],
+  // アンケートに答えた人だけが選べるアイコン（EMO_SP）
+  '👑':['#ffd166','#e0a030'],'💎':['#63d6e8','#a78bfa'],'🦋':['#8b9dff','#ff9dd6'],'🪐':['#a78bfa','#ffb066'],'🌟':['#ffe066','#ff9d70'],
+  '🐉':['#6bd98b','#4b8bf0'],'🦁':['#ffb066','#c89b6b'],'🧸':['#ffcf8a','#c89b6b'],'🍣':['#ff7e6b','#ffd6c0'],'🎀':['#ff7e9d','#ffd1e0']};
+// アンケートの特典（2026-10-05）。限定アイコンとバッジ。バッジは profile.fa.badges に入れて、ほかの人の画面にも出す
+const EMO_SP=['👑','💎','🦋','🪐','🌟','🐉','🦁','🧸','🍣','🎀'];
+const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケートに協力してくれた人'}};
+const badgeKeys=u=>(attrsOf(u).badges||[]).filter(k=>BADGES[k]);
+const badgeIcons=u=>badgeKeys(u).map(k=>BADGES[k].icon).join('');
 const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
 const gr=e=>`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
 function uuid(){return (crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(36).slice(2));}
@@ -1486,7 +1508,7 @@ function renderMeWorry(){ const el=$('#meWorry'); if(!el)return; const p=attrsOf
 function renderMeHero(){
   if(!profile)return; const a=attrsOf(profile);
   $('#meAv').style.background=gr(profile.emoji); $('#meAv').textContent=profile.emoji;
-  $('#meName').textContent=profile.name;
+  $('#meName').textContent=profile.name+(badgeIcons(profile)?' '+badgeIcons(profile):'');
   const h=$('#meFac'); if(h)h.textContent=[a.faculty,a.dept,a.grade].filter(Boolean).join(' ');
 }
 
@@ -1787,7 +1809,7 @@ function bindAttrForm(p,st){
 function commonDetail(u){
   if(!profile)return [];
   const me=attrsOf(profile), th=attrsOf(u), out=[], add=(key,label)=>out.push({key,label});
-  if(me.faculty&&me.faculty===th.faculty)add('fac:'+me.faculty,me.faculty);
+  // 学部・学科は共通点に数えない（2026-10-05 アイデア班のフィードバック）。プロフィールに表示するだけ
   (me.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.purposes||[]).includes(x))add('pur:'+x,x); });
   (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))add('goal:'+x,x); });
   const ma=normAns(me.artist); if(ma&&ma===normAns(th.artist))add('art:'+ma,'同じアーティスト「'+th.artist+'」');
@@ -1805,7 +1827,6 @@ function commonWith(u){ return commonDetail(u).map(x=>x.label); }
 // 「同じ学部」は4人に1人でも一致するので軽く、「同じアーティスト」は数十人に1人なので重くなる
 function keysOf(u){
   const a=attrsOf(u), k=[];
-  if(a.faculty)k.push('fac:'+a.faculty);
   (a.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x))k.push('pur:'+x); });
   (a.goals||[]).forEach(x=>{ if(!FA.weak.includes(x))k.push('goal:'+x); });
   const ar=normAns(a.artist); if(ar)k.push('art:'+ar);
@@ -1868,11 +1889,12 @@ function attrBlock(u){
   const chip=x=>`<span class="fchip${common.has(x)?' hit':''}">${esc(x)}</span>`;
   const artistHit=!!normAns(me.artist)&&normAns(me.artist)===normAns(a.artist);
   return `<div class="fesattr">
+    ${badgeKeys(u).map(k=>`<div class="frow">${BADGES[k].icon} <b>${BADGES[k].label}</b> <span style="color:var(--muted);font-size:11.5px">${BADGES[k].desc}</span></div>`).join('')}
     ${a.artist?`<div class="frow">🎧 よく聴く <b>${esc(a.artist)}</b>${artistHit?' <span class="same">同じ！</span>':''}</div>`:''}
     ${(a.aruaru||[]).length?`<div class="fh">わかる！あるある</div><div class="fchips">${a.aruaru.map(x=>`<span class="fchip${(me.aruaru||[]).includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>`:''}
     ${dailyAnswer(u)?`<div class="frow">🎲 今日のお題「${esc(dailyToday().q)}」 <b>${esc(dailyAnswer(u))}</b>${sameDaily(u)?' <span class="same">同じ！</span>':''}</div>`:''}
     ${same.length?`<div class="frow">📚 同じ授業 ${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')} <span class="same">同じ！</span></div>`:''}
-    ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${common.has(a.faculty)?' <span class="same">同じ！</span>':''}</div>`:''}
+    ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${a.faculty===me.faculty?' <span class="same">同じ！</span>':''}</div>`:''}
     ${statusOf(u)?`<div class="frow">💬 いま <b>${esc(statusOf(u))}</b></div>`:''}
     ${shownWorry.length?`<div class="fh">${openWorry?'いま、気になっていること':'いま、おたがいに気になっていること'}</div><div class="fchips">${shownWorry.map(x=>`<span class="fchip worry${sharedPurposes.includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>${sharedPurposes.length?'<div class="worrysame">🤝 あなたと同じことが気になっています</div>':''}`:''}
     ${(a.goals||[]).length?`<div class="fh">これから・目標</div><div class="fchips">${a.goals.map(chip).join('')}</div>`:''}
@@ -1936,7 +1958,7 @@ function nearRow({u,d,common,closed}){
   const st=statusOf(u);
   return `<div class="urow${closed?' closed':''}" onclick="openNear('${String(u.id).replace(/[^\w-]/g,'')}')">
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-    <div class="info"><div class="n">${esc(u.name)}<span class="gr">${esc(facLine(u))}</span></div>
+    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>
       ${commonLine(common)}${crossBadge(u.id)}
       <div class="b">${st&&!closed?`<span class="stchip">${esc(st)}</span> `:''}${esc(u.bio||'')}</div></div>
     <div class="d">${closed?`<div class="frago">${agoText(u.updated_at)}まで</div>`:`<div class="m">${d!=null?Math.round(d)+'m':'—'}</div>`}${relTag(u.id)}</div></div>`;
@@ -2282,7 +2304,7 @@ function renderCross(){
   const when=t=>t>=today?hhmm(t):new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
   const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/'/g,"&#39;")},null)'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-    <div class="info"><div class="n">${esc(u.name)}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${when(u.last_at||0)}・${esc(u.last_place||'')}${u.first_at&&u.count>=2?`　（はじめては ${when(u.first_at)}）`:''}</div></div>
+    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${when(u.last_at||0)}・${esc(u.last_place||'')}${u.first_at&&u.count>=2?`　（はじめては ${when(u.first_at)}）`:''}</div></div>
     <div class="d"><div class="m${u.count>=2?' rep':''}">${u.count}回</div>${relTag(u.id)}</div></div>`;
   const t=arr.filter(u=>(u.last_at||0)>=today), old=arr.filter(u=>(u.last_at||0)<today);
   ul.innerHTML=(t.length?`<div class="nearsec" style="padding-left:6px">今日 <span class="cnt">${t.length}人</span></div>`+t.map(row).join(''):'')
@@ -2324,6 +2346,14 @@ async function sendWave(u,text){
   // 自分の行の created_at を今にすると、相手の画面でも同時にトークが生き返る（相手の行は触れない＝RLSで触れない）。
   // 最初に話しかけた時刻は研究用に matched.first_at へ残す（列を足さずに済ませるため jsonb の中に入れる）
   const restarting=!!matches[uid]&&!isFriend(uid)&&isExpired(matches[uid]);
+  // 自分から送るいいねか（返事・始め直しではない）。届いていたいいねを「見送る」で隠した人への分は返事なので、相手の行を確かめる。
+  // アンケートの特典の上限（FES.likeLimitFree）に数えるのはこれだけ。研究用に matched.init にも残す
+  let init=false;
+  if(!restarting&&!theirs&&!isTest(uid)&&sb){
+    const {data:th}=await sb.from(T('likes')).select('from_id').eq('from_id',uid).eq('to_id',myId).maybeSingle();
+    init=!th;
+    if(init&&surveyGateOn()&&likesLeft()<=0){ closeSheet(); openSurveyGate('like'); return; }
+  }
   waveTarget=null; closeWave(); closeSheet();
   liked.add(uid); myWaves[uid]={text,at:now}; delete wavesIn[uid];
   renderNearby(); renderCross(); renderMatches(); updateTalkDot();
@@ -2338,6 +2368,7 @@ async function sendWave(u,text){
   // いいねした時点で何が共通していたかを残す（どの種類の共通点がトークにつながったかを後で集計するため）
   const tu=findUser(uid)||u;
   const matched={common:commonWith(tu),sameCourse:sameCourse(tu)?(attrsOf(tu).course||''):null};
+  if(init)matched.init=true;
   const row={from_id:myId,to_id:uid,reason:text,matched};
   if(restarting){
     // 前の行の「最初に話しかけた時刻」を引き継いでから、created_at を今にする
@@ -2355,6 +2386,7 @@ async function sendWave(u,text){
     console.warn('[attrs] tama_likes に matched 列がありません。supabase/tama_tables.sql を実行してください:',le.message);
     await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:text});
   }else if(le){ console.warn('[wave] 送れませんでした',le.message); toast('⚠️ 送れませんでした。電波の良い所でもう一度どうぞ'); liked.delete(uid); delete myWaves[uid]; renderNearby(); return; }
+  const gated=init&&surveyGateOn(); if(gated){ initToday++; renderSurveyBox(); }
   const me=profile?profile.name:'だれか';
   // 始め直しの時は、手元のトークの残り時間もすぐ今から24時間にする（次の refreshMatches を待たずに開けるように）
   if(restarting&&matches[uid]){ matches[uid].matchedAt=now; renderMatches(); }
@@ -2368,7 +2400,7 @@ async function sendWave(u,text){
     openChat(uid,'match');
   }else{
     notifyPush(uid,'👋 '+me+'さんからいいね',likeCommonText(tu)||'「トーク」から見てみよう。いいねを返すとトークが始まります');
-    toast('👋 いいねしました。相手がいいねを返すとトークが始まります');
+    toast(gated?`👋 いいねしました。今日はあと${likesLeft()}回（アンケートに答えると無制限）`:'👋 いいねしました。相手がいいねを返すとトークが始まります');
   }
 }
 // 話しかけてきた人のプロフィール（近くにいない人の分だけ読む）
@@ -2510,9 +2542,12 @@ function openSheet(u,d){
   else if(reply) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">👋 いいねを返す（トーク開始）</button>`;
   else if(ended) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">💬 もう一度話す</button>`;
   else if(liked.has(id)) main=`<button class="btn btn-wait" style="flex:1" disabled>👋 いいね済み（相手のいいね待ち）</button>`;
+  // アンケートに答えるまでは、自分から送れる残りの回数を出す（0回なら押すと特典の案内）
+  else if(surveyGateOn()&&!isTest(id)){ const n=likesLeft();
+    main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button>${n>0?`<button class="btn btn-wave" onclick="openWave()">👋 いいね<small style="display:block;font-size:11px;font-weight:500;opacity:.85">今日あと${n}回</small></button>`:`<button class="btn btn-wave" style="opacity:.75" onclick="closeSheet();openSurveyGate('like')">👋 いいね（今日の分は終わり）</button>`}`; }
   else main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">👋 いいね</button>`;
   $('#sheet').innerHTML=`<div class="cover" style="background:${gr(u.emoji)}"><button class="close" onclick="closeSheet()">✕</button>
-    <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)} <span>${esc(facLine(u))}</span></h2>${dist}</div></div>
+    <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''} <span>${esc(facLine(u))}</span></h2>${dist}</div></div>
     <div class="body">${reply&&!fr?`<div class="wavein"><div class="wh">👋 ${esc(u.name)} さんからいいねが届いています</div>${esc(reply.text||'いいねを返すと、トークが始まります')}</div>`:''}
       ${metLine(id)}${attrBlock(u)}<div class="bio">${esc(u.bio||'')}</div></div>
     ${fr?friendBtnHTML(u):''}
@@ -2617,7 +2652,8 @@ function refreshFriendSuggest(id){
   $$('.frsug').forEach(el=>{ const h=friendSuggestHTML(u); if(h)el.outerHTML=h; else el.remove(); });
 }
 // 多摩キャン版の実証実験は全機能解放。課金デモ（メッセージ解禁・いいねの追加購入・いいねの理由の解禁・
-// マッチの期限をなくす・部屋の作成料）は撤去してあり、いいねは無制限・メッセージといいねの理由は最初から使える。
+// マッチの期限をなくす・部屋の作成料）は撤去してあり、メッセージといいねの理由は最初から使える。
+// いいねは 2026-10-05 から、アンケートに答えるまで自分から送る分だけ1日 FES.likeLimitFree 回まで（「アンケートの特典」を参照）。
 // #payOverlay / #paySheet はコミュニティ作成の入力シートで引き続き使っている。
 function closePay(){$('#payOverlay').classList.remove('show');}
 /* ---------- トーク（2人とも話しかけたら成立。24時間） ---------- */
@@ -2783,7 +2819,6 @@ function topicsFor(u,n=3,exclude=[]){
     else if(kind==='cls'){ const r=(samePeers[u.id]||[]).find(r=>c.key==='cls:'+r.slot+':'+normAns(r.course)); if(r)add(`${slotLabel(r.slot)}の${r.course}、同じ授業ですよね！あの授業どうですか？`,rare); }
     else if(kind==='crs') add(`${th.course}、自分も取りたいんです！気になってる理由ってありますか？`,rare);
     else if(kind==='day') add(`今日のお題、同じ「${dailyAnswer(u)}」でしたね！`,rare);
-    else if(kind==='fac') add(`同じ${th.faculty}ですね！何年生ですか？`,rare);
     else if(kind==='pur') add(FA.purposeTopic[c.label]||`「${c.label}」、自分もです`,rare);
     else if(kind==='goal') add(`${c.label}、どんなことしてるんですか？`,rare);
   }
@@ -4213,25 +4248,79 @@ function renderVisHub(){
       :`<div class="vishint" style="margin:0 0 10px">選んでいません（任意）。<a onclick="closeVisHub();openEdit()">プロフィール編集で選ぶ ›</a></div>`}</div>
     <div class="pssec"><div class="psh">🚫 だれにも見えないもの</div>
       <div class="vishint" style="margin:0 0 10px">年齢・キャンパスの外での位置（アプリを閉じている間は位置を取りません）</div></div>
+    <div class="pssec"><div class="psh">📵 スマホの位置情報そのものを止めたい時</div>
+      <div class="vishint" style="margin:0 0 10px">ちかくはホーム画面に追加したWebアプリなので、iPhoneの「設定 ▶ アプリ」には出てきません。<br>
+        <b>iPhone</b>：設定 ▶ プライバシーとセキュリティ ▶ 位置情報サービス ▶ Safariのサイト ▶「なし」<br>
+        <b>Android</b>：Chrome ▶ ︙ ▶ 設定 ▶ サイトの設定 ▶ 位置情報 で、このサイトをブロック<br>
+        ※ iPhoneのこの設定はSafariで開くほかのサイトにも効きます。ちかくだけ止めるなら、上の「近くの人」を「出さない」にしてください。</div></div>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:4px;color:var(--muted)" onclick="closeVisHub()">閉じる</button>`;
 }
 function saveLocPrefs(){ try{ localStorage.setItem('tama_shareOff',sharing?'0':'1'); localStorage.setItem('tama_coarse',coarse?'1':'0'); }catch(e){} }
 // 「プロフィールを消して共有をやめる」。1回押しただけで消えないよう確認する（何が消えて何が残るかも書く）
+// 2026-10-05 アイデア班のフィードバック：時間割だけ残っていたので一緒に消す。消した後はトーストだけだと何が起きたか分からないので、
+// 消えたもの・残っているもの・また使う時の手順をポップで出す（leaveDoneSheet）
 async function leaveAll(){
-  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録も消えます\n・トーク・友達・時間割はそのまま残ります\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
+  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録も消えます\n・時間割（友達に見せる設定も）も消えます\n・トーク（相手の画面からも）・いいね・友達・コミュニティの参加と投稿も消えます\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
   sharing=false; stopGeo(); saveLocPrefs();
   await stopSharingEverywhere();
+  let talksOk=true;
   if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message);
-    if(!visitsMissing)sb.rpc('tama_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); }); }
+    if(!visitsMissing)sb.rpc('tama_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); });
+    await forgetTimetable(); talksOk=await forgetTalks(); }
   profileDeleted=true;
-  toast('プロフィールを消し、位置の共有を止めました');renderVisSummary();geoState('','停止');
+  renderVisSummary();geoState('','停止');
+  leaveDoneSheet(talksOk);
+}
+// トーク・いいね・友達・コミュニティの参加と投稿を消す（2026-10-05 あおの決定「トークと友達も消せるようにする」）。
+// トークは2人で1つなので、相手の発言は本人の権限では消せない。DBの関数 tama_forget_talks（supabase/forget_talks.sql）でまとめて消す。
+// 関数がまだ無い時は、本人の権限で消せる分（友達・コミュニティの参加・いまどこ）だけ消して false を返す
+async function forgetTalks(){
+  if(!myId||String(myId).startsWith('local-'))return true;
+  let ok=true;
+  const {error}=await sb.rpc('tama_forget_talks');
+  if(error){
+    ok=false; console.warn('[leave] トークを消せませんでした。supabase/forget_talks.sql を実行してください:',error.message);
+    const del=(t,q)=>q.then(({error})=>{ if(error)console.warn('[leave] '+t+'を消せませんでした',error.message); });
+    await Promise.all([
+      del('友達',sb.from(T('friends')).delete().or(`from_id.eq.${myId},to_id.eq.${myId}`)),
+      del('コミュニティの参加',sb.from(T('room_members')).delete().eq('user_id',myId)),
+      del('いまどこ',sb.from(T('presence')).delete().eq('id',myId))]);
+  }
+  // 手元の表示も空にする（テスト用の人は端末の中だけなので残す）
+  Object.keys(matches).filter(id=>!isTest(id)).forEach(id=>delete matches[id]);
+  liked=new Set([...liked].filter(isTest)); myWaves={}; wavesIn={};
+  friendRows=friendRows.filter(r=>isTest(otherIdOf(r))); friendProfiles={}; friendPresence={}; friendTT={}; ttSharedFrom=new Set();
+  myRoomIds=new Set();
+  renderMatches(); renderFriends(); renderRooms(); updateCommDot(); updateTalkDot();
+  return ok;
+}
+// 自分の時間割と「見せる友達」の設定を消す（DBの両方と手元）
+async function forgetTimetable(){
+  if(!myId||String(myId).startsWith('local-'))return;
+  if(!timetableMissing){ const {error}=await sb.from(T('timetable')).delete().eq('id',myId); if(error)console.warn('[leave] 時間割を消せませんでした',error.message); }
+  if(!ttShareMissing){ const {error}=await sb.from(T('timetable_shares')).delete().eq('owner_id',myId); if(error)console.warn('[leave] 時間割の共有を消せませんでした',error.message); }
+  myTimetable={}; myRooms={}; ttSharesTo=new Set(); samePeers={};
+  renderMyPresence(); renderNearby(); renderCross();
+}
+// talksOk=false：DBの関数が無くトークを消せなかった時（友達・コミュニティの参加は消えている）
+function leaveDoneSheet(talksOk){
+  $('#invSheet').innerHTML=`<h2 class="pstitle">✅ プロフィールを消しました</h2>
+    <p class="psdesc">位置情報の共有も止まっています。このままアプリを閉じても大丈夫です。</p>
+    <div class="pssec"><div class="psh">🗑 消えたもの</div>
+      <div class="vishint" style="margin:0 0 10px">近くの人・すれ違いの一覧のあなた ／ 友達に見せていた「いまの自分」 ／ 時間割（友達に見せる設定も） ／ 開いた日の記録 ／ ${talksOk?'トーク・いいね（相手の画面からも） ／ ':''}友達 ／ コミュニティの参加${talksOk?'と投稿':''}</div></div>
+    ${talksOk?'':`<div class="pssec"><div class="psh">⚠️ 消せなかったもの</div>
+      <div class="vishint" style="margin:0 0 10px">トーク・いいね・コミュニティへの投稿（いま準備中です）。消したい時は、マイページの「🆘 困ったとき・お問い合わせ」から連絡してください。</div></div>`}
+    <div class="pssec"><div class="psh">🔁 また使う時は</div>
+      <div class="vishint" style="margin:0 0 10px">マイページ ▶ 🔒 見せる範囲 ▶ 近くの人に「出す」を選ぶと、いまの内容でプロフィールを作り直します。時間割・友達は入れ直しになります。</div></div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:4px" onclick="closeInvite()">わかりました</button>`;
+  $('#invOverlay').classList.add('show');
 }
 
 /* ---------- test mode (1台で確認) ---------- */
 function spawnTest(){
   if(!myId)myId='local-'+uuid();
   if(!myPos){myPos={lat:CAMPUS_CENTER.lat,lng:CAMPUS_CENTER.lng,acc:20};origin={...myPos};geoState('ok');placeName='テスト地点';$('#locPlace').textContent='テスト地点（多摩キャンパス）';$('#meLoc').textContent='📍 テスト地点';}
-  // テスト用の人は、自分と共通点が出るよう、自分のアーティスト・あるある・学部を1つずつ持たせる。
+  // テスト用の人は、自分と共通点が出るよう、自分のアーティスト・あるある・科目を1つずつ持たせる（学部は共通点に数えないが、「同じ！」の表示を試せるよう持たせる）。
   // 「いま、ちょっと困っていること」は同じものを選んだ人にしか見えないので、1人目には自分と同じものを持たせて表示を試せるようにする
   const me=attrsOf(profile), until=new Date(roomExpiryAt()).toISOString(), ar=me.aruaru||[], pu=me.purposes||[];
   const cand=[{name:'ゆい',age:20,emoji:'☕',bio:'学食のカレーが好きです',fa:{faculty:me.faculty||'社会学部',grade:'2年',artist:me.artist||'ヨルシカ',aruaru:[ar[0]||FA.aruaru[0],'方向音痴','傘をよくなくす'],course:'心理学',purposes:[pu[0]||'ひとりでごはんが続いている'],goals:['留学'],status:'ひまです',status_until:until}},
@@ -4262,8 +4351,14 @@ function openEdit(){
     <div class="field"><label>年齢（ほかの人には表示されません）</label><input id="edAge" type="number" inputmode="numeric" min="18" max="99" value="${profile.age||''}"></div>
     <div class="warn-msg" id="edWarn"></div>
     <div class="edbar"><button class="btn btn-ghost" onclick="closeEdit()">やめる</button><button class="btn btn-primary" onclick="saveEdit()">保存する</button></div>`;
-  $('#edEmojis').innerHTML=EMO.map(e=>`<div class="em ${e===profile.emoji?'sel':''}" data-e="${e}">${e}</div>`).join('');
-  $$('#edEmojis .em').forEach(el=>el.onclick=()=>{$$('#edEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
+  // 限定アイコン（EMO_SP）は、アンケートに答えるまで鍵つきで見せる（押すと特典の案内）
+  const emCell=e=>`<div class="em ${e===profile.emoji?'sel':''}" data-e="${e}">${e}</div>`;
+  // アンケートを出していない間（FES.surveyUrl が空）は、限定アイコンの段ごと出さない
+  $('#edEmojis').innerHTML=EMO.map(emCell).join('')
+    +(surveyDone||surveyOpen()?`<div class="emsp" style="width:100%">${BADGES.survey.icon} アンケートに答えた人の限定アイコン</div>`
+      +EMO_SP.map(e=>surveyDone?emCell(e):`<div class="em lock" data-lock="1">${e}</div>`).join(''):'');
+  $$('#edEmojis .em').forEach(el=>el.onclick=()=>{ if(el.dataset.lock){ openSurveyGate('icon'); return; }
+    $$('#edEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
   edAttr=attrStateFrom(profile.fa); bindAttrForm('ed',edAttr);
   $('#editOverlay').classList.add('show');
 }
@@ -4286,6 +4381,7 @@ async function saveEdit(){
   // いまの状態はこの画面では変えないので、いまの値を引き継ぐ（悩み・不安は 2026-10-04 からこの画面で変える）
   const old=profile.fa||{};
   profile.fa={...attrToFa(edAttr),status:old.status||'',status_until:old.status_until||null,daily:old.daily||null,daily_prev:old.daily_prev||null};
+  if(old.badges)profile.fa.badges=old.badges;   // バッジ（アンケートの特典）もこの画面では変えないので引き継ぐ
   renderNearby(); renderCross(); renderMeHero();
   await publishMe();
   // publishMe() は位置が取れていない時・キャンパスの外・共有オフだと何も送らないので、プロフィールだけは別に書き戻す
@@ -4343,12 +4439,13 @@ function go(t){
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='near')loadRooms();if(t==='friends')loadFriends();
-  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
+  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
   publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
   restoreMyPresence();loadTimetable();loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
+  loadSurveyStatus();
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden){presenceTick();renderStatusRow();}},60000);}
 
 /* ---------- 多摩キャン版：開催時間・参加人数・アンケート ---------- */
@@ -4367,10 +4464,81 @@ function fesTime(ts,withDate){
   return new Date(ts).toLocaleString('ja-JP',o);
 }
 function fesNo(){ return myId&&!String(myId).startsWith('local-')?String(myId).slice(0,8):''; }
+// アンケートを出しているか（URLが入っていれば出す）
+const surveyOpen=()=>!!FES.surveyUrl;
+// いいねの上限をかけ始めたか（FES.likeLimitStart を過ぎている）
+const likeLimitStarted=()=>Date.now()>=(Date.parse(FES.likeLimitStart)||0);
 function openSurvey(){
-  if(!FES.surveyUrl){ toast('アンケートは準備中です。もう少しお待ちください'); return; }
+  if(!surveyOpen()){ toast('アンケートは準備中です。もう少しお待ちください'); return; }
   window.open(FES.surveyUrl.split('{id}').join(encodeURIComponent(fesNo())),'_blank');
 }
+
+/* ---------- アンケートの特典（2026-10-05 あおの決定） ----------
+   アンケートに答えるまで、自分から送るいいねは1日 FES.likeLimitFree 回まで（返事のいいね・トークの始め直しは数えない。
+   相手を待たせないため）。答えると上限がなくなり、限定アイコン（EMO_SP）とバッジ（BADGES.survey）がもらえる。
+   回答の判定は、フォームの Apps Script が参加者番号を tama_survey_done に入れ、アプリは tama_survey_status で自分の分を確かめる
+   （supabase/tama_survey.sql・docs/tama-survey.md）。フォームのURLが無い・SQLを実行する前は、答えようがないので上限をかけない */
+let surveyDone=false, surveyMissing=false, initToday=0, initDay=0;
+const surveyGateOn=()=>surveyOpen()&&likeLimitStarted()&&!surveyMissing&&!surveyDone&&FES.likeLimitFree>0;
+// 開いたまま日付が変わったら、数え直さなくても0回に戻す
+function likesLeft(){ const d=jstTodayStart().getTime(); if(d!==initDay){ initDay=d; initToday=0; } return Math.max(0,FES.likeLimitFree-initToday); }
+async function loadSurveyStatus(manual){
+  if(!sb||!myId||String(myId).startsWith('local-'))return;
+  const {data,error}=await sb.rpc('tama_survey_status');
+  if(error){ surveyMissing=true; console.warn('[survey] 回答を確かめられません。supabase/tama_survey.sql を実行してください:',error.message); renderSurveyBox(); return; }
+  surveyMissing=false; surveyDone=!!data;
+  if(surveyDone)onSurveyDone();
+  else{ await loadInitToday(); if(manual)toast('まだ回答が届いていません。送信してから1分ほど待って、もう一度どうぞ'); }
+  renderSurveyBox();
+}
+// 今日（日本時間）自分から送ったいいねの数。sendWave が matched.init=true を付けたものだけ数える
+async function loadInitToday(){
+  if(!surveyGateOn())return;
+  const {count,error}=await sb.from(T('likes')).select('to_id',{count:'exact',head:true}).eq('from_id',myId)
+    .gte('created_at',jstTodayStart().toISOString()).eq('matched->>init','true');
+  if(error){ console.warn('[survey] 今日のいいねの数を数えられません',error.message); return; }
+  initDay=jstTodayStart().getTime(); initToday=count||0;
+}
+function onSurveyDone(){
+  if(profile){
+    const b=new Set(attrsOf(profile).badges||[]);
+    if(!b.has('survey')){ profile.fa={...(profile.fa||{}),badges:[...b,'survey']}; saveMyAttrs(); publishMe(); renderMeHero(); }
+  }
+  let thanked=true; try{ thanked=localStorage.getItem('tama_surveyThanked')==='1'; localStorage.setItem('tama_surveyThanked','1'); }catch(e){}
+  if(thanked)return;
+  $('#invSheet').innerHTML=`<h2 class="pstitle">🎉 アンケートありがとうございます！</h2>
+    <p class="psdesc">特典が使えるようになりました。</p>
+    <div class="pssec"><div class="psh">🎁 特典</div>${surveyPerksHTML()}</div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:4px" onclick="closeInvite();openEdit()">限定アイコンを選ぶ</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeInvite()">閉じる</button>`;
+  $('#invOverlay').classList.add('show');
+}
+// 上限を始める前（FES.likeLimitStart まで）は、だれでも無制限なので「その日から上限がかからない」と書く
+const limitDayText=()=>{ const d=new Date(Date.parse(FES.likeLimitStart)+9*3600000); return (d.getUTCMonth()+1)+'/'+d.getUTCDate(); };
+const surveyPerksHTML=()=>`<div class="vishint" style="margin:0 0 10px">${likeLimitStarted()?'👋 自分からのいいねが<b>無制限</b>に':`👋 ${limitDayText()}から始まる、いいねの上限（1日${FES.likeLimitFree}回）が<b>かからない</b>`}<br>${EMO_SP.join(' ')}　限定アイコン${EMO_SP.length}種<br>${BADGES.survey.icon} プロフィールに「${BADGES.survey.label}」バッジ</div>`;
+// いいねの上限に達した時・限定アイコンを押した時の案内
+function openSurveyGate(why){
+  const head=why==='like'?`今日の「自分からのいいね」は${FES.likeLimitFree}回まで送りました`:why==='icon'?'アンケートに答えた人の限定アイコンです':'アンケートに答えると、特典がもらえます';
+  $('#invSheet').innerHTML=`<h2 class="pstitle">📝 ${head}</h2>
+    <p class="psdesc">アンケートに答えると、すぐに次の特典が使えるようになります。</p>
+    <div class="pssec"><div class="psh">🎁 特典</div>${surveyPerksHTML()}</div>
+    ${why==='like'?'<div class="vishint" style="margin:0 0 12px">届いたいいねに返すのは、答えなくても何回でもできます。明日になるとまた送れます。</div>':''}
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:4px" onclick="closeInvite();openSurvey()">📝 アンケートに答える</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeInvite()">あとで</button>`;
+  $('#invOverlay').classList.add('show');
+}
+// マイページのアンケート欄
+function renderSurveyBox(){
+  const el=$('#surveyBox'); if(!el)return;
+  if(surveyDone){ el.innerHTML=`<div class="surveydone">✅ アンケートに回答済み・${BADGES.survey.icon} 特典が使えます</div>`; return; }
+  if(!surveyOpen()){ el.innerHTML=''; return; }   // フォームのURLが無い間は欄ごと出さない
+  const note=surveyGateOn()?`<br>（答えるまで、自分からのいいねは1日${FES.likeLimitFree}回・今日はあと${likesLeft()}回）`
+    :likeLimitStarted()?'':`<br>（${limitDayText()}から、答えていない人は自分からのいいねが1日${FES.likeLimitFree}回までになります）`;
+  el.innerHTML=`<button class="btn btn-primary" style="margin:14px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openSurvey()">📝 アンケートに答える</button>
+    ${!surveyMissing?`<div class="surveyperk">答えると：いいね無制限・限定アイコン・${BADGES.survey.icon}バッジ${note}<br><a onclick="loadSurveyStatus(true)">答えたのに変わらない時 ›</a></div>`:''}`;
+}
+// フォームから戻ってきた時に、回答が届いたかを確かめる
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&surveyOpen()&&!surveyDone&&!surveyMissing)loadSurveyStatus(); });
 let fesLive=null, fesLastState=null;
 // 「いま参加中」＝直近1分以内に位置を更新した人（近くの人一覧と同じ基準）。自分も含む
 async function fesRefreshCount(){
