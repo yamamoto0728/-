@@ -802,6 +802,7 @@
   .rinfo .rbtn.warn{color:var(--bad)}.rinfo .rbtn small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
   .rinfo .code{font-family:"JetBrains Mono",monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--signal)}
   #paySheet .chips .c.sel{border-color:var(--signal);background:rgba(99,214,232,.12);color:var(--signal);font-weight:700}
+  #paySheet .condsub{font-size:12px;font-weight:700;color:var(--ink);margin:12px 0 6px}#paySheet .condsub span{font-weight:500;color:var(--muted);font-size:11px;margin-left:6px}
   #paySheet .pledge{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.7;padding:11px 12px;border-radius:14px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);margin-bottom:14px;cursor:pointer}
   #roomNm,#roomSt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #paySheet .pledge input{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)}
@@ -1038,6 +1039,8 @@
   <div class="boothpop" id="boothPop"></div>
   <div class="toast" id="toast"></div>
   <div class="frnudge" id="frNudge"></div>
+  <!-- 入力の候補（だれかが一度でも入れたアーティスト・授業名。loadSuggest） -->
+  <datalist id="dlArtist"></datalist><datalist id="dlCourse"></datalist>
 </div>
 <script>
 
@@ -1862,11 +1865,11 @@ function openMissingFold(p,miss){
 function attrFieldsHTML(p,part){
   const who=`<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>`;
-  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
+  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" list="dlArtist" autocomplete="off" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
     <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
       <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
         <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
-    <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
+    <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" list="dlCourse" autocomplete="off" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field worryf"><label>${WORRY_LABEL}<span class="opt">任意・${FA.purposePick}つまで</span></label>
       <div class="hint" style="margin:0 0 8px">選ばなくても大丈夫です。あとで、プロフィール編集からいつでも変えられます。</div>
@@ -3547,24 +3550,30 @@ function renderRooms(){
 const RULE_TMPL=['勧誘・宣伝はしない','相手の連絡先や住所を聞かない','いやな言い方をしない','無理に会おうとしない','困ったらオーナーか運営に知らせる'];
 const ROOM_DAYS=[[1,'1日'],[3,'3日'],[7,'1週間'],[14,'2週間'],[30,'1か月'],[0,'期限なし']];
 const ROOM_CAPS=[[0,'なし'],[5,'5人'],[10,'10人'],[20,'20人'],[50,'50人']];
-// 参加条件にできるのは、オーナー自身のプロフィールにあるものだけ（自分も当てはまる＝同じ仲間を集める部屋）
+// 参加条件にできるのは、オーナー自身のプロフィールにあるものだけ（自分も当てはまる＝同じ仲間を集める部屋）。
+// 2026-10-08 あおの指示：「わかる（あるある）」は条件から外し、代わりに時間割に入れた授業から1つ選べるようにした（同じ曜日・時限に同じ授業名の人。
+// 時間割を入れてもらうきっかけにもなる）。授業は myClassOptions、それ以外がここ
 function myCondOptions(){
   const a=attrsOf(profile), o=[];
   if(a.artist)o.push({k:'art',v:a.artist,label:'同じアーティスト「'+a.artist+'」'});
-  (a.aruaru||[]).forEach(x=>o.push({k:'aru',v:x,label:'わかる「'+x+'」'}));
   (a.goals||[]).forEach(x=>o.push({k:'goal',v:x,label:'目標「'+x+'」'}));
   (a.purposes||[]).forEach(x=>o.push({k:'pur',v:x,label:'気になっている「'+x+'」'}));
   if(a.faculty)o.push({k:'fac',v:a.faculty,label:a.faculty});
   if(a.grade)o.push({k:'grade',v:a.grade,label:a.grade});
   return o;
 }
-const condKey=c=>c.k+':'+c.v;
+// 時間割に入れた授業（曜日・時限の順）。同じ曜日・時限に同じ授業名を入れた人に当てはまる（DBの tama_room_fits の 'cls'）
+function myClassOptions(){
+  return slotKeys(myTimetable).filter(k=>(myTimetable[k]||'').trim()).map(k=>{ const v=myTimetable[k].trim(); return {k:'cls',v,slot:k,label:'同じ授業「'+slotLabel(k)+' '+v+'」'}; });
+}
+const condKey=c=>c.k+':'+(c.slot?c.slot+':':'')+c.v;
 function createRoom(edit){
   if(!roomsV2)return createRoomLegacy();
   if(!profile){ toast('先にプロフィールを登録してね'); return; }
   const r=edit?curRoom:null;
   roomForm={edit:r?rid(r.id):null, vis:r?r.visibility:'all', cond:r?(r.conditions||[]).slice():[], cap:r?(r.capacity||0):0, days:r?null:14};
-  const opts=myCondOptions(); (roomForm.cond||[]).forEach(c=>{ if(!opts.some(o=>condKey(o)===condKey(c)))opts.push(c); });
+  // 前に選んだ条件が、いまのプロフィール・時間割に無くなっていても選択肢に残す（外せるように）
+  const opts=myCondOptions(); (roomForm.cond||[]).forEach(c=>{ if(c.k!=='cls'&&!opts.some(o=>condKey(o)===condKey(c)))opts.push(c); });
   roomForm.opts=opts;
   const m=(r&&r.meet)||{}, places=[...new Set(CAMPUS_LABELS.map(x=>x[0]).filter(n=>!/門$/.test(n)))];
   $('#paySheet').innerHTML=`<h2 class="pstitle">${r?'✏️ コミュニティを編集':'＋ コミュニティを作る'}</h2>
@@ -3590,14 +3599,30 @@ function renderRoomFormChips(){
   const f=roomForm; if(!f)return;
   const VIS=[['all','みんな'],['common','共通点のある人だけ'],['invite','招待コードの人だけ']];
   $('#rmVis').innerHTML=VIS.map(([k,t])=>`<span class="c${f.vis===k?' sel':''}" onclick="roomForm.vis='${k}';renderRoomFormChips()">${t}</span>`).join('');
-  $('#rmVisHint').textContent={all:'一覧にだれにでも出て、だれでも参加できます。',common:'下で選んだどれかに当てはまる人の一覧にだけ出て、その人だけが参加できます（同じ悩み・同じ趣味の人に届けたい時に）。',invite:'一覧には出ません。作った後に出る招待コードを、入ってほしい人に伝えてください。'}[f.vis];
-  $('#rmCondBox').innerHTML=f.vis!=='common'?'':f.opts.length
-    ?`<div class="chips" style="margin-top:8px;gap:6px">${f.opts.map((o,i)=>`<span class="c${f.cond.some(c=>condKey(c)===condKey(o))?' sel':''}" onclick="toggleRoomCond(${i})">${esc(o.label)}</span>`).join('')}</div><div class="hint">あなたのプロフィールから選べます。どれか1つに当てはまればOK。</div>`
-    :`<div class="hint" style="color:var(--bad)">プロフィールにアーティスト・あるある・目標などを入れると選べます。</div>`;
+  $('#rmVisHint').textContent={all:'一覧にだれにでも出て、だれでも参加できます。',common:'下で選んだどれかに当てはまる人の一覧にだけ出て、その人だけが参加できます（同じ授業・同じ趣味・同じ悩みの人に届けたい時に）。',invite:'一覧には出ません。作った後に出る招待コードを、入ってほしい人に伝えてください。'}[f.vis];
+  // 授業の選択肢は開くたびに時間割から作り直す（この画面から時間割に授業を入れて戻ってきた時のため）
+  const cls=myClassOptions(); f.cond.filter(c=>c.k==='cls').forEach(c=>{ if(!cls.some(o=>condKey(o)===condKey(c)))cls.push(c); });
+  f.clsOpts=cls;
+  const sel=o=>f.cond.some(c=>condKey(c)===condKey(o))?' sel':'';
+  $('#rmCondBox').innerHTML=f.vis!=='common'?'':
+    `<div class="condsub">🎯 プロフィールの共通点</div>`
+    +(f.opts.length?`<div class="chips" style="gap:6px">${f.opts.map((o,i)=>`<span class="c${sel(o)}" onclick="toggleRoomCond('p',${i})">${esc(o.label)}</span>`).join('')}</div>`
+      :`<div class="hint">プロフィールにアーティスト・目標などを入れると選べます。</div>`)
+    +`<div class="condsub">📚 授業でしぼる<span>任意・1つまで</span></div>`
+    +(cls.length?`<div class="chips" style="gap:6px">${cls.map((o,i)=>`<span class="c${sel(o)}" onclick="toggleRoomCond('c',${i})">${esc(slotLabel(o.slot))} ${esc(o.v)}</span>`).join('')}</div>
+        <div class="hint">選ぶと、時間割で同じ曜日・時限にこの授業を入れた人にも届きます。</div>`
+      :`<div class="hint">時間割に授業を入れると、同じ授業の人だけの部屋が作れます。<a onclick="openTimetable()" style="color:var(--signal);font-weight:700;cursor:pointer">🗓 時間割に授業を入れる ›</a></div>`)
+    +`<div class="hint">選んだもののどれか1つに当てはまる人に届きます。</div>`;
   $('#rmCap').innerHTML=ROOM_CAPS.map(([n,t])=>`<span class="c${f.cap===n?' sel':''}" onclick="roomForm.cap=${n};renderRoomFormChips()">${t}</span>`).join('');
   $('#rmDays').innerHTML=(f.edit?[[null,'変えない']]:[]).concat(ROOM_DAYS).map(([n,t])=>`<span class="c${f.days===n?' sel':''}" onclick="roomForm.days=${n};renderRoomFormChips()">${t}</span>`).join('');
 }
-function toggleRoomCond(i){ const o=roomForm.opts[i], k=condKey(o); roomForm.cond=roomForm.cond.some(c=>condKey(c)===k)?roomForm.cond.filter(c=>condKey(c)!==k):roomForm.cond.concat(o); renderRoomFormChips(); }
+// kind：'p'＝プロフィールの共通点（いくつでも）／'c'＝授業（1つまで。別の授業を押したら入れ替える）
+function toggleRoomCond(kind,i){
+  const f=roomForm, o=(kind==='c'?f.clsOpts:f.opts)[i]; if(!o)return; const k=condKey(o);
+  if(f.cond.some(c=>condKey(c)===k)) f.cond=f.cond.filter(c=>condKey(c)!==k);
+  else f.cond=(kind==='c'?f.cond.filter(c=>c.k!=='cls'):f.cond).concat(o);
+  renderRoomFormChips();
+}
 function addRuleTmpl(i){ const el=$('#rmRules'), t=RULE_TMPL[i]; if(el.value.includes(t))return; el.value=(el.value.trim()?el.value.trim()+'\n':'')+'・'+t; }
 async function submitRoomForm(){
   const f=roomForm; if(!f||!sb)return;
@@ -3607,7 +3632,7 @@ async function submitRoomForm(){
   if([name,topic,rules,when,note].some(ngCheck)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください'); return; }
   if(f.vis==='common'&&!f.cond.length){ toast('「共通点のある人だけ」の時は、条件を1つ以上選んでね'); return; }
   if(!f.edit&&!$('#rmPledge').checked){ toast('オーナーの約束を読んで、チェックしてね'); return; }
-  const args={p_name:name,p_topic:topic,p_rules:rules,p_visibility:f.vis,p_conditions:f.vis==='common'?f.cond.map(({k,v,label})=>({k,v,label})):[],
+  const args={p_name:name,p_topic:topic,p_rules:rules,p_visibility:f.vis,p_conditions:f.vis==='common'?f.cond.map(({k,v,label,slot})=>({k,v,label,slot})):[],
     p_capacity:f.cap||null,p_days:f.days,p_meet:when||place?{when,place,note}:null};
   if(f.edit){
     const {data,error}=await sb.rpc('tama_room_update',{p_room:f.edit,...args});
@@ -3792,6 +3817,7 @@ async function reportRoom(){
 }
 /* ---------- ようこそ画面・ホーム画面への追加 ---------- */
 function goOnboard(){
+  loadSuggest();   // アーティスト・科目の入力の候補
   $('#s-welcome').classList.remove('active');
   $('#s-onboard').classList.add('active');
 }
@@ -4553,7 +4579,7 @@ function openPlaceEdit(auto){
   $('#placeOverlay').classList.add('show');
 }
 function psPickRoom(){ const cs=ttCurrentSlot(); if(!cs||!myRooms[cs.k])return; $('#psRoom').value=myRooms[cs.k]; if(!$('#psNote').value)$('#psNote').value='授業中'; }
-function closePlaceEdit(){ ttOpen=false; $('#placeOverlay').classList.remove('show'); }
+function closePlaceEdit(){ ttOpen=false; $('#placeOverlay').classList.remove('show'); if(roomForm&&$('#payOverlay').classList.contains('show'))renderRoomFormChips(); }   // コミュニティを作る画面から時間割を開いた時は、授業の選択肢を入れ直す
 function savePlaceEdit(){
   const place=$('#psPlace').value||null, room=$('#psRoom').value.trim(), note=$('#psNote').value.trim();
   if(ngCheck(room)||ngCheck(note)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
@@ -4731,7 +4757,7 @@ async function loadSamePeers(){
 const slotLabel=k=>{ const [d,p]=k.split('-'); return TT_DAYS[d-1]+p; };
 const slotKeys=o=>Object.keys(o).sort((a,b)=>{ const [ad,ap]=a.split('-').map(Number),[bd,bp]=b.split('-').map(Number); return ad-bd||ap-bp; });
 let ttOpen=false;   // 同じシート（#placeSheet）を「いまの自分」と共用しているので、どちらが開いているか
-function openTimetable(){ ttOpen=true; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
+function openTimetable(){ loadSuggest(); ttOpen=true; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
 function renderTimetable(){
   const keys=slotKeys(ttDraft);
   let grid='<div class="ttgrid"><div></div>'+TT_DAYS.map(d=>`<div class="tth">${d}</div>`).join('');
@@ -4746,7 +4772,7 @@ function renderTimetable(){
     ${grid}
     ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
       <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
-      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input maxlength="24" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>`).join('')}</div>`:''}
+      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input list="dlCourse" autocomplete="off" maxlength="24" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>`).join('')}</div>`:''}
     <div class="edbar"><button class="btn btn-ghost" onclick="closeTimetable()">閉じる</button><button class="btn btn-primary" onclick="saveTimetable()">保存する</button></div>`;
 }
 // 授業名を入れたコマを押した時は、名前ごと消えてしまうので確かめる
@@ -4893,6 +4919,22 @@ function answerDaily(a){
   askPushSoon('daily'); visitMaybeUpdate();
   setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
   setTimeout(()=>maybeCheckinPopup(),4500);            // 「☕ ひとこと」を1問だけ（みんなの答えを少し見てから）
+}
+
+/* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
+   アーティスト・取りたい科目・時間割の授業名を、だれかが一度でも入れたものから予測変換のように出す（<datalist>。iPhoneはキーボードの上に出る）。
+   書き方がそろうと「同じアーティスト」「同じ授業」の共通点が見つかりやすくなる。
+   候補はDBの関数 tama_suggest（supabase/tama_class_suggest.sql）が名前だけ返す（だれが入れたかは返さない）。多い順、NGワードは出さない。
+   開くたびに通信しないよう、10分に1回まで読む。関数が無い時（SQLの実行前）は候補が出ないだけ */
+let suggestAt=0;
+async function loadSuggest(){
+  if(!sb||!myId||String(myId).startsWith('local-')||Date.now()-suggestAt<10*60000)return;
+  suggestAt=Date.now();
+  try{
+    const {data,error}=await sb.rpc('tama_suggest'); if(error||!data)return;
+    const fill=(id,arr)=>{ const el=$('#'+id); if(el)el.innerHTML=(arr||[]).filter(v=>v&&!ngCheck(v)).map(v=>`<option value="${esc(v).replace(/"/g,'&quot;')}">`).join(''); };
+    fill('dlArtist',data.artist); fill('dlCourse',data.course);
+  }catch(e){}
 }
 
 /* ---------- ひとこと（つながりの感じ方。2026-10-07、提案②「孤独感が減ったかを測る」） ----------
@@ -5182,6 +5224,7 @@ function spawnTest(){
 
 /* ---------- プロフィール編集 ---------- */
 function openEdit(){
+  loadSuggest();
   if(!profile){toast('先にプロフィール登録してね');return;}
   const es=$('#editSheet');
   es.innerHTML=`
