@@ -711,6 +711,56 @@
   .sharerow.visfr{padding:8px 12px;margin-top:6px}
   .sharerow.visfr .lab{display:flex;align-items:center;gap:8px}
   .sharerow .vav{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:15px}
+  /* ひとこと（つながりの感じ方、2026-10-07）。今日のお題の下に小さく出す */
+  .checkin{margin:-2px 16px 8px;padding:11px 14px;border-radius:16px;background:#f6f8ff;border:1px solid rgba(120,140,255,.28)}
+  .checkin:empty{display:none}
+  .checkin .ckh{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:700;color:#5a63a8}
+  .checkin .ckh small{font-weight:500;color:var(--muted);margin-left:4px}
+  .checkin .ckh button{border:0;background:none;font-family:inherit;font-size:11.5px;color:var(--muted);cursor:pointer;padding:4px 0 4px 10px}
+  .checkin .ckq{font-size:14px;font-weight:700;margin:4px 0 9px;line-height:1.55}
+  .checkin .ckopts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .checkin .ckopts button{padding:9px 2px;border-radius:12px;border:1px solid var(--line);background:#fff;font-family:inherit;font-size:12px;color:var(--ink);cursor:pointer;line-height:1.3}
+  .checkin .ckopts button:active{background:rgba(120,140,255,.15)}
+  .checkin .ckn{font-size:10.5px;color:var(--muted);margin-top:7px;line-height:1.6}
+  .checkin .ckthx{font-size:13px;font-weight:700;color:#5a63a8;text-align:center;padding:4px 0}
+  /* トークの「💡 話題に困ったら」の横の「🤝 会うときは」（2026-10-07） */
+  .topics .tbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .topics .tshow.meet{color:#b0651a}
+  /* 会った最初の1分：会う前に見る1枚・ふたりのお題・だんだん深くなる質問 */
+  #meetSheet .mthead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  #meetSheet .mthead h2{font-family:"Zen Maru Gothic";font-size:19px;font-weight:900;flex:1;line-height:1.35}
+  #meetSheet .mtback{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:18px;color:var(--muted);cursor:pointer;flex-shrink:0}
+  #meetSheet .mtwho{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  #meetSheet .mtwho .av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+  #meetSheet .mtwho .nm{font-size:16px;font-weight:900}#meetSheet .mtwho .sub{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5}
+  #meetSheet .mtsec{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:9px;background:#fff}
+  #meetSheet .mth{font-size:11.5px;font-weight:800;color:var(--signal);margin-bottom:6px}
+  #meetSheet .mtrow{font-size:13px;line-height:1.7}#meetSheet .mtrow b{color:var(--amber-deep)}
+  #meetSheet .mtnone{font-size:12px;color:var(--muted);line-height:1.6}
+  #meetSheet .metline{margin:0 0 9px}
+  #meetSheet .mtsay{display:block;width:100%;text-align:left;font-family:inherit;font-size:13px;line-height:1.5;padding:8px 11px;margin-top:6px;border-radius:12px;border:1px solid rgba(245,151,47,.45);background:#fff7ee;color:var(--ink)}
+  #meetSheet .mtbtns{display:flex;gap:8px;margin-top:12px}#meetSheet .mtbtns .btn{flex:1;padding:13px 6px;font-size:14px}
+  #meetSheet .mtsafe{font-size:11px;color:var(--muted);line-height:1.7;margin-top:10px;text-align:center}
+  #meetSheet .duoq{font-family:"Zen Maru Gothic";font-size:21px;font-weight:900;text-align:center;line-height:1.5;margin:10px 0 16px}
+  #meetSheet .duoopts{display:flex;flex-direction:column;gap:8px}
+  #meetSheet .duoopts button{padding:14px;border-radius:14px;border:1.5px solid rgba(245,151,47,.55);background:#fff7ee;font-family:inherit;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer}
+  #meetSheet .duonote{font-size:12px;color:var(--muted);line-height:1.7;text-align:center;margin-top:12px}
+  #meetSheet .duores{display:flex;gap:8px;margin:4px 0 12px}
+  #meetSheet .duores>div{flex:1;text-align:center;border-radius:14px;padding:12px 6px;background:var(--surface2)}
+  #meetSheet .duores small{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}#meetSheet .duores b{font-size:16px}
+  #meetSheet .duov{text-align:center;font-size:15px;font-weight:900;line-height:1.6}
+  #meetSheet .duov.same{color:var(--amber-deep)}#meetSheet .duov span{display:block;font-size:12.5px;font-weight:500;color:var(--muted)}
+  #meetSheet .dpsteps{display:flex;align-items:center;justify-content:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted2);margin-bottom:6px}
+  #meetSheet .dpsteps span.on{color:#fff;background:var(--signal);border-radius:20px;padding:3px 10px}
+  #meetSheet .dpsteps i{font-style:normal}
+  /* トークの中のふたりのお題 */
+  .duob{align-self:center;max-width:86%;text-align:center;padding:10px 14px;border-radius:16px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);font-size:12.5px;line-height:1.6}
+  .duob .dq{font-weight:700}.duob .dw{font-size:11.5px;color:var(--muted)}
+  .duob .da{display:flex;gap:10px;justify-content:center;margin-top:4px}.duob .da b{display:block;font-size:14px;color:var(--ink)}
+  .duob .dv{font-weight:900;color:var(--amber-deep);margin-top:4px}.duob .dv.diff{color:#5a63a8}
+  .duob button{margin-top:7px;border:0;border-radius:12px;padding:7px 14px;background:var(--amber);color:#3a2410;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
+  .duob button.sub{background:none;color:#b0651a;padding:4px 8px;margin-top:3px}
+  .metline .mpat{display:block;margin-top:5px;font-size:12px;color:var(--ink);font-style:normal}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -802,6 +852,7 @@
       <!-- 「いまの自分」と「時間割」の2枚のタイル（renderStatusRow）。2026-09-24 のUXテストで「人が1人も見えない」と言われたので、1行に小さくした -->
       <div class="nowbar" id="nowBar"></div>
       <div class="daily" id="dailyCard"></div>
+      <div class="checkin" id="checkCard"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
       <!-- 地図は開いた時点でスクロールせずに見える位置に置き、人の一覧はその下に続ける
            （2026-09-24 に一度「一覧／地図」の切り替えにしたが、あおの希望で切り替えをやめて地図を常に出す形に戻した） -->
@@ -915,6 +966,7 @@
   <div class="overlay" id="invOverlay" onclick="if(event.target===this)closeInvite()"><div class="sheet" id="invSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="visOverlay" onclick="if(event.target===this)closeVisHub()"><div class="sheet" id="visSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()"><div class="sheet" id="helpSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="meetOverlay" onclick="if(event.target===this)closeMeet()"><div class="sheet" id="meetSheet" style="padding:22px 20px 26px"></div></div>
   <!-- 機能を初めて見た時だけ出す吹き出し（showTip） -->
   <div class="tipbub" id="tipBubble"></div>
   <div class="guide" id="guide">
@@ -969,6 +1021,8 @@ const FES={
   likeLimitStart:'2026-10-14T00:00:00+09:00',
   // 終了の何分前から「まもなく終了・アンケートへ」の案内を出すか
   surveyBeforeEndMin:30,
+  // 「ひとこと」（つながりの感じ方を、今日のお題の後に1日1問だけ聞く。2026-10-07）の3問を、何日ごとにくり返すか。0で出さない
+  checkinEveryDays:14,
   // true の間は、多摩キャンパスの外では位置の機能だけ止める（位置を送らない・近くの人の一覧と地図・すれ違い・通知・出店の判定をしない）。
   // プロフィール・マッチ・チャット・コミュニティは外でも使える。false にするとどこでも位置の機能が動く（家から試したい時だけ）
   campusOnly:true,
@@ -1376,7 +1430,7 @@ function pushHintText(){
 // 1人1日1行（tama_visits、supabase/tama_retention.sql）。位置は記録しない（あおの決定。利用規約の第4条に記載）。
 // それまでのDBは上書きされる値しか無く、「初日に来た人が何日目に戻ってきたか」が分からなかった。
 // 開いた回数は、5分以上あけて開き直したら1回と数える。キャンパスにいた・近くの人数・通知・お題は、良くなった時だけ送り直す
-const APP_VER='2026-10-01';
+const APP_VER='2026-10-07';
 let visitsMissing=false, visitDay=null, visitSent=null, visitLastOpen=0, visitTimer=null, lastOpenCount=0;
 const jstDateStr=()=>new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 function visitNow(){ return {on:!!myPos&&!fesOutside&&inCampus(myPos.lat,myPos.lng), near:lastOpenCount, push:pushOk(), daily:!!(profile&&dailyAnswer(profile))}; }
@@ -1868,15 +1922,59 @@ function sameCourse(u){ const a=normCourse(attrsOf(profile).course), b=normCours
 // すれ違いの積み重ねを言葉にする（2026-10-02）。
 // ちかくだけが持っているのは属性ではなく「同じ場所に何度もいた」という事実なので、
 // 小さな「3回」ではなく、プロフィールの一番上に文として出す。2回以上は目立たせる。
-// ⚠️ tama_encounters が持っているのは回数・初回・最終（時刻と場所）だけなので、
-//    「毎週木曜の2限後」のような曜日・時間帯の話は書けない（1件ずつの履歴を残していない）
+// 2026-10-07 からは1回ずつの日時と場所も残す（tama_encounter_log）ので、「木曜の昼休みによく近くにいる」も出す（encPattern）
 function metLine(id){
   const e=encMap[id]; if(!e||!e.count)return '';
   const d=t=>new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
   const first=e.first_at&&e.first_at<e.last_at-60000?`はじめては ${d(e.first_at)}・`:'';
-  const where=e.last_place&&e.last_place!=='この付近'?`${esc(e.last_place)}のあたり`:'';
+  const where=e.last_place&&!VAGUE_PLACES.includes(e.last_place)?`${esc(e.last_place)}のあたり`:'';
   const last=`最後は ${e.last_at>=jstTodayStart().getTime()?'今日 '+hhmm(e.last_at):d(e.last_at)}${where?' '+where:''}`;
-  return `<div class="metline${e.count>=2?' rep':''}">${e.count>=2?'✨ ':'🚶 '}これまで <b>${e.count}回</b> すれ違っています<span>${first}${last}</span></div>`;
+  const p=encPattern(id);
+  return `<div class="metline${e.count>=2?' rep':''}">${e.count>=2?'✨ ':'🚶 '}これまで <b>${e.count}回</b> すれ違っています<span>${first}${last}</span>${p?`<i class="mpat">📅 ${esc(p.text)}に、よく近くにいます（${p.n}日${p.place?'・'+esc(p.place)+'のあたり':''}）</i>`:''}</div>`;
+}
+/* ---------- すれ違いを1回ずつ記録する（2026-10-07、提案③「会った最初の1分」） ----------
+   tama_encounters は回数・初回・最終しか持たないので、「毎週木曜の昼休みに会ってるね」のような話題が作れなかった。
+   1回ずつの日時と場所を tama_encounter_log に足す（supabase/tama_meet.sql）。読めるのは記録した本人だけ（RLS）。
+   場所は、建物の判定（curPlace）が取れていればその建物、無ければ「多摩キャンパス」（placeName は多摩キャンパスで固定のため）。
+   テーブルが無い間（SQLの実行前）は、今まで通り回数だけで動く */
+let encLog={}, encLogMissing=false;
+const VAGUE_PLACES=['この付近','多摩キャンパス','テスト地点'];
+async function loadEncounterLog(){
+  if(!sb||!myId||String(myId).startsWith('local-')||encLogMissing)return;
+  const since=new Date(Date.now()-120*86400000).toISOString();
+  const {data,error}=await sb.from(T('encounter_log')).select('other_id,at,place').eq('owner_id',myId).gte('at',since).order('at').limit(3000);
+  if(error){ encLogMissing=true; console.warn('[encounter_log] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); return; }
+  const local=encLog; encLog={};
+  (data||[]).forEach(r=>{ (encLog[r.other_id]=encLog[r.other_id]||[]).push({at:Date.parse(r.at)||0,place:r.place||''}); });
+  // 読み込みより先に、この端末で記録した分（テスト用の人など）は残す
+  for(const id in local) if(!encLog[id]) encLog[id]=local[id];
+}
+// 時刻を、多摩キャンの時間割（FES.periods）の区切りにする。休み時間は「◯限のあと」、2限と3限の間は「昼休み」
+function timeSlotOf(ms){
+  const dow=new Date(ms+9*3600000).getUTCDay(), min=(ms-jstTodayStart(ms).getTime())/60000;
+  if(dow<1||dow>5)return {dow,k:'we',label:'週末'};
+  const hm=s=>{ const [h,m]=s.split(':').map(Number); return h*60+m; }, P=FES.periods;
+  if(min<hm(P[0][0]))return {dow,k:'p0',label:'1限の前'};
+  for(let i=0;i<P.length;i++){
+    if(min<hm(P[i][1]))return min>=hm(P[i][0])?{dow,k:'c'+(i+1),label:(i+1)+'限'}:{dow,k:'a'+i,label:i===2?'昼休み':i+'限のあと'};
+  }
+  return {dow,k:'late',label:P.length+'限のあと'};
+}
+const DOW_JA='日月火水木金土';
+// 同じ曜日・同じ時間帯に、ちがう日に2回以上すれ違っていたら「木曜の昼休み」。無ければ曜日を問わず同じ時間帯に3日以上で「昼休み」。
+// 場所は2回以上同じ建物だった時だけ添える
+function encPattern(id){
+  const ev=encLog[id]; if(!ev||ev.length<2)return null;
+  const day=t=>new Date(t+9*3600000).toISOString().slice(0,10);
+  const byDow={}, bySlot={};
+  const put=(o,k,s,e)=>{ const g=o[k]=o[k]||{s,days:new Set(),places:[]}; g.days.add(day(e.at)); g.places.push(e.place); };
+  ev.forEach(e=>{ const s=timeSlotOf(e.at); if(s.k==='we')return; put(byDow,s.dow+'|'+s.k,s,e); put(bySlot,s.k,s,e); });
+  const best=o=>Object.values(o).sort((a,b)=>b.days.size-a.days.size)[0];
+  const placeOf=arr=>{ const c={}; arr.filter(p=>p&&!VAGUE_PLACES.includes(p)).forEach(p=>c[p]=(c[p]||0)+1);
+    const top=Object.entries(c).sort((a,b)=>b[1]-a[1])[0]; return top&&top[1]>=2?top[0]:''; };
+  const w=best(byDow); if(w&&w.days.size>=2)return {text:`${DOW_JA[w.s.dow]}曜の${w.s.label}`,n:w.days.size,place:placeOf(w.places),weekly:true};
+  const t=best(bySlot); if(t&&t.days.size>=3)return {text:t.s.label,n:t.days.size,place:placeOf(t.places),weekly:false};
+  return null;
 }
 function attrBlock(u){
   const a=attrsOf(u); if(!a.faculty&&!(a.purposes||[]).length)return '';
@@ -2273,7 +2371,8 @@ function bumpCrossDot(){ const dc=$('#dotCross'); if(!dc)return; if(crossNew>0&&
 async function addEncounter(u){
   const prev=encMap[u.id];
   if(prev&&Date.now()-(prev.last_at||0)<ENC_GAP_MS)return;
-  const count=(prev?prev.count:0)+1; const place=placeName||'この付近';
+  // 場所は建物の判定が取れていればその建物（2026-10-07。前は「多摩キャンパス」だけだった）
+  const count=(prev?prev.count:0)+1; const place=curPlace||placeName||'この付近';
   encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},count,last_place:place,last_at:Date.now(),first_at:(prev&&prev.first_at)||Date.now()};
   renderCross();
   // 共通点が無くても知らせる（2026-09-24 から全員を画面に出すため）。レアな共通点があればそれも添える
@@ -2281,10 +2380,14 @@ async function addEncounter(u){
   // 登録・起動の直後は、まわりの人がまとめて記録されて通知が続くので、最初の1分は知らせない
   if(Date.now()-bootAt>60000) toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`+(rare.length?`<br>✨ ${esc(rare[0].label)}`:''));
   crossNew++; bumpCrossDot();
-  if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from(T('encounters')).upsert(rec); }catch(e){} }
+  (encLog[u.id]=encLog[u.id]||[]).push({at:Date.now(),place});
+  if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from(T('encounters')).upsert(rec);
+    if(!encLogMissing){ const {error}=await sb.from(T('encounter_log')).insert({owner_id:myId,other_id:u.id,place}); if(error){ if(/does not exist|schema cache/i.test(error.message))encLogMissing=true; console.warn('[encounter_log] 記録できませんでした',error.message); } }
+  }catch(e){} }
 }
 async function loadEncounters(){
-  if(!sb)return; const {data}=await sb.from(T('encounters')).select('*').eq('owner_id',myId); if(!data)return;
+  if(!sb)return; loadEncounterLog().then(renderCross);
+  const {data}=await sb.from(T('encounters')).select('*').eq('owner_id',myId); if(!data)return;
   for(const e of data){ let u=findUser(e.other_id);
     if(!u){ const {data:p}=await sb.from(T('profiles')).select('*').eq('id',e.other_id).maybeSingle(); u=p; }
     if(u) encMap[e.other_id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fa||u.fes_attrs||{},count:e.count,last_place:e.last_place,last_at:new Date(e.last_at).getTime(),first_at:e.first_at?new Date(e.first_at).getTime():0};
@@ -2424,6 +2527,7 @@ const TERMS_HTML=`
 <h4>第4条（登録情報）</h4>
 <p>氏名・電話番号・メールアドレス・住所などの個人情報は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
 <p>また、研究のため、利用状況（アプリを開いた日と回数、その日キャンパスの中にいたか、近くに表示された人数、通知とホーム画面のアプリを使っているか、今日のお題に答えたか）を記録します。この記録に位置は含みません。</p>
+<p>あわせて、すれ違った相手と日時・場所（建物の名前）を、記録した本人だけが見られる形で記録します。また、任意で答える「ひとこと」（人とのつながりの感じ方についての短い質問）の回答を記録します。「ひとこと」の回答はほかの利用者には見えず、答えなくてもすべての機能を使えます。</p>
 <h4>第5条（禁止事項）</h4>
 <p>次の行為を禁止します。</p>
 <p>・他の利用者への迷惑行為、つきまとい、脅迫、差別的言動<br>
@@ -2739,7 +2843,7 @@ function renderFriendTalks(frItems){
   if(!frItems.length) return h+`<div class="empty"><div class="big">👥</div><p>まだ友達がいません。<br>24時間トークの中の「👥 友達に誘う」か、<br>目の前の人とは4桁のコードで友達になれます。<br>友達とは期限なしで話せます。</p><button class="btn btn-primary" onclick="go('friends');openFrAdd()">＋ 友達を追加</button></div>`;
   return h+frItems.map(({id,u,last},i)=>{
     const pt=presenceText(friendPres(id)), o=findUser(id), online=!!o&&!isClosed(o);
-    const sub=last?(last.from===myId?'あなた: ':'')+esc(last.text):'メッセージを送ってみよう';
+    const sub=last?(last.from===myId?'あなた: ':'')+esc(msgPlain(last.text)):'メッセージを送ってみよう';
     const un=hasUnread(id);
     // 「ひまです」などのいまの状態は、知らない人には出ていたのに友達には出ていなかった（2026-10-03 修正）。
     // 空きコマに声をかけられる相手を探すのが友達タブの目的なので、居場所より先に出す
@@ -2780,7 +2884,7 @@ function renderMatches(){
     const ms=m?matchLeftMs(m):0, warn=ms<3600000;
     const tag=m&&m.matchedAt&&!isTest(id)?`<span style="font-size:11px;font-weight:700;color:${warn?'var(--bad)':'#0a7f96'}">⏳残り${leftText(ms)}</span>`:'';
     const op=m&&m.opener&&m.opener[m.opener.length-1];
-    const sub=last?(last.from===myId?'あなた: ':'')+esc(last.text):op?(op.from===myId?'あなた: ':'')+'👋 '+esc(op.text):(m?'トークが始まりました':'メッセージを送ってみよう');
+    const sub=last?(last.from===myId?'あなた: ':'')+esc(msgPlain(last.text)):op?(op.from===myId?'あなた: ':'')+'👋 '+esc(op.text):(m?'トークが始まりました':'メッセージを送ってみよう');
     // 緑の点は、いまアプリを開いている人だけ
     const o=findUser(id), online=!!o&&!isClosed(o), un=hasUnread(id);
     return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
@@ -2823,8 +2927,10 @@ function topicsFor(u,n=3,exclude=[]){
     else if(kind==='goal') add(`${c.label}、どんなことしてるんですか？`,rare);
   }
   // 何度もすれ違っている相手には、それを最初の一言にする（ちかくにしかない材料なので共通点の次に優先）
-  const enc=encMap[u.id];
+  const enc=encMap[u.id], pat=encPattern(u.id);
   // （text は表示のときに esc されるので、ここでは生の文字列のまま作る）
+  // 同じ曜日・時間帯によく近くにいる（2026-10-07、すれ違いを1回ずつ記録するようにしてから）
+  if(pat&&pat.weekly) add(`${pat.text}、よく近くにいますよね！${pat.place?pat.place+'にはよく行くんですか？':'その時間っていつも何してるんですか？'}`,true);
   if(enc&&enc.count>=2) add(`${enc.count}回もすれ違ってるみたいです！${enc.last_place&&enc.last_place!=='この付近'?enc.last_place+'のあたり':'キャンパス'}によくいますか？`,enc.count>=3);
   // 共通点でなくても、相手のプロフィールから聞けること
   const td=dailyAnswer(u), md=dailyAnswer(profile);
@@ -2853,7 +2959,8 @@ function renderTopics(){
   if(topicsOpen[chatPeer]===undefined&&!fr&&!m.msgs.length&&!(m.opener||[]).length)topicsOpen[chatPeer]='auto';
   if(topicsOpen[chatPeer]==='auto'&&m.msgs.length)topicsOpen[chatPeer]=false;
   // 閉じているのが既定。開くまでは「💡 話題に困ったら」のボタンだけ
-  if(!topicsOpen[chatPeer]){ set(`<button class="tshow" onclick="topicsOpen[chatPeer]=true;renderTopics()">💡 話題に困ったら</button>`); return; }
+  // 右に「🤝 会うときは」（2026-10-07。会う前に見る1枚・ふたりのお題・だんだん深くなる質問）
+  if(!topicsOpen[chatPeer]){ set(`<div class="tbar"><button class="tshow" onclick="topicsOpen[chatPeer]=true;renderTopics()">💡 話題に困ったら</button><button class="tshow meet" onclick="openMeet()">🤝 会うときは</button></div>`); return; }
   const head=`<div class="th"><span>💡 押すと入力欄に入ります（送信はされません）</span><button onclick="topicsOpen[chatPeer]=false;renderTopics()">閉じる</button></div>`;
   if(fr){
     chatTopics=FRIEND_QUICK.map(text=>({text}));
@@ -2878,6 +2985,163 @@ function pickTopic(i){
   if(!putInInput(el,t.text))return;
   topicsOpen[chatPeer]=false; renderTopics();
   toast('入力欄に入れました。確かめて「送る」を押してください');
+}
+
+/* ---------- 会った最初の1分に困らない（2026-10-07、提案③） ----------
+   話題カードはトークの中だけで、本当に困るのは対面の最初の1分。トークの「🤝 会うときは」から開く1枚を足した。
+   ①会う前に見る1枚：共通点・すれ違い（回数・場所・曜日と時間帯）・同じ授業・今日のお題の答えを1画面に
+   ②ふたりのお題：その場で2人が同じ選択式のお題に答え、2人とも答えたら見せ合う（一致しても違っても話が広がる）
+   ③だんだん深くなる質問：軽い話から少しずつ自己開示が深まる順に出す
+   どれも押さなければ何も起きず、相手に伝わるのは「ふたりのお題」に答えた時だけ（ふつうのメッセージとして届く）。
+   会う約束・居場所を見せる機能（提案①）は入れていない */
+let meetMode='card', meetPeer=null, duoQ=null;
+function openMeet(mode,q){
+  const m=chatOf(chatPeer); if(!m)return;
+  meetPeer=chatPeer; meetMode=mode||'card';
+  if(meetMode==='duo')duoPick(q);
+  renderMeet(true); $('#meetOverlay').classList.add('show'); hideTip();
+}
+function closeMeet(){ $('#meetOverlay').classList.remove('show'); meetPeer=null; }
+function meetGo(mode){ if(mode==='duo')duoPick(); meetMode=mode; renderMeet(true); $('#meetSheet').scrollTop=0; }
+// トークは2.5秒ごとに読み直すので、ふたりのお題の答え待ちの間は、相手が答えたらそのまま答え合わせに変わる
+function renderMeet(force){
+  const el=$('#meetSheet'); if(!el||!meetPeer||!chatOf(meetPeer))return;
+  const h=meetMode==='duo'?duoHTML():meetMode==='deep'?deepHTML():meetCardHTML();
+  if(force||el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
+}
+const meetHead=(title,back)=>`<div class="mthead">${back?`<button class="mtback" onclick="meetGo('card')" aria-label="戻る">‹</button>`:''}<h2>${title}</h2><button class="mtback" onclick="closeMeet()" aria-label="閉じる">✕</button></div>`;
+// ① 会う前に見る1枚
+function meetCardHTML(){
+  const id=meetPeer, m=chatOf(id), u=anyUser(id)||m.u, nm=esc(u.name);
+  const cd=commonDetail(u).sort((a,b)=>rarityOf(b.key)-rarityOf(a.key));
+  const same=samePeers[id]||[], st=statusOf(u), pt=isFriend(id)?presenceText(friendPres(id)):'';
+  const t=dailyToday(), ta=dailyAnswer(u), ma=dailyAnswer(profile);
+  const daily=ta&&ma?`あなた <b>${esc(ma)}</b> ／ ${nm}さん <b>${esc(ta)}</b>　${sameDaily(u)?'→ 同じ！':'→ ちがう！ 理由を聞いてみよう'}`
+    :ta?`${nm}さんは <b>${esc(ta)}</b>（あなたはまだ答えていません）`:ma?`${nm}さんはまだ答えていません（あなたは <b>${esc(ma)}</b>）`:'';
+  const says=topicsFor(u,2);
+  return meetHead('🤝 会う前に見る1枚')
+    +`<div class="mtwho"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div><div><div class="nm">${nm}</div><div class="sub">${esc(facLine(u))}${st?`<br>💬 いま「${esc(st)}」`:''}${pt?`<br>📍 ${esc(pt)}`:''}</div></div></div>`
+    +`<div class="mtsec"><div class="mth">🎯 共通点</div>${cd.length?`<div class="fchips">${cd.slice(0,6).map(c=>`<span class="fchip hit">${isRare(c.key)?'✨ ':''}${esc(c.label)}</span>`).join('')}</div>`:`<div class="mtnone">まだ見つかっていません。下の「🎲 ふたりのお題」で探してみよう</div>`}</div>`
+    +metLine(id)
+    +(same.length?`<div class="mtsec"><div class="mth">📚 同じ授業</div><div class="mtrow">${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')}</div></div>`:'')
+    +(daily?`<div class="mtsec"><div class="mth">🎲 今日のお題「${esc(t.q)}」</div><div class="mtrow">${daily}</div></div>`:'')
+    +`<div class="mtsec"><div class="mth">💬 最初のひとことの例</div>${says.map(s=>`<div class="mtsay">${s.rare?'✨ ':''}${esc(s.text)}</div>`).join('')}</div>`
+    +`<div class="mtbtns"><button class="btn btn-primary" onclick="meetGo('duo')">🎲 ふたりのお題</button><button class="btn btn-wave" onclick="meetGo('deep')">💬 深くなる質問</button></div>`
+    +`<div class="mtsafe">この画面は相手には見えません。<br>はじめて会う時は、学食など人の多い場所で。</div>`;
+}
+
+// ② ふたりのお題。答えはトークのメッセージとして送る（末尾の「#duo:お題の番号:選んだ番号」で見分ける）。
+// 新しいテーブルが要らず、24時間トーク・友達のトークのどちらでも、相手の画面に今まで通りのしくみで届く。
+// 文の頭は人が読める形なので、この版より前のアプリでも「🎲 ふたりのお題「…」に答えました」と読める（どれを選んだかは番号だけ）。
+// お題は今日のお題の一覧（DAILY_QS）の2択・3択から（番号はずっと変わらない。daily-qs.js は末尾にしか足さない決まり）
+const DUO_RE=/\s*#duo:(\d+):(\d+)$/;
+function duoParse(text){ const mm=DUO_RE.exec(text||''); return mm&&DAILY_QS[+mm[1]]?{q:+mm[1],a:+mm[2]}:null; }
+// 画面・通知・トークの一覧に出す時は、しるしを外す
+function msgPlain(text){ return String(text||'').replace(DUO_RE,''); }
+const duoPool=()=>DAILY_QS.map((x,i)=>x.o&&x.o.length<=3?i:-1).filter(i=>i>=0);
+// このトークのふたりのお題。番号 → {me, them（選んだ番号）, meMsg, themMsg, at}。同じお題に2回答えていたら最初の答え
+function duoState(m){
+  const st={};
+  (m.msgs||[]).forEach(x=>{ const d=duoParse(x.text); if(!d)return;
+    const s=st[d.q]=st[d.q]||{q:d.q,at:0}, who=x.from===myId?'me':'them';
+    if(s[who]==null){ s[who]=d.a; s[who+'Msg']=x; }
+    s.at=Math.max(s.at,x.at||0); });
+  return st;
+}
+// 開いた時に出すお題：相手が答えて自分がまだのもの → 自分が答えて相手待ちのもの → 新しいお題
+function duoPick(q){
+  const m=chatOf(meetPeer); if(!m)return;
+  const st=duoState(m), list=Object.values(st).sort((a,b)=>b.at-a.at);
+  if(q!=null&&DAILY_QS[q]){ duoQ=q; return; }
+  const open=list.find(s=>s.them!=null&&s.me==null)||list.find(s=>s.me!=null&&s.them==null);
+  duoQ=open?open.q:duoNew(st);
+}
+// まだこのトークで出ていないお題から1つ（今日のお題と、いま出ているお題は外す）
+function duoNew(st,exclude){
+  const today=dailyToday().n, pool=duoPool().filter(i=>i!==today&&i!==exclude), fresh=pool.filter(i=>!st[i]);
+  const from=fresh.length?fresh:pool; return from[Math.floor(Math.random()*from.length)];
+}
+function duoHTML(){
+  const id=meetPeer, m=chatOf(id), u=m.u, nm=esc(u.name), q=DAILY_QS[duoQ];
+  const head=meetHead('🎲 ふたりのお題',true);
+  if(!q)return head;
+  const s=duoState(m)[duoQ]||{};
+  if(s.me==null){
+    if(isExpired(m))return head+`<div class="duonote">このトークは24時間を過ぎたので、ふたりのお題は使えません（友達になると期限なしで使えます）</div>`;
+    return head+`<div class="duoq">${esc(q.q)}</div><div class="duoopts">${q.o.map((o,i)=>`<button onclick="duoAnswer(${i})">${esc(o)}</button>`).join('')}</div>
+      <div class="duonote">${s.them!=null?`${nm}さんはもう答えています。あなたも答えると、答え合わせができます`:`2人とも答えると、おたがいの答えが見られます。<br>目の前にいるなら、${nm}さんにもトークから答えてもらおう`}</div>
+      ${s.them==null?`<button class="vislink" style="text-align:center;margin-top:10px" onclick="duoQ=duoNew(duoState(chatOf(meetPeer)),duoQ);renderMeet(true)">別のお題にする</button>`:''}`;
+  }
+  if(s.them==null) return head+`<div class="duoq">${esc(q.q)}</div><div class="duores"><div><small>あなた</small><b>${esc(q.o[s.me]||'')}</b></div><div><small>${nm}さん</small><b>…</b></div></div>
+    <div class="duonote">${nm}さんが答えると、ここに出ます。<br>トークに「🎲 ふたりのお題」が届いています</div>`;
+  const same=s.me===s.them;
+  return head+`<div class="duoq">${esc(q.q)}</div><div class="duores"><div><small>あなた</small><b>${esc(q.o[s.me]||'')}</b></div><div><small>${nm}さん</small><b>${esc(q.o[s.them]||'')}</b></div></div>
+    <div class="duov${same?' same':''}">${same?'🎉 同じ！':'ちがった！'}<span>${same?'どうしてそれを選んだのか、話してみよう':`${nm}さんがそっちを選んだ理由を聞いてみよう`}</span></div>
+    <div class="mtbtns"><button class="btn btn-primary" onclick="meetGo('duo')">もう1問</button></div>`;
+}
+async function duoAnswer(ai){
+  const id=meetPeer, m=chatOf(id), q=DAILY_QS[duoQ]; if(!m||!q||!q.o[ai])return;
+  if(isExpired(m)){ toast('このトークは24時間を過ぎたので、もう話せません（友達になると期限なしで話せます）'); return; }
+  const s=duoState(m)[duoQ]; if(s&&s.me!=null)return;   // 1問1回（相手の答えを見てから変えられないように）
+  await sendChatText(id,`🎲 ふたりのお題「${q.q}」に答えました #duo:${duoQ}:${ai}`);
+  renderMeet(true);
+}
+// トークの中のふたりのお題。2人とも答えたら、あとから答えた方の位置に答え合わせを1つだけ出す
+function duoBubble(x,d,st,m){
+  const s=st[d.q], q=DAILY_QS[d.q]; if(!s||!q||(x!==s.meMsg&&x!==s.themMsg))return '';
+  const nm=esc(m.u.name), live=!isExpired(m);
+  if(s.me!=null&&s.them!=null){
+    if(x!==((s.meMsg.at||0)>(s.themMsg.at||0)?s.meMsg:s.themMsg))return '';
+    const same=s.me===s.them;
+    return `<div class="duob"><div class="dq">🎲 ふたりのお題「${esc(q.q)}」</div><div class="da"><span>あなた<b>${esc(q.o[s.me]||'')}</b></span><span>${nm}さん<b>${esc(q.o[s.them]||'')}</b></span></div>
+      <div class="dv${same?'':' diff'}">${same?'🎉 同じ！':'ちがった！ 理由を聞いてみよう'}</div>${live?`<button class="sub" onclick="openMeet('duo')">🎲 もう1問</button>`:''}</div>`;
+  }
+  if(x===s.themMsg) return `<div class="duob"><div class="dq">🎲 ${nm}さんが、ふたりのお題「${esc(q.q)}」に答えました</div>${live?`<button onclick="openMeet('duo',${d.q})">答えて答え合わせ</button>`:''}</div>`;
+  return `<div class="duob"><div class="dq">🎲 ふたりのお題「${esc(q.q)}」に答えました</div><div class="dw">${nm}さんが答えると、答え合わせできます</div></div>`;
+}
+
+// ③ だんだん深くなる質問。Aron et al.(1997) の「36の質問」は、軽い質問から少しずつ自己開示が深まる順に並べると、
+// 初対面でも短い時間で親しくなりやすいことを示した。それを休み時間の5分向けに、軽い3段階・各3問にした。
+// 恋愛・家族・お金・健康・容姿・政治・宗教、住む場所・バイト先など本人が特定される質問は入れない（今日のお題と同じ決まり）。
+// 2人の画面で同じ順番になるよう、並べ替えは2人の組み合わせで決める（目の前で同じ質問を見られる）
+const DEEP_QS=[
+  {lv:'かるく',qs:['今日ここに来る前は、何してた？','多摩キャンでいちばん好きな場所は？','最近リピートしてる曲は？','学食でいちばん頼むメニューは？','休みの日、気づくとしていることは？','最近ちょっとハマってることは？']},
+  {lv:'すこし',qs:['大学に入ってから、いちばん変わったことは？','明日1日なんでもできるなら、何する？','子どものころ夢中だったものは？','最近「やってよかった」と思ったことは？','人に言われてうれしかったひとことは？','1年後の自分に、できていてほしいことは？']},
+  {lv:'もうすこし',qs:['最近ちょっとがんばっていることは？','自分の「ここは好き」と思うところは？','いままでで一番の思い出は？','大学でやってみたいけど、まだできていないことは？','今日話してみて「同じだ」と思ったことは？','おたがいの第一印象を、いいところだけで言うと？']},
+];
+const DEEP_PER_LV=3;   // 1段階に何問答えたら次の段階へ進むか
+let deepAt={};         // 相手ごと：{lv, i（並べ替えた中の何番目）, done（その段階で答えた数）}
+function seededOrder(n,seed){
+  let h=2166136261; for(const ch of seed){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619); }
+  const a=[...Array(n).keys()];
+  for(let i=n-1;i>0;i--){ h^=h<<13; h^=h>>>17; h^=h<<5; const j=(h>>>0)%(i+1); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function deepCur(){ const st=deepAt[meetPeer]=deepAt[meetPeer]||{lv:0,i:0,done:0}; return st; }
+function deepQuestion(st){ const L=DEEP_QS[st.lv]; if(!L)return null; return L.qs[seededOrder(L.qs.length,chatKey(meetPeer)+'/'+st.lv)[st.i%L.qs.length]]; }
+function deepHTML(){
+  const st=deepCur(), head=meetHead('💬 だんだん深くなる質問',true);
+  const steps=`<div class="dpsteps">${DEEP_QS.map((L,i)=>`<span class="${i===st.lv?'on':''}">${'①②③'[i]} ${L.lv}</span>`).join('<i>›</i>')}</div>`;
+  if(st.lv>=DEEP_QS.length) return head+`<div class="duoq">ここまで話せたら、<br>もう十分うちとけています 🎉</div>
+    <div class="mtbtns"><button class="btn btn-ghost" onclick="deepAt[meetPeer]=null;renderMeet(true)">最初から</button><button class="btn btn-primary" onclick="closeMeet()">閉じる</button></div>`;
+  const q=deepQuestion(st);
+  return head+steps+`<div class="duoq">${esc(q)}</div>
+    <div class="duonote">2人で画面を見ながら、交互に答えてみよう。<br>答えたくない質問は「パス」でOK</div>
+    <div class="mtbtns"><button class="btn btn-ghost" onclick="deepMove(false)">パス</button><button class="btn btn-primary" onclick="deepMove(true)">次の質問 ›</button></div>
+    ${isExpired(chatOf(meetPeer))?'':`<button class="vislink" style="text-align:center;margin-top:12px" onclick="deepToChat()">トークで聞く（入力欄に入れる）</button>`}`;
+}
+// 次の質問：答えた数を数え、DEEP_PER_LV 問で次の段階へ。パス：同じ段階の別の質問に替える（数えない）
+function deepMove(answered){
+  const st=deepCur(), L=DEEP_QS[st.lv]; if(!L)return;
+  st.i++;
+  if(answered)st.done++;
+  if(st.done>=DEEP_PER_LV||st.i>=L.qs.length){ st.lv++; st.i=0; st.done=0; }
+  renderMeet(true);
+}
+function deepToChat(){
+  const st=deepCur(), q=deepQuestion(st), el=$('#chatInput'); if(!q||!el)return;
+  if(!putInInput(el,q))return;
+  closeMeet(); toast('入力欄に入れました。確かめて「送る」を押してください');
 }
 
 /* ---------- chat (Supabase messages) ---------- */
@@ -2931,8 +3195,10 @@ function renderChat(){const m=chatOf(chatPeer);if(!m)return;const box=$('#msgs')
   }
   // 最初の一言（2人の「👋 話しかけ」）→ メッセージ の順に、日付の区切りと時刻をつけて出す
   const all=(m.opener||[]).map(x=>({...x,wave:true})).concat(m.msgs);
+  const duo=duoState(m);   // ふたりのお題（2026-10-07）は吹き出しではなく、真ん中のカードで出す
   let lastDay='';
   const body=all.map(x=>{ let sep=''; if(x.at){ const dl=dayLabel(x.at); if(dl!==lastDay){ lastDay=dl; sep=`<div class="day">${dl}</div>`; } }
+    const d=!x.wave&&duoParse(x.text); if(d)return sep+duoBubble(x,d,duo,m);
     return sep+`<div class="bub ${x.from===myId?'me':'them'}${x.wave?' wave':''}">${x.wave?'<span class="wl">👋 最初の一言</span>':''}${esc(x.text)}${x.at?`<span class="tm">${hhmm(x.at)}</span>`:''}</div>`; }).join('');
   const html=banner+body;
   // 2.5秒ごとに描き直すので、中身が変わった時だけ差し替える（読んでいる途中で一番下に戻されないように）
@@ -2941,19 +3207,28 @@ function renderChat(){const m=chatOf(chatPeer);if(!m)return;const box=$('#msgs')
   const ci=$('#chatInput'); const cbtn=document.querySelector('.chatbar .send');
   if(ci){ ci.disabled=expired; ci.placeholder=expired?'トークは終わりました':'メッセージを入力…'; }
   if(cbtn){ cbtn.style.opacity=expired?0.4:1; cbtn.style.pointerEvents=expired?'none':'auto'; }
-  renderTopics(); renderMatches();}
+  renderTopics(); renderMatches();
+  if(meetPeer===chatPeer&&$('#meetOverlay').classList.contains('show'))renderMeet();}
 async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!t||!chatPeer)return;
   const c=chatOf(chatPeer); if(!c)return;
   if(isExpired(c)){ toast('このトークは24時間を過ぎたので、もう話せません（友達になると期限なしで話せます）'); return; }
   if(ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください。'); return; }
   inp.value='';
-  if(isTest(chatPeer)){c.msgs.push({from:myId,text:t,at:Date.now()});renderChat();
+  await sendChatText(chatPeer,t);
+}
+// 送る（入力欄からと、ふたりのお題の答えの共通。期限と NGワードは呼ぶ側で確かめる）
+async function sendChatText(uid,t){
+  const c=chatOf(uid); if(!c)return;
+  if(isTest(uid)){c.msgs.push({from:myId,text:t,at:Date.now()});renderChat();
     const rep=['ほんとだ、同じですね😊','学食でよく見かけるかも！','わかります〜','今度授業のあと話しましょう！','それめっちゃ好きです'];
-    setTimeout(()=>{const cc=chatOf(chatPeer);if(cc){cc.msgs.push({from:chatPeer,text:rep[Math.floor(Math.random()*rep.length)],at:Date.now()});if(isTest(chatPeer))renderChat();}},1100);return;}
+    // ふたりのお題には、テスト用の人も選択肢から1つ選んで答える
+    const d=duoParse(t), dq=d&&DAILY_QS[d.q];
+    const reply=()=>dq?`🎲 ふたりのお題「${dq.q}」に答えました #duo:${d.q}:${Math.floor(Math.random()*dq.o.length)}`:rep[Math.floor(Math.random()*rep.length)];
+    setTimeout(()=>{const cc=chatOf(uid);if(cc){cc.msgs.push({from:uid,text:reply(),at:Date.now()});if(chatPeer===uid)renderChat();}},1100);return;}
   if(!sb)return;
   c.msgs.push({from:myId,text:t,at:Date.now()});renderChat();
-  notifyMsg(chatPeer,c,t);
-  await sb.from(T('messages')).insert({match_key:chatKey(chatPeer),from_id:myId,text:t});
+  notifyMsg(uid,c,t);
+  await sb.from(T('messages')).insert({match_key:chatKey(uid),from_id:myId,text:t});
 }
 
 // メッセージのプッシュ通知（マッチ・友達のチャット共通。2026-09-24）。アプリを閉じていても気づけるようにする。
@@ -2967,6 +3242,7 @@ function notifyMsg(uid,c,text){
   if(theirLast&&now-theirLast<MSG_ACTIVE_MS)return;
   if(lastMsgPush[uid]&&now-lastMsgPush[uid]<MSG_PUSH_GAP_MS)return;
   lastMsgPush[uid]=now;
+  text=msgPlain(text);   // ふたりのお題のしるし（#duo:…）は通知に出さない
   const body=text.length>40?text.slice(0,40)+'…':text;
   notifyPush(uid,'💬 '+(profile?profile.name:'だれか')+'さんからメッセージ',body);
 }
@@ -3278,11 +3554,12 @@ const HELP={
     can:['同じ時限に同じ授業を入れた人が「📚 同じ授業」の共通点で見つかります。授業中は、同じ授業の人が一覧の一番上に出ます','教室を入れておくと、「いまの自分」に教室の候補が出ます','友達がいると、その日最初の授業の始まりに「いまどこ？」の通知が届きます'],
     see:'時間割はあなたにしか見えません。見せたい友達にだけ、マイページの「🔒 見せる範囲」で見せられます。'},
   cross:{icon:'🚶',title:'すれ違い',lead:'アプリを開いたままキャンパスを歩くと、近くを通った人が記録されます。',
-    can:[`${FES.encounterRangeM}m以内に入った人が記録され、会うほど回数が増えます`,'何度もすれ違う人は、生活のリズムが近い人かもしれません。プロフィールにも「これまで◯回すれ違っています」と出ます','同じ人は30分以内なら数え直しません'],
+    can:[`${FES.encounterRangeM}m以内に入った人が記録され、会うほど回数が増えます`,'何度もすれ違う人は、生活のリズムが近い人かもしれません。プロフィールにも「これまで◯回すれ違っています」と出ます','同じ人は30分以内なら数え直しません','同じ曜日・同じ時間帯に何度もすれ違うと、プロフィールに「📅 木曜の昼休みに、よく近くにいます」のように出ます'],
     see:'記録するのは、アプリを開いていて、キャンパスの中にいる間だけです。',
     tip:'何度もすれ違う共通点のある人には「👋 いいね」してみよう。トークでは「よくすれ違いますね」もきっかけになります。'},
   talk:{icon:'💬',title:'トーク',lead:'おたがいにいいねした人・友達・コミュニティと話す所です。',
-    can:['💬 24時間：おたがいにいいねすると始まります。最初の一言は共通点の話題から選べます。24時間で終わります','👥 友達：期限なしで話せます。24時間のトークの上の「👥 友達に誘う」から友達になれます','コミュニティ：同じ話題の人が集まるグループ。だれでも作れます'],
+    can:['💬 24時間：おたがいにいいねすると始まります。最初の一言は共通点の話題から選べます。24時間で終わります',
+      '🤝 会うときは：共通点・すれ違い・今日のお題を1枚で見られます。その場で2人で答える「ふたりのお題」と、だんだん深くなる質問も','👥 友達：期限なしで話せます。24時間のトークの上の「👥 友達に誘う」から友達になれます','コミュニティ：同じ話題の人が集まるグループ。だれでも作れます'],
     see:'24時間トークの相手には、あなたのいる建物・教室は見えません。'},
   friends:{icon:'👥',title:'友達',lead:'友達がいまどこにいるかが分かります。',
     can:['友達のいる建物・教室（本人が見せている時だけ）と、いまの授業（時間割を見せてくれた時だけ）','友達になるには、トークの「👥 友達に誘う」か、目の前で4桁のコードを交換します','「地図の位置も見せる」にしている友達は、地図に緑のふちで出ます'],
@@ -4114,6 +4391,7 @@ function fillDailyStats(){
 let dailyShown=null;   // 入力中に6秒ごとの再描画で消えないよう、まだ答えていない間は、お題が変わった時だけ描き直す
 let dailyOpen=false;   // 答えた後のカードを広げているか（ふだんは1行にたたむ。人の一覧を先に見せるため）
 function renderDaily(){
+  renderCheckin();   // 今日のお題に答えた後だけ、その下に「ひとこと」を出す
   const el=$('#dailyCard'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
   const t=dailyToday(), mine=dailyAnswer(profile), key=t.d+'/'+(mine?'a':'q');
@@ -4156,6 +4434,60 @@ function answerDaily(a){
   publishMe(); saveMyAttrs().then(()=>loadDailyStats(t,true)); renderDaily(); renderNearby(); renderCross();
   toast('🎲 答えました。みんなの答えを見てみよう');
   askPushSoon('daily'); visitMaybeUpdate();
+}
+
+/* ---------- ひとこと（つながりの感じ方。2026-10-07、提案②「孤独感が減ったかを測る」） ----------
+   ちかくの根幹（現実で人と出会い、孤独感を埋める）を確かめるため、使い始めと使った後の変化を測る。
+   あおの判断：「孤立していると感じる？」のように孤独感をそのまま聞くと、使う人の心理的ハードルになる。そこで
+   ・UCLA孤独感尺度 第3版（Russell, 1996）の20問のうち、前向きな言い方の項目（逆転項目）だけを使う。「孤独」「孤立」という言葉は出さない
+   ・今日のお題に答えた後に、そのカードの下へ小さく出す。1日1問・1タップ・とばせる。通知やポップアップでは聞かない。ほかの人には見えない
+   ・3問を3日に分けて聞き、FES.checkinEveryDays（14日）ごとにくり返す。1回目＝使い始め、2回目以降＝使った後（実験の終わりの日が決まっていなくてよい）
+   集計では 1〜4 を逆にして（5−値）3問を足すと、孤独感の得点（3〜12、高いほど孤独）。SQL は supabase/tama_meet.sql の末尾。
+   ⚠️ 質問の文は原文からの訳で、検証された日本語版の文言ではない。アイデア班が日本語版にそろえる時は CHECKIN の q だけ直す（k は変えない）*/
+const CHECKIN=[
+  {k:'talk',    q:'このごろ、気軽に話せる人がいると感じる？'},          // 原版の項目19（people you can talk to）
+  {k:'company', q:'だれかと過ごしたい時に、相手が見つかると感じる？'},  // 項目15（find companionship when you want it）
+  {k:'close',   q:'まわりの人を、身近に感じることがある？'},            // 項目10（feel close to people）
+];
+const CHECKIN_OPTS=['ない','あまりない','ときどきある','よくある'];   // 1〜4（原版の Never / Rarely / Sometimes / Often）
+let checkins=[], checkinMissing=true, checkinThanksUntil=0;   // テーブルを読めるまでは出さない
+async function loadCheckins(){
+  if(!sb||!myId||String(myId).startsWith('local-'))return;
+  const {data,error}=await sb.from(T('checkins')).select('wave,item,value,created_at').eq('user_id',myId).order('created_at');
+  if(error){ checkinMissing=true; console.warn('[checkin] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); return; }
+  checkinMissing=false; checkins=(data||[]).map(r=>({wave:r.wave,item:r.item,value:r.value,at:Date.parse(r.created_at)||0}));
+  renderCheckin();
+}
+// いま聞く質問（無ければ null）。今日のお題に答えた日だけ・1日1問まで（とばした日も数える）
+function checkinDue(){
+  if(checkinMissing||!FES.checkinEveryDays||!profile||profileDeleted||!dailyAnswer(profile))return null;
+  const day0=jstTodayStart().getTime();
+  if(checkins.some(c=>c.at>=day0))return null;
+  const first=checkins.length?jstTodayStart(checkins[0].at).getTime():day0;
+  const wave=1+Math.floor((day0-first)/(FES.checkinEveryDays*86400000));
+  const done=new Set(checkins.filter(c=>c.wave===wave).map(c=>c.item));
+  const it=CHECKIN.find(x=>!done.has(x.k)); return it?{...it,wave}:null;
+}
+function renderCheckin(){
+  const el=$('#checkCard'); if(!el||Date.now()<checkinThanksUntil)return;
+  const it=checkinDue();
+  const h=it?`<div class="ckh"><span>☕ ひとこと<small>（1タップ・答えなくてもOK）</small></span><button onclick="answerCheckin(null)">とばす</button></div>
+    <div class="ckq">${esc(it.q)}</div>
+    <div class="ckopts">${CHECKIN_OPTS.map((o,i)=>`<button onclick="answerCheckin(${i+1})">${o}</button>`).join('')}</div>
+    <div class="ckn">ほかの人には見えません。ちかくを良くするために、2週間に3問だけ聞いています</div>`:'';
+  if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
+}
+// v：1〜4。とばした時は null を記録する（同じ質問を何度も出さず、次の日は次の質問へ。とばした数も研究に使える）
+async function answerCheckin(v){
+  const it=checkinDue(); if(!it)return;
+  checkins.push({wave:it.wave,item:it.k,value:v,at:Date.now()});
+  const el=$('#checkCard'); el.dataset.h='thx';   // 次の renderCheckin で必ず描き直す（空どうしだと「ありがとう！」が残っていた）
+  if(v){ el.innerHTML='<div class="ckthx">ありがとう！</div>'; checkinThanksUntil=Date.now()+2200; setTimeout(()=>{ checkinThanksUntil=0; renderCheckin(); },2300); }
+  else el.innerHTML='';
+  // 運営が #debug で触った分は記録しない（開いた日の記録と同じ）
+  if(!sb||!myId||String(myId).startsWith('local-')||debugMode())return;
+  const {error}=await sb.from(T('checkins')).insert({user_id:myId,wave:it.wave,item:it.k,value:v,ver:APP_VER});
+  if(error&&error.code!=='23505')console.warn('[checkin] 保存できませんでした',error.message);
 }
 
 /* ---------- settings ---------- */
@@ -4260,12 +4592,13 @@ function saveLocPrefs(){ try{ localStorage.setItem('tama_shareOff',sharing?'0':'
 // 2026-10-05 アイデア班のフィードバック：時間割だけ残っていたので一緒に消す。消した後はトーストだけだと何が起きたか分からないので、
 // 消えたもの・残っているもの・また使う時の手順をポップで出す（leaveDoneSheet）
 async function leaveAll(){
-  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録も消えます\n・時間割（友達に見せる設定も）も消えます\n・トーク（相手の画面からも）・いいね・友達・コミュニティの参加と投稿も消えます\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
+  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録・ひとことの回答も消えます\n・時間割（友達に見せる設定も）も消えます\n・トーク（相手の画面からも）・いいね・友達・コミュニティの参加と投稿も消えます\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
   sharing=false; stopGeo(); saveLocPrefs();
   await stopSharingEverywhere();
   let talksOk=true;
   if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message);
     if(!visitsMissing)sb.rpc('tama_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); });
+    if(!checkinMissing)sb.from(T('checkins')).delete().eq('user_id',myId).then(({error})=>{ if(error)console.warn('[leave] ひとことの回答を消せませんでした',error.message); else checkins=[]; });
     await forgetTimetable(); talksOk=await forgetTalks(); }
   profileDeleted=true;
   renderVisSummary();geoState('','停止');
@@ -4307,7 +4640,7 @@ function leaveDoneSheet(talksOk){
   $('#invSheet').innerHTML=`<h2 class="pstitle">✅ プロフィールを消しました</h2>
     <p class="psdesc">位置情報の共有も止まっています。このままアプリを閉じても大丈夫です。</p>
     <div class="pssec"><div class="psh">🗑 消えたもの</div>
-      <div class="vishint" style="margin:0 0 10px">近くの人・すれ違いの一覧のあなた ／ 友達に見せていた「いまの自分」 ／ 時間割（友達に見せる設定も） ／ 開いた日の記録 ／ ${talksOk?'トーク・いいね（相手の画面からも） ／ ':''}友達 ／ コミュニティの参加${talksOk?'と投稿':''}</div></div>
+      <div class="vishint" style="margin:0 0 10px">近くの人・すれ違いの一覧のあなた ／ 友達に見せていた「いまの自分」 ／ 時間割（友達に見せる設定も） ／ 開いた日の記録・ひとことの回答 ／ ${talksOk?'トーク・いいね（相手の画面からも） ／ ':''}友達 ／ コミュニティの参加${talksOk?'と投稿':''}</div></div>
     ${talksOk?'':`<div class="pssec"><div class="psh">⚠️ 消せなかったもの</div>
       <div class="vishint" style="margin:0 0 10px">トーク・いいね・コミュニティへの投稿（いま準備中です）。消したい時は、マイページの「🆘 困ったとき・お問い合わせ」から連絡してください。</div></div>`}
     <div class="pssec"><div class="psh">🔁 また使う時は</div>
@@ -4330,7 +4663,14 @@ function spawnTest(){
   testUsers=cand.map((c,i)=>{const ang=Math.random()*Math.PI*2,d=20+Math.random()*40;
     const dLat=(Math.sin(ang)*d)/111320,dLng=(Math.cos(ang)*d)/(111320*Math.cos(myPos.lat*Math.PI/180));
     return {id:'test-'+i,...c,lat:myPos.lat+dLat,lng:myPos.lng+dLng};});
-  others=others.filter(u=>!isTest(u.id)).concat(testUsers);renderNearby();go('near');
+  others=others.filter(u=>!isTest(u.id)).concat(testUsers);
+  // 1人目とは、先週と先々週の同じ曜日の昼休みに食堂A棟ですれ違ったことにする（「会う前に見る1枚」の「📅 ◯曜の昼休みに、よく近くにいます」を1台で試すため。端末の中だけ）
+  { let d0=jstTodayStart().getTime()+13*3600000; while(timeSlotOf(d0).k==='we')d0-=86400000;   // 土日に試した時は、その前の金曜にそろえる
+    const u=testUsers[0], at=[d0-14*86400000,d0-7*86400000];
+    encLog[u.id]=at.map(t=>({at:t,place:'食堂A棟'}));
+    encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:[],work:'',looking:[],likes:[],interests:[],fa:u.fa,count:at.length,last_place:'食堂A棟',last_at:at[1],first_at:at[0]};
+    renderCross(); }
+  renderNearby();go('near');
   // 出店の広告も1台で試せるよう、自分のすぐ近くに試しの出店を置く
   booths=booths.filter(b=>!isTest(b.id)).concat([{id:'test-booth',name:'焼きそば屋（テスト）',description:'1パック300円。大盛りあります',emoji:'🍜',lat:myPos.lat+0.0002,lng:myPos.lng+0.0001,place:'テスト地点のそば',indoor:false}]);
   try{ localStorage.removeItem('tama_booth_test-booth'); }catch(e){}
@@ -4445,7 +4785,7 @@ function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBoot
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
   publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
   restoreMyPresence();loadTimetable();loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
-  loadSurveyStatus();
+  loadSurveyStatus(); loadCheckins();
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden){presenceTick();renderStatusRow();}},60000);}
 
 /* ---------- 多摩キャン版：開催時間・参加人数・アンケート ---------- */
