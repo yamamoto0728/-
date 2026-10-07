@@ -1317,6 +1317,12 @@ async function disablePush(){
 // 一度「拒否」されると端末の設定からしか戻せないので、説明の画面を必ず先に見せてから聞いている。
 const pushSupported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&('PushManager' in window);
 let pushGateTimer=null, pushAsking=false, pushGateSkipped=false;
+// 「あとで」（と端末の確認画面を×で閉じた時）は端末に覚え、PUSH_SKIP_DAYS 日は自動では聞かない（2026-10-07 あおの指摘）。
+// 前はアプリを閉じると忘れていて、ホーム画面のアプリでは開くたび・戻るたびに説明の画面が出ていた。
+// 本人がボタンを押して聞く時（askPushNow・設定のスイッチ）はこれに関係なく聞く
+const PUSH_SKIP_DAYS=3;
+function markPushSkip(){ pushGateSkipped=true; try{ localStorage.setItem('tama_pushSkipAt',String(Date.now())); }catch(e){} }
+function pushSkippedRecently(){ try{ const t=+localStorage.getItem('tama_pushSkipAt')||0; return Date.now()-t<PUSH_SKIP_DAYS*86400000; }catch(e){ return false; } }
 // 設定のスイッチで自分でオフにした人には、開くたびに聞き直さない
 function setPushOptOut(v){ try{ localStorage.setItem('tama_pushOff', v?'1':'0'); }catch(e){} }
 function isPushOptOut(){ try{ return localStorage.getItem('tama_pushOff')==='1'; }catch(e){ return false; } }
@@ -1374,7 +1380,7 @@ async function autoAskPush(){
   if(!profile&&!app) return;
   if(Notification.permission==='granted'){ if(profile)syncPushSubscription(); return; }
   if(Notification.permission==='denied') return;   // 端末の設定からしか戻せないので、ここでは何もしない
-  if(pushGateSkipped||!(pushAskReady()||app)) return;
+  if(pushGateSkipped||pushSkippedRecently()||!(pushAskReady()||app)) return;
   if(introPending||$('#guide').classList.contains('show')) return;   // 使い方の上には重ねない（閉じた時に聞き直す）
   openPushGate();
   requestPushPermission();   // まず触らずに出せるか試す。Androidはこれで出る。iPhoneは失敗するのでタップを待つ
@@ -1384,7 +1390,7 @@ function openPushGate(){
   g.classList.add('show');
 }
 function closePushGate(){ clearTimeout(pushGateTimer); const g=$('#pushGate'); if(g) g.classList.remove('show'); }
-function skipPushGate(){ pushGateSkipped=true; closePushGate(); }
+function skipPushGate(){ markPushSkip(); closePushGate(); }
 // 説明の画面はどこを触っても許可画面が出る（iPhoneは「触った直後」しか出せないため）
 function pushGateTap(){ requestPushPermission(); }
 
@@ -1413,7 +1419,7 @@ async function requestPushPermission(){
     toast('通知はオフのままです。端末の設定から許可できます');
   }else{
     // 端末の確認画面を×で閉じた時（許可も拒否もしていない）。この画面が残り続けないよう閉じ、今回はもう聞かない
-    pushGateSkipped=true; closePushGate();
+    markPushSkip(); closePushGate();
   }
   refreshPushToggle();
 }
@@ -1569,8 +1575,12 @@ function renderMeHero(){
 /* ---------- GPS ---------- */
 function startGeo(){
   if(!('geolocation' in navigator)){geoState('bad','非対応');onGeoFail('この端末は位置情報に非対応');return;}
-  navigator.geolocation.getCurrentPosition(onPos,onErr,{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  // 2026-10-07：始める時は watchPosition だけにした（これも最初の位置をすぐ返す）。
+  // 前は getCurrentPosition と同時に呼んでいて、iPhoneのホーム画面のアプリでは許可の確認が続けて2回出ることがあった。
+  // 見張りがもう動いている時（「再試行」など）だけ、いまの位置を取り直す。断られた後の再試行は見張りから作り直す
+  if(geoDenied&&watchId!=null)stopGeo();
   if(watchId==null)watchId=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,timeout:20000,maximumAge:1500});
+  else navigator.geolocation.getCurrentPosition(onPos,onErr,{enableHighAccuracy:true,timeout:12000,maximumAge:0});
 }
 function stopGeo(){if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}}
 function onPos(p){
