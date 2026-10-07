@@ -93,6 +93,7 @@ PR番号は GitHub の yamamoto0728/- のもの。くわしくは CLAUDE.md の�
 
 - **2026-10-04（移植の後）**：`feature/tama-worry-flow`。👋 いいね（1タップ・誰からか分かる）→おたがいにいいねでトーク、すれ違いのしるし（`crossBadge`・`crossBoost`）、悩み・不安を登録とプロフィール編集へ・見せる相手を本人が選ぶ（`fa.purpose_vis`）・同じ悩みの人数。**学園祭版にはまだ入っていない**
 - **2026-10-07**：`feature/tama-meet-measure`。提案③「会った最初の1分」（トークの「🤝 会うときは」＝会う前に見る1枚・ふたりのお題 `#duo:`・だんだん深くなる質問 `DEEP_QS`、すれ違いの1回ずつの記録 `tama_encounter_log`・`encPattern`）と、提案②「ひとこと」（`CHECKIN`・`tama_checkins`）。SQL は `supabase/tama_meet.sql`。**学園祭版にはまだ入っていない**（2日間の多摩祭では「ひとこと」の変化は測れないので、移すなら③だけでよい）
+- **2026-10-07〜08**（同じブランチ）：通知の「あとで」を3日覚える（`markPushSkip`）・位置は watchPosition だけで始める、友達との共通点のお知らせ（`checkFriendCommons`・`#frNudge`）、**コミュニティの作り直し**（オーナー・入れる人・期限・ルール・集まる約束。SQL は `supabase/tama_community.sql`、学園祭版に移すなら `tama_` → `fes_` に置き換えた版が要る）。**学園祭版にはまだ入っていない**
 
 ## 学園祭版にだけある、消してよいもの
 
