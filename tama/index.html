@@ -805,6 +805,7 @@
   #paySheet .condsub{font-size:12px;font-weight:700;color:var(--ink);margin:12px 0 6px}#paySheet .condsub span{font-weight:500;color:var(--muted);font-size:11px;margin-left:6px}
   .sugg{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 4px;align-items:center}
   .sugg .sh{width:100%;font-size:10.5px;color:var(--muted)}
+  .sugg button small{margin-left:5px;font-size:10px;font-weight:500;color:var(--muted)}   /* その書き方を入れている人数（小さく） */
   .sugg button{border:1px solid rgba(15,176,205,.45);background:rgba(15,176,205,.08);color:#0a7f96;border-radius:14px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #paySheet .pledge{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.7;padding:11px 12px;border-radius:14px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);margin-bottom:14px;cursor:pointer}
   #roomNm,#roomSt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4929,30 +4930,36 @@ function answerDaily(a){
    入力欄（data-sugg="artist" / "course"）のすぐ下に候補のボタンを自分で出すようにした。何も打っていない時は多い順、打つと合うものだけ（ひらがな・カタカナ・全角半角のちがいはそろえる）。
    候補はDBの関数 tama_suggest（supabase/tama_class_suggest.sql）が名前だけ返す（だれが入れたかは返さない）。NGワードは出さない。
    読めた時だけ10分は読み直さない（前は失敗しても10分待っていたので、SQLを実行した直後に出なかった） */
-let suggestData={artist:[],course:[]}, suggestAt=0, suggEl=null;
+let suggestData={artist:[],course:[]}, suggestN={artist:{},course:{}}, suggestAt=0, suggEl=null;
 async function loadSuggest(){
   if(!sb||!myId||String(myId).startsWith('local-')||Date.now()-suggestAt<10*60000)return;
   try{
     const {data,error}=await sb.rpc('tama_suggest');
     if(error||!data){ if(error)console.warn('[suggest] 候補を読めません。supabase/tama_class_suggest.sql を実行してください:',error.message); return; }
     suggestAt=Date.now();
-    const ok=a=>(a||[]).filter(v=>v&&!ngCheck(v));
-    suggestData={artist:ok(data.artist),course:ok(data.course)};
+    // 人数（artist_n・course_n。名前と同じ順）は横に小さく出す。その書き方を入れている人が多いほど、同じ人と共通点になりやすい
+    const ok=(a,ns,kind)=>{ (a||[]).forEach((v,i)=>{ if(ns&&ns[i])suggestN[kind][v]=ns[i]; }); return (a||[]).filter(v=>v&&!ngCheck(v)); };
+    suggestN={artist:{},course:{}};
+    suggestData={artist:ok(data.artist,data.artist_n,'artist'),course:ok(data.course,data.course_n,'course')};
     const a=document.activeElement; if(a&&a.dataset&&a.dataset.sugg)showSugg(a);   // 読み込みの間に入力欄を押していた時
   }catch(e){}
 }
-// 打った文字を含むもの（打った文字で始まるものを先に）。同じものはもう入っているので出さない
+// 打った文字の並びが、順番どおりに入っているか（「メディアa」→「メディア社会学a」）
+function isSubseq(n,x){ let i=0; for(const ch of x){ if(ch===n[i])i++; if(i===n.length)return true; } return i===n.length; }
+// 候補の並び：打った文字で始まる → 打った文字を含む → 略した書き方（文字が順番どおりに入っている）。それぞれの中は多い順（関数の返した順）。
+// 2026-10-08 あおの依頼：「メディア社会学A」を「メディアA」と書く人がいるので、略して打っても正式な書き方を候補に出し、そろえてもらう。
+// 略した書き方は2文字以上打った時だけ（1文字だと何にでも当たるため）。同じものはもう入っているので出さない
 function suggList(kind,q){
   const all=suggestData[kind]||[], n=normAns(q);
   if(!n)return all.slice(0,8);
-  return all.filter(v=>{ const x=normAns(v); return x!==n&&x.includes(n); })
-    .sort((a,b)=>(normAns(a).startsWith(n)?0:1)-(normAns(b).startsWith(n)?0:1)).slice(0,8);
+  const rank=v=>{ const x=normAns(v); if(x===n)return -1; if(x.startsWith(n))return 0; if(x.includes(n))return 1; if([...n].length>=2&&isSubseq([...n],[...x]))return 2; return -1; };
+  return all.map(v=>({v,r:rank(v)})).filter(o=>o.r>=0).sort((a,b)=>a.r-b.r).map(o=>o.v).slice(0,8);
 }
 function showSugg(inp){
   hideSugg();
   const list=suggList(inp.dataset.sugg,inp.value); if(!list.length)return;
   const box=document.createElement('div'); box.className='sugg';
-  box.innerHTML=`<span class="sh">${inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>`<button type="button">${esc(v)}</button>`).join('');
+  box.innerHTML=`<span class="sh">${inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>{ const n=(suggestN[inp.dataset.sugg]||{})[v]; return `<button type="button">${esc(v)}${n?`<small>${n}人</small>`:''}</button>`; }).join('');
   box.querySelectorAll('button').forEach((b,i)=>{
     b.addEventListener('pointerdown',e=>e.preventDefault());   // 押した時に入力欄からフォーカスが外れて、候補が先に消えないように
     b.addEventListener('click',()=>{ inp.value=list[i]; inp.dispatchEvent(new Event('input',{bubbles:true})); hideSugg(); inp.blur(); });

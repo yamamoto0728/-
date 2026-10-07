@@ -53,9 +53,12 @@ returns jsonb language sql stable security definer set search_path = public as $
      where coalesce(v, '') <> '' and length(v) <= 40 and public.tama_norm(v) <> ''
      group by kind, public.tama_norm(v)
   )
+  -- artist_n・course_n は、同じ順番の「その書き方を入れている人数」（2026-10-08 追加。候補の横に小さく出す）
   select jsonb_build_object(
-    'artist', coalesce((select jsonb_agg(x.v order by x.n desc, x.v) from (select v, n from g where kind = 'artist' order by n desc, v limit 300) x), '[]'::jsonb),
-    'course', coalesce((select jsonb_agg(x.v order by x.n desc, x.v) from (select v, n from g where kind = 'course' order by n desc, v limit 400) x), '[]'::jsonb)
+    'artist',   coalesce((select jsonb_agg(x.v order by x.n desc, x.v) from (select v, n from g where kind = 'artist' order by n desc, v limit 300) x), '[]'::jsonb),
+    'artist_n', coalesce((select jsonb_agg(x.n order by x.n desc, x.v) from (select v, n from g where kind = 'artist' order by n desc, v limit 300) x), '[]'::jsonb),
+    'course',   coalesce((select jsonb_agg(x.v order by x.n desc, x.v) from (select v, n from g where kind = 'course' order by n desc, v limit 400) x), '[]'::jsonb),
+    'course_n', coalesce((select jsonb_agg(x.n order by x.n desc, x.v) from (select v, n from g where kind = 'course' order by n desc, v limit 400) x), '[]'::jsonb)
   );
 $$;
 
