@@ -803,6 +803,9 @@
   .rinfo .code{font-family:"JetBrains Mono",monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--signal)}
   #paySheet .chips .c.sel{border-color:var(--signal);background:rgba(99,214,232,.12);color:var(--signal);font-weight:700}
   #paySheet .condsub{font-size:12px;font-weight:700;color:var(--ink);margin:12px 0 6px}#paySheet .condsub span{font-weight:500;color:var(--muted);font-size:11px;margin-left:6px}
+  .sugg{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 4px;align-items:center}
+  .sugg .sh{width:100%;font-size:10.5px;color:var(--muted)}
+  .sugg button{border:1px solid rgba(15,176,205,.45);background:rgba(15,176,205,.08);color:#0a7f96;border-radius:14px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #paySheet .pledge{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.7;padding:11px 12px;border-radius:14px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);margin-bottom:14px;cursor:pointer}
   #roomNm,#roomSt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #paySheet .pledge input{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)}
@@ -1039,8 +1042,6 @@
   <div class="boothpop" id="boothPop"></div>
   <div class="toast" id="toast"></div>
   <div class="frnudge" id="frNudge"></div>
-  <!-- 入力の候補（だれかが一度でも入れたアーティスト・授業名。loadSuggest） -->
-  <datalist id="dlArtist"></datalist><datalist id="dlCourse"></datalist>
 </div>
 <script>
 
@@ -1865,11 +1866,11 @@ function openMissingFold(p,miss){
 function attrFieldsHTML(p,part){
   const who=`<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>`;
-  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" list="dlArtist" autocomplete="off" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
+  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" data-sugg="artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
     <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
       <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
         <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
-    <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" list="dlCourse" autocomplete="off" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
+    <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" data-sugg="course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field worryf"><label>${WORRY_LABEL}<span class="opt">任意・${FA.purposePick}つまで</span></label>
       <div class="hint" style="margin:0 0 8px">選ばなくても大丈夫です。あとで、プロフィール編集からいつでも変えられます。</div>
@@ -4772,7 +4773,7 @@ function renderTimetable(){
     ${grid}
     ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
       <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
-      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input list="dlCourse" autocomplete="off" maxlength="24" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>`).join('')}</div>`:''}
+      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input data-sugg="course" maxlength="24" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>`).join('')}</div>`:''}
     <div class="edbar"><button class="btn btn-ghost" onclick="closeTimetable()">閉じる</button><button class="btn btn-primary" onclick="saveTimetable()">保存する</button></div>`;
 }
 // 授業名を入れたコマを押した時は、名前ごと消えてしまうので確かめる
@@ -4922,20 +4923,47 @@ function answerDaily(a){
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
-   アーティスト・取りたい科目・時間割の授業名を、だれかが一度でも入れたものから予測変換のように出す（<datalist>。iPhoneはキーボードの上に出る）。
+   アーティスト・取りたい科目・時間割の授業名を、だれかが一度でも入れたものから予測変換のように出す。
    書き方がそろうと「同じアーティスト」「同じ授業」の共通点が見つかりやすくなる。
-   候補はDBの関数 tama_suggest（supabase/tama_class_suggest.sql）が名前だけ返す（だれが入れたかは返さない）。多い順、NGワードは出さない。
-   開くたびに通信しないよう、10分に1回まで読む。関数が無い時（SQLの実行前）は候補が出ないだけ */
-let suggestAt=0;
+   最初は <datalist> にしたが、iPhone では出ない・打ち始めないと出ないことがあり、あおの実機で「候補が出てこない」となったので、
+   入力欄（data-sugg="artist" / "course"）のすぐ下に候補のボタンを自分で出すようにした。何も打っていない時は多い順、打つと合うものだけ（ひらがな・カタカナ・全角半角のちがいはそろえる）。
+   候補はDBの関数 tama_suggest（supabase/tama_class_suggest.sql）が名前だけ返す（だれが入れたかは返さない）。NGワードは出さない。
+   読めた時だけ10分は読み直さない（前は失敗しても10分待っていたので、SQLを実行した直後に出なかった） */
+let suggestData={artist:[],course:[]}, suggestAt=0, suggEl=null;
 async function loadSuggest(){
   if(!sb||!myId||String(myId).startsWith('local-')||Date.now()-suggestAt<10*60000)return;
-  suggestAt=Date.now();
   try{
-    const {data,error}=await sb.rpc('tama_suggest'); if(error||!data)return;
-    const fill=(id,arr)=>{ const el=$('#'+id); if(el)el.innerHTML=(arr||[]).filter(v=>v&&!ngCheck(v)).map(v=>`<option value="${esc(v).replace(/"/g,'&quot;')}">`).join(''); };
-    fill('dlArtist',data.artist); fill('dlCourse',data.course);
+    const {data,error}=await sb.rpc('tama_suggest');
+    if(error||!data){ if(error)console.warn('[suggest] 候補を読めません。supabase/tama_class_suggest.sql を実行してください:',error.message); return; }
+    suggestAt=Date.now();
+    const ok=a=>(a||[]).filter(v=>v&&!ngCheck(v));
+    suggestData={artist:ok(data.artist),course:ok(data.course)};
+    const a=document.activeElement; if(a&&a.dataset&&a.dataset.sugg)showSugg(a);   // 読み込みの間に入力欄を押していた時
   }catch(e){}
 }
+// 打った文字を含むもの（打った文字で始まるものを先に）。同じものはもう入っているので出さない
+function suggList(kind,q){
+  const all=suggestData[kind]||[], n=normAns(q);
+  if(!n)return all.slice(0,8);
+  return all.filter(v=>{ const x=normAns(v); return x!==n&&x.includes(n); })
+    .sort((a,b)=>(normAns(a).startsWith(n)?0:1)-(normAns(b).startsWith(n)?0:1)).slice(0,8);
+}
+function showSugg(inp){
+  hideSugg();
+  const list=suggList(inp.dataset.sugg,inp.value); if(!list.length)return;
+  const box=document.createElement('div'); box.className='sugg';
+  box.innerHTML=`<span class="sh">${inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>`<button type="button">${esc(v)}</button>`).join('');
+  box.querySelectorAll('button').forEach((b,i)=>{
+    b.addEventListener('pointerdown',e=>e.preventDefault());   // 押した時に入力欄からフォーカスが外れて、候補が先に消えないように
+    b.addEventListener('click',()=>{ inp.value=list[i]; inp.dispatchEvent(new Event('input',{bubbles:true})); hideSugg(); inp.blur(); });
+  });
+  (inp.closest('.ttrow')||inp).insertAdjacentElement('afterend',box);   // 時間割は1行に授業名と教室が並ぶので、その行の下に
+  suggEl=box; suggEl._for=inp;
+}
+function hideSugg(){ if(suggEl){ suggEl.remove(); suggEl=null; } }
+document.addEventListener('focusin',e=>{ const t=e.target; if(t&&t.dataset&&t.dataset.sugg){ loadSuggest(); showSugg(t); } });
+document.addEventListener('input',e=>{ const t=e.target; if(t&&t.dataset&&t.dataset.sugg&&document.activeElement===t)showSugg(t); });
+document.addEventListener('focusout',e=>{ const t=e.target; if(t&&t.dataset&&t.dataset.sugg)setTimeout(()=>{ if(suggEl&&suggEl._for===t&&document.activeElement!==t)hideSugg(); },150); });
 
 /* ---------- ひとこと（つながりの感じ方。2026-10-07、提案②「孤独感が減ったかを測る」） ----------
    ちかくの根幹（現実で人と出会い、孤独感を埋める）を確かめるため、使い始めと使った後の変化を測る。
