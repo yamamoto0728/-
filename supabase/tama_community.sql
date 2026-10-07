@@ -58,7 +58,7 @@ returns boolean language sql stable security definer set search_path = public as
 $$;
 create or replace function public.tama_room_is_owner(p_room text)
 returns boolean language sql stable security definer set search_path = public as $$
-  select exists (select 1 from public.tama_rooms r where r.id::text = p_room and r.owner_id = auth.uid());
+  select exists (select 1 from public.tama_rooms r where r.id::text = p_room and r.owner_id::text = auth.uid()::text);
 $$;
 
 -- アーティスト名をそろえる（アプリの normAns とほぼ同じ。ひらがな・カタカナの違いだけはそろえない）
@@ -93,12 +93,12 @@ $$;
 drop function if exists public.tama_room_list();
 create or replace function public.tama_room_list()
 returns table (id text, name text, topic text, rules text, visibility text, conditions jsonb, capacity int,
-               expires_at timestamptz, meet jsonb, owner_id uuid, owner_name text, owner_emoji text, created_at timestamptz,
+               expires_at timestamptz, meet jsonb, owner_id text, owner_name text, owner_emoji text, created_at timestamptz,
                members int, last_at timestamptz, joined boolean, muted boolean, unread int, fits boolean, going int, i_going boolean)
 language sql stable security definer set search_path = public as $$
   with me as (select auth.uid() as uid, public.tama_my_fa() as fa)
   select r.id::text, r.name, coalesce(r.topic, ''), r.rules, r.visibility, r.conditions, r.capacity,
-         r.expires_at, r.meet, r.owner_id, op.name, op.emoji, r.created_at,
+         r.expires_at, r.meet, r.owner_id::text, op.name, op.emoji, r.created_at,
          (select count(*)::int from public.tama_room_members m where m.room_id::text = r.id::text),
          (select max(x.created_at) from public.tama_room_messages x where x.room_id::text = r.id::text),
          mm.user_id is not null,
@@ -117,7 +117,7 @@ language sql stable security definer set search_path = public as $$
      and (mm.user_id is not null
           or ((r.expires_at is null or r.expires_at > now())
               and r.visibility <> 'invite'
-              and (r.visibility = 'all' or r.owner_id = me.uid or public.tama_room_fits(r.conditions, me.fa))))
+              and (r.visibility = 'all' or r.owner_id::text = me.uid::text or public.tama_room_fits(r.conditions, me.fa))))
    order by r.created_at desc;
 $$;
 
@@ -137,7 +137,7 @@ begin
   if me is null then raise exception 'not signed in'; end if;
   if coalesce(trim(p_name), '') = '' then return jsonb_build_object('status', 'name'); end if;
   if v_vis = 'common' and coalesce(jsonb_array_length(p_conditions), 0) = 0 then return jsonb_build_object('status', 'cond'); end if;
-  if (select count(*) from public.tama_rooms where owner_id = me and (expires_at is null or expires_at > now())) >= 3 then
+  if (select count(*) from public.tama_rooms where owner_id::text = me::text and (expires_at is null or expires_at > now())) >= 3 then
     return jsonb_build_object('status', 'too_many');
   end if;
   insert into public.tama_rooms (name, topic, rules, visibility, conditions, capacity, expires_at, meet, owner_id)
@@ -173,7 +173,7 @@ begin
   if exists (select 1 from public.tama_room_members m where m.room_id::text = p_room and m.user_id = me) then return 'ok'; end if;
   if r.expires_at is not null and r.expires_at <= now() then return 'ended'; end if;
   if exists (select 1 from public.tama_room_bans b where b.room_id = p_room and b.user_id = me) then return 'banned'; end if;
-  if r.owner_id is distinct from me then
+  if r.owner_id::text is distinct from me::text then
     if r.visibility = 'invite' and not exists (select 1 from public.tama_room_codes c where c.room_id = p_room and c.code = upper(trim(coalesce(p_code, '')))) then
       return 'code';
     end if;
@@ -312,7 +312,7 @@ create or replace function public.tama_room_forget_me()
 returns void language plpgsql volatile security definer set search_path = public as $$
 declare r record; v_next uuid;
 begin
-  for r in select id::text as id from public.tama_rooms where owner_id = auth.uid() loop
+  for r in select id::text as id from public.tama_rooms where owner_id::text = auth.uid()::text loop
     select m.user_id into v_next from public.tama_room_members m
      where m.room_id::text = r.id and m.user_id <> auth.uid() order by m.joined_at limit 1;
     if v_next is null then perform public.tama_room_purge(r.id);
