@@ -760,6 +760,15 @@
   .duob .dv{font-weight:900;color:var(--amber-deep);margin-top:4px}.duob .dv.diff{color:#5a63a8}
   .duob button{margin-top:7px;border:0;border-radius:12px;padding:7px 14px;background:var(--amber);color:#3a2410;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
   .duob button.sub{background:none;color:#b0651a;padding:4px 8px;margin-top:3px}
+  /* 友達との共通点のお知らせ（2026-10-07）。画面の上に小さく出し、10秒で消える（ほかの操作はふさがない） */
+  .frnudge{position:absolute;top:46px;left:12px;right:12px;z-index:38;display:flex;gap:10px;align-items:center;padding:11px 12px;border-radius:16px;
+    background:#fff;border:1px solid rgba(245,151,47,.5);box-shadow:0 10px 28px rgba(20,25,60,.18);transform:translateY(-14px);opacity:0;pointer-events:none;transition:.25s}
+  .frnudge.show{transform:none;opacity:1;pointer-events:auto}
+  .frnudge .av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .frnudge .tx{flex:1;min-width:0;font-size:12.5px;line-height:1.55}.frnudge .tx b{color:var(--amber-deep)}
+  .frnudge .go{flex-shrink:0;border:0;border-radius:12px;padding:8px 11px;background:var(--amber);color:#3a2410;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
+  .frnudge .x{flex-shrink:0;border:0;background:none;color:var(--muted2);font-size:16px;cursor:pointer;padding:4px}
+  .stchip.same{background:#fff3e2;color:#b0651a}
   .metline .mpat{display:block;margin-top:5px;font-size:12px;color:var(--ink);font-style:normal}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
 </style>
@@ -989,6 +998,7 @@
   </div>
   <div class="boothpop" id="boothPop"></div>
   <div class="toast" id="toast"></div>
+  <div class="frnudge" id="frNudge"></div>
 </div>
 <script>
 
@@ -2973,7 +2983,12 @@ function renderTopics(){
   if(!topicsOpen[chatPeer]){ set(`<div class="tbar"><button class="tshow" onclick="topicsOpen[chatPeer]=true;renderTopics()">💡 話題に困ったら</button><button class="tshow meet" onclick="openMeet()">🤝 会うときは</button></div>`); return; }
   const head=`<div class="th"><span>💡 押すと入力欄に入ります（送信はされません）</span><button onclick="topicsOpen[chatPeer]=false;renderTopics()">閉じる</button></div>`;
   if(fr){
-    chatTopics=FRIEND_QUICK.map(text=>({text}));
+    // 今日のお題が同じ・共通点がある友達には、それを先頭に（2026-10-07）
+    const fu=friendUser(chatPeer)||m.u, extra=[];
+    if(fu&&sameDaily(fu))extra.push(frOpener({key:'day:'},fu));
+    const fc=fu?commonDetail(fu).filter(c=>FR_NUDGE_KINDS.includes(c.key.split(':')[0])).sort((a,b)=>rarityOf(b.key)-rarityOf(a.key))[0]:null;
+    if(fc)extra.push(frOpener(fc,fu));
+    chatTopics=extra.concat(FRIEND_QUICK).map(text=>({text}));
     set(head+`<div class="tl">${chatTopics.map((t,i)=>`<button class="tc" onclick="pickTopic(${i})">${esc(t.text)}</button>`).join('')}</div>`);
     return;
   }
@@ -3868,7 +3883,73 @@ async function loadFriends(){
   if(curSheetUser&&$('#overlay').classList.contains('show'))refreshSheetFriendBtn(curSheetUser.id);
   // 時間割を見せ合う設定は、友達が分かってから読む（友達でない人の分は使わない）。通信を抑えるため2分に1回まで
   if(Date.now()-lastTTShareLoad>120000){ lastTTShareLoad=Date.now(); loadTTShares(); }
+  checkFriendCommons('poll');
 }
+
+/* ---------- 友達との共通点を知らせる（2026-10-07 あおの依頼「友達間でも、今日のお題・プロフィール変更で共通点ができたら知らせて、行動を後押ししたい」） ----------
+   ・今日のお題が同じ答え：自分が答えた時に、同じ答えの友達へ通知＋自分の画面に「💬 話す」のお知らせ。友達があとから答えた時は、20秒ごとの読み込みで気づいてお知らせ
+   ・プロフィールを変えて新しい共通点（アーティスト・あるある・取りたい科目・目標）ができた：自分が変えた時は友達へ通知＋お知らせ、友達が変えた時はお知らせ
+   ・しつこくならないように：通知は同じ友達に1日1回・この機能で1日 FR_PUSH_MAX 回まで。お知らせは画面の上に小さく出し、10秒で消える。
+     前からある共通点は知らせない（初めて見た時は覚えるだけ）。一度知らせた共通点は二度と知らせない
+   ・悩み・不安は知らせない（通知はロック画面に出るため）。時間割の同じ授業は、読み込みの順で「新しい」と誤って出るので除く（授業中は近くの人の一番上に出る）
+   「💬 話す」は友達とのトークを開いて、最初の一言を入力欄に入れる（送るのは本人） */
+const FR_NUDGE_KINDS=['art','aru','crs','goal'], FR_PUSH_MAX=3;
+const lsJSON=(k,d)=>{ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } };
+const lsPut=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+let frSeen=lsJSON('tama_frSeen',{}), frNudgeQ=[], frNudgeTimer=null, frNudgeCur=null;
+function frDayState(){ const d=jstDateStr(); let s=lsJSON('tama_frDay',null); if(!s||s.d!==d)s={d,daily:{},pushes:0,pushedTo:{}}; return s; }
+// その共通点から作る、友達への最初の一言（入力欄に入れるだけ）
+function frOpener(c,u){
+  const [kind]=c.key.split(':'), a=attrsOf(u);
+  if(kind==='day')return `今日のお題、同じ「${dailyAnswer(u)}」だったね！`;
+  if(kind==='art')return `${a.artist}聴くんだね！いちばん好きな曲なに？`;
+  if(kind==='aru')return `「${c.key.slice(4)}」わかる笑`;
+  if(kind==='crs')return `${a.course}取りたいの？自分も！`;
+  if(kind==='goal')return `${c.label}、一緒にがんばろう！`;
+  return 'おつかれ！';
+}
+// source：'daily'＝自分がお題に答えた／'edit'＝自分がプロフィールを変えた（この2つは友達へ通知も送る）／'poll'＝友達の変化を読み込んだ
+function checkFriendCommons(source){
+  if(!profile||profileDeleted)return;
+  const st=frDayState(), mine=source==='daily'||source==='edit', found=[];
+  const ids=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>!blocked.has(id));
+  for(const id of ids){
+    const u=friendUser(id); if(!u)continue;
+    if(sameDaily(u)&&!st.daily[id]){ st.daily[id]=true; found.push({id,u,c:{key:'day:'+normAns(dailyAnswer(u)),label:'今日のお題「'+dailyAnswer(u)+'」'}}); }
+    const cur=commonDetail(u).filter(c=>FR_NUDGE_KINDS.includes(c.key.split(':')[0]));
+    const seen=frSeen[id];
+    if(!seen){ frSeen[id]=cur.map(c=>c.key); continue; }   // 初めて見た友達は、いまの共通点を覚えるだけ
+    const fresh=cur.filter(c=>!seen.includes(c.key));
+    if(fresh.length){ frSeen[id]=seen.concat(fresh.map(c=>c.key)); found.push({id,u,c:fresh[0],more:fresh.length-1}); }
+  }
+  lsPut('tama_frSeen',frSeen);
+  if(mine&&!debugMode()) found.forEach(f=>{
+    if(st.pushes>=FR_PUSH_MAX||st.pushedTo[f.id]||isTest(f.id))return;
+    st.pushes++; st.pushedTo[f.id]=true;
+    const me=profile.name, day=f.c.key.startsWith('day:');
+    notifyPush(f.id, day?`🎲 ${me}さんも今日のお題「${dailyAnswer(profile)}」`:`✨ ${me}さんと新しい共通点`,
+      day?'同じ答えでした。トークで話してみよう':f.c.label.replace(/^同じ/,'')+(f.more>0?` ほか${f.more}つ`:''));
+  });
+  lsPut('tama_frDay',st);
+  found.forEach(f=>frNudgeQ.push(f));
+  showFrNudge();
+}
+function showFrNudge(){
+  if(frNudgeCur||!frNudgeQ.length||document.hidden)return;
+  const f=frNudgeCur=frNudgeQ.shift(), el=$('#frNudge'), day=f.c.key.startsWith('day:');
+  const text=day?`🎲 友達の<b>${esc(f.u.name)}</b>さんも、今日のお題で「<b>${esc(dailyAnswer(f.u))}</b>」！`
+    :`✨ <b>${esc(f.u.name)}</b>さんと新しい共通点：${esc(f.c.label)}${f.more>0?` ほか${f.more}つ`:''}`;
+  el.innerHTML=`<div class="av" style="background:${gr(f.u.emoji)}">${f.u.emoji}</div><div class="tx">${text}</div><button class="go" onclick="frNudgeTalk()">💬 話す</button><button class="x" onclick="hideFrNudge()" aria-label="閉じる">✕</button>`;
+  el.classList.add('show');
+  clearTimeout(frNudgeTimer); frNudgeTimer=setTimeout(hideFrNudge,10000);
+}
+function hideFrNudge(){ clearTimeout(frNudgeTimer); $('#frNudge').classList.remove('show'); frNudgeCur=null; setTimeout(showFrNudge,600); }
+async function frNudgeTalk(){
+  const f=frNudgeCur; if(!f)return; frNudgeQ=[]; hideFrNudge();
+  closeSheet(); await openChat(f.id,'friends');
+  const el=$('#chatInput'); if(el&&putInInput(el,frOpener(f.c,f.u)))toast('入力欄に入れました。確かめて「送る」を押してください');
+}
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible')showFrNudge(); });
 let lastTTShareLoad=0;
 function updateFriendDot(){
   const n=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length, dot=$('#dotFriends');
@@ -4015,7 +4096,7 @@ function renderFriends(){
   h+=`<div class="listhead">👥 友達はいまどこ？</div><div class="ulist">`;
   h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
       return `<div class="urow" onclick="openFriend('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-        <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}</div>
+        <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}${sameDaily(u)?`<span class="stchip same">🎲 お題が同じ</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}</div>
         <div class="d">${map?`<button class="frmapbtn" onclick="event.stopPropagation();showFriendOnMap('${id}')">🗺 地図</button>`:''}</div></div>`; }).join('')
     :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>目の前にいる人とは、4桁のコードで<br>すぐ友達になれます。</p>
        <button class="btn btn-primary" onclick="openFrAdd('show')">自分のコードを見せる</button><br><button class="btn btn-ghost" style="margin-top:8px" onclick="openFrAdd('enter')">相手のコードを入れる</button></div>`;
@@ -4428,7 +4509,8 @@ function renderDaily(){
   const c=dailyCounts();
   el.innerHTML=`<div class="dyday" id="dailyYday"></div>`+head+`<div class="dmine">あなたの答え：<b>${esc(mine)}</b></div>
     <div class="ddist" id="dailyDist"></div>
-    <div class="dcount">同じ答えの人　近くに <b>${c.near}</b>人 ・ 今日すれ違った人に <b>${c.crossed}</b>人 ・ キャンパスに <b>${c.all}</b>人</div>
+    <div class="dcount">同じ答えの人　近くに <b>${c.near}</b>人 ・ 今日すれ違った人に <b>${c.crossed}</b>人 ・ キャンパスに <b>${c.all}</b>人${(()=>{ const n=allFriendRows().filter(r=>r.status==='accepted').map(r=>friendUser(otherIdOf(r))).filter(u=>u&&sameDaily(u)).length;
+      return n?` ・ <a onclick="event.stopPropagation();go('friends')" style="color:var(--signal);font-weight:700;cursor:pointer">👥 友達に <b>${n}</b>人 ›</a>`:''; })()}</div>
     <div class="dnote">${c.all?'同じ答えの人は「近くの人」に「今日のお題」の共通点つきで出ます':t.free?'まだ同じ答えの人はいません。一致したらレアな出会いです':'まだ同じ答えの人はいません。お昼どきに増えていきます'}</div>`;
   fillDailyStats();
 }
@@ -4444,6 +4526,7 @@ function answerDaily(a){
   publishMe(); saveMyAttrs().then(()=>loadDailyStats(t,true)); renderDaily(); renderNearby(); renderCross();
   toast('🎲 答えました。みんなの答えを見てみよう');
   askPushSoon('daily'); visitMaybeUpdate();
+  setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
 }
 
 /* ---------- ひとこと（つながりの感じ方。2026-10-07、提案②「孤独感が減ったかを測る」） ----------
@@ -4744,6 +4827,7 @@ async function saveEdit(){
   }
   toast('プロフィールを更新しました');
   closeEdit();
+  setTimeout(()=>checkFriendCommons('edit'),2800);   // 変更で友達と新しい共通点ができたら知らせる
 }
 /* ---------- invite ---------- */
 // 人に配るURLは常にこの正式URLにする（古いドメインで開かれても混乱しないように）
