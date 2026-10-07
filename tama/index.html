@@ -769,6 +769,34 @@
   .frnudge .go{flex-shrink:0;border:0;border-radius:12px;padding:8px 11px;background:var(--amber);color:#3a2410;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
   .frnudge .x{flex-shrink:0;border:0;background:none;color:var(--muted2);font-size:16px;cursor:pointer;padding:4px}
   .stchip.same{background:#fff3e2;color:#b0651a}
+  /* コミュニティ（2026-10-07 作り直し） */
+  .urow .rcond{font-size:11.5px;color:#5a63a8;margin-top:3px;line-height:1.5}.urow .rcond.meet{color:#9a5a10}
+  .joined-tag.own{color:#b0651a}
+  .rjoin{margin:8px 4px;padding:18px 16px;border-radius:18px;background:#fff;border:1px solid var(--line);text-align:center}
+  .rjoin .ic{font-size:34px}.rjoin h3{font-family:"Zen Maru Gothic";font-size:18px;margin:4px 0 2px}.rjoin .tp{font-size:13px;color:var(--muted);margin-bottom:12px}
+  .rjoin .sec{text-align:left;border-radius:14px;background:var(--surface2);padding:10px 12px;margin-bottom:8px;font-size:12.5px;line-height:1.7;white-space:pre-wrap}
+  .rjoin .sec b{display:block;font-size:11.5px;color:var(--muted);margin-bottom:2px;white-space:normal}
+  .rjoin .meta{font-size:11.5px;color:var(--muted);margin:6px 0 12px}
+  .rjoin .btn{width:100%;padding:14px;font-size:15px}
+  .rjoin .note{font-size:11px;color:var(--muted2);margin-top:8px}
+  .rmeet{align-self:stretch;margin:0 0 6px;padding:10px 13px;border-radius:14px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);font-size:12.5px;line-height:1.6;display:flex;gap:10px;align-items:center}
+  .rmeet div{flex:1;min-width:0}.rmeet b{color:#9a5a10}
+  .rmeet button{flex-shrink:0;border:0;border-radius:12px;padding:8px 11px;background:var(--amber);color:#3a2410;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer}
+  .rmeet button.on{background:var(--surface2);color:var(--muted)}
+  .rinfo .sec{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:9px;background:#fff;font-size:13px;line-height:1.7}
+  .rinfo .sec>b{display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px}
+  .rinfo .sec .pre{white-space:pre-wrap}
+  .rinfo .mrow2{display:flex;align-items:center;gap:9px;padding:6px 0;border-top:1px solid var(--line)}.rinfo .mrow2:first-of-type{border-top:0}
+  .rinfo .mrow2 .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .rinfo .mrow2 .nm{flex:1;min-width:0;font-size:13px}
+  .rinfo .mrow2 button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:5px 9px;font-family:inherit;font-size:11.5px;color:var(--muted);cursor:pointer}
+  .rinfo .rbtn{display:block;width:100%;text-align:left;border:0;background:none;padding:11px 2px;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;border-top:1px solid var(--line)}
+  .rinfo .rbtn.warn{color:var(--bad)}.rinfo .rbtn small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
+  .rinfo .code{font-family:"JetBrains Mono",monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--signal)}
+  #paySheet .chips .c.sel{border-color:var(--signal);background:rgba(99,214,232,.12);color:var(--signal);font-weight:700}
+  #paySheet .pledge{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.7;padding:11px 12px;border-radius:14px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);margin-bottom:14px;cursor:pointer}
+  #roomNm,#roomSt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #paySheet .pledge input{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)}
   .metline .mpat{display:block;margin-top:5px;font-size:12px;color:var(--ink);font-style:normal}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
 </style>
@@ -887,7 +915,8 @@
       <div class="scroll" id="commPane" hidden>
         <div class="cmsub" id="commSub"></div>
         <div class="ulist" id="roomList"></div>
-        <div style="padding:4px 16px 18px"><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="createRoom()">＋ 新しいコミュニティを作る</button></div>
+        <div style="padding:4px 16px 18px"><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="createRoom()">＋ 新しいコミュニティを作る</button>
+          <button class="btn btn-ghost" id="roomCodeBtn" style="width:100%;padding:11px;font-size:13px;margin-top:8px" onclick="openRoomCodeJoin()" hidden>🔑 招待コードで入る</button></div>
       </div>
     </section>
     <section class="screen" id="s-chat">
@@ -897,7 +926,7 @@
       <div class="chatbar"><input id="chatInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">↑</button></div>
     </section>
     <section class="screen" id="s-room">
-      <div class="chathead"><button class="back" onclick="go('comm')">‹</button><div class="av" id="roomAv" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div style="flex:1;min-width:0"><div class="nm" id="roomNm"></div><div class="st" id="roomSt"></div></div><button class="joinbtn" id="roomJoinBtn" onclick="toggleRoomJoin()">参加</button><button class="membtn" onclick="openMembers()" title="参加者を見る">👥</button></div>
+      <div class="chathead"><button class="back" onclick="go('comm')">‹</button><div class="av" id="roomAv" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div style="flex:1;min-width:0"><div class="nm" id="roomNm"></div><div class="st" id="roomSt"></div></div><button class="joinbtn" id="roomJoinBtn" onclick="toggleRoomJoin()">参加</button><button class="membtn" onclick="roomsV2?openRoomInfo():openMembers()" title="部屋の情報・参加者">👥</button></div>
       <div class="msgs" id="roomMsgs"></div>
       <div class="chatbar"><input id="roomInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendRoomMsg()"><button class="send" onclick="sendRoomMsg()">↑</button></div>
     </section>
@@ -2608,7 +2637,7 @@ function closeContact(){ $('#contactOverlay').classList.remove('show'); }
 
 /* ---------- 通報・ブロック ---------- */
 const REPORT_REASONS=['不適切な内容・発言','迷惑行為・しつこい','なりすまし・偽アカウント','スパム・勧誘','その他'];
-let reportTarget=null;
+let reportTarget=null, reportContext=null;   // reportContext：どこでの通報か（コミュニティの投稿など。2026-10-07）。理由の頭に付けて運営が分かるようにする
 async function loadBlocks(){
   if(!sb)return;
   try{
@@ -2626,10 +2655,10 @@ function openReport(uid,name){
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeReport()">やめる</button>`;
   $('#reportOverlay').classList.add('show');
 }
-function closeReport(){ $('#reportOverlay').classList.remove('show'); }
+function closeReport(){ $('#reportOverlay').classList.remove('show'); reportContext=null; }
 async function submitReport(reason){
   if(!reportTarget)return;
-  const t=reportTarget; reportTarget=null;
+  const t=reportTarget, ctx=reportContext; reportTarget=null; reportContext=null;
   blocked.add(t.id);
   others=others.filter(u=>u.id!==t.id);
   testUsers=testUsers.filter(u=>u.id!==t.id);
@@ -2640,7 +2669,7 @@ async function submitReport(reason){
   if(isTest(t.id)){ toast('通報しました（テスト用のため記録は残りません）'); return; }
   if(!sb){ toast('通報しました（未接続のため記録は残りません）'); return; }
   try{
-    const {error:e1}=await sb.from(T('reports')).insert({reporter_id:myId,target_id:t.id,reason:reason});
+    const {error:e1}=await sb.from(T('reports')).insert({reporter_id:myId,target_id:t.id,reason:(ctx?ctx+'：':'')+reason});
     if(e1) console.warn('[report] 保存に失敗',e1.message);
     const {error:e2}=await sb.from(T('blocks')).upsert({blocker_id:myId,blocked_id:t.id},{onConflict:'blocker_id,blocked_id'});
     if(e2) console.warn('[block] 保存に失敗',e2.message);
@@ -3278,7 +3307,7 @@ let rooms=[], curRoom=null, roomPoll=null;
 let myRoomIds=new Set(), roomStats={}, lastReadWrite=0;
 const rid=v=>String(v);
 // 部屋ごとに問い合わせるとN+1になるため、rooms/所属/直近メッセージを3クエリでまとめて取る
-async function loadRooms(){ if(!sb)return;
+async function loadRoomsLegacy(){ if(!sb)return;
   try{
     const [rr,mm,gg]=await Promise.all([
       sb.from(T('rooms')).select('*').order('created_at',{ascending:false}),
@@ -3327,6 +3356,7 @@ async function leaveRoom(id){
 }
 async function toggleRoomJoin(){
   if(!curRoom)return;
+  if(roomsV2){ if(myRoomIds.has(rid(curRoom.id)))leaveRoomV2(); else joinRoomV2(); return; }
   if(myRoomIds.has(rid(curRoom.id))){ if(!confirm('この部屋を退出しますか？'))return; if(await leaveRoom(curRoom.id))toast('退出しました'); }
   else if(await joinRoom(curRoom.id))toast('✅ 参加しました');
 }
@@ -3343,11 +3373,15 @@ function updateRoomJoinUI(){
   // 参加中は「退出」と出す（「参加中」を押すと退出の確認が出て分かりにくかった）
   if(b){b.textContent=joined?'退出':'参加する';b.className='joinbtn'+(joined?' joined':'');}
   if(hint)hint.className='joinhint'+(joined?'':' show');
-  if(inp){inp.disabled=!joined;inp.placeholder=joined?'メッセージを入力…':'参加すると投稿できます';}
-  if(send){send.style.opacity=joined?1:.4;send.style.pointerEvents=joined?'auto':'none';}
+  // 2026-10-07：期限が過ぎた部屋は読むだけ。参加していない時は入力欄を出さない（参加の案内を真ん中に出す）
+  const ended=roomsV2&&roomEnded(curRoom), can=joined&&!ended;
+  if(b)b.style.display=roomsV2&&!joined?'none':'';   // 参加していない時は、真ん中の案内の「ルールを守って参加する」から
+  if(inp){inp.disabled=!can;inp.placeholder=ended?'この部屋は終わりました':joined?'メッセージを入力…':'参加すると投稿できます';}
+  if(send){send.style.opacity=can?1:.4;send.style.pointerEvents=can?'auto':'none';}
+  const bar=$('#s-room .chatbar'); if(bar)bar.style.display=roomsV2&&!joined?'none':'';
 }
 function agoText(ts){ const d=Date.now()-new Date(ts).getTime(); const day=Math.floor(d/86400000); if(day>=1)return day+'日前'; const h=Math.floor(d/3600000); if(h>=1)return h+'時間前'; const mi=Math.floor(d/60000); return mi<=0?'たった今':mi+'分前'; }
-function roomRow(r){const meta=roomMeta(r); const k=rid(r.id); const s=roomStats[k]||{}; const joined=myRoomIds.has(k); const un=s.unread||0;
+function roomRowLegacy(r){const meta=roomMeta(r); const k=rid(r.id); const s=roomStats[k]||{}; const joined=myRoomIds.has(k); const un=s.unread||0;
   const right=un?`<div class="unread">${un>99?'99+':un}</div>`:`<div class="m" style="font-size:12.5px">${joined?'開く':'見る'} ›</div>`;
   return `<div class="urow" onclick="openRoom('${k}')"><div class="av" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div class="info"><div class="n">${esc(r.name)}${joined?' <span class="joined-tag">参加中</span>':''}</div><div class="b">${esc(r.topic||'みんなで話そう')}${meta?' <span style=\'color:var(--signal)\'>· '+meta+'</span>':''}</div></div><div class="d">${right}</div></div>`;}
 // 未読がある部屋 → 参加中の部屋 → 残り、の順に並べる（放置された部屋が上に居座らないように）
@@ -3357,12 +3391,12 @@ function sortedRooms(){ return rooms.slice().sort((a,b)=>{
     const ja=myRoomIds.has(ka)?1:0, jb=myRoomIds.has(kb)?1:0;
     return jb-ja;
   });}
-function renderRooms(){ const arr=sortedRooms(); const el=$('#roomList'); if(el){ $('#commSub').textContent=rooms.length?'だれでも参加できる部屋です':'';
+function renderRoomsLegacy(){ const arr=sortedRooms(); const el=$('#roomList'); if(el){ $('#commSub').textContent=rooms.length?'だれでも参加できる部屋です':'';
     if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
     el.innerHTML=arr.length?arr.map(roomRow).join(''):`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`; }
   const hr=$('#homeRoomList'); if(hr){ hr.innerHTML=arr.length?arr.slice(0,3).map(roomRow).join(''):`<div style="padding:14px 16px;font-size:12.5px;color:var(--muted)">まだコミュニティがありません。<span onclick="go('comm')" style="color:var(--signal);font-weight:700;cursor:pointer">作ってみる ›</span></div>`; }
 }
-function createRoom(){
+function createRoomLegacy(){
   $('#paySheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">コミュニティを作成</h2>
     <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:14px">作った部屋には<b style="color:var(--ink)">誰でも参加</b>できます。</p>
     <div class="field"><label>コミュニティ名</label><input id="newRoomName" maxlength="20" placeholder="例：カフェ好き集まれ"></div>
@@ -3382,7 +3416,7 @@ async function confirmCreateRoom(){
   }catch(e){toast('作成に失敗しました');return;}}
   closePay(); toast('✅ コミュニティを作成しました'); loadRooms();
 }
-async function openRoom(id){ const k=rid(id);
+async function openRoomLegacy(id){ const k=rid(id);
   // onclick経由でidは文字列になる。rooms.idがbigintだと===で一致しないため正規化して比較する
   curRoom=rooms.find(r=>rid(r.id)===k)||{id,name:'コミュニティ',topic:''};
   $('#roomNm').textContent=curRoom.name; $('#roomSt').textContent=curRoom.topic||'誰でも参加OK';
@@ -3391,8 +3425,9 @@ async function openRoom(id){ const k=rid(id);
   clearInterval(roomPoll); if(!sb)return;
   roomPoll=setInterval(async()=>{ if(!$('#s-room').classList.contains('active'))return; await loadRoomMsgs(); markRoomRead(curRoom.id); },2500);
 }
-async function loadRoomMsgs(){ if(!sb||!curRoom)return; try{const {data}=await sb.from(T('room_messages')).select('*').eq('room_id',curRoom.id).order('created_at'); if(data){curRoom.msgs=data;renderRoom();}}catch(e){} }
-function renderRoom(){ const box=$('#roomMsgs'); if(!box||!curRoom)return; const msgs=curRoom.msgs||[];
+async function loadRoomMsgs(){ if(!sb||!curRoom)return; if(roomsV2&&!myRoomIds.has(rid(curRoom.id)))return;   // 2026-10-07：投稿は参加している人だけ読める
+  try{const {data}=await sb.from(T('room_messages')).select('*').eq('room_id',curRoom.id).order('created_at'); if(data){curRoom.msgs=data;renderRoom();}}catch(e){} }
+function renderRoomLegacy(){ const box=$('#roomMsgs'); if(!box||!curRoom)return; const msgs=curRoom.msgs||[];
   if(!msgs.length){box.innerHTML='<div class="day">まだメッセージはありません。最初のひとことをどうぞ！</div>';return;}
   let lastDay='';
   box.innerHTML=msgs.map(m=>{const mine=m.from_id===myId, at=Date.parse(m.created_at)||0; let sep='';
@@ -3402,6 +3437,7 @@ function renderRoom(){ const box=$('#roomMsgs'); if(!box||!curRoom)return; const
 }
 async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(); if(!t||!curRoom)return;
   if(!myRoomIds.has(rid(curRoom.id))){ toast('先にこの部屋に参加してください'); return; }
+  if(roomsV2&&roomEnded(curRoom)){ toast('この部屋は終わりました'); return; }
   if(ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください。'); return; }
   inp.value='';
   if(!sb){toast('バックエンド未接続です');return;}
@@ -3415,14 +3451,334 @@ async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(
 async function notifyRoomMembers(room,text){
   if(!sb||!room)return;
   try{
-    const {data}=await sb.from(T('room_members')).select('user_id,last_read_at').eq('room_id',room.id);
+    const {data}=await sb.from(T('room_members')).select(roomsV2?'user_id,last_read_at,muted':'user_id,last_read_at').eq('room_id',room.id);
     if(!data)return;
-    // 直近5分以内に部屋を見ていた人は今まさに開いているので送らない（1発言ごとの通知攻撃を防ぐ）
+    // 直近5分以内に部屋を見ていた人は今まさに開いているので送らない（1発言ごとの通知攻撃を防ぐ）。通知をオフにした人にも送らない（2026-10-07）
     const cutoff=Date.now()-5*60*1000;
     const body=(profile?profile.name:'誰か')+'：'+(text.length>40?text.slice(0,40)+'…':text);
-    data.filter(m=>m.user_id!==myId&&new Date(m.last_read_at).getTime()<cutoff)
+    data.filter(m=>m.user_id!==myId&&!m.muted&&new Date(m.last_read_at).getTime()<cutoff)
         .forEach(m=>notifyPush(m.user_id,room.name||'コミュニティ',body));
   }catch(e){ console.error('[push] コミュニティ通知の送信に失敗',e); }
+}
+
+/* ---------- コミュニティ（2026-10-07 作り直し。supabase/tama_community.sql） ----------
+   あおの依頼「オーナーの責任・公開範囲と参加条件（マッチングと同じく）・コミュニティ自体を消す・必要な機能を、自分で考えて良くして」。
+   それまでは、オーナーがいない・一度作ったら消せない・だれでも入れる、だった。
+   ・作った人がオーナー（👑）。作る時に「オーナーの約束」に同意する。部屋の編集・投稿の削除・メンバーに退出してもらう（再参加させない）・
+     オーナーを譲る・部屋を閉じる（消す）ができる。オーナーは、譲るか閉じるまで退出できない（放置された部屋を作らない）
+   ・だれが入れるか：みんな／共通点のある人だけ（オーナーが自分のプロフィールから選んだ条件のどれかに当てはまる人にだけ一覧に出る）／招待コードの人だけ（一覧に出ない）。
+     判定はDBの関数（tama_room_join）がするので、アプリを書き換えても入れない
+   ・期限（既定2週間）。過ぎたら読むだけになり、3日後に消える（過疎の部屋が残らない）。定員。ルール（参加の前に見せる）
+   ・集まる約束（提案④）：「いつ・どこで」を部屋の一番上に出し、「👍 行く」を押せる
+   ・投稿は参加している人だけ読める。自分の投稿は消せる。投稿・部屋を通報できる。部屋ごとに通知をオフにできる。ブロックした人の投稿は出さない
+   SQL の実行前（関数が無い時）は roomsV2=false で、前のしくみ（〜Legacy）のまま動く */
+let roomsV2=true, roomForm=null, lastRoomCleanup=0;
+const isMissingFn=e=>!!e&&(e.code==='PGRST202'||/schema cache|does not exist|Could not find the function/i.test(e.message||''));
+async function loadRooms(){ if(!sb)return;
+  if(roomsV2){
+    try{
+      const {data,error}=await sb.rpc('tama_room_list');
+      if(!error){ applyRoomList(data||[]); maybeCleanupRooms(); return; }
+      if(!isMissingFn(error)){ console.warn('[rooms] 一覧を読み込めません',error.message); return; }
+      roomsV2=false; console.warn('[rooms] supabase/tama_community.sql を実行すると、オーナー・参加条件・期限が使えます:',error.message);
+    }catch(e){ return; }
+  }
+  await loadRoomsLegacy();
+}
+function applyRoomList(list){
+  rooms=list; myRoomIds=new Set(list.filter(r=>r.joined).map(r=>rid(r.id)));
+  roomStats={}; list.forEach(r=>{ roomStats[rid(r.id)]={members:r.members||0,unread:r.joined?(r.unread||0):0,last:r.last_at}; });
+  if(curRoom){ const f=list.find(r=>rid(r.id)===rid(curRoom.id)); if(f){ const msgs=curRoom.msgs; curRoom={...f,msgs}; if($('#s-room').classList.contains('active')){ renderRoomHead(); updateRoomJoinUI(); renderRoom(); } } }
+  const cb=$('#roomCodeBtn'); if(cb)cb.hidden=false;
+  renderRooms(); updateCommDot();
+}
+function maybeCleanupRooms(){ if(Date.now()-lastRoomCleanup<3600000)return; lastRoomCleanup=Date.now(); sb.rpc('tama_room_cleanup').then(()=>{},()=>{}); }
+const roomEnded=r=>!!r&&!!r.expires_at&&Date.parse(r.expires_at)<=Date.now();
+const isRoomOwner=r=>!!r&&!!myId&&r.owner_id===myId;
+function roomLeft(r){
+  if(!r.expires_at)return '期限なし';
+  const ms=Date.parse(r.expires_at)-Date.now(); if(ms<=0)return '終わりました';
+  const d=Math.floor(ms/86400000); if(d>=1)return 'あと'+d+'日';
+  const h=Math.floor(ms/3600000); return h>=1?'あと'+h+'時間':'まもなく終わり';
+}
+const roomIcon=r=>r.visibility==='invite'?'🔑':r.visibility==='common'?'🎯':'💬';
+function condText(r){ const c=r.conditions||[]; return c.slice(0,2).map(x=>x.label).join('・')+(c.length>2?` ほか${c.length-2}つ`:''); }
+function roomWhoText(r){ return r.visibility==='invite'?'招待コードを知っている人だけ':r.visibility==='common'?`${condText(r)}${(r.conditions||[]).length>1?' のどれか':''}に当てはまる人だけ`:'だれでも'; }
+function meetText(m){ return m&&(m.when||m.place)?[m.when,m.place].filter(Boolean).join('・')+(m.note?`「${m.note}」`:''):''; }
+function roomRow(r){
+  if(!roomsV2)return roomRowLegacy(r);
+  const k=rid(r.id), s=roomStats[k]||{}, joined=myRoomIds.has(k), un=s.unread||0, ended=roomEnded(r);
+  const right=un?`<div class="unread">${un>99?'99+':un}</div>`:`<div class="m" style="font-size:12.5px">${joined?'開く':'見る'} ›</div>`;
+  const meta=[`👥 ${s.members||0}${r.capacity?'/'+r.capacity:''}人`,roomLeft(r),s.last?'最終 '+agoText(s.last):''].filter(Boolean).join(' ・ ');
+  const tag=isRoomOwner(r)?' <span class="joined-tag own">👑 オーナー</span>':joined?' <span class="joined-tag">参加中</span>':'';
+  const cond=r.visibility==='common'?`<div class="rcond">🎯 ${esc(condText(r))}の人向け${!joined&&r.fits?'（あなたも当てはまります）':''}</div>`:r.visibility==='invite'?'<div class="rcond">🔑 招待制</div>':'';
+  const mt=meetText(r.meet), meet=mt?`<div class="rcond meet">📍 ${esc(mt)}${r.going?` 👍${r.going}人`:''}</div>`:'';
+  return `<div class="urow${ended?' endrow':''}" onclick="openRoom('${k}')"><div class="av" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">${roomIcon(r)}</div>
+    <div class="info"><div class="n">${esc(r.name)}${tag}</div><div class="b">${esc(r.topic||'みんなで話そう')}</div>${cond}${meet}<div class="b" style="color:var(--signal);font-size:11.5px">${meta}</div></div><div class="d">${right}</div></div>`;
+}
+function renderRooms(){
+  if(!roomsV2)return renderRoomsLegacy();
+  const by=(a,b)=>((roomStats[rid(b.id)]||{}).unread||0)-((roomStats[rid(a.id)]||{}).unread||0)||(Date.parse(b.last_at||b.created_at)||0)-(Date.parse(a.last_at||a.created_at)||0);
+  const joined=rooms.filter(r=>r.joined&&!roomEnded(r)).sort(by), forYou=rooms.filter(r=>!r.joined&&r.visibility==='common').sort(by),
+        open=rooms.filter(r=>!r.joined&&r.visibility!=='common').sort(by), ended=rooms.filter(r=>r.joined&&roomEnded(r));
+  const sec=(t,arr)=>arr.length?`<div class="listhead" style="padding-left:6px">${t} <span class="cnt">${arr.length}</span></div>`+arr.map(roomRow).join(''):'';
+  const el=$('#roomList');
+  if(el){
+    $('#commSub').textContent='部屋ごとにオーナーがいて、入れる人と期限が決まっています';
+    if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
+    el.innerHTML=rooms.length?sec('参加中',joined)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
+      :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`;
+  }
+  const hr=$('#homeRoomList'), top=joined.concat(forYou,open).slice(0,3);
+  if(hr)hr.innerHTML=top.length?top.map(roomRow).join(''):`<div style="padding:14px 16px;font-size:12.5px;color:var(--muted)">まだコミュニティがありません。<span onclick="go('comm')" style="color:var(--signal);font-weight:700;cursor:pointer">作ってみる ›</span></div>`;
+}
+
+/* 作る・編集する（同じシート） */
+const RULE_TMPL=['勧誘・宣伝はしない','相手の連絡先や住所を聞かない','いやな言い方をしない','無理に会おうとしない','困ったらオーナーか運営に知らせる'];
+const ROOM_DAYS=[[1,'1日'],[3,'3日'],[7,'1週間'],[14,'2週間'],[30,'1か月'],[0,'期限なし']];
+const ROOM_CAPS=[[0,'なし'],[5,'5人'],[10,'10人'],[20,'20人'],[50,'50人']];
+// 参加条件にできるのは、オーナー自身のプロフィールにあるものだけ（自分も当てはまる＝同じ仲間を集める部屋）
+function myCondOptions(){
+  const a=attrsOf(profile), o=[];
+  if(a.artist)o.push({k:'art',v:a.artist,label:'同じアーティスト「'+a.artist+'」'});
+  (a.aruaru||[]).forEach(x=>o.push({k:'aru',v:x,label:'わかる「'+x+'」'}));
+  (a.goals||[]).forEach(x=>o.push({k:'goal',v:x,label:'目標「'+x+'」'}));
+  (a.purposes||[]).forEach(x=>o.push({k:'pur',v:x,label:'気になっている「'+x+'」'}));
+  if(a.faculty)o.push({k:'fac',v:a.faculty,label:a.faculty});
+  if(a.grade)o.push({k:'grade',v:a.grade,label:a.grade});
+  return o;
+}
+const condKey=c=>c.k+':'+c.v;
+function createRoom(edit){
+  if(!roomsV2)return createRoomLegacy();
+  if(!profile){ toast('先にプロフィールを登録してね'); return; }
+  const r=edit?curRoom:null;
+  roomForm={edit:r?rid(r.id):null, vis:r?r.visibility:'all', cond:r?(r.conditions||[]).slice():[], cap:r?(r.capacity||0):0, days:r?null:14};
+  const opts=myCondOptions(); (roomForm.cond||[]).forEach(c=>{ if(!opts.some(o=>condKey(o)===condKey(c)))opts.push(c); });
+  roomForm.opts=opts;
+  const m=(r&&r.meet)||{}, places=[...new Set(CAMPUS_LABELS.map(x=>x[0]).filter(n=>!/門$/.test(n)))];
+  $('#paySheet').innerHTML=`<h2 class="pstitle">${r?'✏️ コミュニティを編集':'＋ コミュニティを作る'}</h2>
+    <p class="psdesc">${r?'変えた内容は、参加している人にもすぐ反映されます。':'作った人がオーナー（👑）になります。部屋には期限があり、過ぎると読むだけになって3日後に消えます。'}</p>
+    <div class="field"><label>コミュニティ名</label><input id="rmName" maxlength="20" placeholder="例：ひとりごはん同盟" value="${r?esc(r.name):''}"></div>
+    <div class="field"><label>ひとこと<span class="opt">任意</span></label><input id="rmTopic" maxlength="40" placeholder="どんな部屋？" value="${r?esc(r.topic||''):''}"></div>
+    <div class="field"><label>ルール<span class="opt">任意・参加する前に見せます</span></label><textarea id="rmRules" rows="3" maxlength="300" placeholder="例：勧誘・宣伝はしない">${r?esc(r.rules||''):''}</textarea>
+      <div class="chips" style="margin-top:8px;gap:6px">${RULE_TMPL.map((t,i)=>`<span class="c" onclick="addRuleTmpl(${i})">＋ ${esc(t)}</span>`).join('')}</div></div>
+    <div class="field"><label>だれが入れる？</label><div class="chips" id="rmVis"></div><div class="hint" id="rmVisHint"></div><div id="rmCondBox"></div></div>
+    <div class="field"><label>定員</label><div class="chips" id="rmCap"></div></div>
+    <div class="field"><label>期限</label><div class="chips" id="rmDays"></div><div class="hint">期限が過ぎた部屋は読むだけになり、3日後に投稿ごと消えます。</div></div>
+    <div class="field"><label>📍 集まる約束<span class="opt">任意・部屋の一番上に出ます</span></label>
+      <input id="rmWhen" maxlength="20" placeholder="いつ　例：木曜の昼休み" value="${esc(m.when||'')}">
+      <select id="rmPlace" style="margin-top:8px"><option value="">どこで（選ばなくてもOK）</option>${places.map(p=>`<option${m.place===p?' selected':''}>${esc(p)}</option>`).join('')}</select>
+      <input id="rmNote" maxlength="30" style="margin-top:8px" placeholder="ひとこと　例：窓際の席にいます" value="${esc(m.note||'')}"></div>
+    ${r?'':`<label class="pledge"><input type="checkbox" id="rmPledge"><span><b>オーナーの約束</b><br>ルールに合わない投稿を消したり、困った人に退出してもらったりして、部屋を見守ります。危ないことが起きたら運営に知らせます。オーナーをやめる時は、ほかの人に譲るか部屋を閉じます。</span></label>`}
+    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="submitRoomForm()">${r?'保存する':'作る'}</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closePay()">やめる</button>`;
+  renderRoomFormChips();
+  $('#payOverlay').classList.add('show');
+}
+function renderRoomFormChips(){
+  const f=roomForm; if(!f)return;
+  const VIS=[['all','みんな'],['common','共通点のある人だけ'],['invite','招待コードの人だけ']];
+  $('#rmVis').innerHTML=VIS.map(([k,t])=>`<span class="c${f.vis===k?' sel':''}" onclick="roomForm.vis='${k}';renderRoomFormChips()">${t}</span>`).join('');
+  $('#rmVisHint').textContent={all:'一覧にだれにでも出て、だれでも参加できます。',common:'下で選んだどれかに当てはまる人の一覧にだけ出て、その人だけが参加できます（同じ悩み・同じ趣味の人に届けたい時に）。',invite:'一覧には出ません。作った後に出る招待コードを、入ってほしい人に伝えてください。'}[f.vis];
+  $('#rmCondBox').innerHTML=f.vis!=='common'?'':f.opts.length
+    ?`<div class="chips" style="margin-top:8px;gap:6px">${f.opts.map((o,i)=>`<span class="c${f.cond.some(c=>condKey(c)===condKey(o))?' sel':''}" onclick="toggleRoomCond(${i})">${esc(o.label)}</span>`).join('')}</div><div class="hint">あなたのプロフィールから選べます。どれか1つに当てはまればOK。</div>`
+    :`<div class="hint" style="color:var(--bad)">プロフィールにアーティスト・あるある・目標などを入れると選べます。</div>`;
+  $('#rmCap').innerHTML=ROOM_CAPS.map(([n,t])=>`<span class="c${f.cap===n?' sel':''}" onclick="roomForm.cap=${n};renderRoomFormChips()">${t}</span>`).join('');
+  $('#rmDays').innerHTML=(f.edit?[[null,'変えない']]:[]).concat(ROOM_DAYS).map(([n,t])=>`<span class="c${f.days===n?' sel':''}" onclick="roomForm.days=${n};renderRoomFormChips()">${t}</span>`).join('');
+}
+function toggleRoomCond(i){ const o=roomForm.opts[i], k=condKey(o); roomForm.cond=roomForm.cond.some(c=>condKey(c)===k)?roomForm.cond.filter(c=>condKey(c)!==k):roomForm.cond.concat(o); renderRoomFormChips(); }
+function addRuleTmpl(i){ const el=$('#rmRules'), t=RULE_TMPL[i]; if(el.value.includes(t))return; el.value=(el.value.trim()?el.value.trim()+'\n':'')+'・'+t; }
+async function submitRoomForm(){
+  const f=roomForm; if(!f||!sb)return;
+  const name=$('#rmName').value.trim(), topic=$('#rmTopic').value.trim(), rules=$('#rmRules').value.trim();
+  const when=$('#rmWhen').value.trim(), place=$('#rmPlace').value, note=$('#rmNote').value.trim();
+  if(!name){ toast('コミュニティ名を入れてね'); return; }
+  if([name,topic,rules,when,note].some(ngCheck)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください'); return; }
+  if(f.vis==='common'&&!f.cond.length){ toast('「共通点のある人だけ」の時は、条件を1つ以上選んでね'); return; }
+  if(!f.edit&&!$('#rmPledge').checked){ toast('オーナーの約束を読んで、チェックしてね'); return; }
+  const args={p_name:name,p_topic:topic,p_rules:rules,p_visibility:f.vis,p_conditions:f.vis==='common'?f.cond.map(({k,v,label})=>({k,v,label})):[],
+    p_capacity:f.cap||null,p_days:f.days,p_meet:when||place?{when,place,note}:null};
+  if(f.edit){
+    const {data,error}=await sb.rpc('tama_room_update',{p_room:f.edit,...args});
+    if(error||data!=='ok'){ toast(data==='not_owner'?'オーナーだけが編集できます':'保存できませんでした'+(error?'：'+error.message:'')); return; }
+    closePay(); toast('保存しました'); await loadRooms(); return;
+  }
+  const {data,error}=await sb.rpc('tama_room_create',args);
+  if(error||!data||data.status!=='ok'){ toast(data&&data.status==='too_many'?'同時にオーナーになれる部屋は3つまでです（終わった部屋は数えません）':'作れませんでした'+(error?'：'+error.message:'')); return; }
+  closePay(); toast('✅ コミュニティを作りました'); await loadRooms(); await openRoom(data.room);
+  if(data.code)showRoomCode(data.code);
+}
+
+/* 部屋の画面 */
+function renderRoomHead(){
+  if(!curRoom)return;
+  $('#roomNm').textContent=curRoom.name; $('#roomAv').textContent=roomsV2?roomIcon(curRoom):'💬';
+  if(!roomsV2){ $('#roomSt').textContent=curRoom.topic||'誰でも参加OK'; return; }
+  const s=roomStats[rid(curRoom.id)]||{};
+  $('#roomSt').textContent=[curRoom.owner_name?'👑 '+curRoom.owner_name:'',`👥 ${s.members||0}${curRoom.capacity?'/'+curRoom.capacity:''}人`,roomLeft(curRoom)].filter(Boolean).join(' ・ ');
+}
+async function openRoom(id){
+  if(!roomsV2)return openRoomLegacy(id);
+  const k=rid(id), r=rooms.find(x=>rid(x.id)===k);
+  if(!r){ toast('この部屋は見つかりません（閉じられたか、入れない部屋です）'); loadRooms(); return; }
+  curRoom={...r,msgs:[]}; renderRoomHead(); renderRoom(); updateRoomJoinUI(); go('room');
+  if(myRoomIds.has(k)){ await loadRoomMsgs(); if(roomStats[k])roomStats[k].unread=0; renderRooms(); updateCommDot(); markRoomRead(curRoom.id,true); }
+  clearInterval(roomPoll); if(!sb)return;
+  roomPoll=setInterval(async()=>{ if(!$('#s-room').classList.contains('active'))return; await loadRoomMsgs(); markRoomRead(curRoom.id); },2500);
+}
+function renderRoom(){
+  if(!roomsV2)return renderRoomLegacy();
+  const box=$('#roomMsgs'); if(!box||!curRoom)return;
+  const r=curRoom, joined=myRoomIds.has(rid(r.id));
+  let h;
+  if(!joined){
+    // 参加していない人には投稿を見せず、ルール・入れる人・オーナーを見せてから参加してもらう
+    h=`<div class="rjoin"><div class="ic">${roomIcon(r)}</div><h3>${esc(r.name)}</h3><div class="tp">${esc(r.topic||'')}</div>
+      <div class="sec"><b>📜 ルール</b>${esc(r.rules||'オーナーはまだルールを書いていません。おたがいに気持ちよく使いましょう。')}</div>
+      <div class="sec"><b>🚪 入れる人</b>${esc(roomWhoText(r))}${r.visibility==='common'&&r.fits?'（あなたも当てはまります）':''}</div>
+      ${meetText(r.meet)?`<div class="sec"><b>📍 集まる約束</b>${esc(meetText(r.meet))}${r.going?`（👍 ${r.going}人が行く）`:''}</div>`:''}
+      <div class="meta">👑 オーナー ${esc(r.owner_name||'なし')} ・ 👥 ${(roomStats[rid(r.id)]||{}).members||0}${r.capacity?'/'+r.capacity:''}人 ・ ${roomLeft(r)}</div>
+      ${roomEnded(r)?'<div class="note">この部屋は終わりました</div>':`<button class="btn btn-primary" onclick="joinRoomV2()">ルールを守って参加する</button><div class="note">投稿は参加している人だけが読めます</div>`}</div>`;
+  }else{
+    const msgs=(r.msgs||[]).filter(m=>!blocked.has(m.from_id));
+    const mt=meetText(r.meet);
+    h=(mt?`<div class="rmeet"><div>📍 <b>集まる約束</b>　${esc(mt)}${r.going?`<br><span style="font-size:11.5px;color:var(--muted)">👍 ${r.going}人が行く</span>`:''}</div>${roomEnded(r)?'':`<button class="${r.i_going?'on':''}" onclick="toggleRoomRsvp()">${r.i_going?'行く ✓':'👍 行く'}</button>`}</div>`:'')
+      +(roomEnded(r)?`<div class="ttlbar over">⌛ この部屋は終わりました。3日後に投稿ごと消えます</div>`:'');
+    if(!msgs.length)h+='<div class="day">まだメッセージはありません。最初のひとことをどうぞ！</div>';
+    let lastDay='';
+    h+=msgs.map(m=>{ const mine=m.from_id===myId, at=Date.parse(m.created_at)||0; let sep='';
+      if(at){ const dl=dayLabel(at); if(dl!==lastDay){ lastDay=dl; sep=`<div class="day">${dl}</div>`; } }
+      const own=m.from_id===r.owner_id?' 👑':'';
+      return sep+`<div class="bub ${mine?'me':'them'}"${m.id!=null?` onclick="roomMsgMenu('${esc(String(m.id))}')"`:''}>${mine?'':`<div class="who" onclick="event.stopPropagation();openUserById('${m.from_id}')">${esc(m.emoji||'')} ${esc(m.name||'匿名')}${own}</div>`}${esc(m.text)}${at?`<span class="tm">${hhmm(at)}</span>`:''}</div>`; }).join('');
+  }
+  // 2.5秒ごとに描き直すので、変わった時だけ差し替える（読んでいる途中で一番下に戻されないように）
+  if(box.dataset.h!==h){ const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60||box.dataset.room!==rid(r.id); box.dataset.h=h; box.dataset.room=rid(r.id); box.innerHTML=h; if(atBottom&&joined)box.scrollTop=box.scrollHeight; else if(!joined)box.scrollTop=0; }
+}
+const ROOM_JOIN_MSG={ok:'✅ 参加しました',full:'定員に達しているため、参加できません',unfit:'この部屋は、条件に当てはまる人だけが参加できます',code:'招待コードが違います',
+  banned:'この部屋には参加できません',ended:'この部屋は終わりました',gone:'この部屋は閉じられました'};
+async function joinRoomV2(code){
+  if(!curRoom||!sb)return;
+  const {data,error}=await sb.rpc('tama_room_join',{p_room:rid(curRoom.id),p_code:code||null});
+  if(error){ toast('参加できませんでした：'+error.message); return; }
+  toast(ROOM_JOIN_MSG[data]||'参加できませんでした');
+  if(data!=='ok')return;
+  myRoomIds.add(rid(curRoom.id)); await loadRooms(); updateRoomJoinUI(); await loadRoomMsgs(); renderRoom(); markRoomRead(curRoom.id,true);
+}
+async function leaveRoomV2(){
+  const r=curRoom; if(!r)return;
+  if(isRoomOwner(r)){ alertOwnerLeave(); return; }
+  if(!confirm('この部屋を退出しますか？'))return;
+  if(await leaveRoom(r.id)){ toast('退出しました'); await loadRooms(); go('comm'); }
+}
+function alertOwnerLeave(){ toast('オーナーは、ほかの人にオーナーを譲るか、部屋を閉じてから退出できます'); openRoomInfo(); }
+async function toggleRoomRsvp(){
+  const r=curRoom; if(!r||!sb)return;
+  const {data,error}=await sb.rpc('tama_room_rsvp_set',{p_room:rid(r.id),p_going:!r.i_going});
+  if(error||data!=='ok'){ toast('うまくいきませんでした'); return; }
+  toast(r.i_going?'「行く」を取り消しました':'👍 行くと伝えました'); await loadRooms();
+}
+// 投稿を押した時：自分の投稿・オーナーは消せる、ほかの人の投稿は通報できる
+function roomMsgMenu(id){
+  const r=curRoom, m=r&&(r.msgs||[]).find(x=>String(x.id)===String(id)); if(!m)return;
+  const mine=m.from_id===myId, canDel=mine||isRoomOwner(r);
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">この投稿</h2><div class="sec">${esc(m.text)}</div>
+    ${canDel?`<button class="rbtn warn" onclick="deleteRoomMsg('${esc(String(id))}')">🗑 この投稿を消す${mine?'':'<small>オーナーとして消します（書いた人には通知されません）</small>'}</button>`:''}
+    ${mine?'':`<button class="rbtn warn" onclick="closeMembers();reportContext='コミュニティ「${esc(r.name).replace(/'/g,'&#39;')}」の投稿「${esc(m.text.slice(0,30)).replace(/'/g,'&#39;')}」';openReport('${m.from_id}','${esc(m.name||'匿名').replace(/'/g,'&#39;')}')">⚠ この投稿を通報する<small>書いた人はあなたの画面に出なくなります</small></button>`}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function deleteRoomMsg(id){
+  const {data,error}=await sb.rpc('tama_room_delete_msg',{p_msg:String(id)});
+  closeMembers();
+  if(error||data!=='ok'){ toast('消せませんでした'); return; }
+  curRoom.msgs=(curRoom.msgs||[]).filter(x=>String(x.id)!==String(id)); renderRoom(); toast('投稿を消しました');
+}
+
+/* 部屋の情報（ルール・入れる人・参加者・オーナーの操作） */
+async function openRoomInfo(){
+  const r=curRoom; if(!r||!sb)return;
+  const k=rid(r.id), joined=myRoomIds.has(k), owner=isRoomOwner(r);
+  let members=[];
+  if(joined){
+    const {data:mem}=await sb.from(T('room_members')).select('user_id,joined_at').eq('room_id',r.id);
+    const ids=(mem||[]).map(m=>m.user_id);
+    if(ids.length){ const {data:ps}=await sb.from(T('profiles')).select('id,name,emoji').in('id',ids); members=(ps||[]).filter(u=>!blocked.has(u.id)||u.id===r.owner_id); }
+    members.sort((a,b)=>(a.id===r.owner_id?-1:b.id===r.owner_id?1:a.id===myId?-1:b.id===myId?1:0));
+  }
+  let code=null; if(owner&&r.visibility==='invite'){ const {data}=await sb.rpc('tama_room_code',{p_room:k}); code=data; }
+  const nm=u=>esc(u.name||'').replace(/'/g,'&#39;');
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">${roomIcon(r)} ${esc(r.name)}</h2><p class="psdesc">${esc(r.topic||'')}</p>
+    <div class="sec"><b>📜 ルール</b><div class="pre">${esc(r.rules||'（まだありません）')}</div></div>
+    <div class="sec"><b>🚪 入れる人</b>${esc(roomWhoText(r))}${code?`<div style="margin-top:6px">招待コード <span class="code">${esc(code)}</span> <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="copyText('${esc(code)}')">コピー</button></div>`:''}</div>
+    <div class="sec"><b>⏳ 期限・👥 定員</b>${roomLeft(r)}${r.expires_at?`（${fesTime(Date.parse(r.expires_at),true)}まで）`:''} ・ 定員 ${r.capacity?r.capacity+'人':'なし'}</div>
+    ${meetText(r.meet)?`<div class="sec"><b>📍 集まる約束</b>${esc(meetText(r.meet))}${r.going?`（👍 ${r.going}人）`:''}</div>`:''}
+    ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.map(u=>`<div class="mrow2"><div class="av" style="background:${gr(u.emoji)}">${u.emoji||'🙂'}</div><div class="nm">${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}</div>
+      ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button><button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
+      :`<div class="sec"><b>👑 オーナー</b>${esc(r.owner_name||'なし')}<br><span style="font-size:11.5px;color:var(--muted)">参加者は、参加すると見られます</span></div>`}
+    ${joined?`<div class="sharerow" style="margin-bottom:6px"><div class="lab">🔔 この部屋の通知<small>オフにすると、投稿があっても通知しません</small></div><div class="toggle${r.muted?'':' on'}" onclick="toggleRoomMute()"><div class="k"></div></div></div>`:''}
+    ${owner?`<button class="rbtn" onclick="closeMembers();createRoom(true)">✏️ 部屋を編集する<small>名前・ルール・入れる人・定員・期限・集まる約束</small></button>
+      <button class="rbtn warn" onclick="closeRoomV2()">🗑 コミュニティを閉じる<small>投稿も参加者もすべて消えます。元に戻せません</small></button>`:''}
+    ${joined&&!owner?`<button class="rbtn" onclick="closeMembers();leaveRoomV2()">🚪 退出する</button>`:''}
+    ${owner?'':`<button class="rbtn warn" onclick="reportRoom()">⚠ このコミュニティを運営に知らせる<small>ルール違反・危ない部屋など</small></button>`}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function copyText(t){ try{ await navigator.clipboard.writeText(t); toast('コピーしました'); }catch(e){ prompt('コピーしてください',t); } }
+function showRoomCode(code){
+  $('#memSheet').innerHTML=`<div class="rinfo" style="text-align:center"><h2 class="pstitle">🔑 招待コード</h2><p class="psdesc">この部屋は一覧に出ません。入ってほしい人にこのコードを伝えてください。<br>（コミュニティ ▶「🔑 招待コードで入る」に入れると参加できます）</p>
+    <div class="code" style="font-size:30px;margin:6px 0 14px">${esc(code)}</div>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="copyText('${esc(code)}')">コピーする</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+function openRoomCodeJoin(){
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🔑 招待コードで入る</h2><p class="psdesc">オーナーから聞いた6文字のコードを入れてください。</p>
+    <div class="field"><input id="roomCodeIn" maxlength="6" autocapitalize="characters" placeholder="例：A1B2C3" style="text-transform:uppercase;letter-spacing:3px;font-size:18px;text-align:center"></div>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="joinByRoomCode()">参加する</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">やめる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function joinByRoomCode(){
+  const c=($('#roomCodeIn').value||'').trim().toUpperCase(); if(!c||!sb)return;
+  const {data,error}=await sb.rpc('tama_room_join_code',{p_code:c});
+  if(error||!data){ toast('参加できませんでした'); return; }
+  toast(ROOM_JOIN_MSG[data.status]||'参加できませんでした');
+  if(data.status!=='ok')return;
+  closeMembers(); await loadRooms(); openRoom(data.room);
+}
+async function toggleRoomMute(){
+  const r=curRoom; if(!r)return; const v=!r.muted;
+  const {error}=await sb.from(T('room_members')).update({muted:v}).eq('room_id',r.id).eq('user_id',myId);
+  if(error){ toast('変えられませんでした'); return; }
+  r.muted=v; const f=rooms.find(x=>rid(x.id)===rid(r.id)); if(f)f.muted=v;
+  toast(v?'🔕 この部屋の通知をオフにしました':'🔔 この部屋の通知をオンにしました'); openRoomInfo();
+}
+async function kickRoomMember(uid,name){
+  if(!confirm(`${name}さんに、この部屋から退出してもらいますか？\n（${name}さんはこの部屋にもう参加できなくなります。相手には通知されません）`))return;
+  const {data,error}=await sb.rpc('tama_room_kick',{p_room:rid(curRoom.id),p_user:uid,p_ban:true});
+  if(error||data!=='ok'){ toast('できませんでした'); return; }
+  toast(`${name}さんに退出してもらいました`); await loadRooms(); openRoomInfo();
+}
+async function transferRoom(uid,name){
+  if(!confirm(`${name}さんにオーナーを譲りますか？\n（あなたは参加者として残ります。部屋の編集・閉じるはできなくなります）`))return;
+  const {data,error}=await sb.rpc('tama_room_transfer',{p_room:rid(curRoom.id),p_user:uid});
+  if(error||data!=='ok'){ toast('譲れませんでした'); return; }
+  toast(`👑 ${name}さんがオーナーになりました`); closeMembers(); await loadRooms();
+  notifyPush(uid,'👑 コミュニティのオーナーになりました',`「${curRoom.name}」のオーナーを譲られました。部屋を見守ってください`);
+}
+async function closeRoomV2(){
+  const r=curRoom; if(!r)return;
+  if(!confirm(`「${r.name}」を閉じますか？\n\n投稿も参加者もすべて消えます。元に戻せません。`))return;
+  const {data,error}=await sb.rpc('tama_room_close',{p_room:rid(r.id)});
+  if(error||data!=='ok'){ toast('閉じられませんでした'); return; }
+  closeMembers(); clearInterval(roomPoll); curRoom=null; toast('コミュニティを閉じました'); await loadRooms(); go('comm');
+}
+async function reportRoom(){
+  const r=curRoom; if(!r||!sb)return;
+  if(!confirm(`「${r.name}」を運営に知らせますか？\n（オーナーには通知されません。運営が内容を確認します）`))return;
+  const {error}=await sb.from(T('reports')).insert({reporter_id:myId,target_id:r.owner_id,reason:`コミュニティ「${r.name}」（${rid(r.id)}）について`});
+  closeMembers(); toast(error?'送れませんでした。マイページの「困ったとき」から連絡してください':'運営に知らせました。ありがとうございます');
 }
 /* ---------- ようこそ画面・ホーム画面への追加 ---------- */
 function goOnboard(){
@@ -3584,7 +3940,7 @@ const HELP={
     tip:'何度もすれ違う共通点のある人には「👋 いいね」してみよう。トークでは「よくすれ違いますね」もきっかけになります。'},
   talk:{icon:'💬',title:'トーク',lead:'おたがいにいいねした人・友達・コミュニティと話す所です。',
     can:['💬 24時間：おたがいにいいねすると始まります。最初の一言は共通点の話題から選べます。24時間で終わります',
-      '🤝 会うときは：共通点・すれ違い・今日のお題を1枚で見られます。その場で2人で答える「ふたりのお題」と、だんだん深くなる質問も','👥 友達：期限なしで話せます。24時間のトークの上の「👥 友達に誘う」から友達になれます','コミュニティ：同じ話題の人が集まるグループ。だれでも作れます'],
+      '🤝 会うときは：共通点・すれ違い・今日のお題を1枚で見られます。その場で2人で答える「ふたりのお題」と、だんだん深くなる質問も','👥 友達：期限なしで話せます。24時間のトークの上の「👥 友達に誘う」から友達になれます','コミュニティ：オーナー（👑）が作る、期限つきのグループ。入れる人は部屋ごとに「みんな／共通点のある人だけ／招待コード」。投稿は参加した人だけが読めます'],
     see:'24時間トークの相手には、あなたのいる建物・教室は見えません。'},
   friends:{icon:'👥',title:'友達',lead:'友達がいまどこにいるかが分かります。',
     can:['友達のいる建物・教室（本人が見せている時だけ）と、いまの授業（時間割を見せてくれた時だけ）','友達になるには、トークの「👥 友達に誘う」か、目の前で4桁のコードを交換します','「地図の位置も見せる」にしている友達は、地図に緑のふちで出ます'],
@@ -4692,6 +5048,8 @@ async function leaveAll(){
   if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message);
     if(!visitsMissing)sb.rpc('tama_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); });
     if(!checkinMissing)sb.from(T('checkins')).delete().eq('user_id',myId).then(({error})=>{ if(error)console.warn('[leave] ひとことの回答を消せませんでした',error.message); else checkins=[]; });
+    // 自分がオーナーの部屋は、いちばん前から参加している人に譲る（だれもいなければ消す）。2026-10-07
+    if(roomsV2){ const {error:re}=await sb.rpc('tama_room_forget_me'); if(re&&!isMissingFn(re))console.warn('[leave] コミュニティのオーナーを譲れませんでした',re.message); }
     await forgetTimetable(); talksOk=await forgetTalks(); }
   profileDeleted=true;
   renderVisSummary();geoState('','停止');
@@ -4733,7 +5091,7 @@ function leaveDoneSheet(talksOk){
   $('#invSheet').innerHTML=`<h2 class="pstitle">✅ プロフィールを消しました</h2>
     <p class="psdesc">位置情報の共有も止まっています。このままアプリを閉じても大丈夫です。</p>
     <div class="pssec"><div class="psh">🗑 消えたもの</div>
-      <div class="vishint" style="margin:0 0 10px">近くの人・すれ違いの一覧のあなた ／ 友達に見せていた「いまの自分」 ／ 時間割（友達に見せる設定も） ／ 開いた日の記録・ひとことの回答 ／ ${talksOk?'トーク・いいね（相手の画面からも） ／ ':''}友達 ／ コミュニティの参加${talksOk?'と投稿':''}</div></div>
+      <div class="vishint" style="margin:0 0 10px">近くの人・すれ違いの一覧のあなた ／ 友達に見せていた「いまの自分」 ／ 時間割（友達に見せる設定も） ／ 開いた日の記録・ひとことの回答 ／ ${talksOk?'トーク・いいね（相手の画面からも） ／ ':''}友達 ／ コミュニティの参加${talksOk?'と投稿':''}${roomsV2?'（オーナーだった部屋は、ほかの参加者に譲りました。だれもいない部屋は閉じました）':''}</div></div>
     ${talksOk?'':`<div class="pssec"><div class="psh">⚠️ 消せなかったもの</div>
       <div class="vishint" style="margin:0 0 10px">トーク・いいね・コミュニティへの投稿（いま準備中です）。消したい時は、マイページの「🆘 困ったとき・お問い合わせ」から連絡してください。</div></div>`}
     <div class="pssec"><div class="psh">🔁 また使う時は</div>
