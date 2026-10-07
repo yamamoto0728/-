@@ -723,6 +723,14 @@
   .checkin .ckopts button:active{background:rgba(120,140,255,.15)}
   .checkin .ckn{font-size:10.5px;color:var(--muted);margin-top:7px;line-height:1.6}
   .checkin .ckthx{font-size:13px;font-weight:700;color:#5a63a8;text-align:center;padding:4px 0}
+  /* 2026-10-08 からポップアップ（#ckSheet）とマイページから開く */
+  #ckSheet .checkin{margin:0;padding:0;border:0;background:none}
+  #ckSheet .ckh{font-size:13px}#ckSheet .ckq{font-size:16px;margin:10px 0 12px}
+  #ckSheet .ckopts button{padding:13px 2px;font-size:13px}
+  #ckSheet .cksep{height:1px;background:var(--line);margin:14px 0 4px}
+  #ckSheet .ckthx{font-size:15px;padding:18px 0}#ckSheet .ckthx small{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:6px}
+  #ckSheet .ckn{margin-top:12px}
+  #ckSheet .ckskip{width:100%;padding:12px;margin-top:14px;font-size:14px;color:var(--muted)}#ckSheet .ckskip small{display:block;font-size:11px;font-weight:500;margin-top:2px}
   /* トークの「💡 話題に困ったら」の横の「🤝 会うときは」（2026-10-07） */
   .topics .tbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
   .topics .tshow.meet{color:#b0651a}
@@ -889,7 +897,6 @@
       <!-- 「いまの自分」と「時間割」の2枚のタイル（renderStatusRow）。2026-09-24 のUXテストで「人が1人も見えない」と言われたので、1行に小さくした -->
       <div class="nowbar" id="nowBar"></div>
       <div class="daily" id="dailyCard"></div>
-      <div class="checkin" id="checkCard"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
       <!-- 地図は開いた時点でスクロールせずに見える位置に置き、人の一覧はその下に続ける
            （2026-09-24 に一度「一覧／地図」の切り替えにしたが、あおの希望で切り替えをやめて地図を常に出す形に戻した） -->
@@ -960,6 +967,8 @@
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openTerms()">📄 利用規約を読む</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openInvite()">📨 アプリに誘う（QR・リンク）</button>
+        <!-- 「☕ ひとこと」にいつでも答えられる所（2026-10-08。ふだんは今日のお題の後にポップアップで1問だけ。中身は renderCheckinRow） -->
+        <div class="setting" id="ckRow" hidden><div class="setrow visrow" style="border:0" onclick="openCheckin('me')"><div class="lab">☕ ひとこと<small id="ckRowTxt">&mdash;</small></div><span class="go">›</span></div></div>
         <!-- アンケートの欄（答えると特典。中身は renderSurveyBox） -->
         <div id="surveyBox"></div>
         <div style="margin:6px 16px 0;text-align:center;font-size:11.5px;color:var(--muted2)">参加者番号 <b id="fesNo" style="font-family:'JetBrains Mono',monospace;color:var(--muted)">&mdash;</b></div>
@@ -1004,6 +1013,7 @@
   <div class="overlay" id="invOverlay" onclick="if(event.target===this)closeInvite()"><div class="sheet" id="invSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="visOverlay" onclick="if(event.target===this)closeVisHub()"><div class="sheet" id="visSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()"><div class="sheet" id="helpSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="ckOverlay" onclick="if(event.target===this)closeCheckin()"><div class="sheet" id="ckSheet" style="padding:22px 20px 26px"></div></div>
   <div class="overlay" id="meetOverlay" onclick="if(event.target===this)closeMeet()"><div class="sheet" id="meetSheet" style="padding:22px 20px 26px"></div></div>
   <!-- 機能を初めて見た時だけ出す吹き出し（showTip） -->
   <div class="tipbub" id="tipBubble"></div>
@@ -1475,7 +1485,7 @@ function pushHintText(){
 // 1人1日1行（tama_visits、supabase/tama_retention.sql）。位置は記録しない（あおの決定。利用規約の第4条に記載）。
 // それまでのDBは上書きされる値しか無く、「初日に来た人が何日目に戻ってきたか」が分からなかった。
 // 開いた回数は、5分以上あけて開き直したら1回と数える。キャンパスにいた・近くの人数・通知・お題は、良くなった時だけ送り直す
-const APP_VER='2026-10-07';
+const APP_VER='2026-10-08';
 let visitsMissing=false, visitDay=null, visitSent=null, visitLastOpen=0, visitTimer=null, lastOpenCount=0;
 const jstDateStr=()=>new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 function visitNow(){ return {on:!!myPos&&!fesOutside&&inCampus(myPos.lat,myPos.lng), near:lastOpenCount, push:pushOk(), daily:!!(profile&&dailyAnswer(profile))}; }
@@ -4838,7 +4848,6 @@ function fillDailyStats(){
 let dailyShown=null;   // 入力中に6秒ごとの再描画で消えないよう、まだ答えていない間は、お題が変わった時だけ描き直す
 let dailyOpen=false;   // 答えた後のカードを広げているか（ふだんは1行にたたむ。人の一覧を先に見せるため）
 function renderDaily(){
-  renderCheckin();   // 今日のお題に答えた後だけ、その下に「ひとこと」を出す
   const el=$('#dailyCard'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
   const t=dailyToday(), mine=dailyAnswer(profile), key=t.d+'/'+(mine?'a':'q');
@@ -4883,15 +4892,20 @@ function answerDaily(a){
   toast('🎲 答えました。みんなの答えを見てみよう');
   askPushSoon('daily'); visitMaybeUpdate();
   setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
+  setTimeout(()=>maybeCheckinPopup(),4500);            // 「☕ ひとこと」を1問だけ（みんなの答えを少し見てから）
 }
 
 /* ---------- ひとこと（つながりの感じ方。2026-10-07、提案②「孤独感が減ったかを測る」） ----------
    ちかくの根幹（現実で人と出会い、孤独感を埋める）を確かめるため、使い始めと使った後の変化を測る。
    あおの判断：「孤立していると感じる？」のように孤独感をそのまま聞くと、使う人の心理的ハードルになる。そこで
    ・UCLA孤独感尺度 第3版（Russell, 1996）の20問のうち、前向きな言い方の項目（逆転項目）だけを使う。「孤独」「孤立」という言葉は出さない
-   ・今日のお題に答えた後に、そのカードの下へ小さく出す。1日1問・1タップ・とばせる。通知やポップアップでは聞かない。ほかの人には見えない
-   ・3問を3日に分けて聞き、FES.checkinEveryDays（14日）ごとにくり返す。1回目＝使い始め、2回目以降＝使った後（実験の終わりの日が決まっていなくてよい）
-   集計では 1〜4 を逆にして（5−値）3問を足すと、孤独感の得点（3〜12、高いほど孤独）。SQL は supabase/tama_meet.sql の末尾。
+   ・1回1問・1タップ・答えなくてよい。ほかの人には見えない
+   ・3問を FES.checkinEveryDays（14日）ごとの「回」で聞く。1回目＝使い始め、2回目以降＝使った後（実験の終わりの日が決まっていなくてよい）
+   2026-10-08 あおの指示で出し方を変えた：
+   ・近くの人の画面のカード（今日のお題の下）はやめた（ホームの配置は前のまま）。今日のお題に答えた少しあとに、ポップアップで1問だけ出す（1日1問まで）
+   ・ポップアップの「今回はとばす」を押したら、そこから14日はポップアップを出さない（端末に覚える：localStorage tama_ckSkipAt。DBには書かない）
+   ・マイページの「☕ ひとこと」から、その回のまだ答えていない質問にいつでも答えられる
+   集計では 1〜4 を逆にして（5−値）3問を足すと、孤独感の得点（3〜12、高いほど孤独）。SQL は supabase/tama_meet_analysis.sql。
    ⚠️ 質問の文は原文からの訳で、検証された日本語版の文言ではない。アイデア班が日本語版にそろえる時は CHECKIN の q だけ直す（k は変えない）*/
 const CHECKIN=[
   {k:'talk',    q:'このごろ、気軽に話せる人がいると感じる？'},          // 原版の項目19（people you can talk to）
@@ -4899,44 +4913,81 @@ const CHECKIN=[
   {k:'close',   q:'まわりの人を、身近に感じることがある？'},            // 項目10（feel close to people）
 ];
 const CHECKIN_OPTS=['ない','あまりない','ときどきある','よくある'];   // 1〜4（原版の Never / Rarely / Sometimes / Often）
-let checkins=[], checkinMissing=true, checkinThanksUntil=0;   // テーブルを読めるまでは出さない
+let checkins=[], checkinMissing=true, ckPopTimer=null, ckMode='pop';   // テーブルを読めるまでは出さない
 async function loadCheckins(){
   if(!sb||!myId||String(myId).startsWith('local-'))return;
   const {data,error}=await sb.from(T('checkins')).select('wave,item,value,created_at').eq('user_id',myId).order('created_at');
-  if(error){ checkinMissing=true; console.warn('[checkin] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); return; }
+  if(error){ checkinMissing=true; console.warn('[checkin] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); renderCheckinRow(); return; }
   checkinMissing=false; checkins=(data||[]).map(r=>({wave:r.wave,item:r.item,value:r.value,at:Date.parse(r.created_at)||0}));
-  renderCheckin();
+  renderCheckinRow();
 }
-// いま聞く質問（無ければ null）。今日のお題に答えた日だけ・1日1問まで（とばした日も数える）
+const checkinOn=()=>!checkinMissing&&!!FES.checkinEveryDays&&!!profile&&!profileDeleted;
+const CK_SPAN=()=>FES.checkinEveryDays*86400000;
+const ckFirstDay=()=>checkins.length?jstTodayStart(checkins[0].at).getTime():jstTodayStart().getTime();
+// いまの回（最初に答えた日から14日ごと。まだ1つも答えていなければ1回目）
+function checkinWave(){ return 1+Math.floor((jstTodayStart().getTime()-ckFirstDay())/CK_SPAN()); }
+// その回で、まだ答えていない質問（前の版で「とばす」と記録した質問（value=null）も答えた扱い）
+function checkinOpen(){
+  if(!checkinOn())return [];
+  const w=checkinWave(), done=new Set(checkins.filter(c=>c.wave===w).map(c=>c.item));
+  return CHECKIN.filter(x=>!done.has(x.k)).map(x=>({...x,wave:w}));
+}
+function ckSkippedAt(){ try{ return +localStorage.getItem('tama_ckSkipAt')||0; }catch(e){ return 0; } }
+// ポップアップで聞く質問（無ければ null）：今日のお題に答えた日だけ・1日1問まで・「とばす」から14日たっている
 function checkinDue(){
-  if(checkinMissing||!FES.checkinEveryDays||!profile||profileDeleted||!dailyAnswer(profile))return null;
-  const day0=jstTodayStart().getTime();
-  if(checkins.some(c=>c.at>=day0))return null;
-  const first=checkins.length?jstTodayStart(checkins[0].at).getTime():day0;
-  const wave=1+Math.floor((day0-first)/(FES.checkinEveryDays*86400000));
-  const done=new Set(checkins.filter(c=>c.wave===wave).map(c=>c.item));
-  const it=CHECKIN.find(x=>!done.has(x.k)); return it?{...it,wave}:null;
+  if(!checkinOn()||!dailyAnswer(profile))return null;
+  if(Date.now()-ckSkippedAt()<CK_SPAN())return null;
+  if(checkins.some(c=>c.at>=jstTodayStart().getTime()))return null;
+  return checkinOpen()[0]||null;
 }
-function renderCheckin(){
-  const el=$('#checkCard'); if(!el||Date.now()<checkinThanksUntil)return;
-  const it=checkinDue();
-  const h=it?`<div class="ckh"><span>☕ ひとこと<small>（1タップ・答えなくてもOK）</small></span><button onclick="answerCheckin(null)">とばす</button></div>
-    <div class="ckq">${esc(it.q)}</div>
-    <div class="ckopts">${CHECKIN_OPTS.map((o,i)=>`<button onclick="answerCheckin(${i+1})">${o}</button>`).join('')}</div>
-    <div class="ckn">ほかの人には見えません。ちかくを良くするために、2週間に3問だけ聞いています</div>`:'';
-  if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
+// 今日のお題に答えた少しあとに呼ぶ。通知の許可・使い方・ほかのシートが出ている間は、閉じるのを待つ（5秒おきに4回まで）
+function maybeCheckinPopup(tries=0){
+  clearTimeout(ckPopTimer);
+  if(!checkinDue())return;
+  if($('.overlay.show')||$('#pushGate').classList.contains('show')||$('#guide').classList.contains('show')||!$('#s-near').classList.contains('active')){
+    if(tries<4)ckPopTimer=setTimeout(()=>maybeCheckinPopup(tries+1),5000); return; }
+  openCheckin('pop');
 }
-// v：1〜4。とばした時は null を記録する（同じ質問を何度も出さず、次の日は次の質問へ。とばした数も研究に使える）
-async function answerCheckin(v){
-  const it=checkinDue(); if(!it)return;
-  checkins.push({wave:it.wave,item:it.k,value:v,at:Date.now()});
-  const el=$('#checkCard'); el.dataset.h='thx';   // 次の renderCheckin で必ず描き直す（空どうしだと「ありがとう！」が残っていた）
-  if(v){ el.innerHTML='<div class="ckthx">ありがとう！</div>'; checkinThanksUntil=Date.now()+2200; setTimeout(()=>{ checkinThanksUntil=0; renderCheckin(); },2300); }
-  else el.innerHTML='';
+// mode：'pop'＝ポップアップ（1問だけ）／'me'＝マイページから（その回のまだの質問を全部）
+function openCheckin(mode){ ckMode=mode; renderCheckinSheet(); $('#ckOverlay').classList.add('show'); hideTip(); }
+function closeCheckin(){ $('#ckOverlay').classList.remove('show'); renderCheckinRow(); }
+function nextCheckinDate(){ return new Date(ckFirstDay()+checkinWave()*CK_SPAN()).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'}); }
+function renderCheckinSheet(thanks){
+  const list=ckMode==='pop'?[checkinDue()].filter(Boolean):checkinOpen();
+  const q=it=>`<div class="ckq">${esc(it.q)}</div><div class="ckopts">${CHECKIN_OPTS.map((o,i)=>`<button onclick="answerCheckin('${it.k}',${i+1})">${o}</button>`).join('')}</div>`;
+  const body=thanks?'<div class="ckthx">ありがとう！</div>'
+    :list.length?list.map(q).join('<div class="cksep"></div>')
+    :`<div class="ckthx">今回の分は答えてくれました。ありがとう！<small>次は ${nextCheckinDate()} ごろにまた聞きます</small></div>`;
+  const pop=ckMode==='pop'&&!thanks&&list.length;
+  $('#ckSheet').innerHTML=`<div class="checkin">
+      <div class="ckh"><span>☕ ひとこと<small>1タップ・答えなくてもOK</small></span></div>
+      ${body}
+      ${thanks?'':`<div class="ckn">答えはほかの人には見えません。ちかくを良くするために、2週間に3問だけ聞いています。${pop?'マイページの「☕ ひとこと」からも答えられます。':''}</div>`}</div>
+    ${thanks?'':pop?`<button class="btn btn-ghost ckskip" onclick="skipCheckin()">今回はとばす<small>2週間はこの画面を出しません</small></button>`
+      :`<button class="btn btn-ghost ckskip" onclick="closeCheckin()">閉じる</button>`}`;
+}
+async function answerCheckin(k,v){
+  if(!checkinOn())return;
+  const w=checkinWave(); if(checkins.some(c=>c.wave===w&&c.item===k))return;
+  checkins.push({wave:w,item:k,value:v,at:Date.now()});
+  if(ckMode==='pop'){ renderCheckinSheet(true); setTimeout(closeCheckin,1300); }
+  else{ toast('ありがとう！'); renderCheckinSheet(); }
+  renderCheckinRow();
   // 運営が #debug で触った分は記録しない（開いた日の記録と同じ）
   if(!sb||!myId||String(myId).startsWith('local-')||debugMode())return;
-  const {error}=await sb.from(T('checkins')).insert({user_id:myId,wave:it.wave,item:it.k,value:v,ver:APP_VER});
+  const {error}=await sb.from(T('checkins')).insert({user_id:myId,wave:w,item:k,value:v,ver:APP_VER});
   if(error&&error.code!=='23505')console.warn('[checkin] 保存できませんでした',error.message);
+}
+function skipCheckin(){
+  try{ localStorage.setItem('tama_ckSkipAt',String(Date.now())); }catch(e){}
+  closeCheckin(); toast('とばしました。マイページの「☕ ひとこと」からいつでも答えられます');
+}
+// マイページの「☕ ひとこと」の行（テーブルが無い時・登録前は出さない）
+function renderCheckinRow(){
+  const el=$('#ckRow'); if(!el)return;
+  el.hidden=!checkinOn(); if(el.hidden)return;
+  const n=checkinOpen().length;
+  $('#ckRowTxt').textContent=n?`今回あと${n}問・答えなくてもOK・ほかの人には見えません`:`今回の分は答えました（次は ${nextCheckinDate()} ごろ）`;
 }
 
 /* ---------- settings ---------- */
@@ -5231,7 +5282,7 @@ function go(t){
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='near')loadRooms();if(t==='friends')loadFriends();
-  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
+  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
