@@ -723,6 +723,14 @@
   .checkin .ckopts button:active{background:rgba(120,140,255,.15)}
   .checkin .ckn{font-size:10.5px;color:var(--muted);margin-top:7px;line-height:1.6}
   .checkin .ckthx{font-size:13px;font-weight:700;color:#5a63a8;text-align:center;padding:4px 0}
+  /* 2026-10-08 からポップアップ（#ckSheet）とマイページから開く */
+  #ckSheet .checkin{margin:0;padding:0;border:0;background:none}
+  #ckSheet .ckh{font-size:13px}#ckSheet .ckq{font-size:16px;margin:10px 0 12px}
+  #ckSheet .ckopts button{padding:13px 2px;font-size:13px}
+  #ckSheet .cksep{height:1px;background:var(--line);margin:14px 0 4px}
+  #ckSheet .ckthx{font-size:15px;padding:18px 0}#ckSheet .ckthx small{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:6px}
+  #ckSheet .ckn{margin-top:12px}
+  #ckSheet .ckskip{width:100%;padding:12px;margin-top:14px;font-size:14px;color:var(--muted)}#ckSheet .ckskip small{display:block;font-size:11px;font-weight:500;margin-top:2px}
   /* トークの「💡 話題に困ったら」の横の「🤝 会うときは」（2026-10-07） */
   .topics .tbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
   .topics .tshow.meet{color:#b0651a}
@@ -794,6 +802,7 @@
   .rinfo .rbtn.warn{color:var(--bad)}.rinfo .rbtn small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
   .rinfo .code{font-family:"JetBrains Mono",monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--signal)}
   #paySheet .chips .c.sel{border-color:var(--signal);background:rgba(99,214,232,.12);color:var(--signal);font-weight:700}
+  #paySheet .condsub{font-size:12px;font-weight:700;color:var(--ink);margin:12px 0 6px}#paySheet .condsub span{font-weight:500;color:var(--muted);font-size:11px;margin-left:6px}
   #paySheet .pledge{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.7;padding:11px 12px;border-radius:14px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);margin-bottom:14px;cursor:pointer}
   #roomNm,#roomSt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #paySheet .pledge input{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)}
@@ -889,7 +898,6 @@
       <!-- 「いまの自分」と「時間割」の2枚のタイル（renderStatusRow）。2026-09-24 のUXテストで「人が1人も見えない」と言われたので、1行に小さくした -->
       <div class="nowbar" id="nowBar"></div>
       <div class="daily" id="dailyCard"></div>
-      <div class="checkin" id="checkCard"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
       <!-- 地図は開いた時点でスクロールせずに見える位置に置き、人の一覧はその下に続ける
            （2026-09-24 に一度「一覧／地図」の切り替えにしたが、あおの希望で切り替えをやめて地図を常に出す形に戻した） -->
@@ -960,6 +968,8 @@
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openTerms()">📄 利用規約を読む</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openInvite()">📨 アプリに誘う（QR・リンク）</button>
+        <!-- 「☕ ひとこと」にいつでも答えられる所（2026-10-08。ふだんは今日のお題の後にポップアップで1問だけ。中身は renderCheckinRow） -->
+        <div class="setting" id="ckRow" hidden><div class="setrow visrow" style="border:0" onclick="openCheckin('me')"><div class="lab">☕ ひとこと<small id="ckRowTxt">&mdash;</small></div><span class="go">›</span></div></div>
         <!-- アンケートの欄（答えると特典。中身は renderSurveyBox） -->
         <div id="surveyBox"></div>
         <div style="margin:6px 16px 0;text-align:center;font-size:11.5px;color:var(--muted2)">参加者番号 <b id="fesNo" style="font-family:'JetBrains Mono',monospace;color:var(--muted)">&mdash;</b></div>
@@ -1004,6 +1014,7 @@
   <div class="overlay" id="invOverlay" onclick="if(event.target===this)closeInvite()"><div class="sheet" id="invSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="visOverlay" onclick="if(event.target===this)closeVisHub()"><div class="sheet" id="visSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()"><div class="sheet" id="helpSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="ckOverlay" onclick="if(event.target===this)closeCheckin()"><div class="sheet" id="ckSheet" style="padding:22px 20px 26px"></div></div>
   <div class="overlay" id="meetOverlay" onclick="if(event.target===this)closeMeet()"><div class="sheet" id="meetSheet" style="padding:22px 20px 26px"></div></div>
   <!-- 機能を初めて見た時だけ出す吹き出し（showTip） -->
   <div class="tipbub" id="tipBubble"></div>
@@ -1028,6 +1039,8 @@
   <div class="boothpop" id="boothPop"></div>
   <div class="toast" id="toast"></div>
   <div class="frnudge" id="frNudge"></div>
+  <!-- 入力の候補（だれかが一度でも入れたアーティスト・授業名。loadSuggest） -->
+  <datalist id="dlArtist"></datalist><datalist id="dlCourse"></datalist>
 </div>
 <script>
 
@@ -1475,7 +1488,7 @@ function pushHintText(){
 // 1人1日1行（tama_visits、supabase/tama_retention.sql）。位置は記録しない（あおの決定。利用規約の第4条に記載）。
 // それまでのDBは上書きされる値しか無く、「初日に来た人が何日目に戻ってきたか」が分からなかった。
 // 開いた回数は、5分以上あけて開き直したら1回と数える。キャンパスにいた・近くの人数・通知・お題は、良くなった時だけ送り直す
-const APP_VER='2026-10-07';
+const APP_VER='2026-10-08';
 let visitsMissing=false, visitDay=null, visitSent=null, visitLastOpen=0, visitTimer=null, lastOpenCount=0;
 const jstDateStr=()=>new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 function visitNow(){ return {on:!!myPos&&!fesOutside&&inCampus(myPos.lat,myPos.lng), near:lastOpenCount, push:pushOk(), daily:!!(profile&&dailyAnswer(profile))}; }
@@ -1852,11 +1865,11 @@ function openMissingFold(p,miss){
 function attrFieldsHTML(p,part){
   const who=`<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>`;
-  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
+  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" list="dlArtist" autocomplete="off" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
     <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
       <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
         <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
-    <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
+    <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" list="dlCourse" autocomplete="off" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field worryf"><label>${WORRY_LABEL}<span class="opt">任意・${FA.purposePick}つまで</span></label>
       <div class="hint" style="margin:0 0 8px">選ばなくても大丈夫です。あとで、プロフィール編集からいつでも変えられます。</div>
@@ -3537,24 +3550,30 @@ function renderRooms(){
 const RULE_TMPL=['勧誘・宣伝はしない','相手の連絡先や住所を聞かない','いやな言い方をしない','無理に会おうとしない','困ったらオーナーか運営に知らせる'];
 const ROOM_DAYS=[[1,'1日'],[3,'3日'],[7,'1週間'],[14,'2週間'],[30,'1か月'],[0,'期限なし']];
 const ROOM_CAPS=[[0,'なし'],[5,'5人'],[10,'10人'],[20,'20人'],[50,'50人']];
-// 参加条件にできるのは、オーナー自身のプロフィールにあるものだけ（自分も当てはまる＝同じ仲間を集める部屋）
+// 参加条件にできるのは、オーナー自身のプロフィールにあるものだけ（自分も当てはまる＝同じ仲間を集める部屋）。
+// 2026-10-08 あおの指示：「わかる（あるある）」は条件から外し、代わりに時間割に入れた授業から1つ選べるようにした（同じ曜日・時限に同じ授業名の人。
+// 時間割を入れてもらうきっかけにもなる）。授業は myClassOptions、それ以外がここ
 function myCondOptions(){
   const a=attrsOf(profile), o=[];
   if(a.artist)o.push({k:'art',v:a.artist,label:'同じアーティスト「'+a.artist+'」'});
-  (a.aruaru||[]).forEach(x=>o.push({k:'aru',v:x,label:'わかる「'+x+'」'}));
   (a.goals||[]).forEach(x=>o.push({k:'goal',v:x,label:'目標「'+x+'」'}));
   (a.purposes||[]).forEach(x=>o.push({k:'pur',v:x,label:'気になっている「'+x+'」'}));
   if(a.faculty)o.push({k:'fac',v:a.faculty,label:a.faculty});
   if(a.grade)o.push({k:'grade',v:a.grade,label:a.grade});
   return o;
 }
-const condKey=c=>c.k+':'+c.v;
+// 時間割に入れた授業（曜日・時限の順）。同じ曜日・時限に同じ授業名を入れた人に当てはまる（DBの tama_room_fits の 'cls'）
+function myClassOptions(){
+  return slotKeys(myTimetable).filter(k=>(myTimetable[k]||'').trim()).map(k=>{ const v=myTimetable[k].trim(); return {k:'cls',v,slot:k,label:'同じ授業「'+slotLabel(k)+' '+v+'」'}; });
+}
+const condKey=c=>c.k+':'+(c.slot?c.slot+':':'')+c.v;
 function createRoom(edit){
   if(!roomsV2)return createRoomLegacy();
   if(!profile){ toast('先にプロフィールを登録してね'); return; }
   const r=edit?curRoom:null;
   roomForm={edit:r?rid(r.id):null, vis:r?r.visibility:'all', cond:r?(r.conditions||[]).slice():[], cap:r?(r.capacity||0):0, days:r?null:14};
-  const opts=myCondOptions(); (roomForm.cond||[]).forEach(c=>{ if(!opts.some(o=>condKey(o)===condKey(c)))opts.push(c); });
+  // 前に選んだ条件が、いまのプロフィール・時間割に無くなっていても選択肢に残す（外せるように）
+  const opts=myCondOptions(); (roomForm.cond||[]).forEach(c=>{ if(c.k!=='cls'&&!opts.some(o=>condKey(o)===condKey(c)))opts.push(c); });
   roomForm.opts=opts;
   const m=(r&&r.meet)||{}, places=[...new Set(CAMPUS_LABELS.map(x=>x[0]).filter(n=>!/門$/.test(n)))];
   $('#paySheet').innerHTML=`<h2 class="pstitle">${r?'✏️ コミュニティを編集':'＋ コミュニティを作る'}</h2>
@@ -3580,14 +3599,30 @@ function renderRoomFormChips(){
   const f=roomForm; if(!f)return;
   const VIS=[['all','みんな'],['common','共通点のある人だけ'],['invite','招待コードの人だけ']];
   $('#rmVis').innerHTML=VIS.map(([k,t])=>`<span class="c${f.vis===k?' sel':''}" onclick="roomForm.vis='${k}';renderRoomFormChips()">${t}</span>`).join('');
-  $('#rmVisHint').textContent={all:'一覧にだれにでも出て、だれでも参加できます。',common:'下で選んだどれかに当てはまる人の一覧にだけ出て、その人だけが参加できます（同じ悩み・同じ趣味の人に届けたい時に）。',invite:'一覧には出ません。作った後に出る招待コードを、入ってほしい人に伝えてください。'}[f.vis];
-  $('#rmCondBox').innerHTML=f.vis!=='common'?'':f.opts.length
-    ?`<div class="chips" style="margin-top:8px;gap:6px">${f.opts.map((o,i)=>`<span class="c${f.cond.some(c=>condKey(c)===condKey(o))?' sel':''}" onclick="toggleRoomCond(${i})">${esc(o.label)}</span>`).join('')}</div><div class="hint">あなたのプロフィールから選べます。どれか1つに当てはまればOK。</div>`
-    :`<div class="hint" style="color:var(--bad)">プロフィールにアーティスト・あるある・目標などを入れると選べます。</div>`;
+  $('#rmVisHint').textContent={all:'一覧にだれにでも出て、だれでも参加できます。',common:'下で選んだどれかに当てはまる人の一覧にだけ出て、その人だけが参加できます（同じ授業・同じ趣味・同じ悩みの人に届けたい時に）。',invite:'一覧には出ません。作った後に出る招待コードを、入ってほしい人に伝えてください。'}[f.vis];
+  // 授業の選択肢は開くたびに時間割から作り直す（この画面から時間割に授業を入れて戻ってきた時のため）
+  const cls=myClassOptions(); f.cond.filter(c=>c.k==='cls').forEach(c=>{ if(!cls.some(o=>condKey(o)===condKey(c)))cls.push(c); });
+  f.clsOpts=cls;
+  const sel=o=>f.cond.some(c=>condKey(c)===condKey(o))?' sel':'';
+  $('#rmCondBox').innerHTML=f.vis!=='common'?'':
+    `<div class="condsub">🎯 プロフィールの共通点</div>`
+    +(f.opts.length?`<div class="chips" style="gap:6px">${f.opts.map((o,i)=>`<span class="c${sel(o)}" onclick="toggleRoomCond('p',${i})">${esc(o.label)}</span>`).join('')}</div>`
+      :`<div class="hint">プロフィールにアーティスト・目標などを入れると選べます。</div>`)
+    +`<div class="condsub">📚 授業でしぼる<span>任意・1つまで</span></div>`
+    +(cls.length?`<div class="chips" style="gap:6px">${cls.map((o,i)=>`<span class="c${sel(o)}" onclick="toggleRoomCond('c',${i})">${esc(slotLabel(o.slot))} ${esc(o.v)}</span>`).join('')}</div>
+        <div class="hint">選ぶと、時間割で同じ曜日・時限にこの授業を入れた人にも届きます。</div>`
+      :`<div class="hint">時間割に授業を入れると、同じ授業の人だけの部屋が作れます。<a onclick="openTimetable()" style="color:var(--signal);font-weight:700;cursor:pointer">🗓 時間割に授業を入れる ›</a></div>`)
+    +`<div class="hint">選んだもののどれか1つに当てはまる人に届きます。</div>`;
   $('#rmCap').innerHTML=ROOM_CAPS.map(([n,t])=>`<span class="c${f.cap===n?' sel':''}" onclick="roomForm.cap=${n};renderRoomFormChips()">${t}</span>`).join('');
   $('#rmDays').innerHTML=(f.edit?[[null,'変えない']]:[]).concat(ROOM_DAYS).map(([n,t])=>`<span class="c${f.days===n?' sel':''}" onclick="roomForm.days=${n};renderRoomFormChips()">${t}</span>`).join('');
 }
-function toggleRoomCond(i){ const o=roomForm.opts[i], k=condKey(o); roomForm.cond=roomForm.cond.some(c=>condKey(c)===k)?roomForm.cond.filter(c=>condKey(c)!==k):roomForm.cond.concat(o); renderRoomFormChips(); }
+// kind：'p'＝プロフィールの共通点（いくつでも）／'c'＝授業（1つまで。別の授業を押したら入れ替える）
+function toggleRoomCond(kind,i){
+  const f=roomForm, o=(kind==='c'?f.clsOpts:f.opts)[i]; if(!o)return; const k=condKey(o);
+  if(f.cond.some(c=>condKey(c)===k)) f.cond=f.cond.filter(c=>condKey(c)!==k);
+  else f.cond=(kind==='c'?f.cond.filter(c=>c.k!=='cls'):f.cond).concat(o);
+  renderRoomFormChips();
+}
 function addRuleTmpl(i){ const el=$('#rmRules'), t=RULE_TMPL[i]; if(el.value.includes(t))return; el.value=(el.value.trim()?el.value.trim()+'\n':'')+'・'+t; }
 async function submitRoomForm(){
   const f=roomForm; if(!f||!sb)return;
@@ -3597,7 +3632,7 @@ async function submitRoomForm(){
   if([name,topic,rules,when,note].some(ngCheck)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください'); return; }
   if(f.vis==='common'&&!f.cond.length){ toast('「共通点のある人だけ」の時は、条件を1つ以上選んでね'); return; }
   if(!f.edit&&!$('#rmPledge').checked){ toast('オーナーの約束を読んで、チェックしてね'); return; }
-  const args={p_name:name,p_topic:topic,p_rules:rules,p_visibility:f.vis,p_conditions:f.vis==='common'?f.cond.map(({k,v,label})=>({k,v,label})):[],
+  const args={p_name:name,p_topic:topic,p_rules:rules,p_visibility:f.vis,p_conditions:f.vis==='common'?f.cond.map(({k,v,label,slot})=>({k,v,label,slot})):[],
     p_capacity:f.cap||null,p_days:f.days,p_meet:when||place?{when,place,note}:null};
   if(f.edit){
     const {data,error}=await sb.rpc('tama_room_update',{p_room:f.edit,...args});
@@ -3782,6 +3817,7 @@ async function reportRoom(){
 }
 /* ---------- ようこそ画面・ホーム画面への追加 ---------- */
 function goOnboard(){
+  loadSuggest();   // アーティスト・科目の入力の候補
   $('#s-welcome').classList.remove('active');
   $('#s-onboard').classList.add('active');
 }
@@ -4543,7 +4579,7 @@ function openPlaceEdit(auto){
   $('#placeOverlay').classList.add('show');
 }
 function psPickRoom(){ const cs=ttCurrentSlot(); if(!cs||!myRooms[cs.k])return; $('#psRoom').value=myRooms[cs.k]; if(!$('#psNote').value)$('#psNote').value='授業中'; }
-function closePlaceEdit(){ ttOpen=false; $('#placeOverlay').classList.remove('show'); }
+function closePlaceEdit(){ ttOpen=false; $('#placeOverlay').classList.remove('show'); if(roomForm&&$('#payOverlay').classList.contains('show'))renderRoomFormChips(); }   // コミュニティを作る画面から時間割を開いた時は、授業の選択肢を入れ直す
 function savePlaceEdit(){
   const place=$('#psPlace').value||null, room=$('#psRoom').value.trim(), note=$('#psNote').value.trim();
   if(ngCheck(room)||ngCheck(note)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
@@ -4721,7 +4757,7 @@ async function loadSamePeers(){
 const slotLabel=k=>{ const [d,p]=k.split('-'); return TT_DAYS[d-1]+p; };
 const slotKeys=o=>Object.keys(o).sort((a,b)=>{ const [ad,ap]=a.split('-').map(Number),[bd,bp]=b.split('-').map(Number); return ad-bd||ap-bp; });
 let ttOpen=false;   // 同じシート（#placeSheet）を「いまの自分」と共用しているので、どちらが開いているか
-function openTimetable(){ ttOpen=true; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
+function openTimetable(){ loadSuggest(); ttOpen=true; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
 function renderTimetable(){
   const keys=slotKeys(ttDraft);
   let grid='<div class="ttgrid"><div></div>'+TT_DAYS.map(d=>`<div class="tth">${d}</div>`).join('');
@@ -4736,7 +4772,7 @@ function renderTimetable(){
     ${grid}
     ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
       <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
-      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input maxlength="24" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>`).join('')}</div>`:''}
+      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input list="dlCourse" autocomplete="off" maxlength="24" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>`).join('')}</div>`:''}
     <div class="edbar"><button class="btn btn-ghost" onclick="closeTimetable()">閉じる</button><button class="btn btn-primary" onclick="saveTimetable()">保存する</button></div>`;
 }
 // 授業名を入れたコマを押した時は、名前ごと消えてしまうので確かめる
@@ -4838,7 +4874,6 @@ function fillDailyStats(){
 let dailyShown=null;   // 入力中に6秒ごとの再描画で消えないよう、まだ答えていない間は、お題が変わった時だけ描き直す
 let dailyOpen=false;   // 答えた後のカードを広げているか（ふだんは1行にたたむ。人の一覧を先に見せるため）
 function renderDaily(){
-  renderCheckin();   // 今日のお題に答えた後だけ、その下に「ひとこと」を出す
   const el=$('#dailyCard'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
   const t=dailyToday(), mine=dailyAnswer(profile), key=t.d+'/'+(mine?'a':'q');
@@ -4883,15 +4918,36 @@ function answerDaily(a){
   toast('🎲 答えました。みんなの答えを見てみよう');
   askPushSoon('daily'); visitMaybeUpdate();
   setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
+  setTimeout(()=>maybeCheckinPopup(),4500);            // 「☕ ひとこと」を1問だけ（みんなの答えを少し見てから）
+}
+
+/* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
+   アーティスト・取りたい科目・時間割の授業名を、だれかが一度でも入れたものから予測変換のように出す（<datalist>。iPhoneはキーボードの上に出る）。
+   書き方がそろうと「同じアーティスト」「同じ授業」の共通点が見つかりやすくなる。
+   候補はDBの関数 tama_suggest（supabase/tama_class_suggest.sql）が名前だけ返す（だれが入れたかは返さない）。多い順、NGワードは出さない。
+   開くたびに通信しないよう、10分に1回まで読む。関数が無い時（SQLの実行前）は候補が出ないだけ */
+let suggestAt=0;
+async function loadSuggest(){
+  if(!sb||!myId||String(myId).startsWith('local-')||Date.now()-suggestAt<10*60000)return;
+  suggestAt=Date.now();
+  try{
+    const {data,error}=await sb.rpc('tama_suggest'); if(error||!data)return;
+    const fill=(id,arr)=>{ const el=$('#'+id); if(el)el.innerHTML=(arr||[]).filter(v=>v&&!ngCheck(v)).map(v=>`<option value="${esc(v).replace(/"/g,'&quot;')}">`).join(''); };
+    fill('dlArtist',data.artist); fill('dlCourse',data.course);
+  }catch(e){}
 }
 
 /* ---------- ひとこと（つながりの感じ方。2026-10-07、提案②「孤独感が減ったかを測る」） ----------
    ちかくの根幹（現実で人と出会い、孤独感を埋める）を確かめるため、使い始めと使った後の変化を測る。
    あおの判断：「孤立していると感じる？」のように孤独感をそのまま聞くと、使う人の心理的ハードルになる。そこで
    ・UCLA孤独感尺度 第3版（Russell, 1996）の20問のうち、前向きな言い方の項目（逆転項目）だけを使う。「孤独」「孤立」という言葉は出さない
-   ・今日のお題に答えた後に、そのカードの下へ小さく出す。1日1問・1タップ・とばせる。通知やポップアップでは聞かない。ほかの人には見えない
-   ・3問を3日に分けて聞き、FES.checkinEveryDays（14日）ごとにくり返す。1回目＝使い始め、2回目以降＝使った後（実験の終わりの日が決まっていなくてよい）
-   集計では 1〜4 を逆にして（5−値）3問を足すと、孤独感の得点（3〜12、高いほど孤独）。SQL は supabase/tama_meet.sql の末尾。
+   ・1回1問・1タップ・答えなくてよい。ほかの人には見えない
+   ・3問を FES.checkinEveryDays（14日）ごとの「回」で聞く。1回目＝使い始め、2回目以降＝使った後（実験の終わりの日が決まっていなくてよい）
+   2026-10-08 あおの指示で出し方を変えた：
+   ・近くの人の画面のカード（今日のお題の下）はやめた（ホームの配置は前のまま）。今日のお題に答えた少しあとに、ポップアップで1問だけ出す（1日1問まで）
+   ・ポップアップの「今回はとばす」を押したら、そこから14日はポップアップを出さない（端末に覚える：localStorage tama_ckSkipAt。DBには書かない）
+   ・マイページの「☕ ひとこと」から、その回のまだ答えていない質問にいつでも答えられる
+   集計では 1〜4 を逆にして（5−値）3問を足すと、孤独感の得点（3〜12、高いほど孤独）。SQL は supabase/tama_meet_analysis.sql。
    ⚠️ 質問の文は原文からの訳で、検証された日本語版の文言ではない。アイデア班が日本語版にそろえる時は CHECKIN の q だけ直す（k は変えない）*/
 const CHECKIN=[
   {k:'talk',    q:'このごろ、気軽に話せる人がいると感じる？'},          // 原版の項目19（people you can talk to）
@@ -4899,44 +4955,81 @@ const CHECKIN=[
   {k:'close',   q:'まわりの人を、身近に感じることがある？'},            // 項目10（feel close to people）
 ];
 const CHECKIN_OPTS=['ない','あまりない','ときどきある','よくある'];   // 1〜4（原版の Never / Rarely / Sometimes / Often）
-let checkins=[], checkinMissing=true, checkinThanksUntil=0;   // テーブルを読めるまでは出さない
+let checkins=[], checkinMissing=true, ckPopTimer=null, ckMode='pop';   // テーブルを読めるまでは出さない
 async function loadCheckins(){
   if(!sb||!myId||String(myId).startsWith('local-'))return;
   const {data,error}=await sb.from(T('checkins')).select('wave,item,value,created_at').eq('user_id',myId).order('created_at');
-  if(error){ checkinMissing=true; console.warn('[checkin] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); return; }
+  if(error){ checkinMissing=true; console.warn('[checkin] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); renderCheckinRow(); return; }
   checkinMissing=false; checkins=(data||[]).map(r=>({wave:r.wave,item:r.item,value:r.value,at:Date.parse(r.created_at)||0}));
-  renderCheckin();
+  renderCheckinRow();
 }
-// いま聞く質問（無ければ null）。今日のお題に答えた日だけ・1日1問まで（とばした日も数える）
+const checkinOn=()=>!checkinMissing&&!!FES.checkinEveryDays&&!!profile&&!profileDeleted;
+const CK_SPAN=()=>FES.checkinEveryDays*86400000;
+const ckFirstDay=()=>checkins.length?jstTodayStart(checkins[0].at).getTime():jstTodayStart().getTime();
+// いまの回（最初に答えた日から14日ごと。まだ1つも答えていなければ1回目）
+function checkinWave(){ return 1+Math.floor((jstTodayStart().getTime()-ckFirstDay())/CK_SPAN()); }
+// その回で、まだ答えていない質問（前の版で「とばす」と記録した質問（value=null）も答えた扱い）
+function checkinOpen(){
+  if(!checkinOn())return [];
+  const w=checkinWave(), done=new Set(checkins.filter(c=>c.wave===w).map(c=>c.item));
+  return CHECKIN.filter(x=>!done.has(x.k)).map(x=>({...x,wave:w}));
+}
+function ckSkippedAt(){ try{ return +localStorage.getItem('tama_ckSkipAt')||0; }catch(e){ return 0; } }
+// ポップアップで聞く質問（無ければ null）：今日のお題に答えた日だけ・1日1問まで・「とばす」から14日たっている
 function checkinDue(){
-  if(checkinMissing||!FES.checkinEveryDays||!profile||profileDeleted||!dailyAnswer(profile))return null;
-  const day0=jstTodayStart().getTime();
-  if(checkins.some(c=>c.at>=day0))return null;
-  const first=checkins.length?jstTodayStart(checkins[0].at).getTime():day0;
-  const wave=1+Math.floor((day0-first)/(FES.checkinEveryDays*86400000));
-  const done=new Set(checkins.filter(c=>c.wave===wave).map(c=>c.item));
-  const it=CHECKIN.find(x=>!done.has(x.k)); return it?{...it,wave}:null;
+  if(!checkinOn()||!dailyAnswer(profile))return null;
+  if(Date.now()-ckSkippedAt()<CK_SPAN())return null;
+  if(checkins.some(c=>c.at>=jstTodayStart().getTime()))return null;
+  return checkinOpen()[0]||null;
 }
-function renderCheckin(){
-  const el=$('#checkCard'); if(!el||Date.now()<checkinThanksUntil)return;
-  const it=checkinDue();
-  const h=it?`<div class="ckh"><span>☕ ひとこと<small>（1タップ・答えなくてもOK）</small></span><button onclick="answerCheckin(null)">とばす</button></div>
-    <div class="ckq">${esc(it.q)}</div>
-    <div class="ckopts">${CHECKIN_OPTS.map((o,i)=>`<button onclick="answerCheckin(${i+1})">${o}</button>`).join('')}</div>
-    <div class="ckn">ほかの人には見えません。ちかくを良くするために、2週間に3問だけ聞いています</div>`:'';
-  if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
+// 今日のお題に答えた少しあとに呼ぶ。通知の許可・使い方・ほかのシートが出ている間は、閉じるのを待つ（5秒おきに4回まで）
+function maybeCheckinPopup(tries=0){
+  clearTimeout(ckPopTimer);
+  if(!checkinDue())return;
+  if($('.overlay.show')||$('#pushGate').classList.contains('show')||$('#guide').classList.contains('show')||!$('#s-near').classList.contains('active')){
+    if(tries<4)ckPopTimer=setTimeout(()=>maybeCheckinPopup(tries+1),5000); return; }
+  openCheckin('pop');
 }
-// v：1〜4。とばした時は null を記録する（同じ質問を何度も出さず、次の日は次の質問へ。とばした数も研究に使える）
-async function answerCheckin(v){
-  const it=checkinDue(); if(!it)return;
-  checkins.push({wave:it.wave,item:it.k,value:v,at:Date.now()});
-  const el=$('#checkCard'); el.dataset.h='thx';   // 次の renderCheckin で必ず描き直す（空どうしだと「ありがとう！」が残っていた）
-  if(v){ el.innerHTML='<div class="ckthx">ありがとう！</div>'; checkinThanksUntil=Date.now()+2200; setTimeout(()=>{ checkinThanksUntil=0; renderCheckin(); },2300); }
-  else el.innerHTML='';
+// mode：'pop'＝ポップアップ（1問だけ）／'me'＝マイページから（その回のまだの質問を全部）
+function openCheckin(mode){ ckMode=mode; renderCheckinSheet(); $('#ckOverlay').classList.add('show'); hideTip(); }
+function closeCheckin(){ $('#ckOverlay').classList.remove('show'); renderCheckinRow(); }
+function nextCheckinDate(){ return new Date(ckFirstDay()+checkinWave()*CK_SPAN()).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'}); }
+function renderCheckinSheet(thanks){
+  const list=ckMode==='pop'?[checkinDue()].filter(Boolean):checkinOpen();
+  const q=it=>`<div class="ckq">${esc(it.q)}</div><div class="ckopts">${CHECKIN_OPTS.map((o,i)=>`<button onclick="answerCheckin('${it.k}',${i+1})">${o}</button>`).join('')}</div>`;
+  const body=thanks?'<div class="ckthx">ありがとう！</div>'
+    :list.length?list.map(q).join('<div class="cksep"></div>')
+    :`<div class="ckthx">今回の分は答えてくれました。ありがとう！<small>次は ${nextCheckinDate()} ごろにまた聞きます</small></div>`;
+  const pop=ckMode==='pop'&&!thanks&&list.length;
+  $('#ckSheet').innerHTML=`<div class="checkin">
+      <div class="ckh"><span>☕ ひとこと<small>1タップ・答えなくてもOK</small></span></div>
+      ${body}
+      ${thanks?'':`<div class="ckn">答えはほかの人には見えません。ちかくを良くするために、2週間に3問だけ聞いています。${pop?'マイページの「☕ ひとこと」からも答えられます。':''}</div>`}</div>
+    ${thanks?'':pop?`<button class="btn btn-ghost ckskip" onclick="skipCheckin()">今回はとばす<small>2週間はこの画面を出しません</small></button>`
+      :`<button class="btn btn-ghost ckskip" onclick="closeCheckin()">閉じる</button>`}`;
+}
+async function answerCheckin(k,v){
+  if(!checkinOn())return;
+  const w=checkinWave(); if(checkins.some(c=>c.wave===w&&c.item===k))return;
+  checkins.push({wave:w,item:k,value:v,at:Date.now()});
+  if(ckMode==='pop'){ renderCheckinSheet(true); setTimeout(closeCheckin,1300); }
+  else{ toast('ありがとう！'); renderCheckinSheet(); }
+  renderCheckinRow();
   // 運営が #debug で触った分は記録しない（開いた日の記録と同じ）
   if(!sb||!myId||String(myId).startsWith('local-')||debugMode())return;
-  const {error}=await sb.from(T('checkins')).insert({user_id:myId,wave:it.wave,item:it.k,value:v,ver:APP_VER});
+  const {error}=await sb.from(T('checkins')).insert({user_id:myId,wave:w,item:k,value:v,ver:APP_VER});
   if(error&&error.code!=='23505')console.warn('[checkin] 保存できませんでした',error.message);
+}
+function skipCheckin(){
+  try{ localStorage.setItem('tama_ckSkipAt',String(Date.now())); }catch(e){}
+  closeCheckin(); toast('とばしました。マイページの「☕ ひとこと」からいつでも答えられます');
+}
+// マイページの「☕ ひとこと」の行（テーブルが無い時・登録前は出さない）
+function renderCheckinRow(){
+  const el=$('#ckRow'); if(!el)return;
+  el.hidden=!checkinOn(); if(el.hidden)return;
+  const n=checkinOpen().length;
+  $('#ckRowTxt').textContent=n?`今回あと${n}問・答えなくてもOK・ほかの人には見えません`:`今回の分は答えました（次は ${nextCheckinDate()} ごろ）`;
 }
 
 /* ---------- settings ---------- */
@@ -5131,6 +5224,7 @@ function spawnTest(){
 
 /* ---------- プロフィール編集 ---------- */
 function openEdit(){
+  loadSuggest();
   if(!profile){toast('先にプロフィール登録してね');return;}
   const es=$('#editSheet');
   es.innerHTML=`
@@ -5231,7 +5325,7 @@ function go(t){
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='near')loadRooms();if(t==='friends')loadFriends();
-  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
+  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
