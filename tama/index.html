@@ -345,6 +345,8 @@
   .mbub{max-width:78%;padding:6px 10px;border-radius:12px;font-size:10.5px;line-height:1.45;margin-bottom:5px}
   .mbub.them{background:#fff;border:1px solid var(--line)}
   .mbub.me{background:linear-gradient(135deg,var(--amber-deep),var(--amber));color:#fff;margin-left:auto}
+  .mline{background:#fff8ea;border:1px solid #f0a030;border-radius:11px;padding:7px 9px;font-size:10.5px;margin-bottom:7px}.mline b{color:var(--amber-deep)}.mline span{display:block;font-size:9.5px;color:var(--ink);margin-top:2px}
+  .mroom{background:#fff;border:1px solid rgba(245,151,47,.45);border-radius:11px;padding:7px 9px;margin-bottom:7px;font-size:11px}.mroom span{display:block;font-size:9.5px;color:var(--muted)}
   .addhome{margin-top:auto;padding:13px 15px;border-radius:14px;background:rgba(15,176,205,.08);border:1px solid rgba(15,176,205,.3);font-size:12px;line-height:1.7;color:var(--ink)}
   .addhome a{color:var(--signal);font-weight:700;cursor:pointer;text-decoration:underline}
   .stepnum{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px}
@@ -456,7 +458,7 @@
   .locbar.okhide{display:none}
   /* トークの「個人／コミュニティ」 */
   .seg{display:flex;gap:6px;margin:0 16px 8px;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line);flex-shrink:0}
-  .seg button{flex:1;border:0;background:none;padding:8px;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+  .seg button{flex:1;border:0;background:none;padding:8px 4px;white-space:nowrap;min-width:0;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
   .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(30,40,90,.12)}
   .seg .sdot{min-width:16px;height:16px;line-height:16px;font-size:10px;background:var(--rose);color:#fff;border-radius:8px;padding:0 4px}
   .cmsub{padding:4px 22px 6px;font-size:11.5px;color:var(--muted)}
@@ -656,6 +658,48 @@
   .homegate .hgcount b{color:var(--signal);font-size:15px}
   .homegate .shots{margin:0 -22px;padding:4px 22px 8px;scroll-padding:0 22px}
   .homegate .hgswipe{font-size:11px;color:var(--muted2);text-align:center;margin:0 0 18px}
+  /* ホーム画面に追加するまでの流れの絵（2026-10-08。gateFlowHTML） */
+  .homegate .hgvals{margin:-6px auto 14px;padding:10px 14px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:12.5px;line-height:1.9;color:var(--ink);max-width:330px}
+  .homegate .hgflowh{font-family:"Zen Maru Gothic";font-size:15px;font-weight:900;text-align:center;margin:2px 0 8px}
+  .homegate .hgflow{display:flex;gap:12px;overflow-x:auto;margin:0 -22px;padding:4px 22px 8px;scroll-snap-type:x mandatory;scroll-padding:0 22px}
+  .homegate .hgflow::-webkit-scrollbar{height:0}
+  .homegate .fstep{flex-shrink:0;width:134px;scroll-snap-align:start}
+  .homegate .fphone{width:128px;height:228px;margin:0 auto;border-radius:20px;border:3px solid #1e2446;background:#f6f7fb;position:relative;overflow:hidden;box-shadow:0 8px 20px rgba(20,25,60,.15)}
+  .homegate .fscr{position:absolute;inset:0;display:flex;flex-direction:column;font-size:9px;color:#4a5070}
+  .homegate .furl{margin:8px 8px 0;padding:4px 6px;border-radius:7px;background:#e9ebf3;font-size:8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .homegate .furl.a{display:flex;justify-content:space-between;align-items:center;text-align:left}
+  .homegate .furl.in{margin:0;flex:1;min-width:0}
+  .homegate .fpg{flex:1;margin:8px;border-radius:10px;background:#fff;padding:10px 8px;display:flex;flex-direction:column;gap:6px}
+  .homegate .fpg .flogo{font-family:"Zen Maru Gothic";font-weight:900;font-size:15px;text-align:center;background:linear-gradient(90deg,var(--amber),var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .homegate .fpg i{display:block;height:7px;border-radius:4px;background:#e6e9f2}.homegate .fpg i.s{width:60%}
+  .homegate .fbar{display:flex;justify-content:space-around;align-items:center;gap:4px;padding:7px 8px 10px;background:#eef0f6;font-size:13px;color:#4a7bd8}
+  .homegate .hl{background:var(--signal)!important;color:#fff!important;border-radius:7px;padding:1px 6px;font-weight:700;box-shadow:0 0 0 3px rgba(15,176,205,.35);animation:fhl 1.4s infinite}
+  @keyframes fhl{50%{box-shadow:0 0 0 6px rgba(15,176,205,.15)}}
+  .homegate .fpop{position:absolute;right:8px;bottom:34px;width:84px;background:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(20,25,60,.25);overflow:hidden}
+  .homegate .fpop.r{top:30px;bottom:auto;width:100px}.homegate .fpop div{white-space:nowrap}
+  .homegate .fpop div,.homegate .fsheet>div{padding:6px 8px;border-top:1px solid #eceef5;font-size:9px}
+  .homegate .fpop div:first-child{border-top:0}
+  .homegate .fpop .hl,.homegate .fsheet .hl{border-radius:0;box-shadow:none;padding:6px 8px}
+  .homegate .fsheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -6px 18px rgba(20,25,60,.18);padding-top:6px}
+  .homegate .fsrow{display:flex;gap:8px;justify-content:center;padding:4px 0 6px!important;border-top:0!important}
+  .homegate .fsrow span{width:20px;height:20px;border-radius:6px;background:#dfe3ee}
+  .homegate .fadd{display:flex;justify-content:space-between;align-items:center;padding:10px 8px 8px;font-size:9px;background:#fff;border-bottom:1px solid #eceef5}
+  .homegate .fadd span,.homegate .fadd b{white-space:nowrap}
+  .homegate .fadd b{font-size:9.5px;color:var(--ink)}.homegate .fadd.l{background:#06c755;color:#fff}.homegate .fadd.l b{color:#fff}
+  .homegate .faddb{display:flex;gap:8px;align-items:center;margin:12px 10px;padding:8px;background:#fff;border-radius:10px}
+  .homegate .faddb img{width:30px;height:30px;border-radius:8px}
+  .homegate .fnm{font-size:10px;font-weight:700;color:var(--ink)}.homegate .faddb small{font-size:8px;color:var(--muted)}
+  .homegate .ftg{display:flex;justify-content:space-between;align-items:center;margin:0 10px;padding:7px 8px;background:#fff;border-radius:10px;font-size:9px}
+  .homegate .ftg .on{width:22px;height:13px;border-radius:8px;background:#34c759;position:relative}.homegate .ftg .on::after{content:"";position:absolute;right:2px;top:2px;width:9px;height:9px;border-radius:50%;background:#fff}
+  .homegate .fdlg{position:absolute;left:6px;right:6px;top:70px;overflow:hidden;background:#fff;border-radius:12px;padding:10px;box-shadow:0 6px 18px rgba(20,25,60,.25)}
+  .homegate .fdlg b{font-size:9px;color:var(--ink);white-space:nowrap}.homegate .fdlg .faddb{margin:8px 0;padding:0}.homegate .fdlg .fnm{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .homegate .fdlgb{display:flex;justify-content:flex-end;align-items:center;gap:6px;font-size:8.5px;color:#4a7bd8;white-space:nowrap}
+  .homegate .fhome{background:linear-gradient(160deg,#7aa2ff,#b38bff);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px 10px;align-content:start}
+  .homegate .fapp{width:22px;height:22px;border-radius:6px;margin:0 auto;display:block}
+  .homegate .fapp.me{padding:0;overflow:hidden;width:24px;height:24px}.homegate .fapp.me img{width:100%;height:100%;display:block}
+  .homegate .fhomel{grid-column:1/-1;text-align:center;font-size:8px;color:#fff;font-weight:700;margin-top:-2px;white-space:nowrap}
+  .homegate .fcap{font-size:11.5px;line-height:1.5;text-align:center;margin-top:7px;color:var(--ink)}
+  .homegate .fcap b{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--signal);color:#fff;font-size:10px;margin-right:4px}
   .homegate .hgapp{width:22px;height:22px;border-radius:6px;vertical-align:middle;margin:0 2px}
   /* 登録直後の使い方のまとめ（1枚） */
   .guide .introl{text-align:left;display:flex;flex-direction:column;gap:12px;margin:4px 0 6px;font-size:13.5px;line-height:1.7;color:var(--ink)}
@@ -829,6 +873,23 @@
   .nearfr .nfc .av{width:44px;height:44px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid #20b483}
   .nearfr .nfc .nm{font-size:11.5px;font-weight:700;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .nearfr .nfc .t{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* はじめにやること・授業の部屋（2026-10-08） */
+  .startcard{margin:2px 16px 10px;padding:10px 12px 6px;border-radius:16px;background:#fff;border:1.5px solid rgba(245,151,47,.5);box-shadow:0 4px 14px rgba(245,151,47,.12)}
+  .startcard:empty{display:none}
+  .startcard .sth{display:flex;align-items:center;gap:8px;margin-bottom:4px}.startcard .sth b{font-size:13.5px}
+  .startcard .sth span{font-size:11.5px;font-weight:700;color:var(--amber-deep)}.startcard .sth button{margin-left:auto;border:0;background:none;color:var(--muted2);font-size:15px;cursor:pointer;padding:2px 4px}
+  .startcard .strow{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid var(--line);cursor:pointer}
+  .startcard .strow.done{cursor:default;opacity:.55}
+  .startcard .sti{font-size:19px;width:24px;text-align:center}.startcard .stt{flex:1;min-width:0}
+  .startcard .stt b{display:block;font-size:13px}.startcard .stt small{display:block;font-size:11px;color:var(--muted);line-height:1.5}
+  .startcard .go{color:var(--muted2);font-size:18px;font-weight:700}
+  .clsbox{margin:8px 4px 6px;padding:12px;border-radius:16px;background:linear-gradient(135deg,#fff7ee,#fff);border:1px solid rgba(245,151,47,.45)}
+  .clsbox .clsh{font-size:14px;font-weight:900}.clsbox .clsd{font-size:11.5px;color:var(--muted);line-height:1.6;margin:3px 0 8px}
+  .clsbox .clsbtn{width:100%;padding:11px;font-size:13.5px}
+  .clsbox .clsrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+  .clsbox .clsrow .ct{flex:1;min-width:0}.clsbox .clsrow b{display:block;font-size:13px}.clsbox .clsrow small{font-size:11px;color:var(--muted)}
+  .clsbox .clsrow button{flex-shrink:0;border:1px solid rgba(245,151,47,.6);background:#fff;color:#9a5a10;border-radius:12px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer}
+  .clsbox .clsrow button.pri{background:var(--amber);border-color:var(--amber);color:#3a2410}
   .commbox{margin:16px 16px 18px;padding:12px 12px 12px;border-radius:18px;background:linear-gradient(135deg,rgba(99,214,232,.12),rgba(139,157,255,.10));border:1px solid rgba(15,176,205,.35)}
   .commbox .cbh{display:flex;align-items:center;font-size:14px;font-weight:900;color:var(--ink)}.commbox .cbh a{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal);cursor:pointer}
   .commbox .cbd{font-size:11.5px;color:var(--muted);line-height:1.6;margin:3px 0 8px}
@@ -858,30 +919,40 @@
         <div class="wtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と、気軽につながる。</div>
         <div class="notlove">🙅 <b>恋愛目的のアプリではありません。</b><br>同じ授業・同じアーティスト・同じ「あるある」の人と<br>友達になるためのアプリです。</div>
         <div class="feslive" id="fesLiveWel"></div>
+        <!-- 2026-10-08 あおの依頼「多摩キャン生にとって何がいいかが伝わるように」：①会った時の話題 ②友達のいまどこ・履修 ③授業の部屋 ④新しい出会い の4枚 -->
         <div class="shots">
           <div class="shot">
-            <div class="sh">📍 近くの「共通点のある人」が見える</div>
-            <div class="sd">めずらしい共通点がある人ほど上に出ます。</div>
+            <div class="sh">🤝 会ったとき、話すことがある</div>
+            <div class="sd">共通点・何度もすれ違っていること・その場で2人で答える「ふたりのお題」が、最初の一言になります。</div>
             <div class="mini">
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい <span style="font-weight:500;color:var(--muted)">社会学部</span></div><div class="mb"><span class="mtag" style="color:#9a4b00;background:#fff0d6;border-color:#f0a030">✨ 同じアーティスト「ヨルシカ」</span></div></div><div class="md">32m</div></div>
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#a78bfa,#63d6e8)">🎧</div><div class="mtx"><div class="mn">そう <span style="font-weight:500;color:var(--muted)">経済学部</span></div><div class="mb"><span class="mtag">🎯 わかる「方向音痴」</span></div></div><div class="md">87m</div></div>
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#7be0b0,#4bc0d9)">🌿</div><div class="mtx"><div class="mn">あおい <span style="font-weight:500;color:var(--muted)">現代福祉学部</span></div><div class="mb"><span class="mtag">🎯 同じ授業「心理学」</span></div></div><div class="md">140m</div></div>
+              <div class="mline">✨ これまで <b>5回</b> すれ違っています<span>📅 水曜の昼休みに、よく近くにいます</span></div>
+              <div class="mbub me">水曜の昼休み、よく近くにいますよね！</div>
+              <div class="mbub them">🎲 ふたりのお題「犬派？猫派？」→ 同じ！</div>
             </div>
           </div>
           <div class="shot">
-            <div class="sh">👋 気になる人に「いいね」→ トーク</div>
-            <div class="sd">おたがいにいいねするとトークが始まります。最初の一言は共通点の話題から選べます。</div>
-            <div class="mini">
-              <div class="mbub me">ヨルシカ、自分もよく聴きます！いちばん好きな曲ってなんですか？</div>
-              <div class="mbub them">えー！うれしい、「ただ君に晴れ」です！</div>
-            </div>
-          </div>
-          <div class="shot">
-            <div class="sh">👥 友達になったら、いまどこにいるか分かる</div>
-            <div class="sd">友達とは期限なしで話せて、いる建物・教室も見られます。</div>
+            <div class="sh">👥 友達のいまどこ・履修が分かる</div>
+            <div class="sd">友達がいる建物・教室と、いまの授業（見せてくれた時だけ）が分かるので、空きコマに会いやすくなります。</div>
             <div class="mini">
               <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#ffb066,#ffd166)">🐱</div><div class="mtx"><div class="mn">けんた</div><div class="mb">📍 社会学部A棟・401「ひま」</div></div><div class="md">💬</div></div>
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#63d6e8,#7be0b0)">🏃</div><div class="mtx"><div class="mn">みお</div><div class="mb">📍 図書館・研究棟</div></div><div class="md">💬</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#63d6e8,#7be0b0)">🏃</div><div class="mtx"><div class="mn">みお</div><div class="mb">🗓 いま2限 統計学（B棟201）</div></div><div class="md">💬</div></div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="sh">📚 同じ授業の人に、授業のことを聞ける</div>
+            <div class="sd">時間割に授業を入れると、同じ授業の人だけが入れる部屋で、課題・テスト・休講の情報交換ができます。</div>
+            <div class="mini">
+              <div class="mroom"><b>📚 月3 統計学</b><span>👥 12人 ・ 同じ授業の人だけ</span></div>
+              <div class="mbub them">第5回の課題、提出は来週でしたっけ？</div>
+              <div class="mbub me">来週の月曜までです！</div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="sh">✨ キャンパスで、新しい出会い</div>
+            <div class="sd">同じアーティスト・同じ授業の人が、共通点つきで地図と一覧に出ます。めずらしい共通点ほど上に。</div>
+            <div class="mini">
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい <span style="font-weight:500;color:var(--muted)">社会 2年</span></div><div class="mb"><span class="mtag">✨ 同じアーティスト「ヨルシカ」</span></div></div><div class="md">32m</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#a78bfa,#63d6e8)">🎧</div><div class="mtx"><div class="mn">そう <span style="font-weight:500;color:var(--muted)">経済 3年</span></div><div class="mb"><span class="mtag">📚 同じ授業「統計学」</span></div></div><div class="md">87m</div></div>
             </div>
           </div>
         </div>
@@ -928,6 +999,8 @@
       <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
       <!-- 「いまの自分」と「時間割」の2枚のタイル（renderStatusRow）。2026-09-24 のUXテストで「人が1人も見えない」と言われたので、1行に小さくした -->
       <div class="nowbar" id="nowBar"></div>
+      <!-- はじめにやること（2026-10-08。renderStartCard） -->
+      <div class="startcard" id="startCard"></div>
       <div class="daily" id="dailyCard"></div>
       <!-- いまキャンパスにいる友達（2026-10-08。だれが友達か分かるよう、一覧とは分けて一番上に横並び。renderNearFriends） -->
       <div class="nearfr" id="nearFriends"></div>
@@ -943,7 +1016,7 @@
         <div class="cbh"><span>💬 コミュニティ</span><a onclick="go('comm')">すべて見る ›</a></div>
         <div class="cbd">同じ趣味・同じ授業の人が集まる部屋。オーナーが作って、期限が来たら消えます。</div>
         <div class="ulist" id="homeRoomList"></div>
-        <div class="cbb"><button class="btn btn-ghost" onclick="go('comm')">部屋をさがす</button><button class="btn btn-primary" onclick="go('comm');createRoom()">＋ 部屋を作る</button></div>
+        <div class="cbb"><button class="btn btn-ghost" onclick="go('comm')">📚 授業の部屋</button><button class="btn btn-primary" onclick="go('comm');createRoom()">＋ 部屋を作る</button></div>
       </div>
       </div>
     </section>
@@ -2224,6 +2297,7 @@ function openNear(id){
   openSheet(u,d);
 }
 function renderNearby(){
+  renderStartCard();
   renderDaily();
   updateRarity();
   // 全員を出す（2026-09-24 に変更。以前は共通点のある人だけ出していたが、たまたま近くにいた人が見えず、すれ違いの偶然が最初から絞られてしまうため）。
@@ -3650,12 +3724,65 @@ function renderRooms(){
   if(el){
     $('#commSub').textContent='部屋ごとにオーナーがいて、入れる人と期限が決まっています';
     if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
-    el.innerHTML=rooms.length?sec('参加中',joined)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
-      :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`;
+    el.innerHTML=classRoomsHTML()+(rooms.length?sec('参加中',joined)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
+      :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`);
   }
   const hr=$('#homeRoomList'), top=joined.concat(forYou,open).slice(0,3);
   if(hr)hr.innerHTML=top.length?top.map(roomRow).join(''):`<div style="padding:14px 16px;font-size:12.5px;color:var(--muted)">まだコミュニティがありません。<span onclick="go('comm')" style="color:var(--signal);font-weight:700;cursor:pointer">作ってみる ›</span></div>`;
 }
+
+/* ---------- 授業の部屋（2026-10-08 あおの依頼「授業について聞けるコミュニティを立ち上げる、くらいまで多摩キャン生にとっての良さを考えて」） ----------
+   時間割に入れた授業ごとに、「同じ曜日・時限に同じ授業を入れた人だけが入れる部屋」をのぞく・作るを1タップで。
+   部屋そのものはふつうのコミュニティ（共通点のある人だけ・条件は授業1つ・期限なし）なので、新しいテーブルは要らない。
+   同じ授業の部屋がもうあればそこへ（条件の授業の曜日・時限と名前で探す）、無ければ作る画面を、名前・ひとこと・ルールを入れた状態で開く */
+function classRoomFor(c){
+  return rooms.find(r=>!roomEnded(r)&&(r.conditions||[]).some(x=>x.k==='cls'&&x.slot===c.slot&&normCourse(x.v)===normCourse(c.v)));
+}
+function classRoomsHTML(){
+  if(!roomsV2||!profile)return '';
+  const cls=myClassOptions();
+  if(!cls.length) return `<div class="clsbox"><div class="clsh">📚 授業の部屋</div>
+    <div class="clsd">時間割に授業を入れると、同じ授業の人だけが入れる部屋で、課題やテストのことを聞けます。</div>
+    <button class="btn btn-primary clsbtn" onclick="openTimetable()">🗓 時間割に授業を入れる</button></div>`;
+  return `<div class="clsbox"><div class="clsh">📚 あなたの授業の部屋</div><div class="clsd">同じ曜日・時限に同じ授業を入れた人だけが入れます。課題・テスト・休講の情報交換に。</div>`
+    +cls.map((c,i)=>{ const r=classRoomFor(c), n=r?((roomStats[rid(r.id)]||{}).members||0):0;
+      return `<div class="clsrow"><div class="ct"><b>${esc(slotLabel(c.slot))} ${esc(c.v)}</b><small>${r?`👥 ${n}人${r.joined?' ・ 参加中':''}`:'まだ部屋がありません'}</small></div>
+        ${r?`<button class="${r.joined?'':'pri'}" onclick="openRoom('${rid(r.id)}')">${r.joined?'開く':'のぞく'}</button>`:`<button onclick="createClassRoom(${i})">＋ 作る</button>`}</div>`; }).join('')
+    +`</div>`;
+}
+function createClassRoom(i){
+  const c=myClassOptions()[i]; if(!c)return;
+  createRoom(); if(!roomForm)return;
+  roomForm.vis='common'; roomForm.cond=[c]; roomForm.days=0;
+  $('#rmName').value=(slotLabel(c.slot)+' '+c.v).slice(0,20);
+  $('#rmTopic').value='授業のこと・課題・テストの情報交換';
+  $('#rmRules').value='・授業に関係ない話はほどほどに\n・課題の答えをそのまま渡さない\n・いやな言い方をしない';
+  renderRoomFormChips();
+}
+
+/* ---------- はじめにやること（2026-10-08 あおの依頼「入れた直後の離脱を減らす」） ----------
+   近くに人がいない時でも、ちかくの良さ（同じ授業の人・授業の部屋・お題・友達のいまどこ）にすぐ触れられるよう、4つの行動を近くの人の画面に出す。
+   終わったものに ✅、全部終わったら出さない。✕ で閉じたら二度と出さない（端末に覚える tama_start） */
+function startState(){ try{ return JSON.parse(localStorage.getItem('tama_start')||'{}'); }catch(e){ return {}; } }
+function saveStart(s){ try{ localStorage.setItem('tama_start',JSON.stringify(s)); }catch(e){} }
+function renderStartCard(){
+  const el=$('#startCard'); if(!el)return;
+  const st=startState();
+  let h='';
+  if(profile&&!st.hide){
+    const items=[
+      {done:myClassOptions().length>0, icon:'🗓', t:'時間割に授業を入れる', d:'同じ授業の人が「共通点」に出て、授業の部屋に入れます', go:'openTimetable()'},
+      {done:!!st.daily||!!dailyAnswer(profile), icon:'🎲', t:'今日のお題に答える', d:'同じ答えの人と、会った時の話題ができます', go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})"},
+      {done:rooms.some(r=>r.joined&&(r.conditions||[]).some(x=>x.k==='cls')), icon:'📚', t:'授業の部屋をのぞく', d:'課題やテストのことを、同じ授業の人に聞けます', go:"go('comm')"},
+      {done:allFriendRows().some(r=>r.status==='accepted'), icon:'👥', t:'友達を1人追加する', d:'いまどの建物にいるか・空きコマが分かります', go:'openFrAdd()'},
+    ];
+    const n=items.filter(x=>x.done).length;
+    if(n<items.length) h=`<div class="sth"><b>🚀 はじめにやること</b><span>${n}/${items.length}</span><button onclick="hideStartCard()" aria-label="閉じる">✕</button></div>`
+      +items.map(x=>`<div class="strow${x.done?' done':''}"${x.done?'':` onclick="${x.go}"`}><span class="sti">${x.done?'✅':x.icon}</span><div class="stt"><b>${x.t}</b><small>${x.d}</small></div>${x.done?'':'<span class="go">›</span>'}</div>`).join('');
+  }
+  if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
+}
+function hideStartCard(){ const s=startState(); s.hide=true; saveStart(s); renderStartCard(); }
 
 /* 作る・編集する（同じシート） */
 const RULE_TMPL=['勧誘・宣伝はしない','相手の連絡先や住所を聞かない','いやな言い方をしない','無理に会おうとしない','困ったらオーナーか運営に知らせる'];
@@ -3979,6 +4106,33 @@ function hgMock(kind){
   if(kind==='amenu')return `<div class="hgmock col"><div>新しいタブ</div><div>ブックマーク</div><div class="hl">ホーム画面に追加<span>📲</span></div></div>`;
   return '';
 }
+/* ホーム画面に追加するまでの流れを、小さなスマホの絵で横に並べる（2026-10-08）。本物のスクリーンショットではなく、押す所が分かるように描いたもの。
+   kind：'ios'（iOS 18まで・下に共有ボタン）／'ios26'（右下の「…」→共有）／'android'（Chrome の ⋮）／'inapp'（LINE などのアプリの中→ブラウザで開く） */
+function gateFlowHTML(kind){
+  const icon=`<img src="/icons/icon-192.png" alt="">`;
+  const page=`<div class="fpg"><div class="flogo">ちかく</div><i></i><i></i><i class="s"></i><i></i><i class="s"></i></div>`;
+  const home=`<div class="fscr fhome">${Array.from({length:11},(_,i)=>`<span class="fapp" style="background:hsl(${i*33},55%,${70-(i%3)*6}%)"></span>`).join('')}<span class="fapp me hl">${icon}</span><div class="fhomel">ちかく多摩キャン</div></div>`;
+  const S={
+    bar:`<div class="fscr"><div class="furl">chikaku-hosei.vercel.app</div>${page}<div class="fbar"><span>‹</span><span>›</span><span class="hl">⬆︎</span><span>📖</span><span>⧉</span></div></div>`,
+    bar26:`<div class="fscr">${page}<div class="fbar"><span class="furl in">chikaku-hosei…</span><span class="hl">…</span></div></div>`,
+    menu26:`<div class="fscr">${page}<div class="fpop"><div>再読み込み</div><div>ブックマーク</div><div class="hl">共有 ⬆︎</div></div></div>`,
+    share:`<div class="fscr">${page}<div class="fsheet"><div class="fsrow"><span></span><span></span><span></span><span></span></div><div>コピー</div><div>ブックマークを追加</div><div class="hl">ホーム画面に追加 ⊞</div></div></div>`,
+    add:`<div class="fscr"><div class="fadd"><span>✕</span><b>ホームに追加</b><span class="hl">追加</span></div><div class="faddb">${icon}<div><div class="fnm">ちかく多摩キャン</div><small>chikaku-hosei…</small></div></div>${kind==='ios26'?'<div class="ftg">Webアプリとして開く <span class="on"></span></div>':''}</div>`,
+    adots:`<div class="fscr"><div class="furl a">chikaku-hosei… <span class="hl">⋮</span></div>${page}</div>`,
+    amenu:`<div class="fscr">${page}<div class="fpop r"><div>新しいタブ</div><div>ブックマーク</div><div class="hl">ホーム画面に追加</div></div></div>`,
+    ainst:`<div class="fscr">${page}<div class="fdlg"><b>アプリをインストール</b><div class="faddb">${icon}<div class="fnm">ちかく多摩キャン</div></div><div class="fdlgb"><span>キャンセル</span><span class="hl">インストール</span></div></div></div>`,
+    inapp:`<div class="fscr"><div class="fadd l"><span>✕</span><b>ちかく</b><span class="hl">…</span></div>${page}</div>`,
+    inmenu:`<div class="fscr">${page}<div class="fsheet"><div>共有</div><div>リンクをコピー</div><div class="hl">${isIOS()?'Safariで開く':'ブラウザで開く'}</div></div></div>`,
+  };
+  const F={
+    ios:[['bar','⬆︎（共有）を押す'],['share','ホーム画面に追加'],['add','「追加」を押す'],['home','アイコンから開く']],
+    ios26:[['bar26','右下の … を押す'],['menu26','「共有」を選ぶ'],['share','ホーム画面に追加'],['add','「追加」を押す'],['home','アイコンから開く']],
+    android:[['adots','右上の ⋮ を押す'],['amenu','ホーム画面に追加'],['ainst','インストール'],['home','アイコンから開く']],
+    inapp:[['inapp','右上の「…」を押す'],['inmenu',isIOS()?'「Safariで開く」':'「ブラウザで開く」'],['home','開いたら追加へ']],
+  }[kind];
+  if(!F)return '';
+  return `<div class="hgflow">${F.map(([k,t],i)=>`<div class="fstep"><div class="fphone">${k==='home'&&kind==='inapp'?S.bar:k==='home'?home:S[k]}</div><div class="fcap"><b>${i+1}</b>${t}</div></div>`).join('')}</div>`;
+}
 function renderHomeGate(){
   const g=$('#homeGate'); if(!g)return;
   const ios=isIOS(), inApp=isInAppBrowser(), other=!inApp&&isIOSOtherBrowser(), ios26=iosSafariVer()>=26;
@@ -4016,12 +4170,13 @@ function renderHomeGate(){
       +step(3,`<b>「インストール」</b>（または「追加」）を押す`)
       +step(4,`ホーム画面にできた ${icon}<b>「ちかく多摩キャン」</b>から開く`,'このブラウザの画面は閉じてOKです');
   }
-  // 見本はようこそ画面と同じもの（作りものの人なので、登録前に見せても誰の情報も出ない）
-  const shots=$('#s-welcome .shots');
+  // 2026-10-08 あおの指示：上のアプリの見本（宣伝）はやめて、ホーム画面に追加するまでの流れを画面の絵で見せる（gateFlowHTML）
+  const flow=gateFlowHTML(inApp?'inapp':ios?(ios26?'ios26':'ios'):other?'':'android');
   g.innerHTML=`<div class="hglogo">ちかく</div>
     <div class="hgtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と気軽につながる。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
+    <div class="hgvals"><div>🤝 会ったとき、話すことがある</div><div>👥 友達のいまどこ・空きコマが分かる</div><div>📚 同じ授業の人に、授業のことを聞ける</div><div>✨ キャンパスで、新しい出会い</div></div>
     <div class="hgcount" id="hgCount">${gateCountHTML()}</div>
-    ${shots?shots.outerHTML+'<div class="hgswipe">← 横にスワイプできます →</div>':''}
+    ${flow?`<div class="hgflowh">📲 ホーム画面に追加するまで</div>${flow}<div class="hgswipe">← 横にスワイプできます →</div>`:''}
     <div class="hgh">📲 ホーム画面に追加すると<br>使えます（30秒）</div>
     <div class="hgd">ホーム画面のアイコンから開くと、返事や友達申請の通知が届き、登録もこのスマホに残ります。</div>
     ${steps}
@@ -4263,9 +4418,9 @@ async function openMembers(){
         const me=u.id===myId;
         return `<div class="urow" ${me?'':`onclick='closeMembers();openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':d})'`}>
           <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-          <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span>${me?' <span class="joined-tag">あなた</span>':''}</div>
+          <div class="info"><div class="n">${esc(u.name)}${me?' <span class="joined-tag">あなた</span>':''}</div>
           <div class="b">${esc(u.bio||'')}</div></div>
-          <div class="d">${me?'':`<div class="m" style="font-size:12.5px">${d!=null?d+'m':'見る ›'}</div>`}</div></div>`;}).join('')}
+          <div class="d">${me?'':`<div class="m" style="font-size:12.5px">見る ›</div>`}</div></div>`;}).join('')}
       </div>
       <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closeMembers()">閉じる</button>`;
   }catch(e){ $('#memSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:10px">参加者</h2><div style="font-size:13px;color:var(--bad)">読み込みに失敗しました</div><button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closeMembers()">閉じる</button>`; }
@@ -5021,8 +5176,8 @@ function renderDaily(){
   }
   if(!mine){
     el.innerHTML=`<div class="dyday" id="dailyYday"></div>`+head+(t.free
-      ?`<div class="drow"><input id="dailyIn" maxlength="24" placeholder="${esc(t.free)}"><button class="btn btn-primary" onclick="answerDaily($('#dailyIn').value)">答える</button></div>`
-      :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="answerDaily('${o}')">${esc(o)}</span>`).join('')}</div>`)
+      ?`<div class="drow"><input id="dailyIn" maxlength="24" placeholder="${esc(t.free)}"><button class="btn btn-primary" onclick="event.stopPropagation();answerDaily($('#dailyIn').value)">答える</button></div>`
+      :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="event.stopPropagation();answerDaily('${o}')">${esc(o)}</span>`).join('')}</div>`)
       +`<div class="dnote">答えると、みんなの答えと、同じ答えの人が見られます（答えは1回だけ）</div>`;
     fillDailyStats();
     return;
@@ -5050,6 +5205,7 @@ function answerDaily(a){
   askPushSoon('daily'); visitMaybeUpdate();
   setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
   setTimeout(()=>maybeCheckinPopup(),4500);            // 「☕ ひとこと」を1問だけ（みんなの答えを少し見てから）
+  { const s=startState(); s.daily=true; saveStart(s); }   // はじめにやることの「お題に答える」を ✅ に
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
