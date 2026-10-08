@@ -4418,9 +4418,9 @@ async function openMembers(){
         const me=u.id===myId;
         return `<div class="urow" ${me?'':`onclick='closeMembers();openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':d})'`}>
           <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-          <div class="info"><div class="n">${esc(u.name)} <span>${u.age||''}</span>${me?' <span class="joined-tag">あなた</span>':''}</div>
+          <div class="info"><div class="n">${esc(u.name)}${me?' <span class="joined-tag">あなた</span>':''}</div>
           <div class="b">${esc(u.bio||'')}</div></div>
-          <div class="d">${me?'':`<div class="m" style="font-size:12.5px">${d!=null?d+'m':'見る ›'}</div>`}</div></div>`;}).join('')}
+          <div class="d">${me?'':`<div class="m" style="font-size:12.5px">見る ›</div>`}</div></div>`;}).join('')}
       </div>
       <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closeMembers()">閉じる</button>`;
   }catch(e){ $('#memSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:10px">参加者</h2><div style="font-size:13px;color:var(--bad)">読み込みに失敗しました</div><button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closeMembers()">閉じる</button>`; }
@@ -5176,8 +5176,8 @@ function renderDaily(){
   }
   if(!mine){
     el.innerHTML=`<div class="dyday" id="dailyYday"></div>`+head+(t.free
-      ?`<div class="drow"><input id="dailyIn" maxlength="24" placeholder="${esc(t.free)}"><button class="btn btn-primary" onclick="answerDaily($('#dailyIn').value)">答える</button></div>`
-      :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="answerDaily('${o}')">${esc(o)}</span>`).join('')}</div>`)
+      ?`<div class="drow"><input id="dailyIn" maxlength="24" placeholder="${esc(t.free)}"><button class="btn btn-primary" onclick="event.stopPropagation();answerDaily($('#dailyIn').value)">答える</button></div>`
+      :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="event.stopPropagation();answerDaily('${o}')">${esc(o)}</span>`).join('')}</div>`)
       +`<div class="dnote">答えると、みんなの答えと、同じ答えの人が見られます（答えは1回だけ）</div>`;
     fillDailyStats();
     return;
