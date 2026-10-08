@@ -870,6 +870,23 @@
   .nearfr .nfc .av{width:44px;height:44px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid #20b483}
   .nearfr .nfc .nm{font-size:11.5px;font-weight:700;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .nearfr .nfc .t{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* はじめにやること・授業の部屋（2026-10-08） */
+  .startcard{margin:2px 16px 10px;padding:10px 12px 6px;border-radius:16px;background:#fff;border:1.5px solid rgba(245,151,47,.5);box-shadow:0 4px 14px rgba(245,151,47,.12)}
+  .startcard:empty{display:none}
+  .startcard .sth{display:flex;align-items:center;gap:8px;margin-bottom:4px}.startcard .sth b{font-size:13.5px}
+  .startcard .sth span{font-size:11.5px;font-weight:700;color:var(--amber-deep)}.startcard .sth button{margin-left:auto;border:0;background:none;color:var(--muted2);font-size:15px;cursor:pointer;padding:2px 4px}
+  .startcard .strow{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid var(--line);cursor:pointer}
+  .startcard .strow.done{cursor:default;opacity:.55}
+  .startcard .sti{font-size:19px;width:24px;text-align:center}.startcard .stt{flex:1;min-width:0}
+  .startcard .stt b{display:block;font-size:13px}.startcard .stt small{display:block;font-size:11px;color:var(--muted);line-height:1.5}
+  .startcard .go{color:var(--muted2);font-size:18px;font-weight:700}
+  .clsbox{margin:8px 4px 6px;padding:12px;border-radius:16px;background:linear-gradient(135deg,#fff7ee,#fff);border:1px solid rgba(245,151,47,.45)}
+  .clsbox .clsh{font-size:14px;font-weight:900}.clsbox .clsd{font-size:11.5px;color:var(--muted);line-height:1.6;margin:3px 0 8px}
+  .clsbox .clsbtn{width:100%;padding:11px;font-size:13.5px}
+  .clsbox .clsrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+  .clsbox .clsrow .ct{flex:1;min-width:0}.clsbox .clsrow b{display:block;font-size:13px}.clsbox .clsrow small{font-size:11px;color:var(--muted)}
+  .clsbox .clsrow button{flex-shrink:0;border:1px solid rgba(245,151,47,.6);background:#fff;color:#9a5a10;border-radius:12px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer}
+  .clsbox .clsrow button.pri{background:var(--amber);border-color:var(--amber);color:#3a2410}
   .commbox{margin:16px 16px 18px;padding:12px 12px 12px;border-radius:18px;background:linear-gradient(135deg,rgba(99,214,232,.12),rgba(139,157,255,.10));border:1px solid rgba(15,176,205,.35)}
   .commbox .cbh{display:flex;align-items:center;font-size:14px;font-weight:900;color:var(--ink)}.commbox .cbh a{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal);cursor:pointer}
   .commbox .cbd{font-size:11.5px;color:var(--muted);line-height:1.6;margin:3px 0 8px}
@@ -969,6 +986,8 @@
       <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
       <!-- 「いまの自分」と「時間割」の2枚のタイル（renderStatusRow）。2026-09-24 のUXテストで「人が1人も見えない」と言われたので、1行に小さくした -->
       <div class="nowbar" id="nowBar"></div>
+      <!-- はじめにやること（2026-10-08。renderStartCard） -->
+      <div class="startcard" id="startCard"></div>
       <div class="daily" id="dailyCard"></div>
       <!-- いまキャンパスにいる友達（2026-10-08。だれが友達か分かるよう、一覧とは分けて一番上に横並び。renderNearFriends） -->
       <div class="nearfr" id="nearFriends"></div>
@@ -984,7 +1003,7 @@
         <div class="cbh"><span>💬 コミュニティ</span><a onclick="go('comm')">すべて見る ›</a></div>
         <div class="cbd">同じ趣味・同じ授業の人が集まる部屋。オーナーが作って、期限が来たら消えます。</div>
         <div class="ulist" id="homeRoomList"></div>
-        <div class="cbb"><button class="btn btn-ghost" onclick="go('comm')">部屋をさがす</button><button class="btn btn-primary" onclick="go('comm');createRoom()">＋ 部屋を作る</button></div>
+        <div class="cbb"><button class="btn btn-ghost" onclick="go('comm')">📚 授業の部屋</button><button class="btn btn-primary" onclick="go('comm');createRoom()">＋ 部屋を作る</button></div>
       </div>
       </div>
     </section>
@@ -2265,6 +2284,7 @@ function openNear(id){
   openSheet(u,d);
 }
 function renderNearby(){
+  renderStartCard();
   renderDaily();
   updateRarity();
   // 全員を出す（2026-09-24 に変更。以前は共通点のある人だけ出していたが、たまたま近くにいた人が見えず、すれ違いの偶然が最初から絞られてしまうため）。
@@ -3691,12 +3711,65 @@ function renderRooms(){
   if(el){
     $('#commSub').textContent='部屋ごとにオーナーがいて、入れる人と期限が決まっています';
     if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
-    el.innerHTML=rooms.length?sec('参加中',joined)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
-      :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`;
+    el.innerHTML=classRoomsHTML()+(rooms.length?sec('参加中',joined)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
+      :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`);
   }
   const hr=$('#homeRoomList'), top=joined.concat(forYou,open).slice(0,3);
   if(hr)hr.innerHTML=top.length?top.map(roomRow).join(''):`<div style="padding:14px 16px;font-size:12.5px;color:var(--muted)">まだコミュニティがありません。<span onclick="go('comm')" style="color:var(--signal);font-weight:700;cursor:pointer">作ってみる ›</span></div>`;
 }
+
+/* ---------- 授業の部屋（2026-10-08 あおの依頼「授業について聞けるコミュニティを立ち上げる、くらいまで多摩キャン生にとっての良さを考えて」） ----------
+   時間割に入れた授業ごとに、「同じ曜日・時限に同じ授業を入れた人だけが入れる部屋」をのぞく・作るを1タップで。
+   部屋そのものはふつうのコミュニティ（共通点のある人だけ・条件は授業1つ・期限なし）なので、新しいテーブルは要らない。
+   同じ授業の部屋がもうあればそこへ（条件の授業の曜日・時限と名前で探す）、無ければ作る画面を、名前・ひとこと・ルールを入れた状態で開く */
+function classRoomFor(c){
+  return rooms.find(r=>!roomEnded(r)&&(r.conditions||[]).some(x=>x.k==='cls'&&x.slot===c.slot&&normCourse(x.v)===normCourse(c.v)));
+}
+function classRoomsHTML(){
+  if(!roomsV2||!profile)return '';
+  const cls=myClassOptions();
+  if(!cls.length) return `<div class="clsbox"><div class="clsh">📚 授業の部屋</div>
+    <div class="clsd">時間割に授業を入れると、同じ授業の人だけが入れる部屋で、課題やテストのことを聞けます。</div>
+    <button class="btn btn-primary clsbtn" onclick="openTimetable()">🗓 時間割に授業を入れる</button></div>`;
+  return `<div class="clsbox"><div class="clsh">📚 あなたの授業の部屋</div><div class="clsd">同じ曜日・時限に同じ授業を入れた人だけが入れます。課題・テスト・休講の情報交換に。</div>`
+    +cls.map((c,i)=>{ const r=classRoomFor(c), n=r?((roomStats[rid(r.id)]||{}).members||0):0;
+      return `<div class="clsrow"><div class="ct"><b>${esc(slotLabel(c.slot))} ${esc(c.v)}</b><small>${r?`👥 ${n}人${r.joined?' ・ 参加中':''}`:'まだ部屋がありません'}</small></div>
+        ${r?`<button class="${r.joined?'':'pri'}" onclick="openRoom('${rid(r.id)}')">${r.joined?'開く':'のぞく'}</button>`:`<button onclick="createClassRoom(${i})">＋ 作る</button>`}</div>`; }).join('')
+    +`</div>`;
+}
+function createClassRoom(i){
+  const c=myClassOptions()[i]; if(!c)return;
+  createRoom(); if(!roomForm)return;
+  roomForm.vis='common'; roomForm.cond=[c]; roomForm.days=0;
+  $('#rmName').value=(slotLabel(c.slot)+' '+c.v).slice(0,20);
+  $('#rmTopic').value='授業のこと・課題・テストの情報交換';
+  $('#rmRules').value='・授業に関係ない話はほどほどに\n・課題の答えをそのまま渡さない\n・いやな言い方をしない';
+  renderRoomFormChips();
+}
+
+/* ---------- はじめにやること（2026-10-08 あおの依頼「入れた直後の離脱を減らす」） ----------
+   近くに人がいない時でも、ちかくの良さ（同じ授業の人・授業の部屋・お題・友達のいまどこ）にすぐ触れられるよう、4つの行動を近くの人の画面に出す。
+   終わったものに ✅、全部終わったら出さない。✕ で閉じたら二度と出さない（端末に覚える tama_start） */
+function startState(){ try{ return JSON.parse(localStorage.getItem('tama_start')||'{}'); }catch(e){ return {}; } }
+function saveStart(s){ try{ localStorage.setItem('tama_start',JSON.stringify(s)); }catch(e){} }
+function renderStartCard(){
+  const el=$('#startCard'); if(!el)return;
+  const st=startState();
+  let h='';
+  if(profile&&!st.hide){
+    const items=[
+      {done:myClassOptions().length>0, icon:'🗓', t:'時間割に授業を入れる', d:'同じ授業の人が「共通点」に出て、授業の部屋に入れます', go:'openTimetable()'},
+      {done:!!st.daily||!!dailyAnswer(profile), icon:'🎲', t:'今日のお題に答える', d:'同じ答えの人と、会った時の話題ができます', go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})"},
+      {done:myRoomIds.size>0, icon:'📚', t:'授業の部屋をのぞく', d:'課題やテストのことを、同じ授業の人に聞けます', go:"go('comm')"},
+      {done:allFriendRows().some(r=>r.status==='accepted'), icon:'👥', t:'友達を1人追加する', d:'いまどの建物にいるか・空きコマが分かります', go:'openFrAdd()'},
+    ];
+    const n=items.filter(x=>x.done).length;
+    if(n<items.length) h=`<div class="sth"><b>🚀 はじめにやること</b><span>${n}/${items.length}</span><button onclick="hideStartCard()" aria-label="閉じる">✕</button></div>`
+      +items.map(x=>`<div class="strow${x.done?' done':''}"${x.done?'':` onclick="${x.go}"`}><span class="sti">${x.done?'✅':x.icon}</span><div class="stt"><b>${x.t}</b><small>${x.d}</small></div>${x.done?'':'<span class="go">›</span>'}</div>`).join('');
+  }
+  if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
+}
+function hideStartCard(){ const s=startState(); s.hide=true; saveStart(s); renderStartCard(); }
 
 /* 作る・編集する（同じシート） */
 const RULE_TMPL=['勧誘・宣伝はしない','相手の連絡先や住所を聞かない','いやな言い方をしない','無理に会おうとしない','困ったらオーナーか運営に知らせる'];
@@ -5118,6 +5191,7 @@ function answerDaily(a){
   askPushSoon('daily'); visitMaybeUpdate();
   setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
   setTimeout(()=>maybeCheckinPopup(),4500);            // 「☕ ひとこと」を1問だけ（みんなの答えを少し見てから）
+  { const s=startState(); s.daily=true; saveStart(s); }   // はじめにやることの「お題に答える」を ✅ に
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
