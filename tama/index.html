@@ -631,6 +631,17 @@
   .homegate .hgstep .no{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--signal);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px}
   .homegate .hgstep .tx{font-size:14px;line-height:1.65;color:var(--ink)}
   .homegate .hgstep .tx small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+  /* 押す場所の見本（2026-10-08） */
+  .homegate .hgstep .tx{flex:1;min-width:0}
+  .homegate .hgmock{display:flex;align-items:center;justify-content:space-around;gap:6px;margin-top:8px;padding:7px 10px;border-radius:12px;background:#f3f4f8;border:1px solid var(--line);font-size:14px;color:var(--muted)}
+  .homegate .hgmock .hl{color:#fff;background:var(--signal);border-radius:8px;padding:2px 9px;font-weight:700;box-shadow:0 0 0 3px rgba(15,176,205,.25)}
+  .homegate .hgmock .url{flex:1;min-width:0;font-size:10.5px;background:#fff;border-radius:8px;padding:4px 8px;text-align:center;overflow:hidden;white-space:nowrap}
+  .homegate .hgmock b{font-size:12px;color:var(--ink)}.homegate .hgmock span{font-size:12px}
+  .homegate .hgmock.col{flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden}
+  .homegate .hgmock.col>div{padding:7px 12px;font-size:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between}
+  .homegate .hgmock.col>div:first-child{border-top:0}
+  .homegate .hgmock.col .hl{border-radius:0;box-shadow:none}
+  .homegate a.hgbtn{display:block;text-align:center;text-decoration:none;box-sizing:border-box}
   .homegate .hgicon{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border:1.5px solid var(--signal);border-radius:7px;color:var(--signal);font-weight:700;font-size:14px;padding:0 5px;vertical-align:middle;margin:0 2px;background:#fff}
   .homegate .hgwarn{font-size:12.5px;line-height:1.7;background:rgba(240,81,123,.08);border:1px solid rgba(240,81,123,.35);color:#8a1d3d;border-radius:14px;padding:11px 13px;margin-bottom:12px}
   .homegate .hgnote{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:6px;text-align:center}
@@ -808,6 +819,22 @@
   .sugg button small{margin-left:5px;font-size:10px;font-weight:500;color:var(--muted)}   /* その書き方を入れている人数（小さく） */
   .sugg button{border:1px solid rgba(15,176,205,.45);background:rgba(15,176,205,.08);color:#0a7f96;border-radius:14px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #paySheet .pledge{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.7;padding:11px 12px;border-radius:14px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);margin-bottom:14px;cursor:pointer}
+  /* いまキャンパスにいる友達（2026-10-08） */
+  .nearfr{margin:2px 16px 10px;padding:10px 12px 8px;border-radius:16px;background:rgba(32,180,131,.07);border:1px solid rgba(32,180,131,.32)}
+  .nearfr:empty{display:none}
+  .nearfr .nfh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#14805c}
+  .nearfr .nfh span{font-weight:500;color:var(--muted)}.nearfr .nfh a{margin-left:auto;color:var(--signal);cursor:pointer}
+  .nearfr .nfl{display:flex;gap:10px;overflow-x:auto;padding-top:8px}.nearfr .nfl::-webkit-scrollbar{height:0}
+  .nearfr .nfc{flex-shrink:0;width:62px;text-align:center;cursor:pointer}
+  .nearfr .nfc .av{width:44px;height:44px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid #20b483}
+  .nearfr .nfc .nm{font-size:11.5px;font-weight:700;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nearfr .nfc .t{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .commbox{margin:16px 16px 18px;padding:12px 12px 12px;border-radius:18px;background:linear-gradient(135deg,rgba(99,214,232,.12),rgba(139,157,255,.10));border:1px solid rgba(15,176,205,.35)}
+  .commbox .cbh{display:flex;align-items:center;font-size:14px;font-weight:900;color:var(--ink)}.commbox .cbh a{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal);cursor:pointer}
+  .commbox .cbd{font-size:11.5px;color:var(--muted);line-height:1.6;margin:3px 0 8px}
+  .commbox .ulist{padding:0}.commbox .urow{margin:0 0 6px;background:#fff}
+  .commbox .cbb{display:flex;gap:8px;margin-top:6px}.commbox .cbb .btn{flex:1;padding:10px;font-size:13px}
+  .nearmore{display:block;width:calc(100% - 32px);margin:6px 16px 4px;padding:11px;font-size:13px}
   #roomNm,#roomSt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #paySheet .pledge input{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--amber)}
   .metline .mpat{display:block;margin-top:5px;font-size:12px;color:var(--ink);font-style:normal}
@@ -902,6 +929,8 @@
       <!-- 「いまの自分」と「時間割」の2枚のタイル（renderStatusRow）。2026-09-24 のUXテストで「人が1人も見えない」と言われたので、1行に小さくした -->
       <div class="nowbar" id="nowBar"></div>
       <div class="daily" id="dailyCard"></div>
+      <!-- いまキャンパスにいる友達（2026-10-08。だれが友達か分かるよう、一覧とは分けて一番上に横並び。renderNearFriends） -->
+      <div class="nearfr" id="nearFriends"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
       <!-- 地図は開いた時点でスクロールせずに見える位置に置き、人の一覧はその下に続ける
            （2026-09-24 に一度「一覧／地図」の切り替えにしたが、あおの希望で切り替えをやめて地図を常に出す形に戻した） -->
@@ -909,8 +938,13 @@
         <div class="mapzoom"><button onclick="mapZoom(1)" aria-label="拡大">＋</button><button onclick="mapZoom(-1)" aria-label="縮小">－</button><button onclick="mapFitCampus()" aria-label="キャンパス全体を表示">🏫</button></div>
         <button class="maptype" id="mapFullBtn" onclick="toggleMapFull()">⤢ 大きく</button><button class="mapme" onclick="centerOnMe()">📍 自分</button></div>
       <div class="ulist" id="ulist"></div>
-      <div class="listhead" style="margin-top:18px">💬 コミュニティ <span onclick="go('comm')" style="margin-left:auto;color:var(--signal);font-weight:700;cursor:pointer;font-size:12px">すべて見る ›</span></div>
-      <div class="ulist" id="homeRoomList"></div>
+      <!-- コミュニティ（2026-10-08 あおの指示「分かりづらいのでボックスに入れる」。人の一覧と見分けがつくよう、枠の中に説明と部屋とボタンをまとめた） -->
+      <div class="commbox">
+        <div class="cbh"><span>💬 コミュニティ</span><a onclick="go('comm')">すべて見る ›</a></div>
+        <div class="cbd">同じ趣味・同じ授業の人が集まる部屋。オーナーが作って、期限が来たら消えます。</div>
+        <div class="ulist" id="homeRoomList"></div>
+        <div class="cbb"><button class="btn btn-ghost" onclick="go('comm')">部屋をさがす</button><button class="btn btn-primary" onclick="go('comm');createRoom()">＋ 部屋を作る</button></div>
+      </div>
       </div>
     </section>
     <section class="screen" id="s-cross">
@@ -1202,9 +1236,10 @@ const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形
 const T=name=>'tama_'+name;
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-// アイコンの絵文字。2026-09-24 に12→38種類に増やした（足す時は GRADS に背景の色も足す。無いと青緑の既定色になる）
-const EMO=['🌙','⭐','🌸','🔥','🐱','🎧','☕','📷','🍜','🌿','🎨','🏃',
-  '🐶','🐰','🐻','🦊','🐼','🐧','🐸','🦄','🐳',
+// アイコンの絵文字。2026-09-24 に12→38種類に増やした（足す時は GRADS に背景の色も足す。無いと青緑の既定色になる）。
+// 2026-10-08 あおの指示で、だれでも選べるのは最初の12個に戻し、残りの26個はアンケートの限定アイコン（EMO_SP）に移した
+const EMO=['🌙','⭐','🌸','🔥','🐱','🎧','☕','📷','🍜','🌿','🎨','🏃'];
+const EMO_MOVED=['🐶','🐰','🐻','🦊','🐼','🐧','🐸','🦄','🐳',
   '🌻','🍀','🌈','🌊','⚡',
   '🍓','🍩','🍙',
   '🎮','🎸','🎤','🎬','📚','⚽','🏀','✈️','👾'];
@@ -1248,7 +1283,7 @@ const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#
   '👑':['#ffd166','#e0a030'],'💎':['#63d6e8','#a78bfa'],'🦋':['#8b9dff','#ff9dd6'],'🪐':['#a78bfa','#ffb066'],'🌟':['#ffe066','#ff9d70'],
   '🐉':['#6bd98b','#4b8bf0'],'🦁':['#ffb066','#c89b6b'],'🧸':['#ffcf8a','#c89b6b'],'🍣':['#ff7e6b','#ffd6c0'],'🎀':['#ff7e9d','#ffd1e0']};
 // アンケートの特典（2026-10-05）。限定アイコンとバッジ。バッジは profile.fa.badges に入れて、ほかの人の画面にも出す
-const EMO_SP=['👑','💎','🦋','🪐','🌟','🐉','🦁','🧸','🍣','🎀'];
+const EMO_SP=['👑','💎','🦋','🪐','🌟','🐉','🦁','🧸','🍣','🎀',...EMO_MOVED];
 const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケートに協力してくれた人'}};
 const badgeKeys=u=>(attrsOf(u).badges||[]).filter(k=>BADGES[k]);
 const badgeIcons=u=>badgeKeys(u).map(k=>BADGES[k].icon).join('');
@@ -1492,7 +1527,7 @@ function pushHintText(){
 // 1人1日1行（tama_visits、supabase/tama_retention.sql）。位置は記録しない（あおの決定。利用規約の第4条に記載）。
 // それまでのDBは上書きされる値しか無く、「初日に来た人が何日目に戻ってきたか」が分からなかった。
 // 開いた回数は、5分以上あけて開き直したら1回と数える。キャンパスにいた・近くの人数・通知・お題は、良くなった時だけ送り直す
-const APP_VER='2026-10-08';
+const APP_VER='2026-10-08b';
 let visitsMissing=false, visitDay=null, visitSent=null, visitLastOpen=0, visitTimer=null, lastOpenCount=0;
 const jstDateStr=()=>new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 function visitNow(){ return {on:!!myPos&&!fesOutside&&inCampus(myPos.lat,myPos.lng), near:lastOpenCount, push:pushOk(), daily:!!(profile&&dailyAnswer(profile))}; }
@@ -2193,13 +2228,15 @@ function renderNearby(){
   updateRarity();
   // 全員を出す（2026-09-24 に変更。以前は共通点のある人だけ出していたが、たまたま近くにいた人が見えず、すれ違いの偶然が最初から絞られてしまうため）。
   // 並び順は共通点のめずらしさ（commonScore）＋すれ違い（crossBoost）→ 距離。めずらしい共通点があって、すれ違った人が上に来る。
-  // アプリを閉じた人は「さっきまでいた人」として下に分ける（UXテストで、30分前に閉じた人が「25m」で1位に出ていた）
-  const all=others.map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}const cd=commonDetail(u);return {u,d,common:cd,score:commonScore(cd)+crossBoost(u.id,cd),closed:isClosed(u)};});
+  // 2026-10-08 あおの指示：アプリを閉じた人（前の「🕘 さっきまでいた人」）は一覧にも地図にも出さない。
+  // 友達は一覧から外して、一番上に横並び（renderNearFriends）。一覧は NEAR_LIMIT 人まで出して、多い時は「もっと見る」
+  const all=others.filter(u=>!isClosed(u)).map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}const cd=commonDetail(u);return {u,d,common:cd,score:commonScore(cd)+crossBoost(u.id,cd),closed:false};});
   const byScore=(x,y)=>(y.score-x.score)||((x.d??1e9)-(y.d??1e9));
-  const open=all.filter(x=>!x.closed).sort(byScore), closed=all.filter(x=>x.closed).sort(byScore);
-  lastOpenCount=open.filter(x=>!isTest(x.u.id)).length; visitMaybeUpdate();
-  $('#nearSub').textContent=open.length||closed.length?(open.length?'いま'+open.length+'人':'')+(closed.length?(open.length?' · ':'')+'さっきまで'+closed.length+'人':''):'まだ誰もいません';
-  lastNearList=open.concat(closed); drawMap(lastNearList); const ul=$('#ulist');
+  const openAll=all.sort(byScore), frNow=openAll.filter(x=>isFriend(x.u.id)), open=openAll.filter(x=>!isFriend(x.u.id));
+  renderNearFriends(frNow);
+  lastOpenCount=openAll.filter(x=>!isTest(x.u.id)).length; visitMaybeUpdate();
+  $('#nearSub').textContent=openAll.length?'いま'+openAll.length+'人'+(frNow.length?`（友達${frNow.length}人）`:''):'まだ誰もいません';
+  lastNearList=openAll; drawMap(lastNearList); const ul=$('#ulist');
   if(fesOutside&&!all.length){
     $('#nearSub').textContent='キャンパスの外では表示しません';
     ul.innerHTML=`<div class="empty"><div class="big">🏫</div><p>いまは多摩キャンパスの外にいます。<br>キャンパスに入ると、近くの人の表示と<br>すれ違いの記録が始まります。<br><br>プロフィール・トーク・友達は<br>このまま使えます。</p>${emptyPushHTML()}</div>`;
@@ -2213,10 +2250,25 @@ function renderNearby(){
   const cs=ttCurrentSlot(), inCls=x=>cs&&cs.inClass&&(samePeers[x.u.id]||[]).some(r=>r.slot===cs.k);
   const clsNow=open.filter(inCls);
   if(clsNow.length){ for(const x of clsNow)open.splice(open.indexOf(x),1); }
+  const shown=nearShowAll?open:open.slice(0,NEAR_LIMIT), more=open.length-shown.length;
   ul.innerHTML=(clsNow.length?`<div class="nearsec cls">📚 いま同じ授業「${esc(myTimetable[cs.k]||'')}」 <span class="cnt">${clsNow.length}人</span></div>`+clsNow.map(nearRow).join(''):'')
-    +(open.length?`<div class="nearsec"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span>いまキャンパスにいる人 <span class="cnt">${open.length}人</span></div>`+open.map(nearRow).join('')
-      :clsNow.length?'':`<div class="nearsec">いまアプリを開いている人はいません</div>`)
-    +(closed.length?`<div class="nearsec" style="margin-top:6px">🕘 さっきまでいた人 <span class="cnt">アプリを閉じた人・${closed.length}人</span></div>`+closed.map(nearRow).join(''):'');
+    +(open.length?`<div class="nearsec"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span>いまキャンパスにいる人 <span class="cnt">${open.length}人</span></div>`+shown.map(nearRow).join('')
+        +(more>0?`<button class="btn btn-ghost nearmore" onclick="nearShowAll=true;renderNearby()">もっと見る（あと${more}人）</button>`:'')
+      :clsNow.length?'':`<div class="nearsec">${frNow.length?'友達のほかに、いまアプリを開いている人はいません':'いまアプリを開いている人はいません'}</div>`);
+}
+const NEAR_LIMIT=20;   // 一覧に最初に出す人数（共通点の多い順。2026-10-08）
+let nearShowAll=false;
+// いまキャンパスにいる友達を横並びに（開いている友達は距離、そうでなければ友達に見せている建物）。押すとプロフィール
+function renderNearFriends(openFr){
+  const el=$('#nearFriends'); if(!el)return;
+  const seen=new Set(openFr.map(x=>x.u.id));
+  const away=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>!seen.has(id)&&!blocked.has(id))
+    .map(id=>({id,u:friendUser(id),t:presenceText(friendPres(id))})).filter(x=>x.u&&x.t);
+  const chips=openFr.slice().sort((a,b)=>(a.d??1e9)-(b.d??1e9))
+    .map(x=>({id:x.u.id,u:x.u,t:x.d!=null?Math.round(x.d)+'m':presenceText(friendPres(x.u.id))||'キャンパス'})).concat(away);
+  const h=chips.length?`<div class="nfh">👥 いまキャンパスにいる友達 <span>${chips.length}人</span><a onclick="go('friends')">友達 ›</a></div>
+    <div class="nfl">${chips.map(c=>`<div class="nfc" onclick="openFriend('${c.id}')"><div class="av" style="background:${gr(c.u.emoji)}">${c.u.emoji}</div><div class="nm">${esc(c.u.name)}</div><div class="t">${esc(c.t)}</div></div>`).join('')}</div>`:'';
+  if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
 }
 // 地図の場所までスクロールする（友達・出店を「地図で見る」時）
 function showMapArea(){ const w=$('#mapWrap'); if(w)w.scrollIntoView({behavior:'smooth',block:'center'}); }
@@ -2514,22 +2566,24 @@ async function loadEncounters(){
 }
 // すれ違った人は全員出す（2026-09-24 から。以前は共通点のある人だけ）。新しい順
 function crossShown(){ return Object.values(encMap).filter(u=>!blocked.has(u.id)); }
+// 2026-10-08 あおの指示：一覧は「今日」すれ違った人だけ（日付が変わると消える）。前の日の人も、回数・曜日と時間帯は
+// プロフィール・会う前の1枚の「これまで◯回すれ違っています」に残る。多い時は CROSS_LIMIT 人まで出して「もっと見る」
+const CROSS_LIMIT=30;
+let crossShowAll=false;
 function renderCross(){
   updateRarity();
-  const arr=crossShown().sort((a,b)=>(b.last_at||0)-(a.last_at||0));
-  $('#crossSub').textContent=arr.length?arr.length+'人とすれ違い':'まだ0人';
-  const ul=$('#crossList');
-  if(!arr.length){ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>まだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`;return;}
-  // 「今日」と「それより前」に分け、いつ・どこで・何回かを出す
   const today=jstTodayStart().getTime();
-  const when=t=>t>=today?hhmm(t):new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
+  const arr=crossShown().filter(u=>(u.last_at||0)>=today).sort((a,b)=>(b.last_at||0)-(a.last_at||0));
+  $('#crossSub').textContent=arr.length?'今日 '+arr.length+'人':'今日はまだ0人';
+  const ul=$('#crossList');
+  if(!arr.length){ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>今日はまだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。<br><span style="font-size:11.5px;color:var(--muted)">前の日にすれ違った人は、日付が変わるとここから消えます（回数はプロフィールに残ります）</span></p></div>`;return;}
   const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/'/g,"&#39;")},null)'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${when(u.last_at||0)}・${esc(u.last_place||'')}${u.first_at&&u.count>=2?`　（はじめては ${when(u.first_at)}）`:''}</div></div>
+    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${hhmm(u.last_at||0)}・${esc(u.last_place||'')}${u.first_at&&u.count>=2?`　（これまで${u.count}回）`:''}</div></div>
     <div class="d"><div class="m${u.count>=2?' rep':''}">${u.count}回</div>${relTag(u.id)}</div></div>`;
-  const t=arr.filter(u=>(u.last_at||0)>=today), old=arr.filter(u=>(u.last_at||0)<today);
-  ul.innerHTML=(t.length?`<div class="nearsec" style="padding-left:6px">今日 <span class="cnt">${t.length}人</span></div>`+t.map(row).join(''):'')
-    +(old.length?`<div class="nearsec" style="padding-left:6px">それより前 <span class="cnt">${old.length}人</span></div>`+old.map(row).join(''):'');
+  const shown=crossShowAll?arr:arr.slice(0,CROSS_LIMIT), more=arr.length-shown.length;
+  ul.innerHTML=`<div class="nearsec" style="padding-left:6px">今日すれ違った人 <span class="cnt">${arr.length}人</span></div>`+shown.map(row).join('')
+    +(more>0?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">もっと見る（あと${more}人）</button>`:'');
 }
 function confettiBurst(){
   const cv=$('#confetti'); if(!cv)return; cv.width=cv.clientWidth; cv.height=cv.clientHeight;
@@ -3910,18 +3964,38 @@ async function copyGateUrl(btn){
   try{ await navigator.clipboard.writeText(u); btn.textContent='✅ コピーしました。Safariのアドレス欄に貼り付けてください'; }
   catch(e){ prompt('このURLをコピーして、Safariで開いてください',u); }
 }
+const isLineBrowser=()=>/Line\//i.test(navigator.userAgent);
+// LINE が外のブラウザで開いてくれるURL（招待のリンク・QRにも付ける。Safari などではただ無視される）
+function externalUrl(base){ const u=new URL(base||location.href); u.searchParams.set('openExternalBrowser','1'); return u.toString(); }
+// Android のアプリ内ブラウザから Chrome を直接開くリンク（Chrome が無ければ、いつものブラウザで開く）
+function androidChromeUrl(){ return `intent://${location.host}${location.pathname}${location.search}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(location.href)};end`; }
+// 手順の横に出す、押す場所の見本（2026-10-08 あおの依頼「ホーム画面追加をもっとやりやすく」。押す所を青緑で光らせる）
+function hgMock(kind){
+  if(kind==='bar')return `<div class="hgmock"><span>‹</span><span>›</span><span class="hl">⬆︎</span><span>📖</span><span>⧉</span></div>`;
+  if(kind==='more')return `<div class="hgmock"><span class="url">chikaku-hosei.vercel.app</span><span class="hl">…</span></div>`;
+  if(kind==='menu')return `<div class="hgmock col"><div>コピー</div><div>ブックマークを追加</div><div class="hl">ホーム画面に追加<span>⊞</span></div></div>`;
+  if(kind==='add')return `<div class="hgmock"><span>キャンセル</span><b>ホーム画面に追加</b><span class="hl">追加</span></div>`;
+  if(kind==='adots')return `<div class="hgmock"><span class="url">chikaku-hosei.vercel.app</span><span class="hl">⋮</span></div>`;
+  if(kind==='amenu')return `<div class="hgmock col"><div>新しいタブ</div><div>ブックマーク</div><div class="hl">ホーム画面に追加<span>📲</span></div></div>`;
+  return '';
+}
 function renderHomeGate(){
   const g=$('#homeGate'); if(!g)return;
   const ios=isIOS(), inApp=isInAppBrowser(), other=!inApp&&isIOSOtherBrowser(), ios26=iosSafariVer()>=26;
   // このブラウザで前に使っていた人（ログイン情報が残っている）には、アプリでは登録し直しになることを伝える
   let usedHere=false; try{ usedHere=Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k)); }catch(e){}
-  const step=(n,t,s)=>`<div class="hgstep"><div class="no">${n}</div><div class="tx">${t}${s?`<small>${s}</small>`:''}</div></div>`;
+  const step=(n,t,s,mock)=>`<div class="hgstep"><div class="no">${n}</div><div class="tx">${t}${s?`<small>${s}</small>`:''}${mock?hgMock(mock):''}</div></div>`;
   const icon=`<img class="hgapp" src="/icons/icon-192.png" alt="">`;
   let steps='', arrow='';
   if(inApp){
-    steps=`<div class="hgwarn">いまLINEなどのアプリの中で開いています。ここからは追加できません。</div>`
+    // 2026-10-08：ボタン1つで外のブラウザへ。LINE は openExternalBrowser=1、Android は Chrome を直接開く。iPhone の Instagram などはボタンで出せないので手順とURLのコピー
+    const btn=isLineBrowser()?`<a class="btn btn-primary hgbtn" href="${externalUrl()}">🧭 ${ios?'Safariで開く':'ブラウザで開く'}</a>`
+      :isAndroid()?`<a class="btn btn-primary hgbtn" href="${androidChromeUrl()}">🧭 ブラウザ（Chrome）で開く</a>`
+      :`<button class="btn btn-primary hgbtn" onclick="copyGateUrl(this)">🔗 URLをコピーする（Safariに貼って開く）</button>`;
+    steps=`<div class="hgwarn">いまLINE・Instagramなどのアプリの中で開いています。ここからはホーム画面に追加できません。</div>`+btn
+      +`<div class="hgnote" style="margin:-4px 0 12px">ボタンで開けない時は、下の手順で</div>`
       +step(1,`右上（または右下）の <span class="hgicon">…</span> を押す`)
-      +step(2,`<b>「${ios?'Safariで開く':'ブラウザで開く'}」</b>を選ぶ`,'開いたら、もう一度この画面が出ます');
+      +step(2,`<b>「${ios?'Safariで開く':'ブラウザで開く'}」</b>を選ぶ`,'開いたら、ホーム画面に追加する手順が出ます');
   }else if(other){
     steps=`<div class="hgwarn">いまSafari以外のブラウザで開いています。<b>Safari</b>で開くと確実に追加できます。</div>`
       +`<button class="btn btn-primary hgbtn" onclick="copyGateUrl(this)">🔗 URLをコピーする</button>`
@@ -3929,16 +4003,16 @@ function renderHomeGate(){
   }else if(ios){
     // iOS 26 の Safari（標準のコンパクト表示）は共有ボタンが「…」の中。追加の画面に「Webアプリとして開く」のスイッチがあり、切るとSafariで開いてしまう
     steps=(ios26
-        ?step(1,`画面の右下の <span class="hgicon">…</span> を押して、<b>「共有」</b>を選ぶ`,'下に <span class="hgicon">⬆︎</span>（共有ボタン）が見えている時は、それを押してもOK')
-        :step(1,`画面の下の <span class="hgicon">⬆︎</span> <b>共有ボタン</b>を押す`,'四角から上向きの矢印が出ているマーク。見当たらない時は、下の <span class="hgicon">…</span> から「共有」'))
-      +step(2,`<b>「ホーム画面に追加」</b>を押す`,'見当たらない時は、メニューを下にスクロールするか「さらに表示」を押す')
-      +step(3,ios26?`<b>「Webアプリとして開く」はオンのまま</b>、右上の<b>「追加」</b>を押す`:`右上の<b>「追加」</b>を押す`)
+        ?step(1,`画面の右下の <span class="hgicon">…</span> を押して、<b>「共有」</b>を選ぶ`,'下に <span class="hgicon">⬆︎</span>（共有ボタン）が見えている時は、それを押してもOK','more')
+        :step(1,`画面の下の <span class="hgicon">⬆︎</span> <b>共有ボタン</b>を押す`,'四角から上向きの矢印が出ているマーク。見当たらない時は、下の <span class="hgicon">…</span> から「共有」','bar'))
+      +step(2,`<b>「ホーム画面に追加」</b>を押す`,'見当たらない時は、メニューを下にスクロールするか「さらに表示」を押す','menu')
+      +step(3,ios26?`<b>「Webアプリとして開く」はオンのまま</b>、右上の<b>「追加」</b>を押す`:`右上の<b>「追加」</b>を押す`,'','add')
       +step(4,`ホーム画面にできた ${icon}<b>「ちかく多摩キャン」</b>から開く`,'このブラウザの画面は閉じてOKです');
     arrow=`<div class="hgarrow${ios26?' r':''}">⬇︎</div>`;
   }else{
     steps=(deferredInstall?`<button class="btn btn-primary hgbtn" onclick="doGateInstall()">📲 ホーム画面に追加する</button><div class="hgnote" style="margin:-4px 0 12px">うまくいかない時は、下の手順でも追加できます</div>`:'')
-      +step(1,`画面右上の <span class="hgicon">⋮</span> を押す`)
-      +step(2,`<b>「アプリをインストール」</b>または<b>「ホーム画面に追加」</b>を押す`)
+      +step(1,`画面右上の <span class="hgicon">⋮</span> を押す`,'','adots')
+      +step(2,`<b>「アプリをインストール」</b>または<b>「ホーム画面に追加」</b>を押す`,'','amenu')
       +step(3,`<b>「インストール」</b>（または「追加」）を押す`)
       +step(4,`ホーム画面にできた ${icon}<b>「ちかく多摩キャン」</b>から開く`,'このブラウザの画面は閉じてOKです');
   }
@@ -4013,7 +4087,7 @@ async function doInstall(){
    ①各機能の見出しに「?」（いつでも openHelp で説明を開ける） ②その機能を初めて見た時だけ吹き出し（showTip）を出す */
 const HELP={
   near:{icon:'📍',title:'近くの人',lead:'今日キャンパスでこのアプリを使った人が、地図と一覧に出ます。',
-    can:['共通点（同じアーティスト・あるある・授業・今日のお題の答えなど）がある人ほど上に出ます。めずらしい共通点は「✨ レアな共通点」。どの項目を共通点に使うかは、マイページの「🎯 マッチングに使う共通点」で選べます','何度もすれ違っている人には「🚶 ◯回すれ違い」が付き、共通点もあれば上の方に出ます','人を押すとプロフィール。「👋 いいね」を押して、相手もいいねを返すとトークが始まります','アプリを閉じた人は「🕘 さっきまでいた人」として下に分かれます'],
+    can:['共通点（同じアーティスト・あるある・授業・今日のお題の答えなど）がある人ほど上に出ます。めずらしい共通点は「✨ レアな共通点」。どの項目を共通点に使うかは、マイページの「🎯 マッチングに使う共通点」で選べます','何度もすれ違っている人には「🚶 ◯回すれ違い」が付き、共通点もあれば上の方に出ます','人を押すとプロフィール。「👋 いいね」を押して、相手もいいねを返すとトークが始まります','いまアプリを開いている人だけが出ます。友達は一番上に横並びで出ます'],
     see:'あなたも、ほかの人の地図・一覧に、アイコン・名前・学部・プロフィールと位置が出ます（キャンパスの中にいる間だけ）。マイページの「🔒 見せる範囲」で、ぼかす・出さないを選べます。',
     tip:'人が多いのは、平日の昼休み（12:50〜13:40）の食堂のあたりです。'},
   daily:{icon:'🎲',title:'今日のお題',lead:'毎日1問の、かんたんな質問です。',
@@ -4026,7 +4100,7 @@ const HELP={
   tt:{icon:'🗓',title:'時間割',lead:'自分の授業を入れておく所です。',
     can:['同じ時限に同じ授業を入れた人が「📚 同じ授業」の共通点で見つかります。授業中は、同じ授業の人が一覧の一番上に出ます','教室を入れておくと、「いまの自分」に教室の候補が出ます','友達がいると、その日最初の授業の始まりに「いまどこ？」の通知が届きます'],
     see:'時間割はあなたにしか見えません。見せたい友達にだけ、マイページの「🔒 見せる範囲」で見せられます。'},
-  cross:{icon:'🚶',title:'すれ違い',lead:'アプリを開いたままキャンパスを歩くと、近くを通った人が記録されます。',
+  cross:{icon:'🚶',title:'すれ違い',lead:'アプリを開いたままキャンパスを歩くと、近くを通った人が記録されます。一覧に出るのは今日すれ違った人だけです（回数はプロフィールに残ります）。',
     can:[`${FES.encounterRangeM}m以内に入った人が記録され、会うほど回数が増えます`,'何度もすれ違う人は、生活のリズムが近い人かもしれません。プロフィールにも「これまで◯回すれ違っています」と出ます','同じ人は30分以内なら数え直しません','同じ曜日・同じ時間帯に何度もすれ違うと、プロフィールに「📅 木曜の昼休みに、よく近くにいます」のように出ます'],
     see:'記録するのは、アプリを開いていて、キャンパスの中にいる間だけです。',
     tip:'何度もすれ違う共通点のある人には「👋 いいね」してみよう。トークでは「よくすれ違いますね」もきっかけになります。'},
@@ -4217,7 +4291,8 @@ async function openUserById(uid){
 // 地図の点は「近くの人」（全員）に出るもので、友達かどうかとは別なので、名前をそれに合わせた（点を消すには位置情報の共有をOFF）
 const VIS_LABEL={map:'名前つきで地図にも出す',building:'建物と教室だけ',hidden:'建物・教室も見せない'};
 let friendRows=[], friendProfiles={}, friendPresence={}, friendTablesMissing=false;
-let myPresence={place:null,room:'',note:'',visibility:'building',expires_at:null}, myPresenceLoaded=false, lastPresenceSave=0;
+// 友達に見せる範囲の最初の設定は「名前つきで地図にも出す」（2026-10-08 あおの指示。前は「建物と教室だけ」。前から使っている人は、保存されている設定のまま）
+let myPresence={place:null,room:'',note:'',visibility:'map',expires_at:null}, myPresenceLoaded=false, lastPresenceSave=0;
 let placeCand=undefined, placeCandSince=0, curPlace=null, placePromptedFor=null;
 let testFriendRows=[], testFriendData={};   // 「🧪 1台で動作確認する」の人と友達になった時だけ使う（端末の中だけ）
 
@@ -5330,7 +5405,8 @@ function openEdit(){
   // アンケートを出していない間（FES.surveyUrl が空）は、限定アイコンの段ごと出さない
   $('#edEmojis').innerHTML=EMO.map(emCell).join('')
     +(surveyDone||surveyOpen()?`<div class="emsp" style="width:100%">${BADGES.survey.icon} アンケートに答えた人の限定アイコン</div>`
-      +EMO_SP.map(e=>surveyDone?emCell(e):`<div class="em lock" data-lock="1">${e}</div>`).join(''):'');
+      // 2026-10-08 に限定へ移したアイコンをもう使っている人は、そのまま使える（選んでいる1つだけは鍵をかけない）
+      +EMO_SP.map(e=>surveyDone||e===profile.emoji?emCell(e):`<div class="em lock" data-lock="1">${e}</div>`).join(''):'');
   $$('#edEmojis .em').forEach(el=>el.onclick=()=>{ if(el.dataset.lock){ openSurveyGate('icon'); return; }
     $$('#edEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
   edAttr=attrStateFrom(profile.fa); bindAttrForm('ed',edAttr);
@@ -5381,10 +5457,10 @@ function openInvite(){
     <div class="inv" style="padding:0">
       <p>このQRを読むか、リンクを開いてもらうと、<br>同じ「近くの人」に表示されます。</p>
       <div class="qrbox" id="qrbox"></div>
-      <div class="urlbox"><input id="shareUrl" readonly value="${OFFICIAL_URL}"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
+      <div class="urlbox"><input id="shareUrl" readonly value="${externalUrl(OFFICIAL_URL)}"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
     </div>
     <button class="btn btn-ghost" style="width:100%;padding:12px;color:var(--muted)" onclick="closeInvite()">閉じる</button>`;
-  renderQR(OFFICIAL_URL);
+  renderQR(externalUrl(OFFICIAL_URL));   // LINE で読んでも Safari／Chrome で開くように（openExternalBrowser=1）
   $('#invOverlay').classList.add('show');
 }
 function closeInvite(){ $('#invOverlay').classList.remove('show'); }
@@ -5574,6 +5650,9 @@ $$('.encR').forEach(e=>e.textContent=FES.encounterRangeM);
 registerSW();
 (async()=>{
   // スマホのブラウザで開いた時は、ホーム画面に追加する手順だけを出す（ログインも位置情報も始めない。別人として登録されないように）
+  // LINE の中のブラウザで開いた時は、URLに openExternalBrowser=1 を付けて開き直すと、LINE が Safari／Chrome で開いてくれる（2026-10-08）。
+  // 効かなかった時は、付いた状態のまま下の案内が出る（もう一度は開き直さないので繰り返さない）
+  if(needHomeGate()&&isLineBrowser()&&!/openExternalBrowser=1/.test(location.search)){ location.replace(externalUrl()); return; }
   if(needHomeGate()){ renderHomeGate(); loadGateCount(); return; }
   // ホーム画面から開いている時は「ホーム画面に追加すると便利」の案内（ようこそ画面・使い方ガイドの最後の1枚）を出さない
   if(isStandalone()){ const a=$('.addhome'); if(a)a.remove(); for(let i=GUIDE.length-1;i>=0;i--)if(GUIDE[i].action)GUIDE.splice(i,1); }
