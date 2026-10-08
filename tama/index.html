@@ -673,7 +673,7 @@
   .homegate .hl{background:var(--signal)!important;color:#fff!important;border-radius:7px;padding:1px 6px;font-weight:700;box-shadow:0 0 0 3px rgba(15,176,205,.35);animation:fhl 1.4s infinite}
   @keyframes fhl{50%{box-shadow:0 0 0 6px rgba(15,176,205,.15)}}
   .homegate .fpop{position:absolute;right:8px;bottom:34px;width:84px;background:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(20,25,60,.25);overflow:hidden}
-  .homegate .fpop.r{top:30px;bottom:auto}
+  .homegate .fpop.r{top:30px;bottom:auto;width:100px}.homegate .fpop div{white-space:nowrap}
   .homegate .fpop div,.homegate .fsheet>div{padding:6px 8px;border-top:1px solid #eceef5;font-size:9px}
   .homegate .fpop div:first-child{border-top:0}
   .homegate .fpop .hl,.homegate .fsheet .hl{border-radius:0;box-shadow:none;padding:6px 8px}
@@ -688,13 +688,13 @@
   .homegate .fnm{font-size:10px;font-weight:700;color:var(--ink)}.homegate .faddb small{font-size:8px;color:var(--muted)}
   .homegate .ftg{display:flex;justify-content:space-between;align-items:center;margin:0 10px;padding:7px 8px;background:#fff;border-radius:10px;font-size:9px}
   .homegate .ftg .on{width:22px;height:13px;border-radius:8px;background:#34c759;position:relative}.homegate .ftg .on::after{content:"";position:absolute;right:2px;top:2px;width:9px;height:9px;border-radius:50%;background:#fff}
-  .homegate .fdlg{position:absolute;left:10px;right:10px;top:70px;background:#fff;border-radius:12px;padding:10px;box-shadow:0 6px 18px rgba(20,25,60,.25)}
-  .homegate .fdlg b{font-size:10px;color:var(--ink)}.homegate .fdlg .faddb{margin:8px 0;padding:0}
-  .homegate .fdlgb{display:flex;justify-content:flex-end;gap:8px;font-size:9px;color:#4a7bd8}
+  .homegate .fdlg{position:absolute;left:6px;right:6px;top:70px;overflow:hidden;background:#fff;border-radius:12px;padding:10px;box-shadow:0 6px 18px rgba(20,25,60,.25)}
+  .homegate .fdlg b{font-size:9px;color:var(--ink);white-space:nowrap}.homegate .fdlg .faddb{margin:8px 0;padding:0}.homegate .fdlg .fnm{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .homegate .fdlgb{display:flex;justify-content:flex-end;align-items:center;gap:6px;font-size:8.5px;color:#4a7bd8;white-space:nowrap}
   .homegate .fhome{background:linear-gradient(160deg,#7aa2ff,#b38bff);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px 10px;align-content:start}
   .homegate .fapp{width:22px;height:22px;border-radius:6px;margin:0 auto;display:block}
   .homegate .fapp.me{padding:0;overflow:hidden;width:24px;height:24px}.homegate .fapp.me img{width:100%;height:100%;display:block}
-  .homegate .fhomel{grid-column:1/-1;text-align:right;font-size:8.5px;color:#fff;font-weight:700;margin-top:-4px}
+  .homegate .fhomel{grid-column:1/-1;text-align:center;font-size:8px;color:#fff;font-weight:700;margin-top:-2px;white-space:nowrap}
   .homegate .fcap{font-size:11.5px;line-height:1.5;text-align:center;margin-top:7px;color:var(--ink)}
   .homegate .fcap b{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--signal);color:#fff;font-size:10px;margin-right:4px}
   .homegate .hgapp{width:22px;height:22px;border-radius:6px;vertical-align:middle;margin:0 2px}
@@ -4042,7 +4042,7 @@ function gateFlowHTML(kind){
     ios:[['bar','⬆︎（共有）を押す'],['share','ホーム画面に追加'],['add','「追加」を押す'],['home','アイコンから開く']],
     ios26:[['bar26','右下の … を押す'],['menu26','「共有」を選ぶ'],['share','ホーム画面に追加'],['add','「追加」を押す'],['home','アイコンから開く']],
     android:[['adots','右上の ⋮ を押す'],['amenu','ホーム画面に追加'],['ainst','インストール'],['home','アイコンから開く']],
-    inapp:[['inapp','右上の「…」を押す'],['inmenu',isIOS()?'「Safariで開く」':'「ブラウザで開く」'],['home','開いたら、追加の手順へ']],
+    inapp:[['inapp','右上の「…」を押す'],['inmenu',isIOS()?'「Safariで開く」':'「ブラウザで開く」'],['home','開いたら追加へ']],
   }[kind];
   if(!F)return '';
   return `<div class="hgflow">${F.map(([k,t],i)=>`<div class="fstep"><div class="fphone">${k==='home'&&kind==='inapp'?S.bar:k==='home'?home:S[k]}</div><div class="fcap"><b>${i+1}</b>${t}</div></div>`).join('')}</div>`;
@@ -4089,7 +4089,7 @@ function renderHomeGate(){
   g.innerHTML=`<div class="hglogo">ちかく</div>
     <div class="hgtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と気軽につながる。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
     <div class="hgcount" id="hgCount">${gateCountHTML()}</div>
-    ${flow?`<div class="hgflowh">📲 ホーム画面に追加するまで${inApp?'（まずブラウザで開く）':''}</div>${flow}<div class="hgswipe">← 横にスワイプできます →</div>`:''}
+    ${flow?`<div class="hgflowh">📲 ホーム画面に追加するまで</div>${flow}<div class="hgswipe">← 横にスワイプできます →</div>`:''}
     <div class="hgh">📲 ホーム画面に追加すると<br>使えます（30秒）</div>
     <div class="hgd">ホーム画面のアイコンから開くと、返事や友達申請の通知が届き、登録もこのスマホに残ります。</div>
     ${steps}
