@@ -345,6 +345,8 @@
   .mbub{max-width:78%;padding:6px 10px;border-radius:12px;font-size:10.5px;line-height:1.45;margin-bottom:5px}
   .mbub.them{background:#fff;border:1px solid var(--line)}
   .mbub.me{background:linear-gradient(135deg,var(--amber-deep),var(--amber));color:#fff;margin-left:auto}
+  .mline{background:#fff8ea;border:1px solid #f0a030;border-radius:11px;padding:7px 9px;font-size:10.5px;margin-bottom:7px}.mline b{color:var(--amber-deep)}.mline span{display:block;font-size:9.5px;color:var(--ink);margin-top:2px}
+  .mroom{background:#fff;border:1px solid rgba(245,151,47,.45);border-radius:11px;padding:7px 9px;margin-bottom:7px;font-size:11px}.mroom span{display:block;font-size:9.5px;color:var(--muted)}
   .addhome{margin-top:auto;padding:13px 15px;border-radius:14px;background:rgba(15,176,205,.08);border:1px solid rgba(15,176,205,.3);font-size:12px;line-height:1.7;color:var(--ink)}
   .addhome a{color:var(--signal);font-weight:700;cursor:pointer;text-decoration:underline}
   .stepnum{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px}
@@ -657,6 +659,7 @@
   .homegate .shots{margin:0 -22px;padding:4px 22px 8px;scroll-padding:0 22px}
   .homegate .hgswipe{font-size:11px;color:var(--muted2);text-align:center;margin:0 0 18px}
   /* ホーム画面に追加するまでの流れの絵（2026-10-08。gateFlowHTML） */
+  .homegate .hgvals{margin:-6px auto 14px;padding:10px 14px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:12.5px;line-height:1.9;color:var(--ink);max-width:330px}
   .homegate .hgflowh{font-family:"Zen Maru Gothic";font-size:15px;font-weight:900;text-align:center;margin:2px 0 8px}
   .homegate .hgflow{display:flex;gap:12px;overflow-x:auto;margin:0 -22px;padding:4px 22px 8px;scroll-snap-type:x mandatory;scroll-padding:0 22px}
   .homegate .hgflow::-webkit-scrollbar{height:0}
@@ -916,30 +919,40 @@
         <div class="wtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と、気軽につながる。</div>
         <div class="notlove">🙅 <b>恋愛目的のアプリではありません。</b><br>同じ授業・同じアーティスト・同じ「あるある」の人と<br>友達になるためのアプリです。</div>
         <div class="feslive" id="fesLiveWel"></div>
+        <!-- 2026-10-08 あおの依頼「多摩キャン生にとって何がいいかが伝わるように」：①会った時の話題 ②友達のいまどこ・履修 ③授業の部屋 ④新しい出会い の4枚 -->
         <div class="shots">
           <div class="shot">
-            <div class="sh">📍 近くの「共通点のある人」が見える</div>
-            <div class="sd">めずらしい共通点がある人ほど上に出ます。</div>
+            <div class="sh">🤝 会ったとき、話すことがある</div>
+            <div class="sd">共通点・何度もすれ違っていること・その場で2人で答える「ふたりのお題」が、最初の一言になります。</div>
             <div class="mini">
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい <span style="font-weight:500;color:var(--muted)">社会学部</span></div><div class="mb"><span class="mtag" style="color:#9a4b00;background:#fff0d6;border-color:#f0a030">✨ 同じアーティスト「ヨルシカ」</span></div></div><div class="md">32m</div></div>
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#a78bfa,#63d6e8)">🎧</div><div class="mtx"><div class="mn">そう <span style="font-weight:500;color:var(--muted)">経済学部</span></div><div class="mb"><span class="mtag">🎯 わかる「方向音痴」</span></div></div><div class="md">87m</div></div>
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#7be0b0,#4bc0d9)">🌿</div><div class="mtx"><div class="mn">あおい <span style="font-weight:500;color:var(--muted)">現代福祉学部</span></div><div class="mb"><span class="mtag">🎯 同じ授業「心理学」</span></div></div><div class="md">140m</div></div>
+              <div class="mline">✨ これまで <b>5回</b> すれ違っています<span>📅 水曜の昼休みに、よく近くにいます</span></div>
+              <div class="mbub me">水曜の昼休み、よく近くにいますよね！</div>
+              <div class="mbub them">🎲 ふたりのお題「犬派？猫派？」→ 同じ！</div>
             </div>
           </div>
           <div class="shot">
-            <div class="sh">👋 気になる人に「いいね」→ トーク</div>
-            <div class="sd">おたがいにいいねするとトークが始まります。最初の一言は共通点の話題から選べます。</div>
-            <div class="mini">
-              <div class="mbub me">ヨルシカ、自分もよく聴きます！いちばん好きな曲ってなんですか？</div>
-              <div class="mbub them">えー！うれしい、「ただ君に晴れ」です！</div>
-            </div>
-          </div>
-          <div class="shot">
-            <div class="sh">👥 友達になったら、いまどこにいるか分かる</div>
-            <div class="sd">友達とは期限なしで話せて、いる建物・教室も見られます。</div>
+            <div class="sh">👥 友達のいまどこ・履修が分かる</div>
+            <div class="sd">友達がいる建物・教室と、いまの授業（見せてくれた時だけ）が分かるので、空きコマに会いやすくなります。</div>
             <div class="mini">
               <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#ffb066,#ffd166)">🐱</div><div class="mtx"><div class="mn">けんた</div><div class="mb">📍 社会学部A棟・401「ひま」</div></div><div class="md">💬</div></div>
-              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#63d6e8,#7be0b0)">🏃</div><div class="mtx"><div class="mn">みお</div><div class="mb">📍 図書館・研究棟</div></div><div class="md">💬</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#63d6e8,#7be0b0)">🏃</div><div class="mtx"><div class="mn">みお</div><div class="mb">🗓 いま2限 統計学（B棟201）</div></div><div class="md">💬</div></div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="sh">📚 同じ授業の人に、授業のことを聞ける</div>
+            <div class="sd">時間割に授業を入れると、同じ授業の人だけが入れる部屋で、課題・テスト・休講の情報交換ができます。</div>
+            <div class="mini">
+              <div class="mroom"><b>📚 月3 統計学</b><span>👥 12人 ・ 同じ授業の人だけ</span></div>
+              <div class="mbub them">第5回の課題、提出は来週でしたっけ？</div>
+              <div class="mbub me">来週の月曜までです！</div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="sh">✨ キャンパスで、新しい出会い</div>
+            <div class="sd">同じアーティスト・同じ授業の人が、共通点つきで地図と一覧に出ます。めずらしい共通点ほど上に。</div>
+            <div class="mini">
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい <span style="font-weight:500;color:var(--muted)">社会 2年</span></div><div class="mb"><span class="mtag">✨ 同じアーティスト「ヨルシカ」</span></div></div><div class="md">32m</div></div>
+              <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#a78bfa,#63d6e8)">🎧</div><div class="mtx"><div class="mn">そう <span style="font-weight:500;color:var(--muted)">経済 3年</span></div><div class="mb"><span class="mtag">📚 同じ授業「統計学」</span></div></div><div class="md">87m</div></div>
             </div>
           </div>
         </div>
@@ -4161,6 +4174,7 @@ function renderHomeGate(){
   const flow=gateFlowHTML(inApp?'inapp':ios?(ios26?'ios26':'ios'):other?'':'android');
   g.innerHTML=`<div class="hglogo">ちかく</div>
     <div class="hgtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と気軽につながる。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
+    <div class="hgvals"><div>🤝 会ったとき、話すことがある</div><div>👥 友達のいまどこ・空きコマが分かる</div><div>📚 同じ授業の人に、授業のことを聞ける</div><div>✨ キャンパスで、新しい出会い</div></div>
     <div class="hgcount" id="hgCount">${gateCountHTML()}</div>
     ${flow?`<div class="hgflowh">📲 ホーム画面に追加するまで</div>${flow}<div class="hgswipe">← 横にスワイプできます →</div>`:''}
     <div class="hgh">📲 ホーム画面に追加すると<br>使えます（30秒）</div>
