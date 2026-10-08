@@ -3615,8 +3615,7 @@ function myCondOptions(){
   if(a.artist)o.push({k:'art',v:a.artist,label:'同じアーティスト「'+a.artist+'」'});
   (a.goals||[]).forEach(x=>o.push({k:'goal',v:x,label:'目標「'+x+'」'}));
   (a.purposes||[]).forEach(x=>o.push({k:'pur',v:x,label:'気になっている「'+x+'」'}));
-  if(a.faculty)o.push({k:'fac',v:a.faculty,label:a.faculty});
-  if(a.grade)o.push({k:'grade',v:a.grade,label:a.grade});
+  // 学部・学年は 2026-10-08 あおの決定で条件にしない（個人のマッチングと同じく。前に作った部屋の条件はそのまま動く）
   return o;
 }
 // 時間割に入れた授業（曜日・時限の順）。同じ曜日・時限に同じ授業名を入れた人に当てはまる（DBの tama_room_fits の 'cls'）
