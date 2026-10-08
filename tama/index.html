@@ -964,6 +964,7 @@
              「🔒 見せる範囲」の1枚（openVisHub）にまとめた。ここには今の状態を1行で出す -->
         <div class="setting">
           <div class="setrow visrow" id="visSum" onclick="openVisHub()"><div class="lab">🔒 見せる範囲<small id="visSumTxt">&mdash;</small></div><span class="go">›</span></div>
+          <div class="setrow visrow" onclick="openMatchPrefs()"><div class="lab">🎯 マッチングに使う共通点<small id="matchSumTxt">&mdash;</small></div><span class="go">›</span></div>
           <div class="setrow"><div class="lab">通知<small id="pushHint">いいね・メッセージ・友達申請をスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
         </div>
         <button class="btn btn-ghost" style="margin:4px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
@@ -1018,6 +1019,7 @@
   <div class="overlay" id="invOverlay" onclick="if(event.target===this)closeInvite()"><div class="sheet" id="invSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="visOverlay" onclick="if(event.target===this)closeVisHub()"><div class="sheet" id="visSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()"><div class="sheet" id="helpSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="matchOverlay" onclick="if(event.target===this)closeMatchPrefs()"><div class="sheet" id="matchSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="ckOverlay" onclick="if(event.target===this)closeCheckin()"><div class="sheet" id="ckSheet" style="padding:22px 20px 26px"></div></div>
   <div class="overlay" id="meetOverlay" onclick="if(event.target===this)closeMeet()"><div class="sheet" id="meetSheet" style="padding:22px 20px 26px"></div></div>
   <!-- 機能を初めて見た時だけ出す吹き出し（showTip） -->
@@ -1924,7 +1926,59 @@ function bindAttrForm(p,st){
   render();
 }
 // 共通点。key は「同じ値を持つ人」を数えるためのもの（めずらしさの重みづけに使う）、label は画面に出す文字
-function commonDetail(u){
+/* ---------- マッチングに使う共通点を自分で選ぶ（2026-10-08 あおの依頼） ----------
+   あおの決定：最初は全部が条件で、あとから外せる（最低1つは残す）。効くのは「自分の画面」だけ＝自分の近くの人の並び・🎯共通の表示・
+   話題カード・会う前の1枚と、自分に届く「共通点のある人が近くにいます」「いいね（共通点つき）」の通知。相手の画面は変わらない。
+   外した種類はプロフィール（fes_attrs.match_off）に入れる（ほかの人の端末が、自分あての通知を作る時に読むため）。
+   commonDetail＝自分の設定で絞ったもの、commonRaw＝絞る前（相手あての通知は commonFor(u, 相手の設定) で作る） */
+const MATCH_KINDS=[
+  {k:'art', icon:'🎧', label:'よく聴くアーティスト'},
+  {k:'cls', icon:'📚', label:'時間割の授業（同じ曜日・時限）'},
+  {k:'crs', icon:'📝', label:'今季取りたい科目'},
+  {k:'day', icon:'🎲', label:'今日のお題の答え'},
+  {k:'aru', icon:'💬', label:'わかる！あるある'},
+  {k:'goal',icon:'🌱', label:'これから・目標'},
+  {k:'pur', icon:'💭', label:'気になっていること（悩み・不安）'},
+];
+const matchOffOf=u=>{ const o=attrsOf(u).match_off; return Array.isArray(o)?o:[]; };
+// その項目の、いまの自分の値（設定画面で「（ヨルシカ）」のように添える。入っていなければ空）
+function matchMyValue(k){
+  const a=attrsOf(profile);
+  if(k==='art')return a.artist||''; if(k==='crs')return a.course||''; if(k==='day')return dailyAnswer(profile)||'';
+  if(k==='cls'){ const n=slotKeys(myTimetable).filter(s=>(myTimetable[s]||'').trim()).length; return n?n+'コマ':''; }
+  const arr={aru:a.aruaru,goal:a.goals,pur:a.purposes}[k]||[]; return arr.length?arr.slice(0,2).join('・')+(arr.length>2?' ほか':''):'';
+}
+function renderMatchSum(){
+  const el=$('#matchSumTxt'); if(!el||!profile)return;
+  const off=matchOffOf(profile).filter(k=>MATCH_KINDS.some(m=>m.k===k));
+  el.textContent=!off.length?`全部（${MATCH_KINDS.length}つ）を使っています`:'外している：'+off.map(k=>MATCH_KINDS.find(m=>m.k===k).label.replace(/（.*）/,'')).join('・');
+}
+function openMatchPrefs(){ if(!profile){ toast('先にプロフィールを登録してね'); return; } renderMatchPrefs(); $('#matchOverlay').classList.add('show'); }
+function closeMatchPrefs(){ $('#matchOverlay').classList.remove('show'); renderMatchSum(); }
+function renderMatchPrefs(){
+  const off=matchOffOf(profile);
+  $('#matchSheet').innerHTML=`<h2 class="pstitle">🎯 マッチングに使う共通点</h2>
+    <p class="psdesc">オンにした項目が同じ人を「共通点のある人」にします。<b style="color:var(--ink)">変わるのはあなたの画面だけ</b>（近くの人の並び・🎯共通の表示・話題、あなたに届く「共通点のある人が近くにいます」の通知）で、相手の画面は変わりません。最低1つは残してください。</p>
+    ${MATCH_KINDS.map(m=>{ const v=matchMyValue(m.k), on=!off.includes(m.k);
+      return `<div class="sharerow" style="margin-bottom:7px"><div class="lab">${m.icon} ${m.label}<small>${v?'あなた：'+esc(v):'まだ入れていません'}</small></div><div class="toggle${on?' on':''}" onclick="toggleMatchKind('${m.k}')"><div class="k"></div></div></div>`; }).join('')}
+    <div class="vishint" style="margin:8px 0 0">学部・学年は、共通点には数えません（プロフィールに「同じ！」と出るだけ）。</div>
+    ${off.length?`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;font-size:13.5px" onclick="setMatchOff([])">全部オンに戻す</button>`:''}
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:10px" onclick="closeMatchPrefs()">閉じる</button>`;
+}
+function toggleMatchKind(k){
+  const off=matchOffOf(profile).filter(x=>MATCH_KINDS.some(m=>m.k===x));
+  if(off.includes(k))return setMatchOff(off.filter(x=>x!==k));
+  if(off.length>=MATCH_KINDS.length-1){ toast('最低1つはオンのままにしてください'); return; }
+  setMatchOff(off.concat(k));
+}
+async function setMatchOff(off){
+  profile.fa=profile.fa||{}; if(off.length)profile.fa.match_off=off; else delete profile.fa.match_off;
+  renderMatchPrefs(); renderMatchSum(); renderNearby(); renderCross();
+  await saveMyAttrs();
+}
+const commonFor=(u,off)=>commonRaw(u).filter(c=>!off.includes(c.key.split(':')[0]));
+function commonDetail(u){ return profile?commonFor(u,matchOffOf(profile)):[]; }
+function commonRaw(u){
   if(!profile)return [];
   const me=attrsOf(profile), th=attrsOf(u), out=[], add=(key,label)=>out.push({key,label});
   // 学部・学科は共通点に数えない（2026-10-05 アイデア班のフィードバック）。プロフィールに表示するだけ
@@ -2340,7 +2394,7 @@ async function checkClosedNearby(){
     // 通信量を抑えるため、別に問い合わせず手元の others（今日キャンパスにいた人）から選ぶ
     const data=others.filter(u=>!isTest(u.id)&&u.updated_at&&isClosed(u)&&now-Date.parse(u.updated_at)<FES.nearbyPushStaleMin*60000);
     const cands=data.filter(u=>!blocked.has(u.id)&&u.lat!=null&&(!FES.campusOnly||inCampus(u.lat,u.lng)))
-      .map(u=>{ const r=relMeters(myPos,u); return {u,d:Math.hypot(r.e,r.n),common:commonWith(u)}; })
+      .map(u=>{ const r=relMeters(myPos,u); return {u,d:Math.hypot(r.e,r.n),common:commonFor(u,matchOffOf(u)).map(x=>x.label)}; })   // 相手あての通知なので、相手が選んだ項目で
       .filter(x=>x.d<=FES.nearbyPushRangeM&&x.common.length)
       .sort((a,b)=>a.d-b.d).slice(0,3);
     if(!cands.length)return;
@@ -2505,7 +2559,8 @@ function hideWave(uid){ const h=waveHidden(); h[uid]=Date.now(); try{ localStora
 function openWave(){ const u=curSheetUser; if(!u||liked.has(u.id)&&!(matches[u.id]&&isExpired(matches[u.id])))return; sendWave(u,''); }
 function closeWave(){ $('#likeOverlay').classList.remove('show'); }
 // いいねの通知・一覧に出す共通点（2つまで）
-function likeCommonText(u){ const c=u?commonWith(u):[]; return c.length?'共通点：'+c.slice(0,2).join('・')+(c.length>2?' ほか':''):''; }
+// forThem：相手あての通知に使う時（相手が「マッチングに使う」と選んだ項目だけにする）
+function likeCommonText(u,forThem){ const c=!u?[]:forThem?commonFor(u,matchOffOf(u)).map(x=>x.label):commonWith(u); return c.length?'共通点：'+c.slice(0,2).join('・')+(c.length>2?' ほか':''):''; }
 async function sendWave(u,text){
   const uid=u.id, now=Date.now(), theirs=wavesIn[uid];
   // 24時間が過ぎたトークを始め直す場合（2026-10-02）。
@@ -2566,7 +2621,7 @@ async function sendWave(u,text){
     toast(restarting?'💬 トークを始め直しました（24時間）':'💬 おたがいにいいね！トークが始まりました（24時間）');
     openChat(uid,'match');
   }else{
-    notifyPush(uid,'👋 '+me+'さんからいいね',likeCommonText(tu)||'「トーク」から見てみよう。いいねを返すとトークが始まります');
+    notifyPush(uid,'👋 '+me+'さんからいいね',likeCommonText(tu,true)||'「トーク」から見てみよう。いいねを返すとトークが始まります');
     toast(gated?`👋 いいねしました。今日はあと${likesLeft()}回（アンケートに答えると無制限）`:'👋 いいねしました。相手がいいねを返すとトークが始まります');
   }
 }
@@ -3959,7 +4014,7 @@ async function doInstall(){
    ①各機能の見出しに「?」（いつでも openHelp で説明を開ける） ②その機能を初めて見た時だけ吹き出し（showTip）を出す */
 const HELP={
   near:{icon:'📍',title:'近くの人',lead:'今日キャンパスでこのアプリを使った人が、地図と一覧に出ます。',
-    can:['共通点（同じアーティスト・あるある・授業・今日のお題の答えなど）がある人ほど上に出ます。めずらしい共通点は「✨ レアな共通点」','何度もすれ違っている人には「🚶 ◯回すれ違い」が付き、共通点もあれば上の方に出ます','人を押すとプロフィール。「👋 いいね」を押して、相手もいいねを返すとトークが始まります','アプリを閉じた人は「🕘 さっきまでいた人」として下に分かれます'],
+    can:['共通点（同じアーティスト・あるある・授業・今日のお題の答えなど）がある人ほど上に出ます。めずらしい共通点は「✨ レアな共通点」。どの項目を共通点に使うかは、マイページの「🎯 マッチングに使う共通点」で選べます','何度もすれ違っている人には「🚶 ◯回すれ違い」が付き、共通点もあれば上の方に出ます','人を押すとプロフィール。「👋 いいね」を押して、相手もいいねを返すとトークが始まります','アプリを閉じた人は「🕘 さっきまでいた人」として下に分かれます'],
     see:'あなたも、ほかの人の地図・一覧に、アイコン・名前・学部・プロフィールと位置が出ます（キャンパスの中にいる間だけ）。マイページの「🔒 見せる範囲」で、ぼかす・出さないを選べます。',
     tip:'人が多いのは、平日の昼休み（12:50〜13:40）の食堂のあたりです。'},
   daily:{icon:'🎲',title:'今日のお題',lead:'毎日1問の、かんたんな質問です。',
@@ -5302,6 +5357,7 @@ async function saveEdit(){
   const old=profile.fa||{};
   profile.fa={...attrToFa(edAttr),status:old.status||'',status_until:old.status_until||null,daily:old.daily||null,daily_prev:old.daily_prev||null};
   if(old.badges)profile.fa.badges=old.badges;   // バッジ（アンケートの特典）もこの画面では変えないので引き継ぐ
+  if(old.match_off)profile.fa.match_off=old.match_off;   // マッチングに使う共通点（マイページで選ぶ）も引き継ぐ
   renderNearby(); renderCross(); renderMeHero();
   await publishMe();
   // publishMe() は位置が取れていない時・キャンパスの外・共有オフだと何も送らないので、プロフィールだけは別に書き戻す
@@ -5360,7 +5416,7 @@ function go(t){
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='near')loadRooms();if(t==='friends')loadFriends();
-  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
+  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
