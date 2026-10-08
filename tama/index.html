@@ -458,7 +458,7 @@
   .locbar.okhide{display:none}
   /* トークの「個人／コミュニティ」 */
   .seg{display:flex;gap:6px;margin:0 16px 8px;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line);flex-shrink:0}
-  .seg button{flex:1;border:0;background:none;padding:8px;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+  .seg button{flex:1;border:0;background:none;padding:8px 4px;white-space:nowrap;min-width:0;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
   .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(30,40,90,.12)}
   .seg .sdot{min-width:16px;height:16px;line-height:16px;font-size:10px;background:var(--rose);color:#fff;border-radius:8px;padding:0 4px}
   .cmsub{padding:4px 22px 6px;font-size:11.5px;color:var(--muted)}
@@ -3773,7 +3773,7 @@ function renderStartCard(){
     const items=[
       {done:myClassOptions().length>0, icon:'🗓', t:'時間割に授業を入れる', d:'同じ授業の人が「共通点」に出て、授業の部屋に入れます', go:'openTimetable()'},
       {done:!!st.daily||!!dailyAnswer(profile), icon:'🎲', t:'今日のお題に答える', d:'同じ答えの人と、会った時の話題ができます', go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})"},
-      {done:myRoomIds.size>0, icon:'📚', t:'授業の部屋をのぞく', d:'課題やテストのことを、同じ授業の人に聞けます', go:"go('comm')"},
+      {done:rooms.some(r=>r.joined&&(r.conditions||[]).some(x=>x.k==='cls')), icon:'📚', t:'授業の部屋をのぞく', d:'課題やテストのことを、同じ授業の人に聞けます', go:"go('comm')"},
       {done:allFriendRows().some(r=>r.status==='accepted'), icon:'👥', t:'友達を1人追加する', d:'いまどの建物にいるか・空きコマが分かります', go:'openFrAdd()'},
     ];
     const n=items.filter(x=>x.done).length;
