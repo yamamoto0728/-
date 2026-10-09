@@ -861,6 +861,9 @@
   .rinfo .mrow2 button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:5px 9px;font-family:inherit;font-size:11.5px;color:var(--muted);cursor:pointer}
   .rinfo .rbtn{display:block;width:100%;text-align:left;border:0;background:none;padding:11px 2px;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;border-top:1px solid var(--line)}
   .rinfo .rbtn.warn{color:var(--bad)}.rinfo .rbtn small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
+  .bigpick{display:flex;align-items:center;gap:14px;width:100%;text-align:left;margin:0 0 12px;padding:18px 16px;border-radius:18px;border:1.5px solid var(--line);background:#fff;font-family:inherit;color:var(--ink);cursor:pointer;box-shadow:0 6px 18px -12px rgba(50,70,150,.4)}
+  .bigpick:active{transform:scale(.98)}.bigpick .bpi{font-size:34px;line-height:1;flex-shrink:0}
+  .bigpick b{display:block;font-size:17px;font-weight:900}.bigpick small{display:block;font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5}.bigpick .go{margin-left:auto;font-size:22px;color:var(--muted2);font-weight:700}
   .rinfo .code{font-family:"JetBrains Mono",monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--signal)}
   #paySheet .chips .c.sel{border-color:var(--signal);background:rgba(99,214,232,.12);color:var(--signal);font-weight:700}
   #paySheet .condsub{font-size:12px;font-weight:700;color:var(--ink);margin:12px 0 6px}#paySheet .condsub span{font-weight:500;color:var(--muted);font-size:11px;margin-left:6px}
@@ -912,11 +915,23 @@
   .startcard .strow.done{cursor:default;opacity:.55}
   .startcard .sti{font-size:19px;width:24px;text-align:center}.startcard .stt{flex:1;min-width:0}
   .startcard .stt b{display:block;font-size:13px}.startcard .stt small{display:block;font-size:11px;color:var(--muted);line-height:1.5}
+  .startcard .misdots{display:inline-flex;gap:4px}.startcard .misdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}.startcard .misdots i.on{background:var(--amber)}
+  .startcard .misfoot{font-size:12.5px;padding:9px 2px 6px;border-top:1px solid var(--line);line-height:1.6}.startcard .misfoot b{color:var(--amber-deep);font-size:15px}.startcard .misfoot small{font-size:11px;color:var(--muted)}
+  .invcode{text-align:center;margin:4px 0 12px}.invcode small{display:block;font-size:12px;color:var(--muted)}.invcode b{font-family:'JetBrains Mono',monospace;font-size:28px;letter-spacing:4px;color:var(--ink)}
+  .invlad{background:#fff8ea;border:1px solid rgba(245,151,47,.45);border-radius:16px;padding:12px 14px;margin:0 0 12px}
+  .invlad .ilh,.inventer .ilh{font-size:14px;font-weight:800}.invlad .ilh span{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:2px}.invlad .ilh b{color:var(--amber-deep);font-size:15px}
+  .invlad .ilr{display:flex;gap:10px;align-items:center;font-size:13.5px;padding:8px 0;border-top:1px solid rgba(245,151,47,.25)}.invlad .ilr:first-of-type{margin-top:6px}
+  .invlad .ilr .iln{flex-shrink:0;min-width:40px;text-align:center;font-weight:800;color:var(--amber-deep)}.invlad .ilr.got{opacity:.6}
+  .invlad .ilnote{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:6px}
+  .inventer{margin:0 0 12px}
+  .hgref{background:#fff8ea;border:1px solid rgba(245,151,47,.5);border-radius:14px;padding:10px 12px;margin:0 0 14px;font-size:14px;text-align:center}.hgref b{font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:2px}.hgref small{display:block;font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:4px;text-align:left}
+  .startcard .mispeek{font-size:12px;background:#fff8ea;border-radius:10px;padding:7px 10px;margin:2px 0 6px}
+  .misgot{background:#fff8ea;border:1px solid rgba(245,151,47,.5);border-radius:14px;padding:12px;font-size:14px;margin:6px 0 12px;line-height:1.6}.misgot small{font-size:11.5px;color:var(--muted)}
   .startcard .go{color:var(--muted2);font-size:18px;font-weight:700}
   .clslist{margin-bottom:6px}
-  .clslist .clsrow{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
-  .clslist .clsrow .ct{flex:1;min-width:0}.clslist .clsrow b{display:block;font-size:14px}.clslist .clsrow small{font-size:11.5px;color:var(--muted)}
-  .clslist .clsrow button{flex-shrink:0;border:1px solid rgba(245,151,47,.6);background:#fff;color:#9a5a10;border-radius:12px;padding:8px 14px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
+  .clslist .clsrow{display:flex;align-items:center;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+  .clslist .clsrow .ct{flex:1;min-width:0}.clslist .clsrow b{display:block;font-size:16px}.clslist .clsrow small{font-size:13px;color:var(--muted)}
+  .clslist .clsrow button{flex-shrink:0;border:1px solid rgba(245,151,47,.6);background:#fff;color:#9a5a10;border-radius:14px;padding:11px 20px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
   .clslist .clsrow button.pri{background:var(--amber);border-color:var(--amber);color:#3a2410}
   .commbox{margin:16px 16px 18px;padding:12px 12px 12px;border-radius:18px;background:linear-gradient(135deg,rgba(99,214,232,.12),rgba(139,157,255,.10));border:1px solid rgba(15,176,205,.35)}
   .commbox .cbh{display:flex;align-items:center;font-size:14px;font-weight:900;color:var(--ink)}.commbox .cbh a{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal);cursor:pointer}
@@ -1020,6 +1035,8 @@
           <div class="obd">アイコンはあとからマイページで変えられます。</div>
           <div class="emojis" id="obEmojis"></div>
           <div class="field" style="margin-top:16px"><label>自己紹介<span class="opt">任意・だれにでも見えます</span></label><textarea id="obBio" rows="2" maxlength="60" placeholder="例：ヨルシカが好きです。学食でよくカレー食べてます"></textarea></div>
+          <!-- 招待コード（2026-10-09。リンクから来た人は入力ずみ） -->
+          <div class="field"><label>招待コード<span class="opt">任意・招待された人だけ</span></label><input id="obRef" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="例：K7QF2M"><div class="hint">入れると、あなたと招待してくれた人の両方に特典があります。</div></div>
           <!-- 位置の出し方をここで選ぶ（2026-10-08 ユーザー役のテスト：「全部共有するか、始めないか」の二択で怖い） -->
           <div class="field"><label>近くの人の地図に、あなたの位置を</label><div class="chips" id="obVis"><span class="c sel" data-v="0" onclick="setObCoarse(false)">そのまま出す</span><span class="c" data-v="1" onclick="setObCoarse(true)">約100mぼかして出す</span></div>
             <div class="hint">ぼかすと、地図のあなたの点が約100mずれて出ます（すれ違いの記録は少し不正確になります）。あとからマイページの「🔒 見せる範囲」で変えられ、「出さない」も選べます。</div></div>
@@ -1118,7 +1135,7 @@
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openContact()">🆘 困ったとき・お問い合わせ</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openTerms()">📄 利用規約を読む</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
-        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openInvite()">📨 アプリに誘う（QR・リンク）</button>
+        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openInvite()">📨 友達をアプリに誘う（🎁 特典あり）</button>
         <!-- 「☕ ひとこと」にいつでも答えられる所（2026-10-08。ふだんは今日のお題の後にポップアップで1問だけ。中身は renderCheckinRow） -->
         <div class="setting" id="ckRow" hidden><div class="setrow visrow" style="border:0" onclick="openCheckin('me')"><div class="lab">☕ ひとこと<small id="ckRowTxt">&mdash;</small></div><span class="go">›</span></div></div>
         <!-- アンケートの欄（答えると特典。中身は renderSurveyBox） -->
@@ -1395,10 +1412,23 @@ const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#
   '✈️':['#63d6e8','#8b9dff'],'👾':['#a78bfa','#ff7e9d'],
   // アンケートに答えた人だけが選べるアイコン（EMO_SP）
   '👑':['#ffd166','#e0a030'],'💎':['#63d6e8','#a78bfa'],'🦋':['#8b9dff','#ff9dd6'],'🪐':['#a78bfa','#ffb066'],'🌟':['#ffe066','#ff9d70'],
+  '🌈':['#ff9d70','#8b9dff'],'🍀':['#6bd98b','#c8f0a0'],'🎯':['#ff7e6b','#ffd166'],'🪁':['#63d6e8','#ff9dd6'],'🚀':['#8b9dff','#ff9d70'],'🎁':['#ff7e9d','#ffd166'],'🧭':['#63d6e8','#c89b6b'],'🌻':['#ffd166','#6bd98b'],'🐣':['#ffe066','#ffb066'],'🎈':['#ff7e6b','#ff9dd6'],
   '🐉':['#6bd98b','#4b8bf0'],'🦁':['#ffb066','#c89b6b'],'🧸':['#ffcf8a','#c89b6b'],'🍣':['#ff7e6b','#ffd6c0'],'🎀':['#ff7e9d','#ffd1e0']};
 // アンケートの特典（2026-10-05）。限定アイコンとバッジ。バッジは profile.fa.badges に入れて、ほかの人の画面にも出す
 const EMO_SP=['👑','💎','🦋','🪐','🌟','🐉','🦁','🧸','🍣','🎀',...EMO_MOVED];
-const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケートに協力してくれた人'}};
+const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケートに協力してくれた人'},
+  // 今日のミッション・招待の特典（2026-10-09）
+  mis3:{icon:'🌱',label:'ちかくデビュー',desc:'今日のミッションを3日やった人'},
+  mis10:{icon:'🔥',label:'ちかく常連',desc:'今日のミッションを10日やった人'},
+  inv1:{icon:'📨',label:'ちかく案内人',desc:'友達をちかくに招待した人'},
+  inv5:{icon:'🏅',label:'ちかく大使',desc:'5人をちかくに招待した人'}};
+// ごほうびの限定アイコン（2026-10-09）。has：使えるか／how：鍵を押した時の案内
+const REWARD_ICONS={
+  mis5:{icons:['🌈','🍀','🎯','🪁'],t:'🎯 今日のミッション5日の限定アイコン',has:()=>misN()>=5,how:'今日のミッションでスタンプを5個ためると使えます'},
+  inv3:{icons:['🚀','🎁','🧭','🌻'],t:'📨 3人招待した人の限定アイコン',has:()=>(attrsOf(profile).inv_n||0)>=3,how:'友達を3人ちかくに招待すると使えます（マイページの「📨 友達を招待」から）'},
+  invited:{icons:['🐣','🎈'],t:'🐣 招待されて来た人の限定アイコン',has:()=>!!attrsOf(profile).inv_by,how:'招待コードを入れて始めた人が使えます'}};
+// 明日のお題を先に見られる（ミッション10日・5人招待）
+const canPeek=()=>misN()>=10||(attrsOf(profile).inv_n||0)>=5;
 const badgeKeys=u=>(attrsOf(u).badges||[]).filter(k=>BADGES[k]);
 const badgeIcons=u=>badgeKeys(u).map(k=>BADGES[k].icon).join('');
 const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
@@ -1751,6 +1781,7 @@ async function onStart(){
   // 位置の出し方は登録の③で選んだもの（2026-10-08。前はあとからマイページでしか選べなかった）
   sharing=true; coarse=obCoarse; profileDeleted=false; saveLocPrefs(); renderVisSummary();
   try{ localStorage.setItem("tama_regDay",String(jstTodayStart().getTime())); }catch(e){}   // 登録した日（その日は ☕ ひとこと・有料の聞き取りを出さない）
+  pendingRef=(($('#obRef')&&$('#obRef').value)||'').trim().toUpperCase();   // 招待コードは、保存が終わってから loadInvite で送る
   buildInvite();renderStatusRow();
   maybeShowGuide(false);   // 新規登録なので必ず出す
   await saveNewProfile();   // 位置を取り始める前に保存する（後だと、遅れて届いた sharing:false が本当の位置を上書きする）
@@ -2836,6 +2867,7 @@ async function sendWave(u,text){
     row.matched={...matched,first_at:(old&&old.matched&&old.matched.first_at)||(old&&old.created_at)||null,restarts:((old&&old.matched&&old.matched.restarts)||0)+1};
     row.created_at=new Date(now).toISOString();
   }
+  misMark('like');   // 今日のミッション②
   let {error:le}=await sb.from(T('likes')).upsert(row);
   if(le&&restarting&&/created_at/.test(le.message)){
     // created_at を書き替えられないテーブルだった時は、話しかけ直しだけはできるようにする
@@ -3391,7 +3423,7 @@ function pickTopic(i){
 let meetMode='card', meetPeer=null, duoQ=null;
 function openMeet(mode,q){
   const m=chatOf(chatPeer); if(!m)return;
-  meetPeer=chatPeer; meetMode=mode||'card';
+  meetPeer=chatPeer; meetMode=mode||'card'; misMark('talk');   // 今日のミッション③（会う時のカードを開いた）
   if(meetMode==='duo')duoPick(q);
   renderMeet(true); $('#meetOverlay').classList.add('show'); hideTip();
 }
@@ -3612,6 +3644,7 @@ async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!
 }
 // 送る（入力欄からと、ふたりのお題の答えの共通。期限と NGワードは呼ぶ側で確かめる）
 async function sendChatText(uid,t){
+  misMark('talk');   // 今日のミッション③
   const c=chatOf(uid); if(!c)return;
   if(isTest(uid)){c.msgs.push({from:myId,text:t,at:Date.now()});renderChat();
     const rep=['ほんとだ、同じですね😊','学食でよく見かけるかも！','わかります〜','今度授業のあと話しましょう！','それめっちゃ好きです'];
@@ -3784,6 +3817,7 @@ async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(
   const m={room_id:curRoom.id,from_id:myId,name:profile?profile.name:'匿名',emoji:profile?profile.emoji:'🙂',text:t};
   curRoom.msgs=(curRoom.msgs||[]).concat(m); renderRoom();
   try{await sb.from(T('room_messages')).insert(m);}catch(e){}
+  misMark('talk');   // 今日のミッション③
   markRoomRead(curRoom.id,true); notifyRoomMembers(curRoom,t);
 }
 // 部屋のメンバーに通知する。Edge Function(send-match-push)は1件ずつ受け取る仕様のまま流用しており、
@@ -3888,8 +3922,8 @@ function newRoom(){
   if(!roomsV2)return createRoomLegacy();
   if(!profile){ toast('先にプロフィールを登録してね'); return; }
   $('#memSheet').innerHTML=`<h2 class="pstitle">＋ コミュニティを作る</h2><p class="psdesc">どんなコミュニティを作りますか？</p>
-    <button class="rbtn" onclick="pickClassRoom()">📚 授業のコミュニティ<small>あなたの時間割の授業から選ぶ</small></button>
-    <button class="rbtn" onclick="closeMembers();createRoom()">💬 そのほか<small>趣味・目標・ひとりごはん など</small></button>
+    <button class="bigpick" onclick="pickClassRoom()"><span class="bpi">📚</span><span><b>授業のコミュニティ</b><small>あなたの時間割の授業から選ぶ。課題・テスト・休講の情報交換に</small></span><span class="go">›</span></button>
+    <button class="bigpick" onclick="closeMembers();createRoom()"><span class="bpi">💬</span><span><b>そのほか</b><small>趣味・目標・ひとりごはん など</small></span><span class="go">›</span></button>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">やめる</button>`;
   $('#memOverlay').classList.add('show');
 }
@@ -3936,10 +3970,80 @@ function renderStartCard(){
       :`<div class="sth"><b>🚀 はじめにやること</b><span>${n}/${items.length}</span><button onclick="toggleStartCard(false)" aria-label="たたむ" style="font-size:12px">たたむ</button><button onclick="hideStartCard()" aria-label="閉じる" style="margin-left:0">✕</button></div>`
       +items.map(x=>`<div class="strow${x.done?' done':''}"${x.done?'':` onclick="${x.go}"`}><span class="sti">${x.done?'✅':x.icon}</span><div class="stt"><b>${x.t}</b><small>${x.d}</small></div>${x.done?'':'<span class="go">›</span>'}</div>`).join('');
   }
+  if(!h)h=misCardHTML();   // はじめにやることが終わったら（閉じたら）、同じ場所に今日のミッション
   if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
 }
 function toggleStartCard(v){ const s=startState(); s.open=v; saveStart(s); renderStartCard(); }
 function hideStartCard(){ const s=startState(); s.hide=true; saveStart(s); renderStartCard(); }
+
+/* ---------- 今日のミッション（2026-10-09 あおの依頼「共通点のある人にいいねして、共通点について話してみよう、で行動してほしい」） ----------
+   あおの決定で、機能の制限はかけない（ごほうびだけ）。毎日3つ：
+     ① 今日のお題に答える
+     ② 共通点のある人に 👋 いいね（近くにもすれ違いにもだれもいない日は「コミュニティをのぞく」でもよい。達成できない日を作らないため）
+     ③ 話してみる（トーク・友達・コミュニティに1回送る／🤝 会う時のカードを開く、どれでもよい）
+   3つ終えた日をスタンプ1個と数える。続けなくてもよい（休んだ日・キャンパスに来ない日で途切れない。心理的な負担にしないため）。
+   保存はプロフィール（fa.mis = {d:今日, like, talk, n:スタンプの数, last:最後にスタンプを押した日}）なので、スマホを変えても続く。
+   登録した直後は「はじめにやること」を出し、それが終わるか閉じたら、同じ場所にこのカードを出す（renderStartCard）。
+   ⚠️ ごほうびに「本来は有料」の2つの機能（前の日のすれ違い・コミュニティを作る）は使わない（料金のテストの結果がくずれるため） */
+const MIS_REWARDS=[{n:3,badge:'mis3',t:'🌱 バッジ「ちかくデビュー」'},{n:5,icons:'mis5',t:'限定アイコン4種'},{n:10,badge:'mis10',peek:true,t:'🔥 バッジ「ちかく常連」と、明日のお題を先に見られる'}];
+function misState(){ const m=(profile&&profile.fa&&profile.fa.mis)||{}, d=dailyToday().d; return m.d===d?{...m}:{n:m.n||0,last:m.last||null,d}; }
+function misN(){ return ((profile&&profile.fa&&profile.fa.mis)||{}).n||0; }
+// 近くにも、今日のすれ違いにも、だれもいない
+function misAlone(){ const t=jstTodayStart().getTime(); return !others.some(u=>!isClosed(u))&&!Object.values(encMap).some(e=>(+e.last_at||Date.parse(e.last_at)||0)>=t); }
+function misItems(m){
+  const alone=!m.like&&misAlone();
+  return [
+    {done:!!dailyAnswer(profile), icon:'🎲', t:'今日のお題に答える', d:'同じ答えの人が、今日だけの共通点になります', go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})"},
+    alone?{done:false, icon:'💬', t:'コミュニティをのぞいてみる', d:'近くにまだだれもいないので、今日はこれでOK', go:"go('match');setTalkTab('comm')"}
+         :{done:!!m.like, icon:'👋', t:'共通点のある人に いいね', d:'近くの人・すれ違った人の一覧から', go:"showNearList()"},
+    {done:!!m.talk, icon:'🗣', t:'共通点について話してみる', d:'トーク・友達・コミュニティに1回送る、どれでもOK', go:"go('match')"}
+  ];
+}
+function misNext(n){ return MIS_REWARDS.find(r=>r.n>n); }
+function misCardHTML(){
+  if(!profile)return '';
+  const m=misState(), items=misItems(m), k=items.filter(x=>x.done).length, n=m.n||0, nx=misNext(n), done=m.last===m.d;
+  let open=false; try{ open=localStorage.getItem('tama_misOpen')==='1'; }catch(e){}
+  const dots=items.map(x=>`<i class="${x.done?'on':''}"></i>`).join('');
+  const stamp=`🏅 スタンプ <b>${n}</b>個${nx?` ・ あと${nx.n-n}個で ${nx.t}`:''}`;
+  if(!open) return `<div class="sth" style="margin:0;cursor:pointer" onclick="toggleMis(true)"><b>🎯 今日のミッション</b>${done?'<span>✅ 達成</span>':`<span class="misdots">${dots}</span><span>${k}/3</span>`}<span class="go" style="margin-left:auto">›</span></div>`;
+  const peek=canPeek()?`<div class="mispeek">👀 明日のお題：「${esc(dailyOn(Date.now()+86400000).q)}」</div>`:'';
+  return `<div class="sth"><b>🎯 今日のミッション</b><span>${done?'✅ 達成':k+'/3'}</span><button onclick="toggleMis(false)" style="font-size:12px">たたむ</button></div>`
+    +items.map(x=>`<div class="strow${x.done?' done':''}"${x.done?'':` onclick="${x.go}"`}><span class="sti">${x.done?'✅':x.icon}</span><div class="stt"><b>${x.t}</b><small>${x.d}</small></div>${x.done?'':'<span class="go">›</span>'}</div>`).join('')
+    +`<div class="misfoot">${stamp}<br><small>3つ終えた日にスタンプが1個たまります。毎日でなくて大丈夫です。</small></div>${peek}`;
+}
+function toggleMis(v){ try{ localStorage.setItem('tama_misOpen',v?'1':'0'); }catch(e){} renderStartCard(); }
+// k：'like'（いいねした・だれもいない日にコミュニティを開いた）／'talk'（送った・会う時のカードを開いた）
+function misMark(k){
+  if(!profile||String(myId||'').startsWith('local-'))return;
+  const m=misState(); if(m[k]){ return; }
+  m[k]=1; misSave(m);
+}
+// お題に答えた時などにも呼ぶ。3つそろったら、その日のスタンプを押す
+function misCheck(){ if(profile)misSave(misState(),true); }
+function misSave(m,checkOnly){
+  let got=null;
+  if(dailyAnswer(profile)&&m.like&&m.talk&&m.last!==m.d){
+    m.n=(m.n||0)+1; m.last=m.d;
+    const r=MIS_REWARDS.find(x=>x.n===m.n); got={n:m.n,r};
+    if(r&&r.badge){ const b=new Set(attrsOf(profile).badges||[]); b.add(r.badge); profile.fa={...(profile.fa||{}),badges:[...b]}; }
+  } else if(checkOnly) return;
+  profile.fa={...(profile.fa||{}),mis:m};
+  saveMyAttrs(); if(got&&got.r&&got.r.badge){ publishMe(); renderMeHero(); }
+  renderStartCard();
+  if(got)setTimeout(()=>misDone(got),900);
+}
+function misDone(g){
+  const nx=misNext(g.n);
+  if($('.overlay.show')){ toast(`🎉 今日のミッション達成！スタンプ ${g.n}個目`); return; }
+  $('#memSheet').innerHTML=`<div class="rinfo" style="text-align:center"><div style="font-size:52px;line-height:1.2">🎉</div>
+    <h2 class="pstitle" style="text-align:center">今日のミッション達成！</h2>
+    <p class="psdesc" style="text-align:center">スタンプが <b style="color:var(--amber-deep);font-size:18px">${g.n}個</b> になりました。</p>
+    ${g.r?`<div class="misgot">🎁 ごほうび：<b>${g.r.t}</b>${g.r.icons?'<br><small>マイページの「プロフィールを編集」のアイコンから選べます</small>':''}</div>`:''}
+    ${nx?`<p class="psdesc" style="text-align:center">あと${nx.n-g.n}個で ${nx.t}</p>`:''}
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
 
 /* 作る・編集する（同じシート） */
 const RULE_TMPL=['勧誘・宣伝はしない','相手の連絡先や住所を聞かない','いやな言い方をしない','無理に会おうとしない','困ったらオーナーか運営に知らせる'];
@@ -4086,6 +4190,7 @@ function renderRoomHead(){
   $('#roomSt').textContent=[curRoom.owner_name?'👑 '+curRoom.owner_name:!curRoom.owner_id&&isClassRoom(curRoom)?'📚 運営が見守る授業の部屋':'',`👥 ${s.members||0}${curRoom.capacity?'/'+curRoom.capacity:''}人`,roomLeft(curRoom)].filter(Boolean).join(' ・ ');
 }
 async function openRoom(id){
+  if(misAlone())misMark('like');   // 今日のミッション②（近くにだれもいない日は、コミュニティをのぞけばOK）
   if(!roomsV2)return openRoomLegacy(id);
   const k=rid(id), r=rooms.find(x=>rid(x.id)===k);
   if(!r){ toast('この部屋は見つかりません（閉じられたか、入れない部屋です）'); loadRooms(); return; }
@@ -4252,6 +4357,7 @@ async function reportRoom(){
 /* ---------- ようこそ画面・ホーム画面への追加 ---------- */
 function goOnboard(){
   loadSuggest();   // アーティスト・科目の入力の候補
+  if($('#obRef')&&!$('#obRef').value)$('#obRef').value=savedRef();   // 招待のリンクから来た人は、招待コードを入力ずみに
   $('#s-welcome').classList.remove('active');
   $('#s-onboard').classList.add('active');
 }
@@ -4370,9 +4476,10 @@ function renderHomeGate(){
   // 2026-10-08 あおの指示：上のアプリの見本（宣伝）はやめて、ホーム画面に追加するまでの流れを画面の絵で見せる（gateFlowHTML）
   const flow=gateFlowHTML(inApp?'inapp':ios?(ios26?'ios26':'ios'):other?'':'android');
   g.innerHTML=`<div class="hglogo">ちかく</div>
-    <div class="hgtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と気軽につながる。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
+    <div class="hgtag">同じキャンパスの、<b style="color:var(--amber-deep)">共通点がある人</b>が分かる。<br>だから、会ったときに話しかけやすい。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
     <div class="hgvals"><div>🤝 会ったとき、話すことがある</div><div>👥 友達のいまどこ・空きコマが分かる</div><div>📚 同じ授業の人に、授業のことを聞ける</div><div>✨ キャンパスで、新しい出会い</div></div>
     <div class="hgcount" id="hgCount">${gateCountHTML()}</div>
+    ${savedRef()?`<div class="hgref">🎁 招待コード <b>${esc(savedRef())}</b><small>登録の最後の「招待コード」に入れると、あなたと招待してくれた人に特典があります。ホーム画面から開くと消えていることがあるので、メモしておいてください。</small></div>`:""}
     ${inApp?`<div style="margin:0 0 14px">${steps}</div>`:""}<!-- LINE などの中では「Safariで開く」を一番上に（2026-10-08 ユーザー役のテスト：最初の画面にボタンが入っていなかった） -->
     ${flow?`<div class="hgflowh">📲 ホーム画面に追加するまで</div>${flow}<div class="hgswipe">← 横にスワイプできます →</div>`:''}
     <div class="hgh">📲 ホーム画面に追加すると<br>使えます（30秒）</div>
@@ -5436,6 +5543,7 @@ function answerDaily(a){
   setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
   // 「☕ ひとこと」はお題に答えた直後には出さない（2026-10-08。アプリを開いて少したった時に maybeCheckinPopup）
   { const s=startState(); s.daily=true; saveStart(s); }   // はじめにやることの「お題に答える」を ✅ に
+  misCheck();   // 今日のミッション①
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
@@ -5812,8 +5920,10 @@ function openEdit(){
   $('#edEmojis').innerHTML=EMO.map(emCell).join('')
     +(surveyDone||surveyOpen()?`<div class="emsp" style="width:100%">${BADGES.survey.icon} アンケートに答えた人の限定アイコン</div>`
       // 2026-10-08 に限定へ移したアイコンをもう使っている人は、そのまま使える（選んでいる1つだけは鍵をかけない）
-      +EMO_SP.map(e=>surveyDone||e===profile.emoji?emCell(e):`<div class="em lock" data-lock="1">${e}</div>`).join(''):'');
-  $$('#edEmojis .em').forEach(el=>el.onclick=()=>{ if(el.dataset.lock){ openSurveyGate('icon'); return; }
+      +EMO_SP.map(e=>surveyDone||e===profile.emoji?emCell(e):`<div class="em lock" data-lock="1">${e}</div>`).join(''):'')
+    // ごほうびの限定アイコン（今日のミッション・招待。2026-10-09）。まだの時は鍵つきで見せ、押すともらい方を出す
+    +Object.entries(REWARD_ICONS).map(([k,s])=>{ const has=s.has(); return `<div class="emsp" style="width:100%">${s.t}</div>`+s.icons.map(e=>has||e===profile.emoji?emCell(e):`<div class="em lock" data-how="${k}">${e}</div>`).join(''); }).join('');
+  $$('#edEmojis .em').forEach(el=>el.onclick=()=>{ if(el.dataset.how){ toast('🔒 '+REWARD_ICONS[el.dataset.how].how); return; } if(el.dataset.lock){ openSurveyGate('icon'); return; }
     $$('#edEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
   edAttr=attrStateFrom(profile.fa); bindAttrForm('ed',edAttr);
   $('#editOverlay').classList.add('show');
@@ -5839,6 +5949,7 @@ async function saveEdit(){
   profile.fa={...attrToFa(edAttr),status:old.status||'',status_until:old.status_until||null,daily:old.daily||null,daily_prev:old.daily_prev||null};
   if(old.badges)profile.fa.badges=old.badges;   // バッジ（アンケートの特典）もこの画面では変えないので引き継ぐ
   if(old.match_off)profile.fa.match_off=old.match_off;   // マッチングに使う共通点（マイページで選ぶ）も引き継ぐ
+  if(old.mis)profile.fa.mis=old.mis; if(old.inv_by)profile.fa.inv_by=old.inv_by;   // 今日のミッションのスタンプ・招待してくれた人も引き継ぐ（2026-10-09）
   renderNearby(); renderCross(); renderMeHero();
   await publishMe();
   // publishMe() は位置が取れていない時・キャンパスの外・共有オフだと何も送らないので、プロフィールだけは別に書き戻す
@@ -5858,16 +5969,75 @@ async function saveEdit(){
 const OFFICIAL_URL='https://chikaku-hosei.vercel.app/tama/';
 // 「アプリに誘う」はシートで出す（2026-09-24 にマイページの真ん中の大きなQRをやめた。近くの人が0人の時・友達の追加からも開ける）
 function buildInvite(){}
-function openInvite(){
-  $('#invSheet').innerHTML=`<h2 class="pstitle">📨 アプリに誘う</h2>
-    <div class="inv" style="padding:0">
-      <p>このQRを読むか、リンクを開いてもらうと、<br>同じ「近くの人」に表示されます。</p>
-      <div class="qrbox" id="qrbox"></div>
-      <div class="urlbox"><input id="shareUrl" readonly value="${externalUrl(OFFICIAL_URL)}"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
-    </div>
-    <button class="btn btn-ghost" style="width:100%;padding:12px;color:var(--muted)" onclick="closeInvite()">閉じる</button>`;
-  renderQR(externalUrl(OFFICIAL_URL));   // LINE で読んでも Safari／Chrome で開くように（openExternalBrowser=1）
+/* ---------- 招待の特典（2026-10-09 あおの依頼「招待してくれた人に特典をつけてユーザーを増やしたい」。supabase/tama_invite.sql） ----------
+   ・1人に1つの6文字の招待コード。招待のQR・リンクには ?ref=コード が付く
+   ・リンクから来た人は、登録の③の「招待コード」に入力ずみ（iPhone はホーム画面のアプリと Safari で保存場所が分かれるので、
+     ホーム画面に追加する案内にもコードを出して、メモしてもらう）。登録した日から3日のうちは、この画面からも入れられる
+   ・招待した人に数えるのは、招待された人が「コードを入れた日とは別の日に、もう一度開いた」時（水増しを防ぐ。SQL の tama_invite_tick）
+   ・特典：招待された人は限定アイコン2種、招待した人は 1人でバッジ「📨 ちかく案内人」、3人で限定アイコン4種、5人でバッジ「🏅 ちかく大使」と明日のお題を先に見られる
+   ・招待した人数は fa.inv_n に、招待してくれた人は fa.inv_by に入れる（スマホを変えても特典が残るように） */
+const INV_REWARDS=[{n:1,badge:'inv1',t:'📨 バッジ「ちかく案内人」'},{n:3,t:'限定アイコン4種 🚀🎁🧭🌻'},{n:5,badge:'inv5',t:'🏅 バッジ「ちかく大使」と、明日のお題を先に見られる'}];
+let inviteInfo=null, inviteMissing=false;
+const refFromUrl=(()=>{ try{ const r=(new URL(location.href).searchParams.get('ref')||'').toUpperCase(); if(/^[A-Z0-9]{6}$/.test(r)){ localStorage.setItem('tama_ref',r); return r; } }catch(e){} return ''; })();
+function savedRef(){ try{ return localStorage.getItem('tama_ref')||''; }catch(e){ return ''; } }
+const inviteUrl=()=>{ const u=new URL(OFFICIAL_URL); if(inviteInfo&&inviteInfo.code)u.searchParams.set('ref',inviteInfo.code); return externalUrl(u.toString()); };
+async function loadInvite(){
+  if(!sb||!myId||String(myId).startsWith('local-')||!profile||inviteMissing)return;
+  try{ await sb.rpc('tama_invite_tick'); }catch(e){}
+  const {data,error}=await sb.rpc('tama_my_invite');
+  if(error){ inviteMissing=true; console.warn('[invite] 読み込めません。supabase/tama_invite.sql を実行してください:',error.message); return; }
+  inviteInfo=data||null; if(!inviteInfo)return;
+  // 特典をプロフィールに反映（人数・バッジ・招待してくれた人）
+  const fa=profile.fa||{}, n=inviteInfo.counted||0, b=new Set(fa.badges||[]), by=inviteInfo.invited_by&&inviteInfo.invited_by.id;
+  let ch=false;
+  if((fa.inv_n||0)!==n){ fa.inv_n=n; ch=true; }
+  INV_REWARDS.forEach(r=>{ if(r.badge&&n>=r.n&&!b.has(r.badge)){ b.add(r.badge); ch=true; } });
+  if(by&&fa.inv_by!==by){ fa.inv_by=by; ch=true; }
+  if(ch){ profile.fa={...fa,badges:[...b]}; saveMyAttrs(); publishMe(); renderMeHero(); }
+  if($('#invOverlay').classList.contains('show'))openInvite();
+  // 登録の時に入れた招待コード（ログインの前に入れたので、ここで送る）
+  if(!by&&pendingRef){ const c=pendingRef; pendingRef=''; useInvite(c,true); }
+}
+let pendingRef='', invBy=null;
+// 招待コードを入れる。quiet：登録の時に入れたものを送る時（失敗しても大きく出さない）
+async function useInvite(code,quiet){
+  code=String(code||'').trim().toUpperCase(); if(!code)return;
+  if(!/^[A-Z0-9]{6}$/.test(code)){ toast('招待コードは6文字です'); return; }
+  if(!sb||inviteMissing){ toast('招待はまだ準備中です'); return; }
+  const {data,error}=await sb.rpc('tama_use_invite',{p_code:code});
+  if(error){ toast('招待コードを送れませんでした'); return; }
+  const st=data&&data.status;
+  if(st!=='ok'){ if(!quiet||st==='notfound')toast({notfound:'その招待コードは見つかりませんでした',self:'自分の招待コードは使えません',already:'招待コードはもう入れてあります',tries:'少し時間をおいてから入れてください'}[st]||'招待コードを送れませんでした'); return; }
+  try{ localStorage.removeItem('tama_ref'); }catch(e){}
+  profile.fa={...(profile.fa||{}),inv_by:data.id}; saveMyAttrs();
+  const nm=data.name||'招待してくれた人'; invBy={id:data.id,name:nm};
+  $('#invSheet').innerHTML=`<div style="text-align:center"><div style="font-size:52px;line-height:1.2">🎁</div>
+    <h2 class="pstitle" style="text-align:center">招待コードを入れました</h2>
+    <p class="psdesc" style="text-align:center">限定アイコン <b style="font-size:20px">🐣 🎈</b> が使えるようになりました。<br>（マイページの「プロフィールを編集」のアイコンから）</p>
+    <p class="psdesc" style="text-align:center"><b style="color:var(--ink)">${esc(nm)}さん</b>に友達申請を送りますか？<br>友達になると、いる建物・空きコマが分かります。</p>
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px" onclick="closeInvite();requestFriend(invBy.id,invBy.name)">👥 友達申請を送る</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeInvite()">あとで</button></div>`;
   $('#invOverlay').classList.add('show');
+}
+// 登録した日から3日のうちは、あとからでも招待コードを入れられる
+const canEnterRef=()=>!!profile&&!attrsOf(profile).inv_by&&firstUseDay()>0&&Date.now()-firstUseDay()<3*86400000;
+function openInvite(){
+  const I=inviteInfo, n=(I&&I.counted)||0, pend=(I&&I.pending)||0, url=inviteUrl();
+  const ladder=I?`<div class="invlad"><div class="ilh">🎁 招待した人の特典 <span>いま <b>${n}人</b>${pend?`（ほかに${pend}人が、あした以降にもう一度開くと数えます）`:''}</span></div>`
+      +INV_REWARDS.map(r=>`<div class="ilr${n>=r.n?' got':''}"><span class="iln">${n>=r.n?'✅':r.n+'人'}</span><span>${r.t}</span></div>`).join('')
+      +`<div class="ilnote">招待された人にも、限定アイコン 🐣🎈 があります。招待した人に数えるのは、相手が登録した次の日以降にもう一度アプリを開いた時です。</div></div>`:'';
+  const code=I?`<div class="invcode"><small>あなたの招待コード</small><b>${esc(I.code)}</b></div>`:'';
+  const enter=canEnterRef()&&!inviteMissing?`<div class="inventer"><div class="ilh">招待されて始めた人は</div><div class="urlbox" style="margin:6px 0 0"><input id="refInput" maxlength="6" placeholder="招待コード（6文字）" value="${esc(savedRef())}" autocapitalize="characters"><button class="btn btn-primary" onclick="useInvite($('#refInput').value)">入れる</button></div></div>`:'';
+  $('#invSheet').innerHTML=`<h2 class="pstitle">📨 友達をアプリに誘う</h2>
+    <div class="inv" style="padding:0">
+      <p>このQRを読むか、リンクを開いてもらうと始められます。${I?'<br>あなたの招待コードが付いています。':''}</p>
+      <div class="qrbox" id="qrbox"></div>
+      <div class="urlbox"><input id="shareUrl" readonly value="${url}"><button class="btn btn-primary" onclick="copyUrl()">コピー</button></div>
+    </div>${code}${ladder}${enter}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;color:var(--muted)" onclick="closeInvite()">閉じる</button>`;
+  renderQR(url);   // LINE で読んでも Safari／Chrome で開くように（openExternalBrowser=1）
+  $('#invOverlay').classList.add('show');
+  if(!I&&!inviteMissing)loadInvite();
 }
 function closeInvite(){ $('#invOverlay').classList.remove('show'); }
 function renderQR(url){const box=$('#qrbox');const img=new Image();
@@ -5901,6 +6071,7 @@ function go(t){
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
+  loadInvite();   // 招待コード・招待した人数（2026-10-09）
   publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
   restoreMyPresence();loadTimetable();loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
   // ☕ ひとことは、開いて20秒ほどたってから（2026-10-08）。登録した日は出さない（firstUseDay）
