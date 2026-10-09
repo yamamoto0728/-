@@ -2011,7 +2011,7 @@ function attrFieldsHTML(p,part){
     <div class="field"><label>わかる！あるある<span class="req">必須・1〜${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
       <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
         <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
-    <div class="field"><label>気になっている授業<span class="opt">任意・取っている授業・取りたい授業など1つ</span></label><input id="${p}Course" data-sugg="course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
+    <div class="field"><label>これだけは落としたくない授業<span class="opt">任意・いま取っている授業から1つ</span></label><input id="${p}Course" data-sugg="course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ授業を書いた人には「同じ！」と出ます。テスト前に情報交換できる仲間が見つかるかも</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field worryf"><label>${WORRY_LABEL}<span class="opt">任意・${FA.purposePick}つまで</span></label>
       <div class="hint" style="margin:0 0 8px">選ばなくても大丈夫です。あとで、プロフィール編集からいつでも変えられます。</div>
@@ -2072,7 +2072,7 @@ function bindAttrForm(p,st){
 const MATCH_KINDS=[
   {k:'art', icon:'🎧', label:'よく聴くアーティスト'},
   {k:'cls', icon:'📚', label:'時間割の授業（同じ曜日・時限）'},
-  {k:'crs', icon:'📝', label:'気になっている授業'},
+  {k:'crs', icon:'📝', label:'これだけは落としたくない授業'},
   {k:'day', icon:'🎲', label:'今日のお題の答え'},
   {k:'aru', icon:'💬', label:'わかる！あるある'},
   {k:'goal',icon:'🌱', label:'これから・目標'},
@@ -2124,7 +2124,7 @@ function commonRaw(u){
   (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))add('goal:'+x,x); });
   const ma=normAns(me.artist); if(ma&&ma===normAns(th.artist))add('art:'+ma,'同じアーティスト「'+th.artist+'」');
   (me.aruaru||[]).forEach(x=>{ if((th.aruaru||[]).includes(x))add('aru:'+x,'わかる「'+x+'」'); });
-  if(sameCourse(u))add('crs:'+normCourse(me.course),'気になっている授業「'+th.course+'」');
+  if(sameCourse(u))add('crs:'+normCourse(me.course),'落としたくない授業「'+th.course+'」');
   // 時間割で同じ曜日・時限に同じ授業名を入れている人（毎週会える人なので、共通点に数える）
   (samePeers[u.id]||[]).forEach(r=>add('cls:'+r.slot+':'+normAns(r.course),'同じ授業「'+r.course+'」'));
   // 今日のお題で同じ答え（その日だけの共通点。偶然の出会いを作るため）
@@ -2254,7 +2254,7 @@ function attrBlock(u){
     ${shownWorry.length?`<div class="fh">${openWorry?'いま、気になっていること':'いま、おたがいに気になっていること'}</div><div class="fchips">${shownWorry.map(x=>`<span class="fchip worry${sharedPurposes.includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>${sharedPurposes.length?'<div class="worrysame">🤝 あなたと同じことが気になっています</div>':''}`:''}
     ${(a.goals||[]).length?`<div class="fh">これから・目標</div><div class="fchips">${a.goals.map(chip).join('')}</div>`:''}
     ${a.hometown?`<div class="frow" style="margin-top:8px">🏠 出身 <b>${esc(a.hometown)}</b></div>`:''}
-    ${a.course?`<div class="qline"><span class="qt">気になっている授業</span><b>${esc(a.course)}</b>${courseHit?'<span class="same">同じ！</span>':''}</div>`:''}
+    ${a.course?`<div class="qline"><span class="qt">これだけは落としたくない授業</span><b>${esc(a.course)}</b>${courseHit?'<span class="same">同じ！</span>':''}</div>`:''}
   </div>`;
 }
 // 近くの人の一番上に「いまの自分」と「時間割」の2枚のタイル（2026-09-24。ちかくの強みなので、いちばん目立つ所に大きく置いた）。
@@ -3026,7 +3026,7 @@ function openPreview(mode){
   if(!me.bio)miss.push('自己紹介');
   if(!a.artist)miss.push('よく聴くアーティスト');
   if(!(a.aruaru||[]).length)miss.push('わかる！あるある');
-  if(!a.course)miss.push('気になっている授業');
+  if(!a.course)miss.push('これだけは落としたくない授業');
   // 悩み・不安は「入れていない項目」として催促しない（任意で、入れないのも大事な選択なので）
   if(!(a.goals||[]).length)miss.push('これから・目標');
   if(!a.hometown)miss.push('出身');
@@ -3258,7 +3258,7 @@ function topicsFor(u,n=3,exclude=[]){
     if(kind==='art') add(`${th.artist}、自分もよく聴きます！いちばん好きな曲ってなんですか？`,rare);
     else if(kind==='aru'){ const x=c.key.slice(4); add(`「${x}」、自分もです笑　わかる人がいてうれしい`,rare); }
     else if(kind==='cls'){ const r=(samePeers[u.id]||[]).find(r=>c.key==='cls:'+r.slot+':'+normAns(r.course)); if(r)add(`${slotLabel(r.slot)}の${r.course}、同じ授業ですよね！あの授業どうですか？`,rare); }
-    else if(kind==='crs') add(`${th.course}、自分も気になってるんです！どんな授業か知ってますか？`,rare);
+    else if(kind==='crs') add(`${th.course}、自分も落としたくない授業なんです！どんな感じですか？`,rare);
     else if(kind==='day') add(`今日のお題、同じ「${dailyAnswer(u)}」でしたね！`,rare);
     else if(kind==='pur') add(FA.purposeTopic[c.label]||`「${c.label}」、自分もです`,rare);
     else if(kind==='goal') add(`${c.label}、どんなことしてるんですか？`,rare);
@@ -3273,7 +3273,7 @@ function topicsFor(u,n=3,exclude=[]){
   const td=dailyAnswer(u), md=dailyAnswer(profile);
   if(td&&md&&!sameDaily(u)) add(`今日のお題、「${td}」なんですね！自分は「${md}」でした。なんでですか？`);
   if(th.artist&&normAns(th.artist)!==normAns(me.artist)) add(`${th.artist}よく聴くんですね！はじめて聴くならおすすめの曲ありますか？`);
-  if(th.course) add(`${th.course}、気になってるんですね！どんな授業なんですか？`);
+  if(th.course) add(`${th.course}、落としたくない授業なんですね！どんな授業なんですか？`);
   (th.aruaru||[]).forEach(x=>{ if(!(me.aruaru||[]).includes(x)) add(`「${x}」ってどういうときですか？笑`); });
   if(th.artist&&normAns(th.artist)===normAns(me.artist)) add(`${th.artist}のライブって行ったことありますか？`);
   add('はじめまして！すれ違ったみたいですね😊');
@@ -3942,7 +3942,8 @@ async function loadPaywall(){
   paywallMissing=false; paywallAnswered={}; (data||[]).forEach(r=>{ paywallAnswered[r.feature]=r.choice; });
 }
 function paywallPrice(){ let h=0; for(const ch of String(myId||''))h=(h*31+ch.charCodeAt(0))>>>0; return [100,300,500][h%3]; }
-function paywallNeed(f){ return !!profile&&!paywallMissing&&!paywallAnswered[f]&&!debugMode(); }
+// 使い始めた日は聞かない（2026-10-09 あおの「本来の機能やコンセプトの邪魔をしないように」。初日に「有料」と見ると、お金を取るアプリという第一印象になるため）
+function paywallNeed(f){ return !!profile&&!paywallMissing&&!paywallAnswered[f]&&!debugMode()&&firstUseDay()<jstTodayStart().getTime(); }
 function paywallAsk(f,next){
   paywallNext=next; const p=PAYWALL[f], price=paywallPrice();
   $('#memSheet').innerHTML=`<div class="rinfo pw"><div class="pwic">${p.icon}</div>
@@ -4746,7 +4747,7 @@ function frOpener(c,u){
   if(kind==='day')return `今日のお題、同じ「${dailyAnswer(u)}」だったね！`;
   if(kind==='art')return `${a.artist}聴くんだね！いちばん好きな曲なに？`;
   if(kind==='aru')return `「${c.key.slice(4)}」わかる笑`;
-  if(kind==='crs')return `${a.course}気になってるの？自分も！`;
+  if(kind==='crs')return `${a.course}、自分も落としたくない！`;
   if(kind==='goal')return `${c.label}、一緒にがんばろう！`;
   return 'おつかれ！';
 }
