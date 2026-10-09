@@ -188,7 +188,7 @@
   .urow .info .n span{font-size:12px;color:var(--muted);font-weight:500}
   .urow .info .b{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
   .urow .d{text-align:right;flex-shrink:0}
-  .urow .d .m{font-family:"JetBrains Mono";font-size:15px;font-weight:500;color:var(--amber)}
+  .urow .d .m{font-family:"JetBrains Mono";font-size:12.5px;font-weight:500;color:var(--muted)}   /* 2026-10-09：距離より共通点が目立つように（前はオレンジの大きな字で、一番目立っていた） */
   /* 2回以上すれ違っている人は数字を強調（2026-10-02。ちかくだけが持っている材料なので） */
   .urow .d .m.rep{font-size:18px;font-weight:700;color:var(--amber-deep)}
   .urow .d .lk{font-size:11px;color:var(--rose);margin-top:2px}
@@ -258,6 +258,10 @@
   .sheet .body{padding:20px 20px 4px;background:#fff}
   .sheet{position:relative}
   .sheet .cover .idn h2{color:#fff}
+  /* 2026-10-09 あおの依頼「見づらいを減らす」：明るい色のアイコンだと白い名前が背景にとけていたので、下を暗くして文字をくっきり（Instagram・Hinge の写真の上の名前と同じやり方） */
+  .sheet .cover::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60%;background:linear-gradient(180deg,transparent,rgba(20,16,40,.55));pointer-events:none}
+  .mebdg{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:4px 0 2px}.mebdg:empty{display:none}.mebdg span{font-size:12px;font-weight:700;background:#fff8ea;border:1px solid rgba(245,151,47,.45);color:#9a5a10;border-radius:999px;padding:4px 10px;cursor:pointer}
+  .sheet .cover .idn{position:relative;z-index:1}.sheet .cover .idn h2{text-shadow:0 1px 3px rgba(0,0,0,.6),0 2px 14px rgba(0,0,0,.45)}
   .sheet .bio{font-size:14px;line-height:1.85;color:#3a4066}
   .tags{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 6px}
   .tag{font-size:12px;padding:6px 12px;border-radius:20px;background:rgba(99,214,232,.1);border:1px solid rgba(99,214,232,.28);color:var(--signal);font-weight:600}
@@ -1115,7 +1119,7 @@
     <section class="screen" id="s-me">
       <div class="scroll">
         <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
-        <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="h" id="meFac"></div><div class="h" id="meLoc">📍 &mdash;</div><div id="meWorry"></div></div>
+        <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="mebdg" id="meBadges"></div><div class="h" id="meFac"></div><div class="h" id="meLoc">📍 &mdash;</div><div id="meWorry"></div></div>
         <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <!-- 自分のプロフィールが相手にどう見えるか（2026-10-02 追加） -->
         <button class="btn btn-ghost" id="mePrevBtn" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openPreview('near')">👀 周りからの見え方を見る</button>
@@ -1809,7 +1813,9 @@ function renderMeWorry(){ const el=$('#meWorry'); if(!el)return; const p=attrsOf
 function renderMeHero(){
   if(!profile)return; const a=attrsOf(profile);
   $('#meAv').style.background=gr(profile.emoji); $('#meAv').textContent=profile.emoji;
-  $('#meName').textContent=profile.name+(badgeIcons(profile)?' '+badgeIcons(profile):'');
+  $('#meName').textContent=profile.name;
+  // バッジは名前の横の小さな絵文字だけだと何か分からなかったので、名前つきで並べる（2026-10-09。Duolingo の実績のように）
+  const mb=$('#meBadges'); if(mb)mb.innerHTML=badgeKeys(profile).map(k=>`<span title="${esc(BADGES[k].desc)}" onclick="toast('${BADGES[k].icon} ${esc(BADGES[k].desc)}')">${BADGES[k].icon} ${esc(BADGES[k].label)}</span>`).join('');
   const h=$('#meFac'); if(h)h.textContent=[a.faculty,a.dept,a.grade].filter(Boolean).join(' ');
 }
 
@@ -2170,7 +2176,7 @@ function commonRaw(u){
   (me.purposes||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.purposes||[]).includes(x))add('pur:'+x,x); });
   (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))add('goal:'+x,x); });
   const ma=normAns(me.artist); if(ma&&ma===normAns(th.artist))add('art:'+ma,'同じアーティスト「'+th.artist+'」');
-  (me.aruaru||[]).forEach(x=>{ if((th.aruaru||[]).includes(x))add('aru:'+x,'わかる「'+x+'」'); });
+  (me.aruaru||[]).forEach(x=>{ if((th.aruaru||[]).includes(x))add('aru:'+x,'あるある「'+x+'」'); });
   if(sameCourse(u))add('crs:'+normCourse(me.course),'落としたくない授業「'+th.course+'」');
   // 時間割で同じ曜日・時限に同じ授業名を入れている人（毎週会える人なので、共通点に数える）
   (samePeers[u.id]||[]).forEach(r=>add('cls:'+r.slot+':'+normAns(r.course),'同じ授業「'+r.course+'」'));
@@ -2216,7 +2222,7 @@ function commonLine(cd){
   if(!cd.length)return '';
   const rare=cd.filter(x=>isRare(x.key)), rest=cd.filter(x=>!isRare(x.key));
   if(rare.length)return `<div class="common rare">✨ レアな共通点 ${rare.slice(0,2).map(x=>esc(x.label)).join('・')}${rare.length>2||rest.length?' 他':''}</div>`;
-  return `<div class="common">🎯 共通 ${cd.slice(0,3).map(x=>esc(x.label)).join('・')}${cd.length>3?' 他':''}</div>`;
+  return `<div class="common">🎯 共通点 ${cd.slice(0,3).map(x=>esc(x.label)).join('・')}${cd.length>3?' 他':''}</div>`;
 }
 // 取りたい科目が同じか（共通点の判定には使わず、プロフィールに「同じ！」と出すだけ）。
 // 「 マーケティング論 」「ﾏｰｹﾃｨﾝｸﾞ論」のような書き方のゆれを吸収してから比べる
