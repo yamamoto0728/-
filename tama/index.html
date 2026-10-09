@@ -659,6 +659,7 @@
   .homegate .shots{margin:0 -22px;padding:4px 22px 8px;scroll-padding:0 22px}
   .homegate .hgswipe{font-size:11px;color:var(--muted2);text-align:center;margin:0 0 18px}
   /* ホーム画面に追加するまでの流れの絵（2026-10-08。gateFlowHTML） */
+  #pushGate .pgkinds{margin-top:12px;font-size:11.5px;line-height:1.7;color:var(--muted);text-align:left;background:rgba(255,255,255,.7);border-radius:12px;padding:9px 12px}
   .homegate .hgvals{margin:-6px auto 14px;padding:10px 14px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:12.5px;line-height:1.9;color:var(--ink);max-width:330px}
   .homegate .hgflowh{font-family:"Zen Maru Gothic";font-size:15px;font-weight:900;text-align:center;margin:2px 0 8px}
   .homegate .hgflow{display:flex;gap:12px;overflow-x:auto;margin:0 -22px;padding:4px 22px 8px;scroll-snap-type:x mandatory;scroll-padding:0 22px}
@@ -1042,7 +1043,7 @@
       </div>
     </section>
     <section class="screen" id="s-chat">
-      <div class="chathead"><button class="back" onclick="go(chatReturn)" aria-label="戻る">‹</button><div class="av" id="chatAv" onclick="openChatProfile()"></div><div style="flex:1;min-width:0" onclick="openChatProfile()"><div class="nm" id="chatNm"></div><div class="st" id="chatSt"></div></div><div id="chatFr"></div></div>
+      <div class="chathead"><button class="back" onclick="go(chatReturn)" aria-label="戻る">‹</button><div class="av" id="chatAv" onclick="openChatProfile()"></div><div style="flex:1;min-width:0" onclick="openChatProfile()"><div class="nm" id="chatNm"></div><div class="st" id="chatSt"></div></div><div id="chatFr"></div><button class="membtn" onclick="openChatMenu()" aria-label="その他（通報・ブロック）">⋯</button></div>
       <div class="msgs" id="msgs"></div>
       <div class="topics" id="chatTopics"></div>
       <div class="chatbar"><input id="chatInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">↑</button></div>
@@ -1075,6 +1076,7 @@
         <div class="setting">
           <div class="setrow visrow" id="visSum" onclick="openVisHub()"><div class="lab">🔒 見せる範囲<small id="visSumTxt">&mdash;</small></div><span class="go">›</span></div>
           <div class="setrow visrow" onclick="openMatchPrefs()"><div class="lab">🎯 マッチングに使う共通点<small id="matchSumTxt">&mdash;</small></div><span class="go">›</span></div>
+          <div class="setrow visrow" onclick="openBlocked()"><div class="lab">🚫 ブロックした人<small>一覧と解除</small></div><span class="go">›</span></div>
           <div class="setrow"><div class="lab">通知<small id="pushHint">いいね・メッセージ・友達申請をスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
         </div>
         <button class="btn btn-ghost" style="margin:4px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
@@ -1143,12 +1145,14 @@
   <!-- 通知の許可を聞く画面。iPhoneは画面を触った直後しか許可画面を出せないので、どこを触っても出るようにしている。
        2026-09-24 から、開いた瞬間ではなく「話しかけた・友達になった」など通知の意味が分かる場面で出す（askPushSoon） -->
   <div class="guide" id="pushGate" style="z-index:90;background:linear-gradient(180deg,#ffffff,#eef3ff)" onclick="pushGateTap()">
-    <div class="gtop"><button class="skip" id="pushGateSkip" onclick="event.stopPropagation();skipPushGate()">あとで</button></div>
+    <div class="gtop"><button class="skip" id="pushGateSkip" style="font-size:14.5px;padding:9px 16px;border:1px solid var(--line);border-radius:20px;background:#fff" onclick="event.stopPropagation();skipPushGate()">あとで</button></div>
     <div class="gbody">
       <div class="gicon">🔔</div>
       <h3 id="pushGateH">返事が来たら<br>通知で知らせます</h3>
       <p id="pushGateP">いいね・メッセージ・友達申請が届いたときに、アプリを閉じていてもお知らせします。</p>
       <div class="note2" id="pushGateNote">端末の確認画面が出たら「許可」を選んでください。</div>
+      <!-- 2026-10-08 ユーザー役のテスト：何が届くか・ロック画面に何が出るかが書かれていなかった -->
+      <div class="pgkinds">届くのは：いいね・メッセージ・友達申請／平日の昼休みのお題（まだ答えていない日だけ）／友達がいる人は、その日最初の授業の「いまどこ？」。<br>ロック画面には、相手の名前とメッセージの最初の数文字が出ます。マイページの「通知」でいつでもオフにできます。</div>
     </div>
     <div class="gnav"><button class="btn btn-primary" id="pushGateBtn" onclick="event.stopPropagation();pushGateTap()">通知をオンにする</button></div>
   </div>
@@ -1544,7 +1548,9 @@ async function autoAskPush(){
   // 2026-10-04 あおの決定：ホーム画面のアプリから開いた時は、登録前（ようこそ画面）でもすぐ聞いてよい。
   // ブラウザ（PC）で開いた時は、これまで通り登録して話しかけた後などから聞く
   const app=isStandalone();
-  if(!profile&&!app) return;
+  // 2026-10-08：登録する前には聞かない（ユーザー役のテストで「何のアプリか分かる前に許可を求められて引く」。10/4 に「ホーム画面のアプリなら登録前でも」としたのを戻した）。
+  // 登録した後は、ホーム画面のアプリならすぐ聞く（今まで通り）
+  if(!profile) return;
   if(Notification.permission==='granted'){ if(profile)syncPushSubscription(); return; }
   if(Notification.permission==='denied') return;   // 端末の設定からしか戻せないので、ここでは何もしない
   if(pushGateSkipped||pushSkippedRecently()||!(pushAskReady()||app)) return;
@@ -1812,7 +1818,9 @@ function fesCampusGate(){
   renderNearby();
 }
 let geoDenied=false;   // 位置情報を許可しなかった（「キャンパスの外」と出すと、外にいると勘違いされるので分ける）
-function onErr(e){ geoDenied=e.code===1; geoState('bad'); onGeoFail(geoDenied?'位置情報がオフになっています':'現在地を取得できません'); renderStatusRow(); }
+function onErr(e){ geoDenied=e.code===1; geoState('bad'); onGeoFail(geoDenied?'位置情報がオフになっています':'現在地を取得できません'); renderStatusRow();
+  // 位置を断った時は、友達に見せている建物・教室・メモも消す（2026-10-08 ユーザー役のテスト：断ったのに「社会学部A棟・401」が出たままだった）
+  if(geoDenied&&myPresence.place){ curPlace=null; myPresence.place=null; myPresence.room=''; myPresence.note=''; myPresence.expires_at=null; savePresence(true); renderMyPresence(); } }
 function onGeoFail(msg){geoSettled();const lb=$('#locbar');lb.className='locbar bad';$('#locPlace').textContent=msg;
   $('#meLoc').textContent='📍 位置情報オフ';
   // 近くの人・すれ違いだけ使えない。オンにする場所は端末で違う（ホーム画面のアプリはブラウザの設定に従う）
@@ -2858,6 +2866,7 @@ function openReport(uid,name){
   $('#reportSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:6px">${esc(name)} さんを通報</h2>
     <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">理由を選んでください。通報するとこの人は<b style="color:var(--ink)">あなたの画面に表示されなくなります</b>（ブロック）。<br><span style="color:var(--muted2)">※相手に通知されることはありません</span></p>
     ${REPORT_REASONS.map(r=>`<button class="rsn" onclick="submitReport('${r}')">${r}</button>`).join('')}
+    <button class="rsn" style="border-style:dashed" onclick="submitReport(null)">🚫 通報はせず、ブロックだけする<small style="display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px">運営には知らせず、この人をあなたの画面に出さないだけにします（マイページで解除できます）</small></button>
     <div style="margin-top:12px;font-size:11.5px;color:var(--muted);line-height:1.75">身の危険を感じている場合は、通報だけで終わらせず<a onclick="closeReport();openContact()" style="color:var(--signal);font-weight:700;text-decoration:underline;cursor:pointer">運営・警察への連絡</a>もご検討ください。</div>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeReport()">やめる</button>`;
   $('#reportOverlay').classList.add('show');
@@ -2873,15 +2882,45 @@ async function submitReport(reason){
   insideSet.delete(t.id);
   closeReport(); closeSheet();
   renderNearby(); renderCross(); renderMatches();
-  if(isTest(t.id)){ toast('通報しました（テスト用のため記録は残りません）'); return; }
+  // reason が null＝ブロックだけ（2026-10-08 ユーザー役のテスト：「ブロックだけしたい（通報まではしたくない）」が選べなかった）
+  const onlyBlock=reason==null;
+  if(isTest(t.id)){ toast(onlyBlock?'ブロックしました（テスト用のため記録は残りません）':'通報しました（テスト用のため記録は残りません）'); return; }
   if(!sb){ toast('通報しました（未接続のため記録は残りません）'); return; }
   try{
-    const {error:e1}=await sb.from(T('reports')).insert({reporter_id:myId,target_id:t.id,reason:(ctx?ctx+'：':'')+reason});
-    if(e1) console.warn('[report] 保存に失敗',e1.message);
+    if(!onlyBlock){ const {error:e1}=await sb.from(T('reports')).insert({reporter_id:myId,target_id:t.id,reason:(ctx?ctx+'：':'')+reason});
+      if(e1) console.warn('[report] 保存に失敗',e1.message); }
     const {error:e2}=await sb.from(T('blocks')).upsert({blocker_id:myId,blocked_id:t.id},{onConflict:'blocker_id,blocked_id'});
     if(e2) console.warn('[block] 保存に失敗',e2.message);
   }catch(e){ console.error('[report] 送信に失敗',e); }
-  toast('通報しました。この人はもう表示されません');
+  toast(onlyBlock?'ブロックしました。この人はもう表示されません（マイページで解除できます）':'通報しました。この人はもう表示されません');
+}
+// ブロックした人の一覧と解除（2026-10-08）。tama_blocks の自分の行を消せない時（DBに消すポリシーが無い時）は、運営に連絡するよう案内する
+async function openBlocked(){
+  const ids=[...blocked].filter(id=>!isTest(id));
+  let list=[];
+  if(sb&&ids.length){ const {data}=await sb.from(T('profiles')).select('id,name,emoji').in('id',ids); list=data||[]; }
+  const known=new Set(list.map(u=>u.id)); ids.filter(id=>!known.has(id)).forEach(id=>list.push({id,name:'（プロフィールを消した人）',emoji:'🙂'}));
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🚫 ブロックした人</h2><p class="psdesc">ブロックした人は、あなたの近くの人・すれ違い・トークに出ません。相手には知らされません。</p>
+    ${list.length?`<div class="sec">${list.map(u=>`<div class="mrow2"><div class="av" style="background:${gr(u.emoji)}">${u.emoji||'🙂'}</div><div class="nm">${esc(u.name||'')}</div><button onclick="unblockUser('${u.id}')">解除</button></div>`).join('')}</div>`:'<div class="sec">ブロックしている人はいません。</div>'}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function unblockUser(id){
+  if(!confirm('ブロックを解除しますか？\n（この人がまた近くの人などに出るようになります。通報した記録は残ります）'))return;
+  if(sb){ const {error}=await sb.from(T('blocks')).delete().eq('blocker_id',myId).eq('blocked_id',id);
+    if(error){ toast('解除できませんでした。マイページの「困ったとき」から運営に連絡してください'); return; } }
+  blocked.delete(id); toast('ブロックを解除しました'); openBlocked(); pollUsers&&pollUsers();
+}
+// トークの右上の「⋯」（2026-10-08 ユーザー役のテスト：いやなことを言われたトークの画面に、通報・ブロックの入口が無かった）
+function openChatMenu(){
+  const id=chatPeer, m=chatOf(id); if(!m)return;
+  const nm=esc(m.u.name).replace(/'/g,'&#39;');
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">${esc(m.u.name)} さん</h2>
+    <button class="rbtn" onclick="closeMembers();openChatProfile()">👤 プロフィールを見る</button>
+    <button class="rbtn warn" onclick="closeMembers();reportContext='トーク';openReport('${id}','${nm}')">⚠ 通報・ブロックする<small>通報してもしなくても、相手には知らされません</small></button>
+    <button class="rbtn" onclick="closeMembers();openContact()">🆘 困ったとき・お問い合わせ<small>身の危険を感じる時は、まず警察（110番）へ</small></button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
 }
 /* ---------- profile sheet + like ---------- */
 let curSheetUser=null;
