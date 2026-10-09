@@ -950,6 +950,8 @@
   .startcard .strow.done{cursor:default;opacity:.55}
   .startcard .sti{font-size:19px;width:24px;text-align:center}.startcard .stt{flex:1;min-width:0}
   .startcard .stt b{display:block;font-size:13px}.startcard .stt small{display:block;font-size:11px;color:var(--muted);line-height:1.5}
+  .startcard .strow.mis1{border-top:0;padding:4px 2px}.startcard .strow.mis1 .mish{color:var(--amber-deep);font-weight:800;font-size:11px}.startcard .strow.mis1 b{font-size:14px}.startcard .misst{color:var(--amber-deep)}
+  .startcard .strow.mis1.done{opacity:1}.startcard .strow.mis1.done b{color:var(--muted)}
   .startcard .misdots{display:inline-flex;gap:4px}.startcard .misdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}.startcard .misdots i.on{background:var(--amber)}
   .startcard .misfoot{font-size:12.5px;padding:9px 2px 6px;border-top:1px solid var(--line);line-height:1.6}.startcard .misfoot b{color:var(--amber-deep);font-size:15px}.startcard .misfoot small{font-size:11px;color:var(--muted)}
   .invcode{text-align:center;margin:4px 0 12px}.invcode small{display:block;font-size:12px;color:var(--muted)}.invcode b{font-family:'JetBrains Mono',monospace;font-size:28px;letter-spacing:4px;color:var(--ink)}
@@ -1451,7 +1453,8 @@ const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#
   '🌈':['#ff9d70','#8b9dff'],'🍀':['#6bd98b','#c8f0a0'],'🎯':['#ff7e6b','#ffd166'],'🪁':['#63d6e8','#ff9dd6'],'🚀':['#8b9dff','#ff9d70'],'🎁':['#ff7e9d','#ffd166'],'🧭':['#63d6e8','#c89b6b'],'🌻':['#ffd166','#6bd98b'],'🐣':['#ffe066','#ffb066'],'🎈':['#ff7e6b','#ff9dd6'],
   '🐉':['#6bd98b','#4b8bf0'],'🦁':['#ffb066','#c89b6b'],'🧸':['#ffcf8a','#c89b6b'],'🍣':['#ff7e6b','#ffd6c0'],'🎀':['#ff7e9d','#ffd1e0']};
 // アンケートの特典（2026-10-05）。限定アイコンとバッジ。バッジは profile.fa.badges に入れて、ほかの人の画面にも出す
-const EMO_SP=['👑','💎','🦋','🪐','🌟','🐉','🦁','🧸','🍣','🎀',...EMO_MOVED];
+// 2026-10-09 あおの指摘「アンケートで全部は安直すぎる」：アンケートで使えるのは6個だけにし、残り（前の EMO_SP の30個）は「きせかえ」の段（LOOK_ICONS）に分けた
+const EMO_SP=['👑','💎','🦋','🪐','🌟','🐉'];
 /* ---------- きせかえ（2026-10-09 あおの依頼「何もしてない人のアイコンとバッジをそれぞれ管理して、もっと報酬をもらいたくなるように。背景の色やフレームも」） ----------
    アイコン・背景の色・フレーム・バッジを、この1か所（LOOK_*）で管理する。もらう条件は c（'free' / 'survey' / '種類:数'）：
      mis：今日のミッションのスタンプ　inv：招待して数えた人数　invited：招待コードで始めた　daily：お題に答えた日数
@@ -1461,9 +1464,9 @@ const EMO_SP=['👑','💎','🦋','🪐','🌟','🐉','🦁','🧸','🍣','�
    選んだものは fa.look = {bg, fr, badge}。数は fa.stat に「これまでの一番大きい数」を残す（友達が減っても、もらったものは消えない）。
    ⚠️ 「本来は有料」の2つの機能は特典にしない（料金のテストの結果がくずれるため） */
 const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケートに協力してくれた人',c:'survey'},
-  mis3:{icon:'🌱',label:'ちかくデビュー',desc:'今日のミッションを3日やった人',c:'mis:3'},
-  mis10:{icon:'🔥',label:'ちかく常連',desc:'今日のミッションを10日やった人',c:'mis:10'},
-  mis30:{icon:'🏆',label:'ちかくマスター',desc:'今日のミッションを30日やった人',c:'mis:30'},
+  mis3:{icon:'🌱',label:'ちかくデビュー',desc:'今日のミッションを3回やった人',c:'mis:3'},
+  mis10:{icon:'🔥',label:'ちかく常連',desc:'今日のミッションを10回やった人',c:'mis:10'},
+  mis30:{icon:'🏆',label:'ちかくマスター',desc:'今日のミッションを30回やった人',c:'mis:30'},
   daily7:{icon:'📅',label:'お題マスター',desc:'今日のお題に7日答えた人',c:'daily:7'},
   cross10:{icon:'👟',label:'すれちがい名人',desc:'10人とすれ違った人',c:'cross:10'},
   friend1:{icon:'🤝',label:'はじめての友達',desc:'ちかくで友達ができた人',c:'friend:1'},
@@ -1472,16 +1475,26 @@ const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケー�
   inv5:{icon:'🏅',label:'ちかく大使',desc:'5人をちかくに招待した人',c:'inv:5'}};
 // ごほうびのアイコン（何もしてない人の12個＝EMO と、アンケートの36個＝EMO_SP は別に持つ）
 const LOOK_ICONS=[
+  {id:'mis1',name:'はじめてのミッション',c:'mis:1',icons:['🐶','🐰','🐻','🦊']},
+  {id:'daily3',name:'お題3日',c:'daily:3',icons:['🍓','🍩','🍙','🍣']},
+  {id:'cross5',name:'5人とすれ違い',c:'cross:5',icons:['⚽','🏀','🎮','👾']},
+  {id:'inv2',name:'2人招待',c:'inv:2',icons:['🎸','🎤','🎬','📚']},
+  {id:'mis8',name:'ミッション8回',c:'mis:8',icons:['🐼','🐧','🐸','🦄']},
+  {id:'friend3',name:'友達3人',c:'friend:3',icons:['🐳','🌊','⚡','🌻']},
+  {id:'daily15',name:'お題15日',c:'daily:15',icons:['🍀','🌈','✈️']},
+  {id:'mis25',name:'ミッション25回',c:'mis:25',icons:['🦁','🧸','🎀']},
   {id:'invited',name:'招待されて来た人',c:'invited',icons:['🐣','🎈']},
-  {id:'mis5',name:'ミッション5日',c:'mis:5',icons:['🦉','🐙','🦩','🪼']},
+  {id:'mis5',name:'ミッション5回',c:'mis:5',icons:['🦉','🐙','🦩','🪼']},
   {id:'daily7',name:'お題7日',c:'daily:7',icons:['🧁','🍰','🍡','🍪']},
   {id:'friend1',name:'はじめての友達',c:'friend:1',icons:['🐨','🐹','🦔','🦦']},
   {id:'cross10',name:'10人とすれ違い',c:'cross:10',icons:['👟','🛹','🚲','🛼']},
   {id:'inv3',name:'3人招待',c:'inv:3',icons:['🚀','🎁','🧭','🛸']},
   {id:'owner',name:'コミュニティのオーナー',c:'owner:1',icons:['🏰','🎪']},
-  {id:'mis15',name:'ミッション15日',c:'mis:15',icons:['🦚','🐢','🦭','🐝']},
+  {id:'mis15',name:'ミッション15回',c:'mis:15',icons:['🦚','🐢','🦭','🐝']},
   {id:'daily30',name:'お題30日',c:'daily:30',icons:['🍕','🍔','🌮','🍦']},
-  {id:'cross30',name:'30人とすれ違い',c:'cross:30',icons:['🗺️','🏔️','🏝️','🗼']}];
+  {id:'cross30',name:'30人とすれ違い',c:'cross:30',icons:['🗺️','🏔️','🏝️','🗼']}]
+  // きせかえの画面では、もらいやすい順に並べる（だいたいの手間：招待＞友達・オーナー＞ミッション＞お題＞すれ違い）
+  .sort((a,b)=>{ const w=c=>{ if(c==='invited')return 0; const [k,n]=c.split(':'); return (+n||1)*({inv:6,friend:3,owner:4,mis:1.5,daily:0.8,cross:0.5}[k]||1); }; return w(a.c)-w(b.c); });
 // プロフィールの背景の色（プロフィールの上の大きな帯）。auto＝アイコンの色
 const LOOK_BG={auto:{name:'アイコンの色',c:'free'},
   sky:{name:'空',c:'free',g:['#8ec5ff','#dceeff']},mint:{name:'ミント',c:'free',g:['#7be0b0','#d8f8e8']},peach:{name:'ピーチ',c:'free',g:['#ffb4a2','#ffe5d9']},
@@ -1495,7 +1508,7 @@ const LOOK_FR={none:{name:'なし',c:'free'},white:{name:'しろ',c:'free'},
   amber:{name:'オレンジ',c:'mis:5'},mint:{name:'ミント',c:'friend:1'},sakura:{name:'さくら',c:'daily:7'},blue:{name:'ブルー',c:'survey'},
   silver:{name:'シルバー',c:'cross:10'},royal:{name:'むらさき',c:'owner:1'},gold:{name:'ゴールド',c:'inv:3'},
   rainbow:{name:'にじ',c:'mis:20'},star:{name:'きらきら',c:'inv:5'}};
-const LOOK_KIND={mis:['今日のミッション','日'],inv:['招待','人'],daily:['今日のお題に答える','日'],cross:['すれ違う','人'],friend:['友達','人'],owner:['コミュニティを作る','']};
+const LOOK_KIND={mis:['今日のミッション','回'],inv:['招待','人'],daily:['今日のお題に答える','日'],cross:['すれ違う','人'],friend:['友達','人'],owner:['コミュニティを作る','']};
 // いまの数（これまでの一番大きい数）
 function lookCount(k){
   const fa=attrsOf(profile), st=fa.stat||{};
@@ -1523,7 +1536,7 @@ function lookHow(c){
   if(k==='inv')return `${n}人を招待する（あと${left}人）`;
   if(k==='cross')return `${n}人とすれ違う（あと${left}人）`;
   if(k==='friend')return `友達を${n}人つくる（あと${left}人）`;
-  if(k==='mis')return `今日のミッションを${n}日（あと${left}日）`;
+  if(k==='mis')return `今日のミッションを${n}回（あと${left}回）`;
   if(k==='daily')return `今日のお題に${n}日答える（あと${left}日）`;
   return `${K[0]}を${n}${K[1]}（あと${left}${K[1]}）`;
 }
@@ -1533,13 +1546,13 @@ const REWARD_ICONS=Object.fromEntries(LOOK_ICONS.map(s=>[s.id,{icons:s.icons,t:`
 // 明日のお題を先に見られる（ミッション10日・5人招待）
 // 種類ごとのごほうびの段（今日のミッション・招待の画面に「あと◯で…」を出すため）。[{n, t:説明, badge, icons}]
 function rewardsAt(k){
-  const m={}, add=(c,txt,extra)=>{ const [kk,n]=String(c).split(':'); if(kk!==k)return; const r=m[n]=m[n]||{n:+n,parts:[]}; r.parts.push(txt); Object.assign(r,extra||{}); };
-  Object.entries(BADGES).forEach(([id,b])=>add(b.c,`${b.icon} バッジ「${b.label}」`,{badge:id}));
-  LOOK_ICONS.forEach(s=>add(s.c,`限定アイコン ${s.icons.join('')}`,{icons:true}));
-  Object.values(LOOK_BG).forEach(b=>add(b.c,`背景「${b.name}」`));
-  Object.values(LOOK_FR).forEach(f=>add(f.c,`フレーム「${f.name}」`));
+  const m={}, add=(c,txt,extra,sh)=>{ const [kk,n]=String(c).split(':'); if(kk!==k)return; const r=m[n]=m[n]||{n:+n,parts:[],sp:[]}; r.parts.push(txt); r.sp.push(sh||txt); Object.assign(r,extra||{}); };
+  Object.entries(BADGES).forEach(([id,b])=>add(b.c,`${b.icon} バッジ「${b.label}」`,{badge:id},b.icon));
+  LOOK_ICONS.forEach(s=>add(s.c,`限定アイコン ${s.icons.join('')}`,{icons:true},s.icons.join('')));
+  Object.values(LOOK_BG).forEach(b=>add(b.c,`背景「${b.name}」`,null,'背景'));
+  Object.values(LOOK_FR).forEach(f=>add(f.c,`フレーム「${f.name}」`,null,'フレーム'));
   if(k==='mis')add('mis:10','明日のお題を先に見られる'); if(k==='inv')add('inv:5','明日のお題を先に見られる');
-  return Object.values(m).sort((a,b)=>a.n-b.n).map(r=>({...r,t:r.parts.join('・')}));
+  return Object.values(m).sort((a,b)=>a.n-b.n).map(r=>({...r,t:r.parts.join('・'),s:r.sp.join(' ')}));   // s：短い書き方（ミッションのカード用）
 }
 const canPeek=()=>misN()>=10||(attrsOf(profile).inv_n||0)>=5;
 const badgeKeys=u=>(attrsOf(u).badges||[]).filter(k=>BADGES[k]);
@@ -3938,7 +3951,7 @@ async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(
   const m={room_id:curRoom.id,from_id:myId,name:profile?profile.name:'匿名',emoji:profile?profile.emoji:'🙂',text:t};
   curRoom.msgs=(curRoom.msgs||[]).concat(m); renderRoom();
   try{await sb.from(T('room_messages')).insert(m);}catch(e){}
-  misMark('talk');   // 今日のミッション③
+  misMark('post');   // 今日のミッション（コミュニティに書き込む）
   markRoomRead(curRoom.id,true); notifyRoomMembers(curRoom,t);
 }
 // 部屋のメンバーに通知する。Edge Function(send-match-push)は1件ずつ受け取る仕様のまま流用しており、
@@ -4097,64 +4110,68 @@ function renderStartCard(){
 function toggleStartCard(v){ const s=startState(); s.open=v; saveStart(s); renderStartCard(); }
 function hideStartCard(){ const s=startState(); s.hide=true; saveStart(s); renderStartCard(); }
 
-/* ---------- 今日のミッション（2026-10-09 あおの依頼「共通点のある人にいいねして、共通点について話してみよう、で行動してほしい」） ----------
-   あおの決定で、機能の制限はかけない（ごほうびだけ）。毎日3つ：
-     ① 今日のお題に答える
-     ② 共通点のある人に 👋 いいね（近くにもすれ違いにもだれもいない日は「コミュニティをのぞく」でもよい。達成できない日を作らないため）
-     ③ 話してみる（トーク・友達・コミュニティに1回送る／🤝 会う時のカードを開く、どれでもよい）
-   3つ終えた日をスタンプ1個と数える。続けなくてもよい（休んだ日・キャンパスに来ない日で途切れない。心理的な負担にしないため）。
-   保存はプロフィール（fa.mis = {d:今日, like, talk, n:スタンプの数, last:最後にスタンプを押した日}）なので、スマホを変えても続く。
-   登録した直後は「はじめにやること」を出し、それが終わるか閉じたら、同じ場所にこのカードを出す（renderStartCard）。
+/* ---------- 今日のミッション（2026-10-09 あおの依頼。同じ日に作り直し） ----------
+   あおの指示「週に3回くらい開催で、項目は1つでいい。ユーザーがまだ達成したことのない項目や、アクティブになったり、ユーザーが増えるようなミッション」。
+   ・開催は月・水・金（MIS_DAYS。日本時間）。ほかの日はカードを出さない
+   ・その日のミッションは1つ。まだ一度もやったことがない行動（fa.mis.ever と、いまの状態から判断）を優先して選ぶ。
+     全部やったことがある人には、使う人が増える・動きが出る行動（いいね・トーク・コミュニティ・招待・お題）から選ぶ
+   ・選んだものはその日の間は変えない（fa.mis.k）。できない行動（近くにだれもいないのに「いいね」など）は選ばない
+   ・制限はかけない（あおの決定。ごほうびだけ）。達成するとスタンプ1個（fa.mis.n）。ごほうびは「きせかえ」（rewardsAt('mis')）
+   ・登録した直後は「はじめにやること」を出し、それが終わるか閉じたら、同じ場所にこのカードを出す（renderStartCard）
    ⚠️ ごほうびに「本来は有料」の2つの機能（前の日のすれ違い・コミュニティを作る）は使わない（料金のテストの結果がくずれるため） */
+const MIS_DAYS=[1,3,5];   // 月・水・金
 const MIS_REWARDS=rewardsAt('mis');   // ごほうびは「きせかえ」（LOOK_*・BADGES）で管理する
-function misState(){ const m=(profile&&profile.fa&&profile.fa.mis)||{}, d=dailyToday().d; return m.d===d?{...m}:{n:m.n||0,last:m.last||null,d}; }
+// ever：前からやったことがあるか（記録を始める前の人のため、いまの状態から見る）／can：今日できるか／rep：くり返し出してよい（人が増える・動きが出る）
+const MIS_POOL=[
+  {k:'tt',icon:'🗓',t:'時間割に授業を1つ入れる',d:'同じ授業の人が「共通点」で見つかります',go:'openTimetable()',ever:()=>myClassOptions().length>0},
+  {k:'invite',icon:'📨',t:'友達をちかくに誘う',d:'招待のリンクをコピーして送る（あなたにも特典あり）',go:'openInvite()',ever:()=>(attrsOf(profile).inv_n||0)>0,rep:true},
+  {k:'friend',icon:'👥',t:'友達を1人追加する',d:'目の前の人とは「＋ 追加」の4桁のコードで',go:"go('friends');openFrAdd()",ever:()=>lookCount('friend')>0},
+  {k:'like',icon:'👋',t:'共通点のある人に いいね',d:'近くの人・すれ違った人の一覧から',go:'showNearList()',ever:()=>liked.size>0,can:()=>!misAlone(),rep:true},
+  {k:'talk',icon:'🗣',t:'トークで共通点の話をしてみる',d:'トーク・友達に1回送る',go:"go('match')",ever:()=>false,can:()=>Object.values(matches).some(m=>!isExpired(m))||lookCount('friend')>0,rep:true},
+  {k:'post',icon:'💬',t:'コミュニティに1つ書き込む',d:'参加しているコミュニティか、新しく入って',go:"go('match');setTalkTab('comm')",ever:()=>false,rep:true},
+  {k:'status',icon:'📍',t:'「いまの自分」に状態を入れる',d:'「ひまです」などを入れると、近くの人に伝わります',go:'openPlaceEdit()',ever:()=>!!attrsOf(profile).status},
+  {k:'daily',icon:'🎲',t:'今日のお題に答える',d:'同じ答えの人が、今日だけの共通点になります',go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})",ever:()=>(attrsOf(profile).stat||{}).daily>0,can:()=>!dailyAnswer(profile),rep:true}
+];
+const jstDow=()=>new Date(Date.now()+9*3600000).getUTCDay();
+const misToday=()=>MIS_DAYS.includes(jstDow());
+function misNextDay(){ const w='日月火水木金土'; for(let i=1;i<=7;i++){ const d=(jstDow()+i)%7; if(MIS_DAYS.includes(d))return w[d]+'曜日'; } return ''; }
 function misN(){ return ((profile&&profile.fa&&profile.fa.mis)||{}).n||0; }
+function misState(){ const m=(profile&&profile.fa&&profile.fa.mis)||{}, d=dailyToday().d; return m.d===d?{...m}:{n:m.n||0,last:m.last||null,ever:m.ever||[],d}; }
 // 近くにも、今日のすれ違いにも、だれもいない
 function misAlone(){ const t=jstTodayStart().getTime(); return !others.some(u=>!isClosed(u))&&!Object.values(encMap).some(e=>(+e.last_at||Date.parse(e.last_at)||0)>=t); }
-function misItems(m){
-  const alone=!m.like&&misAlone();
-  return [
-    {done:!!dailyAnswer(profile), icon:'🎲', t:'今日のお題に答える', d:'同じ答えの人が、今日だけの共通点になります', go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})"},
-    alone?{done:false, icon:'💬', t:'コミュニティをのぞいてみる', d:'近くにまだだれもいないので、今日はこれでOK', go:"go('match');setTalkTab('comm')"}
-         :{done:!!m.like, icon:'👋', t:'共通点のある人に いいね', d:'近くの人・すれ違った人の一覧から', go:"showNearList()"},
-    {done:!!m.talk, icon:'🗣', t:'共通点について話してみる', d:'トーク・友達・コミュニティに1回送る、どれでもOK', go:"go('match')"}
-  ];
+// 今日のミッションを選ぶ（まだやったことがないもの → くり返してよいもの。同じ人・同じ日なら同じ結果）
+function misPick(m){
+  const ever=new Set(m.ever||[]), ok=p=>!p.can||p.can();
+  let c=MIS_POOL.filter(p=>ok(p)&&!ever.has(p.k)&&!p.ever());
+  if(!c.length)c=MIS_POOL.filter(p=>ok(p)&&p.rep);
+  if(!c.length)c=MIS_POOL.filter(p=>p.k==='invite');
+  let h=0; for(const ch of String(myId||'')+m.d)h=(h*31+ch.charCodeAt(0))>>>0;
+  return c[h%c.length].k;
+}
+function misCardHTML(){
+  if(!profile||!misToday())return '';
+  const m=misState();
+  if(!m.k){ m.k=misPick(m); profile.fa={...(profile.fa||{}),mis:m}; saveMyAttrs(); }
+  const p=MIS_POOL.find(x=>x.k===m.k)||MIS_POOL[0], n=m.n||0, nx=misNext(n), done=m.last===m.d;
+  const sub=done?`🏅 スタンプ ${n}個${nx?` ・ あと${nx.n-n}個で ${esc(nx.t)}`:''} ・ 次は${misNextDay()}`
+    :`${esc(p.d)}<br><span class="misst">🏅 達成でスタンプ1個${nx?` ・ あと${nx.n-n}個で ${esc(nx.s)}`:''}</span>`;
+  return `<div class="strow mis1${done?' done':''}"${done?'':` onclick="${p.go}"`}><span class="sti">${done?'✅':p.icon}</span>
+    <div class="stt"><small class="mish">🎯 今日のミッション${done?' ・ 達成！':''}</small><b>${esc(p.t)}</b><small>${sub}</small></div>${done?'':'<span class="go">›</span>'}</div>`;
 }
 function misNext(n){ return MIS_REWARDS.find(r=>r.n>n); }
-function misCardHTML(){
-  if(!profile)return '';
-  const m=misState(), items=misItems(m), k=items.filter(x=>x.done).length, n=m.n||0, nx=misNext(n), done=m.last===m.d;
-  let open=false; try{ open=localStorage.getItem('tama_misOpen')==='1'; }catch(e){}
-  const dots=items.map(x=>`<i class="${x.done?'on':''}"></i>`).join('');
-  const stamp=`🏅 スタンプ <b>${n}</b>個${nx?` ・ あと${nx.n-n}個で ${nx.t}`:''}`;
-  if(!open) return `<div class="sth" style="margin:0;cursor:pointer" onclick="toggleMis(true)"><b>🎯 今日のミッション</b>${done?'<span>✅ 達成</span>':`<span class="misdots">${dots}</span><span>${k}/3</span>`}<span class="go" style="margin-left:auto">›</span></div>`;
-  const peek=canPeek()?`<div class="mispeek">👀 明日のお題：「${esc(dailyOn(Date.now()+86400000).q)}」</div>`:'';
-  return `<div class="sth"><b>🎯 今日のミッション</b><span>${done?'✅ 達成':k+'/3'}</span><button onclick="toggleMis(false)" style="font-size:12px">たたむ</button></div>`
-    +items.map(x=>`<div class="strow${x.done?' done':''}"${x.done?'':` onclick="${x.go}"`}><span class="sti">${x.done?'✅':x.icon}</span><div class="stt"><b>${x.t}</b><small>${x.d}</small></div>${x.done?'':'<span class="go">›</span>'}</div>`).join('')
-    +`<div class="misfoot">${stamp}<br><small>3つ終えた日にスタンプが1個たまります。毎日でなくて大丈夫です。</small></div>${peek}`;
-}
-function toggleMis(v){ try{ localStorage.setItem('tama_misOpen',v?'1':'0'); }catch(e){} renderStartCard(); }
-// k：'like'（いいねした・だれもいない日にコミュニティを開いた）／'talk'（送った・会う時のカードを開いた）
+// 行動したら呼ぶ。k は MIS_POOL の k。やったことがある行動に足し、今日のミッションならスタンプを押す
 function misMark(k){
   if(!profile||String(myId||'').startsWith('local-'))return;
-  const m=misState(); if(m[k]){ return; }
-  m[k]=1; misSave(m);
+  const m=misState(), ever=new Set(m.ever||[]); let ch=false, got=null;
+  if(!ever.has(k)){ ever.add(k); m.ever=[...ever]; ch=true; }
+  if(misToday()&&m.k===k&&m.last!==m.d){
+    m.n=(m.n||0)+1; m.last=m.d; ch=true; got={n:m.n,r:MIS_REWARDS.find(x=>x.n===m.n)};
+  }
+  if(!ch)return;
+  profile.fa={...(profile.fa||{}),mis:m}; saveMyAttrs(); renderStartCard();
+  if(got){ setTimeout(()=>misDone(got),900); setTimeout(()=>lookSync(true),400); }
 }
-// お題に答えた時などにも呼ぶ。3つそろったら、その日のスタンプを押す
-function misCheck(){ if(profile)misSave(misState(),true); }
-function misSave(m,checkOnly){
-  let got=null;
-  if(dailyAnswer(profile)&&m.like&&m.talk&&m.last!==m.d){
-    m.n=(m.n||0)+1; m.last=m.d;
-    const r=MIS_REWARDS.find(x=>x.n===m.n); got={n:m.n,r};
-    if(r&&r.badge){ const b=new Set(attrsOf(profile).badges||[]); b.add(r.badge); profile.fa={...(profile.fa||{}),badges:[...b]}; }
-  } else if(checkOnly) return;
-  profile.fa={...(profile.fa||{}),mis:m};
-  saveMyAttrs(); if(got&&got.r&&got.r.badge){ publishMe(); renderMeHero(); }
-  renderStartCard();
-  if(got)setTimeout(()=>misDone(got),900);
-  setTimeout(()=>lookSync(true),400);
-}
+function misCheck(){}   // 前の版の名残（呼んでいる所があっても何もしない）
 function misDone(g){
   const nx=misNext(g.n);
   if($('.overlay.show')){ toast(`🎉 今日のミッション達成！スタンプ ${g.n}個目`); return; }
@@ -4312,7 +4329,6 @@ function renderRoomHead(){
   $('#roomSt').textContent=[curRoom.owner_name?'👑 '+curRoom.owner_name:!curRoom.owner_id&&isClassRoom(curRoom)?'📚 運営が見守る授業の部屋':'',`👥 ${s.members||0}${curRoom.capacity?'/'+curRoom.capacity:''}人`,roomLeft(curRoom)].filter(Boolean).join(' ・ ');
 }
 async function openRoom(id){
-  if(misAlone())misMark('like');   // 今日のミッション②（近くにだれもいない日は、コミュニティをのぞけばOK）
   if(!roomsV2)return openRoomLegacy(id);
   const k=rid(id), r=rooms.find(x=>rid(x.id)===k);
   if(!r){ toast('この部屋は見つかりません（閉じられたか、入れない部屋です）'); loadRooms(); return; }
@@ -5082,7 +5098,7 @@ async function acceptFriend(rowId,id,name){
   const {error}=await sb.from(T('friends')).update({status:'accepted',responded_at:new Date().toISOString()}).eq('id',rowId);
   if(error){ console.warn('[friends] 承認できません:',error.message); toast('承認できませんでした'); return; }
   notifyPush(id,'👥 友達になりました',(profile?profile.name:'')+'さんが友達申請を承認しました');
-  toast('🎉 '+esc(name||'')+'さんと友達になりました'); await loadFriends(); refreshFriendSuggest(id);
+  toast('🎉 '+esc(name||'')+'さんと友達になりました'); await loadFriends(); refreshFriendSuggest(id); misMark('friend');
   // 友達になると24時間の縛りが外れるので、終わっていたトークの表示も作り直す
   if(curSheetUser&&curSheetUser.id===id)openSheet(curSheetUser,null);
 }
@@ -5307,7 +5323,7 @@ function savePlaceEdit(){
   savePresence();
   // 「いまの状態」はプロフィール側に保存する（みんなに見えるため）。自動で開いた小さい版には状態の欄が無いので、その時は触らない
   if(profile&&$('#psStatus')){ profile.fa=profile.fa||{}; profile.fa.status=psStatus;
-    profile.fa.status_until=psStatus?new Date(roomExpiryAt()).toISOString():null; publishMe(); saveMyAttrs(); renderNearby(); renderCross(); }
+    profile.fa.status_until=psStatus?new Date(roomExpiryAt()).toISOString():null; publishMe(); saveMyAttrs(); renderNearby(); renderCross(); if(psStatus)misMark('status'); }
   renderMyPresence(); closePlaceEdit();
   toast(!sharing?'保存しました（位置情報の共有を止めているので、友達には表示されません）':myPresence.visibility==='hidden'?'保存しました（建物・教室はいま友達にも見せない設定です）':'保存しました');
 }
@@ -5539,7 +5555,7 @@ async function saveTimetable(){
   const row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=rooms;
   const {error}=await sb.from(T('timetable')).upsert(row);
   if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
-  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadCommonCount(true);   // 授業のコミュニティの一覧・共通点のある人の数も新しく
+  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadCommonCount(true); if(myClassOptions().length)misMark('tt');   // 授業のコミュニティの一覧・共通点のある人の数も新しく
   toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました');
   if(Object.keys(slots).length)askPushSoon('tt');
 }
@@ -5668,7 +5684,7 @@ function answerDaily(a){
   setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
   // 「☕ ひとこと」はお題に答えた直後には出さない（2026-10-08。アプリを開いて少したった時に maybeCheckinPopup）
   { const s=startState(); s.daily=true; saveStart(s); }   // はじめにやることの「お題に答える」を ✅ に
-  misCheck();   // 今日のミッション①
+  misMark('daily');   // 今日のミッション
   setTimeout(()=>lookSync(),1500);   // きせかえ（お題の日数）
 }
 
@@ -6048,7 +6064,9 @@ function openEdit(){
       // 2026-10-08 に限定へ移したアイコンをもう使っている人は、そのまま使える（選んでいる1つだけは鍵をかけない）
       +EMO_SP.map(e=>surveyDone||e===profile.emoji?emCell(e):`<div class="em lock" data-lock="1">${e}</div>`).join(''):'')
     // ごほうびの限定アイコン（今日のミッション・招待。2026-10-09）。まだの時は鍵つきで見せ、押すともらい方を出す
-    +Object.entries(REWARD_ICONS).map(([k,s])=>{ const has=s.has(); return `<div class="emsp" style="width:100%">${s.t}</div>`+s.icons.map(e=>has||e===profile.emoji?emCell(e):`<div class="em lock" data-how="${k}">${e}</div>`).join(''); }).join('');
+    // 2026-10-09：ごほうびのアイコンは、使えるものだけここに出す（全部と、もらい方は「🎨 きせかえ」で見る。前は鍵つきの段が19段並んで長かった）
+    +(()=>{ const own=LOOK_ICONS.filter(s=>lookHas(s.c)).flatMap(s=>s.icons).concat(LOOK_ICONS.flatMap(s=>s.icons).filter(e=>e===profile.emoji&&!lookHas(LOOK_ICONS.find(s=>s.icons.includes(e)).c)));
+      return (own.length?`<div class="emsp" style="width:100%">🎁 ごほうびのアイコン</div>`+own.map(emCell).join(''):'')+`<div class="emsp" style="width:100%;cursor:pointer;color:var(--signal)" onclick="closeEdit();openLook('icon')">🎨 ほかのアイコンと、もらい方を見る ›</div>`; })();
   $$('#edEmojis .em').forEach(el=>el.onclick=()=>{ if(el.dataset.how){ toast('🔒 '+REWARD_ICONS[el.dataset.how].how); return; } if(el.dataset.lock){ openSurveyGate('icon'); return; }
     $$('#edEmojis .em').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');});
   edAttr=attrStateFrom(profile.fa); bindAttrForm('ed',edAttr);
@@ -6213,10 +6231,10 @@ async function lookSet(k,v){
 function lookSync(quiet){
   if(!profile||String(myId||'').startsWith('local-'))return;
   const fa=profile.fa||{}, st={...(fa.stat||{})}; let ch=false;
-  ['cross','friend','owner'].forEach(k=>{ const n=lookCount(k); if(n>(st[k]||0)){ st[k]=n; ch=true; } });
+  ['cross','friend','owner'].forEach(k=>{ const n=lookCount(k); if(n>(st[k]||0)){ if(k==='friend'&&st.friend!==undefined)misMark('friend'); st[k]=n; ch=true; } });   // 友達が増えた（相手が承認した時も）＝ミッション
   const b=new Set(fa.badges||[]), newB=[];
   Object.entries(BADGES).forEach(([id,x])=>{ if(!b.has(id)&&x.c!=='survey'&&lookHas(x.c)){ b.add(id); newB.push(id); ch=true; } });
-  if(ch){ profile.fa={...fa,stat:st,badges:[...b]}; saveMyAttrs(); if(newB.length){ publishMe(); renderMeHero(); } }
+  if(ch){ profile.fa={...(profile.fa||{}),stat:st,badges:[...b]}; saveMyAttrs(); if(newB.length){ publishMe(); renderMeHero(); } }
   // 新しく使えるようになったもの（この端末で、まだ知らせていないもの）
   let seen=[]; try{ seen=JSON.parse(localStorage.getItem('tama_lookSeen')||'null'); }catch(e){}
   const now=[...LOOK_ICONS.filter(s=>lookHas(s.c)).map(s=>'i:'+s.id),...Object.entries(LOOK_BG).filter(([,x])=>x.c!=='free'&&lookHas(x.c)).map(([id])=>'b:'+id),
@@ -6234,7 +6252,7 @@ function renderQR(url){const box=$('#qrbox');const img=new Image();
   img.onload=()=>{box.innerHTML='';box.appendChild(img);};
   img.onerror=()=>{box.innerHTML=`<div class="qrfallback">QR画像を読み込めませんでした。<br>下のリンクをコピーして共有してください。</div>`;};
   img.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data='+encodeURIComponent(url);}
-function copyUrl(){const v=$('#shareUrl').value;if(navigator.clipboard){navigator.clipboard.writeText(v).then(()=>toast('リンクをコピーしました')).catch(()=>toast('コピーできませんでした'));}else toast('手動でコピーしてください');}
+function copyUrl(){misMark('invite');const v=$('#shareUrl').value;if(navigator.clipboard){navigator.clipboard.writeText(v).then(()=>toast('リンクをコピーしました')).catch(()=>toast('コピーできませんでした'));}else toast('手動でコピーしてください');}
 
 /* ---------- misc ---------- */
 let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
