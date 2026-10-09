@@ -4207,7 +4207,7 @@ const condKey=c=>c.k+':'+(c.slot?c.slot+':':'')+c.v;
 /* ---------- 本来は有料の予定（フェイクドアテスト。2026-10-09 あおの依頼。supabase/tama_paywall.sql） ----------
    Googleフォームで聞くより、機能を使う瞬間の本音を取るため。対象は「前の日にすれ違った人を見る」「コミュニティを作る」（授業の部屋は無料）。
    初めて使う時に1回だけ「本来は月◯円の予定です（いまは無料・あとで請求されません）」と出し、[月◯円でも使いたい][無料なら使う] を選んでもらう。
-   どちらを選んでも機能は使える（押すのに損得が無いので、正直な答えになりやすい）。金額は人ごとに100・300・500円（ユーザーIDから決めるので同じ人には同じ金額）。
+   どちらを選んでも機能は使える（押すのに損得が無いので、正直な答えになりやすい）。金額は500円で固定（2026-10-09 あおの指示。前は人ごとに100・300・500円）。
    表が無い時（SQLの実行前）・#debug・テスト用の端末では聞かない。利用規約の第4条に記載 */
 const PAYWALL={
   cross_past:{icon:'🕘',name:'前の日にすれ違った人を見る',desc:'昨日より前にすれ違った人の一覧が見られます'},
@@ -4220,7 +4220,7 @@ async function loadPaywall(){
   if(error){ paywallMissing=true; return; }
   paywallMissing=false; paywallAnswered={}; (data||[]).forEach(r=>{ paywallAnswered[r.feature]=r.choice; });
 }
-function paywallPrice(){ let h=0; for(const ch of String(myId||''))h=(h*31+ch.charCodeAt(0))>>>0; return [100,300,500][h%3]; }
+function paywallPrice(){ return 500; }   // 2026-10-09 あおの指示で500円に固定（前は人ごとに100・300・500円）
 // 使い始めた日は聞かない（2026-10-09 あおの「本来の機能やコンセプトの邪魔をしないように」。初日に「有料」と見ると、お金を取るアプリという第一印象になるため）
 function paywallNeed(f){ return !!profile&&!paywallMissing&&!paywallAnswered[f]&&!debugMode()&&firstUseDay()<jstTodayStart().getTime(); }
 function paywallAsk(f,next){
