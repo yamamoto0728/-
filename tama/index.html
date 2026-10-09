@@ -986,7 +986,10 @@
           <div class="obh">③ アイコンを選んで始める</div>
           <div class="obd">アイコンはあとからマイページで変えられます。</div>
           <div class="emojis" id="obEmojis"></div>
-          <div class="field" style="margin-top:16px"><label>ひとこと（任意）</label><textarea id="obBio" rows="2" maxlength="60" placeholder="例：ヨルシカが好きです。学食でよくカレー食べてます"></textarea></div>
+          <div class="field" style="margin-top:16px"><label>自己紹介<span class="opt">任意・だれにでも見えます</span></label><textarea id="obBio" rows="2" maxlength="60" placeholder="例：ヨルシカが好きです。学食でよくカレー食べてます"></textarea></div>
+          <!-- 位置の出し方をここで選ぶ（2026-10-08 ユーザー役のテスト：「全部共有するか、始めないか」の二択で怖い） -->
+          <div class="field"><label>近くの人の地図に、あなたの位置を</label><div class="chips" id="obVis"><span class="c sel" data-v="0" onclick="setObCoarse(false)">そのまま出す</span><span class="c" data-v="1" onclick="setObCoarse(true)">約100mぼかして出す</span></div>
+            <div class="hint">ぼかすと、地図のあなたの点が約100mずれて出ます（すれ違いの記録は少し不正確になります）。あとからマイページの「🔒 見せる範囲」で変えられ、「出さない」も選べます。</div></div>
           <div class="privacy">🔒 <b>位置情報について</b><br>「位置情報を共有して始める」を押すと、スマホのGPSの現在地を、<b>多摩キャンパスの中にいる間だけ</b>、このアプリを使っている人に共有します。キャンパスの外では位置を送りません。約100mぼかす・止めるは、いつでもマイページの「見せる範囲」から選べます。</div>
         </div>
         <div class="obnav"><button class="btn btn-ghost" id="obBack" onclick="obMove(-1)">戻る</button><button class="btn btn-primary" id="obNext" onclick="obMove(1)">次へ</button></div>
@@ -1684,11 +1687,13 @@ function obCheck(step){
     if(!obAttr.course.trim())miss.push([$('#obCourse'),'取りたい科目']);
     else if(ngCheck(obAttr.course))miss.push([$('#obCourse'),'科目名に使えない言葉があります']);
   }
-  if(step===3&&ngCheck($('#obBio').value))miss.push([$('#obBio'),'ひとことに使えない言葉があります']);
+  if(step===3&&ngCheck($('#obBio').value))miss.push([$('#obBio'),'自己紹介に使えない言葉があります']);
   // agegate・terms のチェックボックスは .field の外なので、枠の代わりに親の箱を揺らさず目立たせる
   miss.forEach(([el])=>{ const box=el&&el.closest('.terms,.agegate'); if(box){ box.style.outline='2px solid rgba(226,87,79,.55)'; setTimeout(()=>box.style.outline='',2600); } });
   return markMissing(miss);
 }
+let obCoarse=false;   // 登録の③で選ぶ、近くの人の地図での位置の出し方（false＝そのまま／true＝約100mぼかす）
+function setObCoarse(v){ obCoarse=v; $$("#obVis .c").forEach(c=>c.classList.toggle("sel",(c.dataset.v==="1")===v)); }
 function obMove(d){
   if(d<0){ if(obStep===1){ $('#s-onboard').classList.remove('active'); $('#s-welcome').classList.add('active'); return; } obStep--; renderObStep(); return; }
   if(!obCheck(obStep))return;
@@ -1699,12 +1704,13 @@ async function onStart(){
   if(!myId){ if(!(await initBackend())){ if(!configured) return; myId='local-'+uuid(); } }
   const name=$('#obName').value.trim(), age=parseInt($('#obAge').value)||null;
   const bioVal=$('#obBio').value.trim();
-  if(ngCheck(bioVal)){ toast('⚠️ ひとことに不適切な言葉が含まれています。修正してください。'); return; }
+  if(ngCheck(bioVal)){ toast('⚠️ 自己紹介に不適切な言葉が含まれています。修正してください。'); return; }
   profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[],work:'',looking:[],likes:[],interests:[],fa:{...attrToFa(obAttr),status:''}};
   renderMeHero();
   $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
   // 「位置情報を共有して始める」を押したので共有ON（プロフィールを消した後に登録し直した時、前のOFFが残らないように）
-  sharing=true; profileDeleted=false; saveLocPrefs(); renderVisSummary();
+  // 位置の出し方は登録の③で選んだもの（2026-10-08。前はあとからマイページでしか選べなかった）
+  sharing=true; coarse=obCoarse; profileDeleted=false; saveLocPrefs(); renderVisSummary();
   buildInvite();renderStatusRow();
   maybeShowGuide(false);   // 新規登録なので必ず出す
   await saveNewProfile();   // 位置を取り始める前に保存する（後だと、遅れて届いた sharing:false が本当の位置を上書きする）
@@ -2279,6 +2285,8 @@ function relTag(id){
 }
 /* ---------- render nearby ---------- */
 let lastNearList=[];
+// 距離の出し方（2026-10-08 ユーザー役のテスト：知らない人の「いまここから 60m」が怖い）。友達はそのまま、それ以外は大まかに
+function distText(d,id){ if(isFriend(id)||isTest(id))return Math.round(d)+"m"; return d<30?"すぐ近く":d<100?"100m以内":d<300?"300m以内":"キャンパス内"; }
 function nearRow({u,d,common,closed}){
   const st=statusOf(u);
   return `<div class="urow${closed?' closed':''}" onclick="openNear('${String(u.id).replace(/[^\w-]/g,'')}')">
@@ -2286,7 +2294,7 @@ function nearRow({u,d,common,closed}){
     <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>
       ${commonLine(common)}${crossBadge(u.id)}
       <div class="b">${st&&!closed?`<span class="stchip">${esc(st)}</span> `:''}${esc(u.bio||'')}</div></div>
-    <div class="d">${closed?`<div class="frago">${agoText(u.updated_at)}まで</div>`:`<div class="m">${d!=null?Math.round(d)+'m':'—'}</div>`}${relTag(u.id)}</div></div>`;
+    <div class="d">${closed?`<div class="frago">${agoText(u.updated_at)}まで</div>`:`<div class="m">${d!=null?distText(d,u.id):'—'}</div>`}${relTag(u.id)}</div></div>`;
 }
 // すれ違った回数のしるし（2026-10-04。オーナーの流れ「共通点があってすれ違う → いいね」の1段階目を一覧で見えるように）
 function crossBadge(id){ const e=encMap[id]; return e&&e.count?`<div class="crossb${e.count>=2?' rep':''}">🚶 ${e.count}回すれ違い</div>`:''; }
@@ -2504,7 +2512,7 @@ function drawMap(list){
   }
   // いちばん近い人（アプリを開いている人だけ。一覧の1位＝共通点の多い人ではない）
   const near=list.filter(x=>!x.closed&&x.d!=null).sort((a,b)=>a.d-b.d)[0];
-  $('#nearest').innerHTML=near?'いちばん近い人 '+esc(near.u.name)+' · <b>'+Math.round(near.d)+'m</b>':'—';
+  $('#nearest').innerHTML=near?'いちばん近い人 '+esc(near.u.name)+' · <b>'+distText(near.d,near.u.id)+'</b>':'—';
 }
 
 /* ---------- 閉じている人への「近くにいます」通知（最後にいた位置を使う） ---------- */
@@ -2886,7 +2894,7 @@ function openSheet(u,d){
   const ended=!!m&&!fr&&isExpired(m);
   // アプリを閉じた人は「いまここ」ではなく「◯分前までここにいた」と出す
   const closed=!!u.updated_at&&isClosed(u)&&!isTest(id);
-  const dist=d==null?'':closed?`<div class="dist">🕘 ${agoText(u.updated_at)}まで、ここから <b>${Math.round(d)}m</b> の所にいました</div>`:`<div class="dist">📍 いまここから <b>${Math.round(d)}m</b></div>`;
+  const dist=d==null?'':closed?`<div class="dist">🕘 ${agoText(u.updated_at)}まで、ここから <b>${distText(d,u.id)}</b> の所にいました</div>`:`<div class="dist">📍 いまここから <b>${distText(d,u.id)}</b></div>`;
   const nm=esc(u.name).replace(/'/g,'&#39;');
   let main;
   if(fr) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button>`;   // 友達は下の「💬 メッセージ」を使う
@@ -2934,7 +2942,7 @@ function openPreview(mode){
     <div class="body">${attrBlock(me)}<div class="bio">${esc(me.bio||'')}</div></div>`);
   // 入れていない項目（相手の画面では、その行ごと出ない）
   const miss=[];
-  if(!me.bio)miss.push('ひとこと');
+  if(!me.bio)miss.push('自己紹介');
   if(!a.artist)miss.push('よく聴くアーティスト');
   if(!(a.aruaru||[]).length)miss.push('わかる！あるある');
   if(!a.course)miss.push('今季絶対取りたい科目');
@@ -2955,7 +2963,7 @@ function openPreview(mode){
         💬 トークは期限なしで続きます<br>
         ${(a.purposes||[]).length?(a.purpose_vis==='all'?'🤝 「'+WORRY_LABEL+'」は、近くの人みんなに見せています':'🤝 「'+WORRY_LABEL+'」は、友達でも<b>同じことを選んだ人にだけ</b>見えます'):''}</div>`
       :`<div class="pvhint"><b>知らない人には、これは見えません</b><br>
-        🚫 年齢・いる建物・教室・ひとこと（友達だけ）<br>
+        🚫 年齢・いる建物・教室・いまのメモ（友達だけ）<br>
         🚫 時間割（見せると決めた友達だけ）<br>
         ${(a.purposes||[]).length&&a.purpose_vis!=='all'?`🤝 「${WORRY_LABEL}」（${a.purposes.map(esc).join('・')}）は、<b>同じことを選んだ人にだけ</b>見えます。だからこのプレビューには出ていません<br>`:''}
         👀 見えるのは上のカードと、地図・一覧に出るアイコン・位置・距離です<br>
@@ -4251,7 +4259,7 @@ const HELP={
     see:'あなたの答えは、その日だけプロフィールに出ます。答えられるのは1日1回で、あとから変えられません。',
     tip:'まだ答えていない日は、昼休みにお題の通知が届くことがあります。'},
   now:{icon:'📍',title:'いまの自分',lead:'いまの状態と、いる場所を入れておく所です。',
-    can:['「ひまです」「一緒にごはん行ける」などの状態は、近くの人みんなに見えます（授業の時限の終わりで消えます）','いる建物は自動で入ります。教室・ひとことを入れると友達に見えます（建物を出るか、90分で消えます）','「いま、気になっていること（悩み・不安）」は、プロフィール編集でいつでも選べます'],
+    can:['「ひまです」「一緒にごはん行ける」などの状態は、近くの人みんなに見えます（授業の時限の終わりで消えます）','いる建物は自動で入ります。教室・メモを入れると友達に見えます（建物を出るか、90分で消えます）','「いま、気になっていること（悩み・不安）」は、プロフィール編集でいつでも選べます'],
     see:'建物・教室が見えるのは友達だけです。どこまで見せるかは、マイページの「🔒 見せる範囲」で変えられます。'},
   tt:{icon:'🗓',title:'時間割',lead:'自分の授業を入れておく所です。',
     can:['同じ時限に同じ授業を入れた人が「📚 同じ授業」の共通点で見つかります。授業中は、同じ授業の人が一覧の一番上に出ます','教室を入れておくと、「いまの自分」に教室の候補が出ます','友達がいると、その日最初の授業の始まりに「いまどこ？」の通知が届きます'],
@@ -4852,9 +4860,9 @@ function openPlaceEdit(auto){
   const friends=`<div class="pssec"><div class="psh">👥 友達だけに見える</div>
       <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
       <div class="field"><label>教室・場所（任意）</label>${roomCand}<input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
-      <div class="field"><label>ひとこと（任意）</label><input id="psNote" maxlength="20" placeholder="例：授業中、図書館で課題" value="${act?esc(p.note||''):''}">
+      <div class="field"><label>いまのメモ<span class="opt">任意・友達にだけ見えます</span></label><input id="psNote" maxlength="20" placeholder="例：授業中、図書館で課題" value="${act?esc(p.note||''):''}">
         <div class="chips psquick">${['授業中','休憩中','ごはん中','課題中'].map(s=>`<span class="c" onclick="putInInput($('#psNote'),'${s}')">${s}</span>`).join('')}</div>
-        <div class="hint">教室・ひとことは <b>${until}ごろ</b>か、建物を出ると消えます</div></div>
+        <div class="hint">教室・メモは <b>${until}ごろ</b>か、建物を出ると消えます</div></div>
       ${auto?'':`<div class="visnote" style="margin-bottom:12px">友達に見せる範囲：<b>${esc(VIS_LABEL[p.visibility])}</b>　<a onclick="closePlaceEdit();openVisHub()">🔒 見せる範囲で変える ›</a></div>`}</div>`;
   // 建物に入って自動で開いた時は、教室を入れて保存するだけの小さい版にする（全部出すと保存ボタンが画面の外だった）
   $('#placeSheet').innerHTML=`<h2 class="pstitle">${auto?`🏢 ${esc(p.place)}に入りました`:'✏️ いまの自分'}</h2>
@@ -5552,7 +5560,7 @@ function openEdit(){
     <h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:16px">プロフィールを編集</h2>
     <div class="field"><label>ニックネーム</label><input id="edName" maxlength="12" value="${esc(profile.name)}"></div>
     <div class="field"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
-    <div class="field"><label>ひとこと（任意）</label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
+    <div class="field"><label>自己紹介<span class="opt">任意・だれにでも見えます</span></label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
     ${attrFieldsHTML('ed')}
     <div class="field"><label>年齢（ほかの人には表示されません）</label><input id="edAge" type="number" inputmode="numeric" min="18" max="99" value="${profile.age||''}"></div>
     <div class="warn-msg" id="edWarn"></div>
@@ -5575,7 +5583,7 @@ async function saveEdit(){
   const bio=$('#edBio').value.trim();
   const ng=ngCheck(name)||ngCheck(bio);
   const w=$('#edWarn');
-  if(ng){ w.textContent='⚠️ 名前かひとことに不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
+  if(ng){ w.textContent='⚠️ 名前か自己紹介に不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
   const miss=attrMissing(edAttr); if(miss)openMissingFold('ed',miss);
   if(miss){ w.textContent='⚠️ '+miss; w.classList.add('show'); w.scrollIntoView({behavior:'smooth',block:'center'}); return; }
   if(ngCheck(edAttr.course)||ngCheck(edAttr.artist)){ w.textContent='⚠️ 科目名・アーティスト名に不適切な言葉が含まれています。修正しないと保存できません。'; w.classList.add('show'); return; }
