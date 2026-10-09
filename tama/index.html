@@ -528,6 +528,9 @@
   .daily .dq{font-size:14.5px;margin:2px 0 8px}
   .daily .chips .c{padding:6px 12px}
   .daily.done{padding:10px 14px;cursor:pointer}
+  .daily.q{padding:10px 14px}.daily.q .dqline{font-size:14.5px;font-weight:800;line-height:1.5;margin-bottom:8px}
+  .daily.q .dqh{display:inline-flex;align-items:center;gap:2px;font-size:11.5px;font-weight:700;color:#b0651a;margin-right:8px;vertical-align:1px}
+  .daily.q .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.daily.q .chips::-webkit-scrollbar{height:0}.daily.q .chips .c{flex-shrink:0;padding:6px 12px;font-size:13px}
   .daily.done .dline{font-size:13px;line-height:1.55}
   .daily.done .dline b{color:var(--amber-deep)}
   .daily.done .dline .dc{color:var(--signal);font-weight:700;white-space:nowrap}
@@ -5518,10 +5521,12 @@ function renderDaily(){
     return;
   }
   if(!mine){
-    el.innerHTML=`<div class="dyday" id="dailyYday"></div>`+head+(t.free
+    // 2026-10-09 あおの指示「ミッション・お題を小さく」：答える前は、お題の1行と選ぶボタンの1列だけ（昨日の結果と説明は、答えた後に広げた時に出す）
+    el.classList.add('q');
+    el.innerHTML=`<div class="dqline"><span class="dqh">🎲 今日のお題<span class="qhelp" role="button" aria-label="今日のお題の説明" onclick="event.stopPropagation();openHelp('daily')">?</span></span>${esc(t.q)}</div>`+(t.free
       ?`<div class="drow"><input id="dailyIn" maxlength="24" placeholder="${esc(t.free)}"><button class="btn btn-primary" onclick="event.stopPropagation();answerDaily($('#dailyIn').value)">答える</button></div>`
       :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="event.stopPropagation();answerDaily('${o}')">${esc(o)}</span>`).join('')}</div>`)
-      +`<div class="dnote">答えると、みんなの答えと、同じ答えの人が見られます（答えは1回だけ）</div>`;
+      ;
     fillDailyStats();
     return;
   }
