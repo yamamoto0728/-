@@ -1849,7 +1849,10 @@ let encMap={}, insideSet=new Set();
 let blocked=new Set();   // 通報・ブロックした相手（自分の画面から消す）
 const R=6371000;
 function relMeters(from,to){const dLat=(to.lat-from.lat)*Math.PI/180,dLng=(to.lng-from.lng)*Math.PI/180;return {e:dLng*R*Math.cos(from.lat*Math.PI/180),n:dLat*R};}
-function esc(s){return (s||'').toString().replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+function esc(s){return (s||'').toString().replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));}
+// onclick="f('${jsq(名前)}')" のように、JS の文字列の中に入れる時はこちら（2026-10-09 セキュリティの見直し）。
+// esc だと属性の中で &#39; が ' に戻って JS の文字列を抜けられてしまう。\uXXXX にすると、HTML でも JS でも安全
+const jsq=s=>String(s??'').replace(/[\\'"<>&\n\r\u2028\u2029]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
 
 /* ---------- onboarding ---------- */
 // 多摩キャン版では、通常版から引き継いだ「タグ・職業・求めている関係・好きなもの・興味」は登録でも編集でも聞かない
@@ -2506,7 +2509,7 @@ function distText(d,id){ if(isFriend(id)||isTest(id))return Math.round(d)+"m"; r
 function nearRow({u,d,common,closed}){
   const st=statusOf(u);
   return `<div class="urow${closed?' closed':''}" onclick="openNear('${String(u.id).replace(/[^\w-]/g,'')}')">
-    <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
+    <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
     <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>
       ${commonLine(common)}${crossBadge(u.id)}
       <div class="b">${st&&!closed?`<span class="stchip">${esc(st)}</span> `:''}${esc(u.bio||'')}</div></div>
@@ -2613,7 +2616,7 @@ function renderNearFriends(openFr){
   const chips=openFr.slice().sort((a,b)=>(a.d??1e9)-(b.d??1e9))
     .map(x=>({id:x.u.id,u:x.u,t:x.d!=null?Math.round(x.d)+'m':presenceText(friendPres(x.u.id))||'キャンパス'})).concat(away);
   const h=chips.length?`<div class="nfh">👥 いまキャンパスにいる友達 <span>${chips.length}人</span><a onclick="go('friends')">友達 ›</a></div>
-    <div class="nfl">${chips.map(c=>`<div class="nfc" onclick="openFriend('${c.id}')"><div class="av${frCls(c.u)}" style="background:${gr(c.u.emoji)}">${c.u.emoji}</div><div class="nm">${esc(c.u.name)}</div><div class="t">${esc(c.t)}</div></div>`).join('')}</div>`:'';
+    <div class="nfl">${chips.map(c=>`<div class="nfc" onclick="openFriend('${c.id}')"><div class="av${frCls(c.u)}" style="background:${gr(c.u.emoji)}">${esc(c.u.emoji)}</div><div class="nm">${esc(c.u.name)}</div><div class="t">${esc(c.t)}</div></div>`).join('')}</div>`:'';
   if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
 }
 // 地図の場所までスクロールする（友達・出店を「地図で見る」時）
@@ -2748,7 +2751,7 @@ function toggleMapFull(){
 function mapIcon(emoji,me,closed){
   const s=me?30:28;
   return L.divIcon({className:'',iconSize:[s,s],iconAnchor:[s/2,s/2],
-    html:`<div class="pmk${me?' me':''}${closed?' closed':''}" style="background:${me?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${emoji}</div>`});
+    html:`<div class="pmk${me?' me':''}${closed?' closed':''}" style="background:${me?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${esc(emoji)}</div>`});
 }
 function centerOnMe(){
   if(!fesMap)return;
@@ -2927,7 +2930,7 @@ function renderCross(){
   const ul=$('#crossList');
   const when=t=>new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
   const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/'/g,"&#39;")},null)'>
-    <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
+    <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
     <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${(u.last_at||0)>=today?hhmm(u.last_at||0):when(u.last_at||0)}${(u.last_at||0)>=today?'・'+esc(u.last_place||''):''}${u.first_at&&u.count>=2?`　（これまで${u.count}回）`:''}</div></div>
     <div class="d"><div class="m${u.count>=2?' rep':''}">${u.count}回</div>${relTag(u.id)}</div></div>`;
   // 前の日にすれ違った人（2026-10-09：「本来は有料の予定」の聞き取りの対象。初めて開く時に1回だけ聞く openCrossPast）
@@ -3196,7 +3199,7 @@ async function openBlocked(){
   if(sb&&ids.length){ const {data}=await sb.from(T('profiles')).select('id,name,emoji').in('id',ids); list=data||[]; }
   const known=new Set(list.map(u=>u.id)); ids.filter(id=>!known.has(id)).forEach(id=>list.push({id,name:'（プロフィールを消した人）',emoji:'🙂'}));
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🚫 ブロックした人</h2><p class="psdesc">ブロックした人は、あなたの近くの人・すれ違い・トークに出ません。相手には知らされません。</p>
-    ${list.length?`<div class="sec">${list.map(u=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji||'🙂'}</div><div class="nm">${esc(u.name||'')}</div><button onclick="unblockUser('${u.id}')">解除</button></div>`).join('')}</div>`:'<div class="sec">ブロックしている人はいません。</div>'}
+    ${list.length?`<div class="sec">${list.map(u=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji||'🙂')}</div><div class="nm">${esc(u.name||'')}</div><button onclick="unblockUser('${u.id}')">解除</button></div>`).join('')}</div>`:'<div class="sec">ブロックしている人はいません。</div>'}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
 }
@@ -3209,7 +3212,7 @@ async function unblockUser(id){
 // トークの右上の「⋯」（2026-10-08 ユーザー役のテスト：いやなことを言われたトークの画面に、通報・ブロックの入口が無かった）
 function openChatMenu(){
   const id=chatPeer, m=chatOf(id); if(!m)return;
-  const nm=esc(m.u.name).replace(/'/g,'&#39;');
+  const nm=jsq(m.u.name);
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">${esc(m.u.name)} さん</h2>
     <button class="rbtn" onclick="closeMembers();openChatProfile()">👤 プロフィールを見る</button>
     <button class="rbtn warn" onclick="closeMembers();reportContext='トーク';openReport('${id}','${nm}')">⚠ 通報・ブロックする<small>通報してもしなくても、相手には知らされません</small></button>
@@ -3229,7 +3232,7 @@ function openSheet(u,d){
   // アプリを閉じた人は「いまここ」ではなく「◯分前までここにいた」と出す
   const closed=!!u.updated_at&&isClosed(u)&&!isTest(id);
   const dist=d==null?'':closed?`<div class="dist">🕘 ${agoText(u.updated_at)}まで、ここから <b>${distText(d,u.id)}</b> の所にいました</div>`:`<div class="dist">📍 いまここから <b>${distText(d,u.id)}</b></div>`;
-  const nm=esc(u.name).replace(/'/g,'&#39;');
+  const nm=jsq(u.name);
   let main;
   if(fr) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button>`;   // 友達は下の「💬 メッセージ」を使う
   else if(talking) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="closeSheet();openChat('${id}','match')">💬 トークを開く</button>`;
@@ -3241,7 +3244,7 @@ function openSheet(u,d){
     main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button>${n>0?`<button class="btn btn-wave" onclick="openWave()">👋 いいね<small style="display:block;font-size:11px;font-weight:500;opacity:.85">今日あと${n}回</small></button>`:`<button class="btn btn-wave" style="opacity:.75" onclick="closeSheet();openSurveyGate('like')">👋 いいね（今日の分は終わり）</button>`}`; }
   else main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">👋 いいね</button>`;
   $('#sheet').innerHTML=`<div class="cover" style="background:${coverBg(u)}"><button class="close" onclick="closeSheet()">✕</button>
-    <div class="initial${frCls(u)}">${u.emoji}</div><div class="idn"><h2>${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''} <span>${esc(facLine(u))}</span></h2>${dist}</div></div>
+    <div class="initial${frCls(u)}">${esc(u.emoji)}</div><div class="idn"><h2>${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''} <span>${esc(facLine(u))}</span></h2>${dist}</div></div>
     <div class="body">${reply&&!fr?`<div class="wavein"><div class="wh">👋 ${esc(u.name)} さんからいいねが届いています</div>${esc(reply.text||'いいねを返すと、トークが始まります')}</div>`:''}
       ${metLine(id)}${attrBlock(u)}<div class="bio">${esc(u.bio||'')}</div></div>
     ${fr?friendBtnHTML(u):''}
@@ -3271,7 +3274,7 @@ function openPreview(mode){
   const me=profile, fr=pvMode==='fr', a=attrsOf(me), p=myPresence, act=presenceActive(p);
   // 相手用シートと同じ組み立て（openSheet の cover + body）。ボタン類は付けない
   const card=asStranger(()=>`<div class="cover" style="background:${coverBg(me)}">
-      <div class="initial${frCls(me)}">${me.emoji}</div><div class="idn"><h2>${esc(me.name)}${badgeIcons(me)?`<i class="bdg">${badgeIcons(me)}</i>`:''} <span>${esc(facLine(me))}</span></h2>
+      <div class="initial${frCls(me)}">${esc(me.emoji)}</div><div class="idn"><h2>${esc(me.name)}${badgeIcons(me)?`<i class="bdg">${badgeIcons(me)}</i>`:''} <span>${esc(facLine(me))}</span></h2>
       <div class="dist">📍 いまここから <b>120m</b>（例）</div></div></div>
     <div class="body">${attrBlock(me)}<div class="bio">${esc(me.bio||'')}</div></div>`);
   // 入れていない項目（相手の画面では、その行ごと出ない）
@@ -3333,7 +3336,7 @@ function endedHTML(u){
 // 押しつけないよう、文は短く1行に収める
 function friendSuggestHTML(u){
   if(!u||u.id===myId||isFriend(u.id))return '';
-  const nm=esc(u.name).replace(/'/g,'&#39;'), r=friendRowWith(u.id);
+  const nm=jsq(u.name), r=friendRowWith(u.id);
   if(r&&r.status==='pending'&&r.to_id===myId)
     return `<div class="frsug"><span>👥 ${esc(u.name)} さんから友達申請が届いています</span><button onclick="acceptFriend(${r.id},'${u.id}','${nm}')">承認する</button></div>`;
   if(r)return `<div class="frsug"><span>👥 友達申請を送っています（承認待ち）</span></div>`;
@@ -3411,7 +3414,7 @@ function showMatchPop(u){const mp=$('#matchpop');
   const m=matches[u.id], last=m&&m.opener&&m.opener.filter(x=>x.from===u.id).pop();
   mp.innerHTML=`<h2 style="color:#0a7f96;text-shadow:none">おたがいにいいね！</h2><p><b style="color:var(--ink)">${esc(u.name)}</b> さんとトークが始まりました（24時間）<br><span style="font-size:12.5px;color:var(--muted)">最初の一言は、共通点の話題から選べます</span></p>
     ${last?`<div class="wavein" style="max-width:280px;text-align:left;margin-bottom:22px">${esc(last.text)}</div>`:''}
-    <div class="avs"><div class="a" style="background:${profile?gr(profile.emoji):'#f78b3c'}">${profile?profile.emoji:'😀'}</div><span class="heart" style="animation:none">👋</span><div class="a" style="background:${gr(u.emoji)}">${u.emoji}</div></div>
+    <div class="avs"><div class="a" style="background:${profile?gr(profile.emoji):'#f78b3c'}">${profile?profile.emoji:'😀'}</div><span class="heart" style="animation:none">👋</span><div class="a" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div></div>
     <div class="mbtns"><button class="btn btn-wave" onclick="closePop();openChat('${u.id}','match')">トークを開く</button><button class="btn later" onclick="closePop()">あとで</button></div>`;
   mp.classList.add('show');}
 function closePop(){$('#matchpop').classList.remove('show');}
@@ -3438,7 +3441,7 @@ function renderFriendTalks(frItems){
     // 「ひまです」などのいまの状態は、知らない人には出ていたのに友達には出ていなかった（2026-10-03 修正）。
     // 空きコマに声をかけられる相手を探すのが友達タブの目的なので、居場所より先に出す
     const st=statusOf(friendUser(id)||u);
-    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
+    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}${online?'<span class="on"></span>':''}</div>
       <div class="info"><div class="nm">${esc(u.name)}${st?`<span class="stchip">💬 ${esc(st)}</span>`:''}${last&&last.at?`<span class="gr" style="font-size:11px;color:var(--muted2);font-weight:500;margin-left:6px">${esc(dayLabel(last.at)==='今日'?hhmm(last.at):dayLabel(last.at))}</span>`:''}</div>
         <div class="last${un?' unread':''}">${sub}</div>${pt?`<div class="mtime" style="color:#0a7f96">📍 ${esc(pt)}</div>`:''}</div>
       ${unreadBadge(id)}</div>${i<frItems.length-1?'<div class="sep"></div>':''}`; }).join('');
@@ -3462,7 +3465,7 @@ function renderMatches(){
   if(talkTab==='fr'){ list.innerHTML=renderFriendTalks(frItems); updateTalkDot(); return; }
   let h=`<div class="cmsub">友達でない人とのトークは24時間で終わります。続けたい相手はトークの中から「👥 友達に誘う」</div>`;
   if(ins.length){
-    h+=`<div class="wavehead">👋 いいねが届いています（${ins.length}人）</div>`+ins.map(({id,u,w})=>`<div class="mrow" onclick="openUserSheet('${id}')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
+    h+=`<div class="wavehead">👋 いいねが届いています（${ins.length}人）</div>`+ins.map(({id,u,w})=>`<div class="mrow" onclick="openUserSheet('${id}')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
       <div class="info"><div class="nm">${esc(u.name)}<span class="gr" style="font-size:11px;color:var(--muted);font-weight:500;margin-left:5px">${esc(facLine(u))}</span></div><div class="last unread">${esc(w.text||likeCommonText(u)||'👋 いいねが届きました')}</div><div class="mtime">${agoText(w.at)}</div></div>
       <div style="display:flex;flex-direction:column;align-items:center"><button class="wavebtn btn-wave" onclick="event.stopPropagation();openUserSheet('${id}');setTimeout(openWave,50)">いいねを返す</button><button class="later2" onclick="event.stopPropagation();hideWave('${id}')">見送る</button></div></div>`).join('')
       +'<div class="sep" style="margin-top:4px"></div>';
@@ -3477,19 +3480,19 @@ function renderMatches(){
     const sub=last?(last.from===myId?'あなた: ':'')+esc(msgPlain(last.text)):op?(op.from===myId?'あなた: ':'')+'👋 '+esc(op.text):(m?'トークが始まりました':'メッセージを送ってみよう');
     // 緑の点は、いまアプリを開いている人だけ
     const o=findUser(id), online=!!o&&!isClosed(o), un=hasUnread(id);
-    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
+    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}${online?'<span class="on"></span>':''}</div>
       <div class="info"><div class="nm">${esc(u.name)} ${tag}</div><div class="last${un?' unread':''}">${sub}</div></div>
       ${unreadBadge(id)}</div>${i<items.length-1?'<div class="sep"></div>':''}`;}).join('');
   // 自分が話しかけて返事を待っている人（小さく下に）
   const waiting=Object.keys(myWaves).filter(id=>!matches[id]&&!isFriend(id)&&!blocked.has(id)&&anyUser(id));
   if(waiting.length) h+=`<div class="wavehead" style="color:var(--muted);margin-top:10px">⏳ いいね済み・相手のいいね待ち（${waiting.length}人）</div>`
-    +waiting.map(id=>{ const u=anyUser(id); return `<div class="mrow" style="padding:8px 18px;opacity:.8" onclick="openUserSheet('${id}')"><div class="av" style="width:36px;height:36px;font-size:18px;background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="nm" style="font-size:13.5px">${esc(u.name)}</div><div class="last">${myWaves[id].text?'あなた: 👋 '+esc(myWaves[id].text):'👋 いいねしました'}</div></div></div>`; }).join('');
+    +waiting.map(id=>{ const u=anyUser(id); return `<div class="mrow" style="padding:8px 18px;opacity:.8" onclick="openUserSheet('${id}')"><div class="av" style="width:36px;height:36px;font-size:18px;background:${gr(u.emoji)}">${esc(u.emoji)}</div><div class="info"><div class="nm" style="font-size:13.5px">${esc(u.name)}</div><div class="last">${myWaves[id].text?'あなた: 👋 '+esc(myWaves[id].text):'👋 いいねしました'}</div></div></div>`; }).join('');
   // 24時間が終わったトーク（2026-10-02）。前はここから黙って消えていたので、相手に辿り着けなくなっていた
   const over=Object.keys(matches).filter(id=>!isFriend(id)&&!blocked.has(id)&&isExpired(matches[id]))
     .sort((a,b)=>(matches[b].matchedAt||0)-(matches[a].matchedAt||0));
   if(over.length) h+=`<div class="wavehead" style="color:var(--muted);margin-top:10px">💬 終わったトーク（${over.length}人）</div>`
     +over.map(id=>{ const m=matches[id], u=m.u, n=(m.msgs||[]).length;
-      return `<div class="mrow endrow" style="padding:8px 18px" onclick="openUserSheet('${id}')"><div class="av" style="width:36px;height:36px;font-size:18px;background:${gr(u.emoji)}">${u.emoji}</div>
+      return `<div class="mrow endrow" style="padding:8px 18px" onclick="openUserSheet('${id}')"><div class="av" style="width:36px;height:36px;font-size:18px;background:${gr(u.emoji)}">${esc(u.emoji)}</div>
         <div class="info"><div class="nm">${esc(u.name)}</div><div class="last">${n?n+'通やりとりしました':'メッセージなし'}・もう一度話せます</div></div></div>`; }).join('');
   list.innerHTML=h;
   updateTalkDot();   // 新しいメッセージを読み込んだ時に、未読のバッジも一緒に直す
@@ -3615,7 +3618,7 @@ function meetCardHTML(){
     :ta?`${nm}さんは <b>${esc(ta)}</b>（あなたはまだ答えていません）`:ma?`${nm}さんはまだ答えていません（あなたは <b>${esc(ma)}</b>）`:'';
   const says=topicsFor(u,2);
   return meetHead('🤝 会う前に見る1枚')
-    +`<div class="mtwho"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div><div><div class="nm">${nm}</div><div class="sub">${esc(facLine(u))}${st?`<br>💬 いま「${esc(st)}」`:''}${pt?`<br>📍 ${esc(pt)}`:''}</div></div></div>`
+    +`<div class="mtwho"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div><div><div class="nm">${nm}</div><div class="sub">${esc(facLine(u))}${st?`<br>💬 いま「${esc(st)}」`:''}${pt?`<br>📍 ${esc(pt)}`:''}</div></div></div>`
     +`<div class="mtsec"><div class="mth">🎯 共通点</div>${cd.length?`<div class="fchips">${cd.slice(0,6).map(c=>`<span class="fchip hit">${isRare(c.key)?'✨ ':''}${esc(c.label)}</span>`).join('')}</div>`:`<div class="mtnone">まだ見つかっていません。下の「🎲 ふたりのお題」で探してみよう</div>`}</div>`
     +metLine(id)
     +(same.length?`<div class="mtsec"><div class="mth">📚 同じ授業</div><div class="mtrow">${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')}</div></div>`:'')
@@ -3769,7 +3772,7 @@ async function openChat(uid,from){
 function renderChatHead(){
   const el=$('#chatFr'); if(!el||!chatPeer)return;
   const id=chatPeer, m=chatOf(id); if(!m){ el.innerHTML=''; return; }
-  const r=friendRowWith(id), nm=esc(m.u.name).replace(/'/g,'&#39;');
+  const r=friendRowWith(id), nm=jsq(m.u.name);
   // 名前の下：友達なら「いまの自分」、そうでなければトークの残り時間
   const pt=isFriend(id)?presenceText(friendPres(id)):'';
   $('#chatSt').textContent=isFriend(id)?(pt?'📍 '+pt:'👥 友達'):isTest(id)?'🧪 テスト用の人':m.matchedAt?'⏳ トークは残り'+leftText(matchLeftMs(m)):'';
@@ -3782,7 +3785,7 @@ function renderChat(){const m=chatOf(chatPeer);if(!m)return;const box=$('#msgs')
   const expired=isExpired(m); const ms=matchLeftMs(m);
   renderChatHead();
   let banner='';
-  const invite=`<span class="frhint">もっと話したいなら <button onclick="requestFriend('${chatPeer}','${esc(m.u.name).replace(/'/g,'&#39;')}')">👥 友達に誘う</button>（友達とは期限なしで話せます）</span>`;
+  const invite=`<span class="frhint">もっと話したいなら <button onclick="requestFriend('${chatPeer}','${jsq(m.u.name)}')">👥 友達に誘う</button>（友達とは期限なしで話せます）</span>`;
   if(isFriend(chatPeer)) banner='';
   else if(m.matchedAt&&!isTest(chatPeer)){
     if(expired) banner='<div class="ttlbar over">⌛ このトークは24時間が過ぎて終わりました</div>';
@@ -4430,7 +4433,7 @@ function roomMsgMenu(id){
   const mine=m.from_id===myId, canDel=mine||isRoomOwner(r);
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">この投稿</h2><div class="sec">${esc(m.text)}</div>
     ${canDel?`<button class="rbtn warn" onclick="deleteRoomMsg('${esc(String(id))}')">🗑 この投稿を消す${mine?'':'<small>オーナーとして消します（書いた人には通知されません）</small>'}</button>`:''}
-    ${mine?'':`<button class="rbtn warn" onclick="closeMembers();reportContext='コミュニティ「${esc(r.name).replace(/'/g,'&#39;')}」の投稿「${esc(m.text.slice(0,30)).replace(/'/g,'&#39;')}」';openReport('${m.from_id}','${esc(m.name||'匿名').replace(/'/g,'&#39;')}')">⚠ この投稿を通報する<small>書いた人はあなたの画面に出なくなります</small></button>`}
+    ${mine?'':`<button class="rbtn warn" onclick="closeMembers();reportContext='コミュニティ「${jsq(r.name)}」の投稿「${jsq(m.text.slice(0,30))}」';openReport('${m.from_id}','${jsq(m.name||'匿名')}')">⚠ この投稿を通報する<small>書いた人はあなたの画面に出なくなります</small></button>`}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
 }
@@ -4453,13 +4456,13 @@ async function openRoomInfo(){
     members.sort((a,b)=>(a.id===r.owner_id?-1:b.id===r.owner_id?1:a.id===myId?-1:b.id===myId?1:0));
   }
   let code=null; if(owner&&r.visibility==='invite'){ const {data}=await sb.rpc('tama_room_code',{p_room:k}); code=data; }
-  const nm=u=>esc(u.name||'').replace(/'/g,'&#39;');
+  const nm=u=>jsq(u.name||'');
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">${roomIcon(r)} ${esc(r.name)}</h2><p class="psdesc">${esc(r.topic||'')}</p>
     <div class="sec"><b>📜 ルール</b><div class="pre">${esc(r.rules||'（まだありません）')}</div></div>
     <div class="sec"><b>🚪 入れる人</b>${esc(roomWhoText(r))}${code?`<div style="margin-top:6px">招待コード <span class="code">${esc(code)}</span> <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="copyText('${esc(code)}')">コピー</button></div>`:''}</div>
     <div class="sec"><b>⏳ 期限・👥 定員</b>${roomLeft(r)}${r.expires_at?`（${fesTime(Date.parse(r.expires_at),true)}まで）`:''} ・ 定員 ${r.capacity?r.capacity+'人':'なし'}</div>
     ${meetText(r.meet)?`<div class="sec"><b>📍 集まる約束</b>${esc(meetText(r.meet))}${r.going?`（👍 ${r.going}人）`:''}</div>`:''}
-    ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.map(u=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji||'🙂'}</div><div class="nm">${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}</div>
+    ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.map(u=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji||'🙂')}</div><div class="nm">${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}</div>
       ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button><button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
       :`<div class="sec"><b>👑 オーナー</b>${!r.owner_id&&isClassRoom(r)?'なし（運営が見守る授業の部屋）':esc(r.owner_name||'なし')}<br><span style="font-size:11.5px;color:var(--muted)">参加者は、参加すると見られます</span></div>`}
     ${joined?`<div class="sharerow" style="margin-bottom:6px"><div class="lab">🔔 この部屋の通知<small>オフにすると、投稿があっても通知しません</small></div><div class="toggle${r.muted?'':' on'}" onclick="toggleRoomMute()"><div class="k"></div></div></div>`:''}
@@ -4900,7 +4903,7 @@ async function openMembers(){
         let d=null; if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.round(Math.hypot(r.e,r.n));}
         const me=u.id===myId;
         return `<div class="urow" ${me?'':`onclick='closeMembers();openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':d})'`}>
-          <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
+          <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
           <div class="info"><div class="n">${esc(u.name)}${me?' <span class="joined-tag">あなた</span>':''}</div>
           <div class="b">${esc(u.bio||'')}</div></div>
           <div class="d">${me?'':`<div class="m" style="font-size:12.5px">見る ›</div>`}</div></div>`;}).join('')}
@@ -5100,7 +5103,7 @@ function showFrNudge(){
   const f=frNudgeCur=frNudgeQ.shift(), el=$('#frNudge'), day=f.c.key.startsWith('day:');
   const text=day?`🎲 友達の<b>${esc(f.u.name)}</b>さんも、今日のお題で「<b>${esc(dailyAnswer(f.u))}</b>」！`
     :`✨ <b>${esc(f.u.name)}</b>さんと新しい共通点：${esc(f.c.label)}${f.more>0?` ほか${f.more}つ`:''}`;
-  el.innerHTML=`<div class="av${frCls(f.u)}" style="background:${gr(f.u.emoji)}">${f.u.emoji}</div><div class="tx">${text}</div><button class="go" onclick="frNudgeTalk()">💬 話す</button><button class="x" onclick="hideFrNudge()" aria-label="閉じる">✕</button>`;
+  el.innerHTML=`<div class="av${frCls(f.u)}" style="background:${gr(f.u.emoji)}">${esc(f.u.emoji)}</div><div class="tx">${text}</div><button class="go" onclick="frNudgeTalk()">💬 話す</button><button class="x" onclick="hideFrNudge()" aria-label="閉じる">✕</button>`;
   el.classList.add('show');
   clearTimeout(frNudgeTimer); frNudgeTimer=setTimeout(hideFrNudge,10000);
 }
@@ -5245,18 +5248,18 @@ function renderFriends(){
   const friends=rows.filter(r=>r.status==='accepted').map(r=>{ const id=otherIdOf(r); return {r,id,u:friendUser(id),p:friendPres(id)}; })
     .filter(x=>x.u).sort((a,b)=>(presenceText(b.p)?1:0)-(presenceText(a.p)?1:0));   // 建物にいる友達を上に
   $('#friendSub').textContent=friends.length+'人';
-  const nm=u=>esc(u.name).replace(/'/g,'&#39;');
+  const nm=u=>jsq(u.name);
   const who=id=>friendUser(id)||{name:'だれか',emoji:'🙂'};
   let h='';
   if(friendTablesMissing) h+=`<div class="frnote">⚠️ 友達機能のデータベースがまだ準備されていません（運営向け：supabase/tama_friends.sql を実行）</div>`;
   if(incoming.length){
     h+=`<div class="listhead">📩 届いた友達申請</div><div class="ulist">`+incoming.map(r=>{ const u=who(r.from_id);
-      return `<div class="urow" style="cursor:default"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">友達申請が届いています</div></div>
+      return `<div class="urow" style="cursor:default"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">友達申請が届いています</div></div>
         <div class="frbtns"><button class="btn btn-primary" onclick="acceptFriend(${r.id},'${r.from_id}','${nm(u)}')">承認</button><button class="btn btn-ghost" onclick="removeFriendRow(${r.id},false)">断る</button></div></div>`; }).join('')+`</div>`;
   }
   h+=`<div class="listhead">👥 友達はいまどこ？</div><div class="ulist">`;
   h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
-      return `<div class="urow" onclick="openFriend('${id}')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
+      return `<div class="urow" onclick="openFriend('${id}')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
         <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}${sameDaily(u)?`<span class="stchip same">🎲 お題が同じ</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}${freeText(id)?`<div class="mtime frfreeline">${esc(freeText(id))}</div>`:''}</div>
         <div class="d">${map?`<button class="frmapbtn" onclick="event.stopPropagation();showFriendOnMap('${id}')">🗺 地図</button>`:''}</div></div>`; }).join('')
     :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>目の前にいる人とは、4桁のコードで<br>すぐ友達になれます。</p>
@@ -5265,7 +5268,7 @@ function renderFriends(){
   h+=freeTogetherHTML();   // 今日、いっしょに空いているコマ（2026-10-08）
   if(sent.length){
     h+=`<div class="listhead">⏳ 送った申請</div><div class="ulist">`+sent.map(r=>{ const u=who(r.to_id);
-      return `<div class="urow" style="cursor:default"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">承認待ち</div></div>
+      return `<div class="urow" style="cursor:default"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">承認待ち</div></div>
         <div class="frbtns"><button class="btn btn-ghost" onclick="removeFriendRow(${r.id},false)">取り消す</button></div></div>`; }).join('')+`</div>`;
   }
   box.innerHTML=h;
@@ -5285,9 +5288,9 @@ function friendBtnHTML(u){
       +(ttShareMissing||isTest(u.id)?'':`<div class="sharerow"><div class="lab">🗓 自分の時間割を見せる<small>${hasCourseNames()?'授業名・教室・時限が、この友達にだけ見えます':'時間割に授業名か教室を入れると見せられます'}</small></div>
         <div class="toggle${ttSharesTo.has(u.id)?' on':''}" onclick="toggleTTShare('${u.id}')"><div class="k"></div></div></div>`)
       +`<button class="frquit" onclick="removeFriendRow(${r.id},true)">友達をやめる</button>`;
-  }else if(r&&r.to_id===myId) inner=`<button class="btn btn-primary frbtn" onclick="acceptFriend(${r.id},'${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">👥 友達申請を承認する</button>`;
+  }else if(r&&r.to_id===myId) inner=`<button class="btn btn-primary frbtn" onclick="acceptFriend(${r.id},'${u.id}','${jsq(u.name)}')">👥 友達申請を承認する</button>`;
   else if(r) inner=`<button class="btn btn-ghost frbtn" disabled>👥 友達申請中（承認待ち）</button>`;
-  else inner=`<button class="btn btn-ghost frbtn" onclick="requestFriend('${u.id}','${esc(u.name).replace(/'/g,'&#39;')}')">👥 友達申請する</button>`;
+  else inner=`<button class="btn btn-ghost frbtn" onclick="requestFriend('${u.id}','${jsq(u.name)}')">👥 友達申請する</button>`;
   return `<div class="frrow" id="sheetFriend">${inner}</div>`;
 }
 function refreshSheetFriendBtn(id){ const el=$('#sheetFriend'); if(el&&curSheetUser&&curSheetUser.id===id)el.outerHTML=friendBtnHTML(curSheetUser); }
@@ -5308,7 +5311,7 @@ function drawFriendMarkers(){
     const id=otherIdOf(r), o=friendOnMap(id); if(!o)return;
     const u=friendUser(id)||o;
     L.marker([o.lat,o.lng],{zIndexOffset:500,icon:L.divIcon({className:'',iconSize:[30,30],iconAnchor:[15,15],
-      html:`<div class="pmk fr" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="frname">${esc(u.name)}</div>`})})
+      html:`<div class="pmk fr" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div><div class="frname">${esc(u.name)}</div>`})})
       .on('click',()=>openFriend(id)).addTo(fesLayer);
   });
 }
@@ -5976,7 +5979,7 @@ function renderVisHub(){
   const ttRows=ttShareMissing?'<div class="vishint">時間割を見せる機能は準備中です</div>'
     :!fr.length?'<div class="vishint">友達になると、ここで友達ごとに選べます</div>'
     :(!canTT?'<div class="vishint">時間割に授業名か教室を入れると見せられます</div>':'')
-      +fr.map(({id,u})=>`<div class="sharerow visfr"><div class="lab"><span class="vav" style="background:${gr(u.emoji)}">${u.emoji}</span>${esc(u.name)}</div>
+      +fr.map(({id,u})=>`<div class="sharerow visfr"><div class="lab"><span class="vav" style="background:${gr(u.emoji)}">${esc(u.emoji)}</span>${esc(u.name)}</div>
         <div class="toggle${ttSharesTo.has(id)?' on':''}" onclick="toggleTTShare('${id}')"><div class="k"></div></div></div>`).join('');
   $('#visSheet').innerHTML=`<h2 class="pstitle">🔒 見せる範囲</h2>
     <p class="psdesc">だれに何が見えるかを、ここでまとめて変えられます。</p>
@@ -6272,7 +6275,7 @@ function renderLook(){
   }else if(lookTab==='bg'){
     body=svGate+`<div class="lkg wide">${Object.entries(LOOK_BG).map(([id,b])=>lookCell((svOpen?L.bg||'auto':'auto')===id,svOpen&&lookHas(b.c),`<span class="lkbg" style="background:${b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(p.emoji)}"></span>`,(svOpen?lookHow(b.c):'アンケートに答えると変えられます'),`lookSet('bg','${id}')`,lookHas(b.c)?b.name:lookHow(b.c))).join('')}</div>`;
   }else if(lookTab==='fr'){
-    body=svGate+`<div class="lkg wide">${Object.entries(LOOK_FR).map(([id,f])=>lookCell((svOpen?L.fr||'none':'none')===id,svOpen&&lookHas(f.c),`<span class="lke${id==='none'?'':' fr-'+id}" style="background:${gr(p.emoji)}">${p.emoji}</span>`,(svOpen?lookHow(f.c):'アンケートに答えると変えられます'),`lookSet('fr','${id}')`,lookHas(f.c)?f.name:lookHow(f.c))).join('')}</div>`;
+    body=svGate+`<div class="lkg wide">${Object.entries(LOOK_FR).map(([id,f])=>lookCell((svOpen?L.fr||'none':'none')===id,svOpen&&lookHas(f.c),`<span class="lke${id==='none'?'':' fr-'+id}" style="background:${gr(p.emoji)}">${esc(p.emoji)}</span>`,(svOpen?lookHow(f.c):'アンケートに答えると変えられます'),`lookSet('fr','${id}')`,lookHas(f.c)?f.name:lookHow(f.c))).join('')}</div>`;
   }else{
     const sh=badgeShown(p);
     body=`<div class="lknote">持っているバッジから1つ、名前の横に出せます。持っているバッジは全部プロフィールに並びます。</div>`
@@ -6280,7 +6283,7 @@ function renderLook(){
       +Object.entries(BADGES).map(([id,b])=>{ const has=badgeKeys(p).includes(id); return lookCell(sh===id,has,`<span class="lkb">${b.icon}</span><span class="lkbt"><b>${esc(b.label)}</b><em>${esc(has?b.desc:'🔒 '+lookHow(b.c))}</em></span>`,lookHow(b.c),`lookSet('badge','${id}')`); }).join('')+`</div>`;
   }
   $('#memSheet').innerHTML=`<div class="lk">
-    <div class="lkprev"><div class="lkcover" style="background:${coverBg(p)}"><span class="lkav${frCls(p)}" style="background:${gr(p.emoji)}">${p.emoji}</span><b>${esc(p.name)}${badgeIcons(p)?' '+badgeIcons(p):''}</b></div></div>
+    <div class="lkprev"><div class="lkcover" style="background:${coverBg(p)}"><span class="lkav${frCls(p)}" style="background:${gr(p.emoji)}">${esc(p.emoji)}</span><b>${esc(p.name)}${badgeIcons(p)?' '+badgeIcons(p):''}</b></div></div>
     <h2 class="pstitle" style="margin:12px 0 2px">🎨 きせかえ <span class="lkcnt">${got}/${all.length} 集めました</span></h2>
     <div class="seg lktabs">${tabs.map(([k,t])=>`<button class="${lookTab===k?'on':''}" onclick="lookTab='${k}';renderLook()">${t}</button>`).join('')}</div>
     <div class="lkbody">${body}</div>
