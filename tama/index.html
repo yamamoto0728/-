@@ -888,6 +888,9 @@
   .frfree .ffrow{display:flex;gap:8px;align-items:baseline;padding:5px 0;font-size:13px;border-top:1px solid var(--line)}.frfree .ffrow:first-child{border-top:0}
   .frfree .ffrow b{color:#14805c;flex-shrink:0}.frfree .ffrow span{font-size:11px;color:var(--muted);flex-shrink:0}
   .frfree .ffnote{font-size:10.5px;color:var(--muted2);margin-top:3px}
+  /* 本来は有料の予定（2026-10-09） */
+  .rinfo.pw .pwic{font-size:40px;text-align:center;margin:4px 0 6px}.rinfo.pw .pwprice{color:var(--amber-deep)}
+  .rinfo.pw .pwnote{font-size:11px;color:var(--muted);line-height:1.7;margin-top:12px;text-align:center}
   .nearjump{margin:0 16px 8px;padding:9px 14px;border-radius:14px;background:linear-gradient(90deg,rgba(15,176,205,.12),rgba(32,180,131,.10));border:1px solid rgba(15,176,205,.35);font-size:13px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer}
   .nearjump:empty{display:none}.nearjump b{color:#0a7f96;font-size:14.5px}.nearjump span{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal)}
   .startcard{margin:2px 16px 10px;padding:10px 12px 6px;border-radius:16px;background:#fff;border:1.5px solid rgba(245,151,47,.5);box-shadow:0 4px 14px rgba(245,151,47,.12)}
@@ -1625,7 +1628,7 @@ function pushHintText(){
 // 1人1日1行（tama_visits、supabase/tama_retention.sql）。位置は記録しない（あおの決定。利用規約の第4条に記載）。
 // それまでのDBは上書きされる値しか無く、「初日に来た人が何日目に戻ってきたか」が分からなかった。
 // 開いた回数は、5分以上あけて開き直したら1回と数える。キャンパスにいた・近くの人数・通知・お題は、良くなった時だけ送り直す
-const APP_VER='2026-10-08b';
+const APP_VER='2026-10-09';
 let visitsMissing=false, visitDay=null, visitSent=null, visitLastOpen=0, visitTimer=null, lastOpenCount=0;
 const jstDateStr=()=>new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 function visitNow(){ return {on:!!myPos&&!fesOutside&&inCampus(myPos.lat,myPos.lng), near:lastOpenCount, push:pushOk(), daily:!!(profile&&dailyAnswer(profile))}; }
@@ -2008,7 +2011,7 @@ function attrFieldsHTML(p,part){
     <div class="field"><label>わかる！あるある<span class="req">必須・1〜${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
       <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
         <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
-    <div class="field"><label>気になっている授業<span class="opt">任意・取っている授業・取りたい授業など1つ</span></label><input id="${p}Course" data-sugg="course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
+    <div class="field"><label>これだけは落としたくない授業<span class="opt">任意・いま取っている授業から1つ</span></label><input id="${p}Course" data-sugg="course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ授業を書いた人には「同じ！」と出ます。テスト前に情報交換できる仲間が見つかるかも</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field worryf"><label>${WORRY_LABEL}<span class="opt">任意・${FA.purposePick}つまで</span></label>
       <div class="hint" style="margin:0 0 8px">選ばなくても大丈夫です。あとで、プロフィール編集からいつでも変えられます。</div>
@@ -2069,7 +2072,7 @@ function bindAttrForm(p,st){
 const MATCH_KINDS=[
   {k:'art', icon:'🎧', label:'よく聴くアーティスト'},
   {k:'cls', icon:'📚', label:'時間割の授業（同じ曜日・時限）'},
-  {k:'crs', icon:'📝', label:'気になっている授業'},
+  {k:'crs', icon:'📝', label:'これだけは落としたくない授業'},
   {k:'day', icon:'🎲', label:'今日のお題の答え'},
   {k:'aru', icon:'💬', label:'わかる！あるある'},
   {k:'goal',icon:'🌱', label:'これから・目標'},
@@ -2121,7 +2124,7 @@ function commonRaw(u){
   (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))add('goal:'+x,x); });
   const ma=normAns(me.artist); if(ma&&ma===normAns(th.artist))add('art:'+ma,'同じアーティスト「'+th.artist+'」');
   (me.aruaru||[]).forEach(x=>{ if((th.aruaru||[]).includes(x))add('aru:'+x,'わかる「'+x+'」'); });
-  if(sameCourse(u))add('crs:'+normCourse(me.course),'気になっている授業「'+th.course+'」');
+  if(sameCourse(u))add('crs:'+normCourse(me.course),'落としたくない授業「'+th.course+'」');
   // 時間割で同じ曜日・時限に同じ授業名を入れている人（毎週会える人なので、共通点に数える）
   (samePeers[u.id]||[]).forEach(r=>add('cls:'+r.slot+':'+normAns(r.course),'同じ授業「'+r.course+'」'));
   // 今日のお題で同じ答え（その日だけの共通点。偶然の出会いを作るため）
@@ -2251,7 +2254,7 @@ function attrBlock(u){
     ${shownWorry.length?`<div class="fh">${openWorry?'いま、気になっていること':'いま、おたがいに気になっていること'}</div><div class="fchips">${shownWorry.map(x=>`<span class="fchip worry${sharedPurposes.includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>${sharedPurposes.length?'<div class="worrysame">🤝 あなたと同じことが気になっています</div>':''}`:''}
     ${(a.goals||[]).length?`<div class="fh">これから・目標</div><div class="fchips">${a.goals.map(chip).join('')}</div>`:''}
     ${a.hometown?`<div class="frow" style="margin-top:8px">🏠 出身 <b>${esc(a.hometown)}</b></div>`:''}
-    ${a.course?`<div class="qline"><span class="qt">気になっている授業</span><b>${esc(a.course)}</b>${courseHit?'<span class="same">同じ！</span>':''}</div>`:''}
+    ${a.course?`<div class="qline"><span class="qt">これだけは落としたくない授業</span><b>${esc(a.course)}</b>${courseHit?'<span class="same">同じ！</span>':''}</div>`:''}
   </div>`;
 }
 // 近くの人の一番上に「いまの自分」と「時間割」の2枚のタイル（2026-09-24。ちかくの強みなので、いちばん目立つ所に大きく置いた）。
@@ -2690,17 +2693,29 @@ let crossShowAll=false;
 function renderCross(){
   updateRarity();
   const today=jstTodayStart().getTime();
-  const arr=crossShown().filter(u=>(u.last_at||0)>=today).sort((a,b)=>(b.last_at||0)-(a.last_at||0));
+  const all=crossShown().sort((a,b)=>(b.last_at||0)-(a.last_at||0));
+  const arr=all.filter(u=>(u.last_at||0)>=today), past=all.filter(u=>(u.last_at||0)<today);
   $('#crossSub').textContent=arr.length?'今日 '+arr.length+'人':'今日はまだ0人';
   const ul=$('#crossList');
-  if(!arr.length){ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>今日はまだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。<br><span style="font-size:11.5px;color:var(--muted)">前の日にすれ違った人は、日付が変わるとここから消えます（回数はプロフィールに残ります）</span></p></div>`;return;}
+  const when=t=>new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
   const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/'/g,"&#39;")},null)'>
     <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${hhmm(u.last_at||0)}・${esc(u.last_place||'')}${u.first_at&&u.count>=2?`　（これまで${u.count}回）`:''}</div></div>
+    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${(u.last_at||0)>=today?hhmm(u.last_at||0):when(u.last_at||0)}${(u.last_at||0)>=today?'・'+esc(u.last_place||''):''}${u.first_at&&u.count>=2?`　（これまで${u.count}回）`:''}</div></div>
     <div class="d"><div class="m${u.count>=2?' rep':''}">${u.count}回</div>${relTag(u.id)}</div></div>`;
+  // 前の日にすれ違った人（2026-10-09：「本来は有料の予定」の聞き取りの対象。初めて開く時に1回だけ聞く openCrossPast）
+  const pastH=!past.length?'':crossShowPast
+    ?`<div class="nearsec" style="padding-left:6px;margin-top:8px">前の日にすれ違った人 <span class="cnt">${past.length}人</span></div>`+past.slice(0,50).map(row).join('')
+    :`<button class="btn btn-ghost nearmore" onclick="openCrossPast()">🕘 前の日にすれ違った人を見る（${past.length}人）</button>`;
+  if(!arr.length){ ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>今日はまだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`+pastH; return; }
   const shown=crossShowAll?arr:arr.slice(0,CROSS_LIMIT), more=arr.length-shown.length;
   ul.innerHTML=`<div class="nearsec" style="padding-left:6px">今日すれ違った人 <span class="cnt">${arr.length}人</span></div>`+shown.map(row).join('')
-    +(more>0?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">もっと見る（あと${more}人）</button>`:'');
+    +(more>0?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">もっと見る（あと${more}人）</button>`:'')+pastH;
+}
+let crossShowPast=false;
+function openCrossPast(){
+  const show=()=>{ crossShowPast=true; renderCross(); };
+  if(paywallNeed('cross_past'))return paywallAsk('cross_past',show);
+  show();
 }
 function confettiBurst(){
   const cv=$('#confetti'); if(!cv)return; cv.width=cv.clientWidth; cv.height=cv.clientHeight;
@@ -2818,6 +2833,7 @@ const TERMS_HTML=`
 <p>氏名・電話番号・メールアドレス・住所などの個人情報は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
 <p>また、研究のため、利用状況（アプリを開いた日と回数、その日キャンパスの中にいたか、近くに表示された人数、通知とホーム画面のアプリを使っているか、今日のお題に答えたか）を記録します。この記録に位置は含みません。</p>
 <p>あわせて、すれ違った相手と日時・場所（建物の名前）を、記録した本人だけが見られる形で記録します。また、任意で答える「ひとこと」（人とのつながりの感じ方についての短い質問）の回答を記録します。「ひとこと」の回答はほかの利用者には見えず、答えなくてもすべての機能を使えます。</p>
+<p>一部の機能を初めて使う時に、有料になった場合に使いたいかどうかをおたずねし、その選択を記録します。本サービスが利用者に請求することはありません。</p>
 <h4>第5条（禁止事項）</h4>
 <p>次の行為を禁止します。</p>
 <p>・他の利用者への迷惑行為、つきまとい、脅迫、差別的言動<br>
@@ -3010,7 +3026,7 @@ function openPreview(mode){
   if(!me.bio)miss.push('自己紹介');
   if(!a.artist)miss.push('よく聴くアーティスト');
   if(!(a.aruaru||[]).length)miss.push('わかる！あるある');
-  if(!a.course)miss.push('気になっている授業');
+  if(!a.course)miss.push('これだけは落としたくない授業');
   // 悩み・不安は「入れていない項目」として催促しない（任意で、入れないのも大事な選択なので）
   if(!(a.goals||[]).length)miss.push('これから・目標');
   if(!a.hometown)miss.push('出身');
@@ -3242,7 +3258,7 @@ function topicsFor(u,n=3,exclude=[]){
     if(kind==='art') add(`${th.artist}、自分もよく聴きます！いちばん好きな曲ってなんですか？`,rare);
     else if(kind==='aru'){ const x=c.key.slice(4); add(`「${x}」、自分もです笑　わかる人がいてうれしい`,rare); }
     else if(kind==='cls'){ const r=(samePeers[u.id]||[]).find(r=>c.key==='cls:'+r.slot+':'+normAns(r.course)); if(r)add(`${slotLabel(r.slot)}の${r.course}、同じ授業ですよね！あの授業どうですか？`,rare); }
-    else if(kind==='crs') add(`${th.course}、自分も気になってるんです！どんな授業か知ってますか？`,rare);
+    else if(kind==='crs') add(`${th.course}、自分も落としたくない授業なんです！どんな感じですか？`,rare);
     else if(kind==='day') add(`今日のお題、同じ「${dailyAnswer(u)}」でしたね！`,rare);
     else if(kind==='pur') add(FA.purposeTopic[c.label]||`「${c.label}」、自分もです`,rare);
     else if(kind==='goal') add(`${c.label}、どんなことしてるんですか？`,rare);
@@ -3257,7 +3273,7 @@ function topicsFor(u,n=3,exclude=[]){
   const td=dailyAnswer(u), md=dailyAnswer(profile);
   if(td&&md&&!sameDaily(u)) add(`今日のお題、「${td}」なんですね！自分は「${md}」でした。なんでですか？`);
   if(th.artist&&normAns(th.artist)!==normAns(me.artist)) add(`${th.artist}よく聴くんですね！はじめて聴くならおすすめの曲ありますか？`);
-  if(th.course) add(`${th.course}、気になってるんですね！どんな授業なんですか？`);
+  if(th.course) add(`${th.course}、落としたくない授業なんですね！どんな授業なんですか？`);
   (th.aruaru||[]).forEach(x=>{ if(!(me.aruaru||[]).includes(x)) add(`「${x}」ってどういうときですか？笑`); });
   if(th.artist&&normAns(th.artist)===normAns(me.artist)) add(`${th.artist}のライブって行ったことありますか？`);
   add('はじめまして！すれ違ったみたいですね😊');
@@ -3853,7 +3869,7 @@ async function joinClassRoom(i){
 }
 function createClassRoom(i){
   const c=myClassOptions()[i]; if(!c)return;
-  createRoom(); if(!roomForm)return;
+  createRoom(false,true); if(!roomForm)return;   // 授業の部屋は無料なので「本来は有料」は聞かない
   roomForm.vis='common'; roomForm.cond=[c]; roomForm.days=0;
   $('#rmName').value=(slotLabel(c.slot)+' '+c.v).slice(0,20);
   $('#rmTopic').value='授業のこと・課題・テストの情報交換';
@@ -3909,7 +3925,45 @@ function myClassOptions(){
   return slotKeys(myTimetable).filter(k=>(myTimetable[k]||'').trim()).map(k=>{ const v=myTimetable[k].trim(); return {k:'cls',v,slot:k,label:'同じ授業「'+slotLabel(k)+' '+v+'」'}; });
 }
 const condKey=c=>c.k+':'+(c.slot?c.slot+':':'')+c.v;
-function createRoom(edit){
+/* ---------- 本来は有料の予定（フェイクドアテスト。2026-10-09 あおの依頼。supabase/tama_paywall.sql） ----------
+   Googleフォームで聞くより、機能を使う瞬間の本音を取るため。対象は「前の日にすれ違った人を見る」「コミュニティを作る」（授業の部屋は無料）。
+   初めて使う時に1回だけ「本来は月◯円の予定です（いまは無料・あとで請求されません）」と出し、[月◯円でも使いたい][無料なら使う] を選んでもらう。
+   どちらを選んでも機能は使える（押すのに損得が無いので、正直な答えになりやすい）。金額は人ごとに100・300・500円（ユーザーIDから決めるので同じ人には同じ金額）。
+   表が無い時（SQLの実行前）・#debug・テスト用の端末では聞かない。利用規約の第4条に記載 */
+const PAYWALL={
+  cross_past:{icon:'🕘',name:'前の日にすれ違った人を見る',desc:'昨日より前にすれ違った人の一覧が見られます'},
+  room_create:{icon:'💬',name:'コミュニティを作る',desc:'自分がオーナーのコミュニティを作れます（授業の部屋は無料）'},
+};
+let paywallAnswered={}, paywallMissing=true, paywallNext=null;
+async function loadPaywall(){
+  if(!sb||!myId||String(myId).startsWith('local-'))return;
+  const {data,error}=await sb.from(T('paywall')).select('feature,choice');
+  if(error){ paywallMissing=true; return; }
+  paywallMissing=false; paywallAnswered={}; (data||[]).forEach(r=>{ paywallAnswered[r.feature]=r.choice; });
+}
+function paywallPrice(){ let h=0; for(const ch of String(myId||''))h=(h*31+ch.charCodeAt(0))>>>0; return [100,300,500][h%3]; }
+// 使い始めた日は聞かない（2026-10-09 あおの「本来の機能やコンセプトの邪魔をしないように」。初日に「有料」と見ると、お金を取るアプリという第一印象になるため）
+function paywallNeed(f){ return !!profile&&!paywallMissing&&!paywallAnswered[f]&&!debugMode()&&firstUseDay()<jstTodayStart().getTime(); }
+function paywallAsk(f,next){
+  paywallNext=next; const p=PAYWALL[f], price=paywallPrice();
+  $('#memSheet').innerHTML=`<div class="rinfo pw"><div class="pwic">${p.icon}</div>
+    <h2 class="pstitle" style="text-align:center">「${p.name}」は<br>本来は <b class="pwprice">月${price}円</b> の予定です</h2>
+    <p class="psdesc" style="text-align:center">${p.desc}。<br><b style="color:var(--ink)">いまは実験中なので無料です。あとで請求されることはありません。</b></p>
+    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="paywallAnswer('${f}','pay')">月${price}円でも使いたい</button>
+    <button class="btn btn-ghost" style="width:100%;padding:13px;margin-top:8px;font-size:14.5px" onclick="paywallAnswer('${f}','free')">無料なら使う</button>
+    <div class="pwnote">どちらを選んでも、このまま無料で使えます。この選択は、ちかくの料金を考えるために記録します（ほかの人には見えません）。</div></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function paywallAnswer(f,choice){
+  paywallAnswered[f]=choice; closeMembers();
+  const next=paywallNext; paywallNext=null; if(next)next();
+  if(!sb||!myId||String(myId).startsWith('local-')||debugMode())return;
+  const {error}=await sb.from(T('paywall')).insert({user_id:myId,feature:f,price:paywallPrice(),choice,ver:APP_VER});
+  if(error&&error.code!=='23505')console.warn('[paywall] 記録できませんでした',error.message);
+}
+// skipPaywall：授業の部屋（無料）から呼ぶ時と、聞き取りが終わった後に呼び直す時
+function createRoom(edit,skipPaywall){
+  if(roomsV2&&!edit&&!skipPaywall&&paywallNeed('room_create'))return paywallAsk('room_create',()=>createRoom(false,true));
   if(!roomsV2)return createRoomLegacy();
   if(!profile){ toast('先にプロフィールを登録してね'); return; }
   const r=edit?curRoom:null;
@@ -4693,7 +4747,7 @@ function frOpener(c,u){
   if(kind==='day')return `今日のお題、同じ「${dailyAnswer(u)}」だったね！`;
   if(kind==='art')return `${a.artist}聴くんだね！いちばん好きな曲なに？`;
   if(kind==='aru')return `「${c.key.slice(4)}」わかる笑`;
-  if(kind==='crs')return `${a.course}気になってるの？自分も！`;
+  if(kind==='crs')return `${a.course}、自分も落としたくない！`;
   if(kind==='goal')return `${c.label}、一緒にがんばろう！`;
   return 'おつかれ！';
 }
@@ -5610,6 +5664,7 @@ async function leaveAll(){
   let talksOk=true;
   if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message);
     if(!visitsMissing)sb.rpc('tama_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); });
+    if(!paywallMissing)sb.from(T('paywall')).delete().eq('user_id',myId).then(({error})=>{ if(error)console.warn('[leave] 有料の聞き取りの記録を消せませんでした',error.message); });
     if(!checkinMissing)sb.from(T('checkins')).delete().eq('user_id',myId).then(({error})=>{ if(error)console.warn('[leave] ひとことの回答を消せませんでした',error.message); else checkins=[]; });
     // 自分がオーナーの部屋は、いちばん前から参加している人に譲る（だれもいなければ消す）。2026-10-07
     if(roomsV2){ const {error:re}=await sb.rpc('tama_room_forget_me'); if(re&&!isMissingFn(re))console.warn('[leave] コミュニティのオーナーを譲れませんでした',re.message); }
@@ -5812,6 +5867,7 @@ function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBoot
   publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
   restoreMyPresence();loadTimetable();loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
   // ☕ ひとことは、開いて20秒ほどたってから（2026-10-08）。この端末で使い始めた日も覚える（その日は出さない）
+  loadPaywall();   // 本来は有料の予定（2026-10-09）
   firstUseDay(); loadSurveyStatus(); loadCheckins().then(()=>setTimeout(maybeCheckinPopup,20000));
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden){presenceTick();renderStatusRow();}},60000);}
 
