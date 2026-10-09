@@ -959,7 +959,7 @@
           </div>
           <div class="shot">
             <div class="sh">📚 同じ授業の人に、授業のことを聞ける</div>
-            <div class="sd">時間割に授業を入れると、同じ授業の人だけが入れる部屋で、課題・テスト・休講の情報交換ができます。</div>
+            <div class="sd">時間割に授業を入れると、同じ授業の人が作ったコミュニティが見つかります。課題・テスト・休講の情報交換に。</div>
             <div class="mini">
               <div class="mroom"><b>📚 月3 統計学</b><span>👥 12人 ・ 同じ授業の人だけ</span></div>
               <div class="mbub them">第5回の課題、提出は来週でしたっけ？</div>
@@ -1039,7 +1039,7 @@
         <div class="cbh"><span>💬 コミュニティ</span><a onclick="go('comm')">すべて見る ›</a></div>
         <div class="cbd">同じ趣味・同じ授業の人が集まる部屋。オーナーが作って、期限が来たら消えます。</div>
         <div class="ulist" id="homeRoomList"></div>
-        <div class="cbb"><button class="btn btn-ghost" onclick="go('comm')">📚 授業の部屋</button><button class="btn btn-primary" onclick="go('comm');createRoom()">＋ 部屋を作る</button></div>
+        <div class="cbb"><button class="btn btn-ghost" onclick="go('comm')">📚 授業のコミュニティ</button><button class="btn btn-primary" onclick="go('comm');createRoom()">＋ 部屋を作る</button></div>
       </div>
       </div>
     </section>
@@ -1735,6 +1735,7 @@ async function onStart(){
   // 「位置情報を共有して始める」を押したので共有ON（プロフィールを消した後に登録し直した時、前のOFFが残らないように）
   // 位置の出し方は登録の③で選んだもの（2026-10-08。前はあとからマイページでしか選べなかった）
   sharing=true; coarse=obCoarse; profileDeleted=false; saveLocPrefs(); renderVisSummary();
+  try{ localStorage.setItem("tama_regDay",String(jstTodayStart().getTime())); }catch(e){}   // 登録した日（その日は ☕ ひとこと・有料の聞き取りを出さない）
   buildInvite();renderStatusRow();
   maybeShowGuide(false);   // 新規登録なので必ず出す
   await saveNewProfile();   // 位置を取り始める前に保存する（後だと、遅れて届いた sharing:false が本当の位置を上書きする）
@@ -2359,7 +2360,7 @@ function renderNearby(){
     ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>いまは近くにアプリを開いている人がいません。<br>平日の昼休み（12:50〜13:40）の<br>食堂のあたりに多いです。</p>${today}
       <div class="emptyacts"><div class="eah">いまできること</div>
         ${dailyAnswer(profile)?'':`<button class="btn btn-primary" onclick="$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})">🎲 今日のお題に答える</button>`}
-        <button class="btn btn-ghost" onclick="go('comm')">📚 授業の部屋をのぞく</button></div>
+        <button class="btn btn-ghost" onclick="go('comm')">📚 授業のコミュニティを見る</button></div>
       ${emptyPushHTML()}<button class="btn btn-ghost" style="margin-top:10px;padding:10px 16px;font-size:12.5px" onclick="openInvite()">📨 友達をアプリに誘う</button>${debugMode()?`<br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button>`:''}</div>`;
     return;
   }
@@ -3830,42 +3831,28 @@ function renderRooms(){
 function classRoomFor(c){
   return rooms.find(r=>!roomEnded(r)&&(r.conditions||[]).some(x=>x.k==='cls'&&x.slot===c.slot&&normCourse(x.v)===normCourse(c.v)));
 }
-// 2026-10-08（ユーザー役のテスト：授業の部屋を作るのに長いフォームとオーナーの責任が要るのは重い）：
-// DBの関数 tama_class_rooms があれば、授業の部屋は「オーナーなし・運営が見守る・1タップで入る（無ければその時に作る）」。
-// 同じ授業名なら曜日・時限が違っても1つの部屋。時間割にその授業を入れている人数も出す。関数が無い時は前の「作る」のまま
-let classRoomData=null, classRoomsV2=true, classRoomsAt=0;
-async function loadClassRooms(force){
-  if(!sb||!classRoomsV2||!profile||(!force&&Date.now()-classRoomsAt<60000))return;
-  classRoomsAt=Date.now();
-  const {data,error}=await sb.rpc('tama_class_rooms');
-  if(error){ if(isMissingFn(error))classRoomsV2=false; classRoomData=null; renderRooms(); return; }
-  classRoomData=data||[]; renderRooms();
+// 2026-10-09 あおの指示：授業の部屋を勝手に作らない（10/9 の「オーナーなし・1タップで入る（無ければ作る）」はやめた）。
+// 自分の時間割の授業について、だれかがオーナーとして作ったコミュニティがあれば表示するだけ。
+// 見つけ方：条件が同じ授業名（時間割の授業 'cls'・授業名 'cname'）、または部屋の名前に授業名が入っている部屋。曜日・時限が違っても同じ授業名ならまとめる。
+// オーナーのいない部屋（10/9 の版が作ったもの）は出さない。部屋が無い授業は、下の「＋ 新しいコミュニティを作る」から作れる（作った人がオーナー）
+function myCourseNames(){
+  const seen=new Map(); myClassOptions().forEach(c=>{ const k=normCourse(c.v); if(k&&!seen.has(k))seen.set(k,c.v); }); return [...seen.entries()].map(([k,v])=>({k,v}));
+}
+function classRoomsFor(k){
+  return rooms.filter(r=>!roomEnded(r)&&r.owner_id&&((r.conditions||[]).some(x=>(x.k==='cls'||x.k==='cname')&&normCourse(x.v)===k)||normCourse(r.name).includes(k)));
 }
 function classRoomsHTML(){
   if(!roomsV2||!profile)return '';
-  const cls=myClassOptions();
-  if(!cls.length) return `<div class="clsbox"><div class="clsh">📚 授業の部屋</div>
-    <div class="clsd">時間割に授業を入れると、同じ授業の人だけが入れる部屋で、課題やテストのことを聞けます。</div>
-    <button class="btn btn-primary clsbtn" onclick="openTimetable()">🗓 時間割に授業を入れる</button></div>`;
-  if(classRoomsV2){
-    if(!classRoomData){ loadClassRooms(); return `<div class="clsbox"><div class="clsh">📚 あなたの授業の部屋</div><div class="clsd">読み込み中…</div></div>`; }
-    loadClassRooms();   // 1分に1回まで読み直す
-    return `<div class="clsbox"><div class="clsh">📚 あなたの授業の部屋</div><div class="clsd">同じ授業を時間割に入れた人だけが入れる部屋です。課題・テスト・休講の情報交換に。運営が見守っています。</div>`
-      +classRoomData.map((c,i)=>`<div class="clsrow"><div class="ct"><b>${esc(c.name)}</b><small>時間割に入れている人 ${c.takers||1}人${c.room_id?` ・ 部屋に ${c.members||0}人`:''}</small></div>
-        ${c.joined?`<button onclick="openRoom('${esc(String(c.room_id))}')">開く</button>`:`<button class="pri" onclick="joinClassRoom(${i})">入る</button>`}</div>`).join('')
-      +`</div>`;
-  }
-  return `<div class="clsbox"><div class="clsh">📚 あなたの授業の部屋</div><div class="clsd">同じ曜日・時限に同じ授業を入れた人だけが入れます。課題・テスト・休講の情報交換に。</div>`
-    +cls.map((c,i)=>{ const r=classRoomFor(c), n=r?((roomStats[rid(r.id)]||{}).members||0):0;
-      return `<div class="clsrow"><div class="ct"><b>${esc(slotLabel(c.slot))} ${esc(c.v)}</b><small>${r?`👥 ${n}人${r.joined?' ・ 参加中':''}`:'まだ部屋がありません'}</small></div>
-        ${r?`<button class="${r.joined?'':'pri'}" onclick="openRoom('${rid(r.id)}')">${r.joined?'開く':'のぞく'}</button>`:`<button onclick="createClassRoom(${i})">＋ 作る</button>`}</div>`; }).join('')
-    +`</div>`;
-}
-async function joinClassRoom(i){
-  const c=classRoomData&&classRoomData[i]; if(!c||!sb)return;
-  const {data,error}=await sb.rpc('tama_class_room_join',{p_name:c.name});
-  if(error||!data||data.status!=='ok'){ toast(data&&data.status==='unfit'?'時間割にこの授業を入れている人だけが入れます':'入れませんでした'); return; }
-  toast('📚 授業の部屋に入りました'); await loadRooms(); await loadClassRooms(true); openRoom(data.room);
+  const cs=myCourseNames();
+  if(!cs.length) return `<div class="clsbox"><div class="clsh">📚 授業のコミュニティ</div>
+    <div class="clsd">時間割に授業を入れると、同じ授業のコミュニティがあればここに出ます。</div>
+    <button class="btn btn-ghost clsbtn" onclick="openTimetable()">🗓 時間割に授業を入れる</button></div>`;
+  return `<div class="clsbox"><div class="clsh">📚 あなたの授業のコミュニティ</div><div class="clsd">あなたの時間割の授業について、だれかが作ったコミュニティです。</div>`
+    +cs.map(c=>{ const rs=classRoomsFor(c.k);
+      return rs.length?rs.slice(0,3).map(r=>{ const k=rid(r.id), n=(roomStats[k]||{}).members||0;
+          return `<div class="clsrow"><div class="ct"><b>${esc(r.name)}</b><small>${esc(c.v)} ・ 👥 ${n}人${r.joined?' ・ 参加中':''}</small></div><button class="${r.joined?'':'pri'}" onclick="openRoom('${k}')">${r.joined?'開く':'のぞく'}</button></div>`; }).join('')
+        :`<div class="clsrow"><div class="ct"><b>${esc(c.v)}</b><small>まだコミュニティはありません</small></div></div>`; }).join('')
+    +`<div class="clsd" style="margin:8px 0 0">コミュニティが無い授業は、下の「＋ 新しいコミュニティを作る」から作れます（作った人がオーナーになります）。</div></div>`;
 }
 function createClassRoom(i){
   const c=myClassOptions()[i]; if(!c)return;
@@ -3888,9 +3875,9 @@ function renderStartCard(){
   let h='';
   if(profile&&!st.hide){
     const items=[
-      {done:myClassOptions().length>0, icon:'🗓', t:'時間割に授業を入れる', d:'同じ授業の人が「共通点」に出て、授業の部屋に入れます', go:'openTimetable()'},
+      {done:myClassOptions().length>0, icon:'🗓', t:'時間割に授業を入れる', d:'同じ授業の人が「共通点」に出て、授業のコミュニティが見つかります', go:'openTimetable()'},
       {done:!!st.daily||!!dailyAnswer(profile), icon:'🎲', t:'今日のお題に答える', d:'同じ答えの人と、会った時の話題ができます', go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})"},
-      {done:rooms.some(r=>r.joined&&isClassRoom(r)), icon:'📚', t:'授業の部屋をのぞく', d:'課題やテストのことを、同じ授業の人に聞けます', go:"go('comm')"},
+      {done:myCourseNames().some(c=>classRoomsFor(c.k).some(r=>r.joined)), icon:'📚', t:'授業のコミュニティをのぞく', d:'同じ授業の人が作ったコミュニティで、課題やテストのことを聞けます', go:"go('comm')"},
       {done:allFriendRows().some(r=>r.status==='accepted'), icon:'👥', t:'友達を1人追加する', d:'いまどの建物にいるか・空きコマが分かります', go:'openFrAdd()'},
     ];
     const n=items.filter(x=>x.done).length;
@@ -5273,7 +5260,7 @@ async function saveTimetable(){
   const row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=rooms;
   const {error}=await sb.from(T('timetable')).upsert(row);
   if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
-  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); loadClassRooms(true);   // 授業の部屋の一覧も新しく
+  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms();   // 授業のコミュニティの一覧も新しく
   toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました');
   if(Object.keys(slots).length)askPushSoon('tt');
 }
@@ -5498,10 +5485,10 @@ function checkinDue(){
   if(checkins.some(c=>c.at>=jstTodayStart().getTime()))return null;
   return checkinOpen()[0]||null;
 }
-// この端末で初めて ちかく を使った日（日本時間の0時）。無ければ今日を覚える
-function firstUseDay(){
-  try{ let v=+localStorage.getItem('tama_firstDay'); if(!v){ v=jstTodayStart().getTime(); localStorage.setItem('tama_firstDay',String(v)); } return v; }catch(e){ return 0; }
-}
+// 登録した日（日本時間の0時）。この端末で新しく登録した時だけ覚える（onStart）。覚えていない＝前から使っている人なので 0（初日ではない）を返す。
+// 2026-10-09 修正：前は「この版を初めて開いた日」を覚えていたので、前から使っている人も新しい版を開いた日が「初日」扱いになり、
+// ☕ ひとこと と「本来は有料」の聞き取りがその日に出なかった。キーの名前も変えて、前の版が覚えた日付は使わない
+function firstUseDay(){ try{ return +localStorage.getItem('tama_regDay')||0; }catch(e){ return 0; } }
 // アプリを開いてから少したった時に呼ぶ（startLoops から20秒後）。通知の許可・使い方・ほかのシートが出ている間や、
 // 近くの人の画面にいない時は、閉じるのを待つ（10秒おきに6回まで）
 function maybeCheckinPopup(tries=0){
@@ -5866,9 +5853,9 @@ function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBoot
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
   publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
   restoreMyPresence();loadTimetable();loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
-  // ☕ ひとことは、開いて20秒ほどたってから（2026-10-08）。この端末で使い始めた日も覚える（その日は出さない）
+  // ☕ ひとことは、開いて20秒ほどたってから（2026-10-08）。登録した日は出さない（firstUseDay）
   loadPaywall();   // 本来は有料の予定（2026-10-09）
-  firstUseDay(); loadSurveyStatus(); loadCheckins().then(()=>setTimeout(maybeCheckinPopup,20000));
+  loadSurveyStatus(); loadCheckins().then(()=>setTimeout(maybeCheckinPopup,20000));
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden){presenceTick();renderStatusRow();}},60000);}
 
 /* ---------- 多摩キャン版：開催時間・参加人数・アンケート ---------- */
