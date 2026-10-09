@@ -3085,7 +3085,7 @@ const TERMS_HTML=`
 <p>つきまとい・脅迫など<b>身の危険を感じる事態</b>が起きた場合は、まず安全な場所に移動し、<b>警察（110番）</b>または大学の窓口にご連絡ください。そのうえで、下記の連絡先までお知らせいただければ、運営でも対応します。</p>
 <h4>第10条（データの削除）</h4>
 <p>利用者は設定画面から、いつでも自分の情報をすべて削除できます。また、実証実験の終了後、取得したデータは速やかに削除します。</p>
-<p>友達でない人との24時間のトークは、終わってから7日たつと自動で消えます。友達とのトークは、どちらかが情報を削除するまで残ります。コミュニティの投稿は、部屋の期限から3日たつと消えます（期限のない部屋の投稿は残ります）。</p>
+<p>友達でない人とのトークは、24時間で終わり、おたがいに読めなくなります。運営が保管している記録も、終わってから7日たつと自動で消えます。友達とのトークは、どちらかが情報を削除するまで残ります。コミュニティの投稿は、部屋の期限から3日たつと消えます（期限のない部屋の投稿は残ります）。</p>
 <p>安全のため、トークとコミュニティの投稿は保存されており、通報があった時など必要な場合に、運営が内容を確認することがあります。通報すると、その時のやりとりが運営に届き、通報の記録はトークが消えた後も残ります。</p>
 <h4>第11条（お問い合わせ・緊急時の連絡先）</h4>
 <p>本サービスに関するお問い合わせ、および緊急時のご連絡は下記までお願いします。アプリ内の「マイページ → 困ったとき・お問い合わせ」からも開けます。</p>
@@ -3465,7 +3465,7 @@ function renderMatches(){
   if(talkTab==='dm')$('#matchCount').textContent=items.length?items.length+'件':'';
   const list=$('#matchList'); if(!list)return;
   if(talkTab==='fr'){ list.innerHTML=renderFriendTalks(frItems); updateTalkDot(); return; }
-  let h=`<div class="cmsub">友達でない人とのトークは24時間で終わり、7日後に消えます。続けたい相手はトークの中から「👥 友達に誘う」</div>`;
+  let h=`<div class="cmsub">友達でない人とのトークは24時間で終わります。続けたい相手はトークの中から「👥 友達に誘う」</div>`;
   if(ins.length){
     h+=`<div class="wavehead">👋 いいねが届いています（${ins.length}人）</div>`+ins.map(({id,u,w})=>`<div class="mrow" onclick="openUserSheet('${id}')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
       <div class="info"><div class="nm">${esc(u.name)}<span class="gr" style="font-size:11px;color:var(--muted);font-weight:500;margin-left:5px">${esc(facLine(u))}</span></div><div class="last unread">${esc(w.text||likeCommonText(u)||'👋 いいねが届きました')}</div><div class="mtime">${agoText(w.at)}</div></div>
@@ -3760,6 +3760,7 @@ let friendChats={}, chatReturn='match';
 const chatOf=uid=>matches[uid]||friendChats[uid];
 async function loadChat(uid){ if(isTest(uid)||!sb)return; const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at'); const c=chatOf(uid); if(data&&c)c.msgs=data.map(x=>({from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0})); }
 async function openChat(uid,from){
+  if(matches[uid]&&!isFriend(uid)&&isExpired(matches[uid])&&!isTest(uid)){ openUserSheet(uid); return; }   // 24時間が終わったトークは、通知などから来ても開かない（使う人どうしは24時間で読めなくなる）
   if(!matches[uid]){
     if(!isFriend(uid))return;
     if(!friendChats[uid]){ friendChats[uid]={u:friendUser(uid),msgs:[],matchedAt:null}; await loadChat(uid); }
@@ -4744,7 +4745,7 @@ const HELP={
     see:'記録するのは、アプリを開いていて、キャンパスの中にいる間だけです。',
     tip:'何度もすれ違う共通点のある人には「👋 いいね」してみよう。トークでは「よくすれ違いますね」もきっかけになります。'},
   talk:{icon:'💬',title:'トーク',lead:'おたがいにいいねした人・友達・コミュニティと話す所です。',
-    can:['💬 24時間：おたがいにいいねすると始まります。最初の一言は共通点の話題から選べます。24時間で終わり、終わって7日たつとメッセージは消えます',
+    can:['💬 24時間：おたがいにいいねすると始まります。最初の一言は共通点の話題から選べます。24時間で終わります',
       '🤝 会うときは：共通点・すれ違い・今日のお題を1枚で見られます。その場で2人で答える「ふたりのお題」と、だんだん深くなる質問も','👥 友達：期限なしで話せます。24時間のトークの上の「👥 友達に誘う」から友達になれます','コミュニティ：オーナー（👑）が作る、期限つきのグループ。入れる人は部屋ごとに「みんな／共通点のある人だけ／招待コード」。投稿は参加した人だけが読めます'],
     see:'24時間トークの相手には、あなたのいる建物・教室は見えません。'},
   friends:{icon:'👥',title:'友達',lead:'友達がいまどこにいるかが分かります。',
