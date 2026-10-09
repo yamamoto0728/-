@@ -883,6 +883,11 @@
   .empty .emptyacts .eah{font-size:11.5px;font-weight:700;color:var(--muted)}
   .medel{margin:0 16px 10px;padding:12px 14px;border-radius:14px;background:var(--surface2);border:1px dashed var(--muted2);font-size:12.5px;line-height:1.7;color:var(--muted)}
   .medel b{display:block;color:var(--ink);font-size:14px;margin-bottom:3px}.medel .btn{margin-top:8px;width:100%;padding:11px;font-size:13.5px}
+  .frfreeline{color:#14805c!important;font-weight:700}
+  .frfree{margin:0 16px 10px;padding:8px 12px;border-radius:14px;background:rgba(32,180,131,.07);border:1px solid rgba(32,180,131,.3)}
+  .frfree .ffrow{display:flex;gap:8px;align-items:baseline;padding:5px 0;font-size:13px;border-top:1px solid var(--line)}.frfree .ffrow:first-child{border-top:0}
+  .frfree .ffrow b{color:#14805c;flex-shrink:0}.frfree .ffrow span{font-size:11px;color:var(--muted);flex-shrink:0}
+  .frfree .ffnote{font-size:10.5px;color:var(--muted2);margin-top:3px}
   .nearjump{margin:0 16px 8px;padding:9px 14px;border-radius:14px;background:linear-gradient(90deg,rgba(15,176,205,.12),rgba(32,180,131,.10));border:1px solid rgba(15,176,205,.35);font-size:13px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer}
   .nearjump:empty{display:none}.nearjump b{color:#0a7f96;font-size:14.5px}.nearjump span{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal)}
   .startcard{margin:2px 16px 10px;padding:10px 12px 6px;border-radius:16px;background:#fff;border:1.5px solid rgba(245,151,47,.5);box-shadow:0 4px 14px rgba(245,151,47,.12)}
@@ -4880,11 +4885,12 @@ function renderFriends(){
   h+=`<div class="listhead">👥 友達はいまどこ？</div><div class="ulist">`;
   h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
       return `<div class="urow" onclick="openFriend('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
-        <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}${sameDaily(u)?`<span class="stchip same">🎲 お題が同じ</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}</div>
+        <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}${sameDaily(u)?`<span class="stchip same">🎲 お題が同じ</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}${freeText(id)?`<div class="mtime frfreeline">${esc(freeText(id))}</div>`:''}</div>
         <div class="d">${map?`<button class="frmapbtn" onclick="event.stopPropagation();showFriendOnMap('${id}')">🗺 地図</button>`:''}</div></div>`; }).join('')
     :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>目の前にいる人とは、4桁のコードで<br>すぐ友達になれます。</p>
        <button class="btn btn-primary" onclick="openFrAdd('show')">自分のコードを見せる</button><br><button class="btn btn-ghost" style="margin-top:8px" onclick="openFrAdd('enter')">相手のコードを入れる</button></div>`;
   h+=`</div>`;
+  h+=freeTogetherHTML();   // 今日、いっしょに空いているコマ（2026-10-08）
   if(sent.length){
     h+=`<div class="listhead">⏳ 送った申請</div><div class="ulist">`+sent.map(r=>{ const u=who(r.to_id);
       return `<div class="urow" style="cursor:default"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">承認待ち</div></div>
@@ -5135,7 +5141,9 @@ function openFriendTT(id){
   grid+='</div>';
   const list=slotKeys(tt.slots).map(k=>`<div class="frow" style="font-size:13px;margin:4px 0">${slotLabel(k)} <b>${esc(tt.slots[k]||'（授業名なし）')}</b>${tt.rooms[k]?' ・ '+esc(tt.rooms[k]):''}</div>`).join('');
   $('#invSheet').innerHTML=`<h2 class="pstitle">🗓 ${esc(u.name)} さんの時間割</h2>
-    <p class="psdesc">${esc(u.name)}さんが見せてくれています。緑のふちは、あなたと同じ授業です。</p>${grid}<div style="margin-top:12px">${list}</div>
+    <p class="psdesc">${esc(u.name)}さんが見せてくれています。緑のふちは、あなたと同じ授業です。</p>
+    ${!ttShareMissing&&!ttSharesTo.has(id)?`<div class="frsug" style="margin:0 0 12px"><span>${esc(u.name)}さんは見せてくれています。<b>あなたの時間割も見せますか？</b></span><button onclick="toggleTTShare('${id}').then(()=>openFriendTT('${id}'))">見せる</button></div>`:''}
+    ${grid}<div style="margin-top:12px">${list}</div>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="closeInvite()">閉じる</button>`;
   $('#invOverlay').classList.add('show');
 }
@@ -5147,6 +5155,31 @@ async function loadSamePeers(){
   renderNearby(); renderCross();
 }
 const slotLabel=k=>{ const [d,p]=k.split('-'); return TT_DAYS[d-1]+p; };
+/* 友達との空きコマ（2026-10-08 ユーザー役のテスト（3年生）：いまどこが分かっても、空きコマに会う役に立たなかった）。
+   時間割を見せてくれている友達だけ。時間割は「授業を入れたコマ」だけを持つので、入っていないコマを空きとみなす */
+function nextFree(slots){
+  const ms=Date.now(), dow=new Date(ms+9*3600000).getUTCDay(), min=(ms-jstTodayStart(ms).getTime())/60000;
+  if(dow<1||dow>5)return null;
+  const hm=s=>{ const [h,m]=s.split(":").map(Number); return h*60+m; };
+  for(let i=0;i<FES.periods.length;i++){ const [s,e]=FES.periods[i]; if(min>=hm(e))continue; const k=dow+"-"+(i+1); if(!(k in slots))return {i:i+1,k,now:min>=hm(s)}; }
+  return null;
+}
+function freeText(id){
+  const tt=friendTT[id]; if(!tt)return ""; const f=nextFree(tt.slots||{}); if(!f)return "";
+  return "🕐 "+(f.now?"いま空きコマ":"次の空き："+f.i+"限")+(!(f.k in myTimetable)?"（あなたも空き）":"");
+}
+// 今日まだ終わっていない時限のうち、自分が空いていて、同じく空いている友達がいるコマ
+function freeTogetherHTML(){
+  if(!Object.keys(myTimetable).length)return "";
+  const ms=Date.now(), dow=new Date(ms+9*3600000).getUTCDay(), min=(ms-jstTodayStart(ms).getTime())/60000;
+  if(dow<1||dow>5)return "";
+  const hm=s=>{ const [h,m]=s.split(":").map(Number); return h*60+m; };
+  const ids=Object.keys(friendTT).filter(id=>isFriend(id)&&!blocked.has(id)), rows=[];
+  FES.periods.forEach(([s,e],i)=>{ if(min>=hm(e))return; const k=dow+"-"+(i+1); if(k in myTimetable)return;
+    const fr=ids.filter(id=>!(k in (friendTT[id].slots||{}))).map(id=>(friendUser(id)||{}).name).filter(Boolean);
+    if(fr.length)rows.push(`<div class="ffrow"><b>${i+1}限</b><span>${s}〜</span>${fr.map(esc).join("・")}</div>`); });
+  return rows.length?`<div class="listhead">🗓 今日、いっしょに空いているコマ</div><div class="frfree">${rows.join("")}<div class="ffnote">時間割を見せてくれている友達だけです</div></div>`:"";
+}
 const slotKeys=o=>Object.keys(o).sort((a,b)=>{ const [ad,ap]=a.split('-').map(Number),[bd,bp]=b.split('-').map(Number); return ad-bd||ap-bp; });
 let ttOpen=false;   // 同じシート（#placeSheet）を「いまの自分」と共用しているので、どちらが開いているか
 function openTimetable(){ loadSuggest(); ttOpen=true; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
