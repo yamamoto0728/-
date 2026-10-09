@@ -881,6 +881,8 @@
   .empty .emptycnt{font-size:13px;margin:6px 0 2px}.empty .emptycnt b{color:var(--signal);font-size:15px}
   .empty .emptyacts{margin:14px auto 4px;max-width:280px;display:flex;flex-direction:column;gap:8px}.empty .emptyacts .btn{margin:0;padding:12px;font-size:14px}
   .empty .emptyacts .eah{font-size:11.5px;font-weight:700;color:var(--muted)}
+  .medel{margin:0 16px 10px;padding:12px 14px;border-radius:14px;background:var(--surface2);border:1px dashed var(--muted2);font-size:12.5px;line-height:1.7;color:var(--muted)}
+  .medel b{display:block;color:var(--ink);font-size:14px;margin-bottom:3px}.medel .btn{margin-top:8px;width:100%;padding:11px;font-size:13.5px}
   .nearjump{margin:0 16px 8px;padding:9px 14px;border-radius:14px;background:linear-gradient(90deg,rgba(15,176,205,.12),rgba(32,180,131,.10));border:1px solid rgba(15,176,205,.35);font-size:13px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer}
   .nearjump:empty{display:none}.nearjump b{color:#0a7f96;font-size:14.5px}.nearjump span{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal)}
   .startcard{margin:2px 16px 10px;padding:10px 12px 6px;border-radius:16px;background:#fff;border:1.5px solid rgba(245,151,47,.5);box-shadow:0 4px 14px rgba(245,151,47,.12)}
@@ -1074,9 +1076,9 @@
       <div class="scroll">
         <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
         <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="h" id="meFac"></div><div class="h" id="meLoc">📍 &mdash;</div><div id="meWorry"></div></div>
-        <button class="btn btn-primary" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
+        <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <!-- 自分のプロフィールが相手にどう見えるか（2026-10-02 追加） -->
-        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openPreview('near')">👀 周りからの見え方を見る</button>
+        <button class="btn btn-ghost" id="mePrevBtn" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openPreview('near')">👀 周りからの見え方を見る</button>
         <div class="listhead" style="margin-top:10px">🗓 時間割</div>
         <div class="mypres" id="ttCard"></div>
         <div class="listhead" style="margin-top:6px">⚙️ 設定</div>
@@ -3766,7 +3768,8 @@ function roomLeft(r){
   const d=Math.floor(ms/86400000); if(d>=1)return 'あと'+d+'日';
   const h=Math.floor(ms/3600000); return h>=1?'あと'+h+'時間':'まもなく終わり';
 }
-const roomIcon=r=>r.visibility==='invite'?'🔑':r.visibility==='common'?'🎯':'💬';
+// 授業の部屋（条件が時間割の授業）は📚にする（2026-10-08。趣味の部屋と見分けがつくように）
+const roomIcon=r=>(r.conditions||[]).some(x=>x.k==='cls')?'📚':r.visibility==='invite'?'🔑':r.visibility==='common'?'🎯':'💬';
 function condText(r){ const c=r.conditions||[]; return c.slice(0,2).map(x=>x.label).join('・')+(c.length>2?` ほか${c.length-2}つ`:''); }
 function roomWhoText(r){ return r.visibility==='invite'?'招待コードを知っている人だけ':r.visibility==='common'?`${condText(r)}${(r.conditions||[]).length>1?' のどれか':''}に当てはまる人だけ`:'だれでも'; }
 function meetText(m){ return m&&(m.when||m.place)?[m.when,m.place].filter(Boolean).join('・')+(m.note?`「${m.note}」`:''):''; }
@@ -4247,10 +4250,11 @@ function renderHomeGate(){
     <div class="hgtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と気軽につながる。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
     <div class="hgvals"><div>🤝 会ったとき、話すことがある</div><div>👥 友達のいまどこ・空きコマが分かる</div><div>📚 同じ授業の人に、授業のことを聞ける</div><div>✨ キャンパスで、新しい出会い</div></div>
     <div class="hgcount" id="hgCount">${gateCountHTML()}</div>
+    ${inApp?`<div style="margin:0 0 14px">${steps}</div>`:""}<!-- LINE などの中では「Safariで開く」を一番上に（2026-10-08 ユーザー役のテスト：最初の画面にボタンが入っていなかった） -->
     ${flow?`<div class="hgflowh">📲 ホーム画面に追加するまで</div>${flow}<div class="hgswipe">← 横にスワイプできます →</div>`:''}
     <div class="hgh">📲 ホーム画面に追加すると<br>使えます（30秒）</div>
     <div class="hgd">ホーム画面のアイコンから開くと、返事や友達申請の通知が届き、登録もこのスマホに残ります。</div>
-    ${steps}
+    ${inApp?"":steps}
     ${usedHere?`<div class="hgnote">※ このブラウザで登録した内容は、アプリには引き継がれません。アプリで登録し直してください。</div>`:''}
     ${arrow}`;
   g.classList.add('show');
@@ -4377,12 +4381,15 @@ function maybeTip(){
   const scr=curScreen(), t=(TIPS[scr]||[]).find(x=>{ if(tipsSeen.includes(x.k))return false; const el=$(x.sel); return el&&el.offsetParent&&el.textContent.trim(); });
   if(t)showTip(t,scr);
 }
+let tipAutoTimer=null;
 function showTip(t,scr){
   tipCur={...t,scr};
   const el=$(t.sel); try{ el.scrollIntoView({block:'nearest'}); }catch(e){}
   const more=t.help===null?'':`<button onclick="tipMore()">くわしく</button>`;
   $('#tipBubble').innerHTML=`<i class="ar"></i><div class="tt">${t.t}</div><div class="tb">${more}<button class="ok" onclick="tipOk()">OK</button></div>`;
   $('#tipBubble').classList.add('show'); placeTip();
+  // 9秒で自動で消して「見た」ことにする（2026-10-08 ユーザー役のテスト：吹き出しが中身の上にかぶさって読めない）
+  clearTimeout(tipAutoTimer); tipAutoTimer=setTimeout(()=>{ if(tipCur&&tipCur.k===t.k){ markTip(t.k); hideTip(); } },9000);
 }
 // 吹き出しを対象の下（下に入らなければ上）に置き、矢印を対象の真ん中に向ける。スクロールで対象が見えなくなったら隠す
 function placeTip(){
@@ -5451,7 +5458,7 @@ async function setNearVis(k){
     if(!sharing&&profileDeleted&&!confirm('プロフィールを作り直して、位置情報の共有を再開しますか？'))return;
     const wasOff=!sharing;
     sharing=true; coarse=k==='coarse'; geoState('ok'); saveLocPrefs();
-    if(wasOff){ profileDeleted=false; startGeo(); }
+    if(wasOff){ profileDeleted=false; startGeo(); renderMeDeleted(); }
     publishMe(); afterVisChange();
     toast(wasOff?'位置情報の共有を再開しました':coarse?'位置を約100mぼかして出すようにしました':'位置をぼかさずに出すようにしました');
   }
@@ -5548,7 +5555,7 @@ async function leaveAll(){
     await forgetTimetable(); talksOk=await forgetTalks(); }
   profileDeleted=true;
   renderVisSummary();geoState('','停止');
-  leaveDoneSheet(talksOk);
+  leaveDoneSheet(talksOk); renderMeDeleted();
 }
 // トーク・いいね・友達・コミュニティの参加と投稿を消す（2026-10-05 あおの決定「トークと友達も消せるようにする」）。
 // トークは2人で1つなので、相手の発言は本人の権限では消せない。DBの関数 tama_forget_talks（supabase/forget_talks.sql）でまとめて消す。
@@ -5580,6 +5587,14 @@ async function forgetTimetable(){
   if(!ttShareMissing){ const {error}=await sb.from(T('timetable_shares')).delete().eq('owner_id',myId); if(error)console.warn('[leave] 時間割の共有を消せませんでした',error.message); }
   myTimetable={}; myRooms={}; ttSharesTo=new Set(); samePeers={};
   renderMyPresence(); renderNearby(); renderCross();
+}
+// プロフィールを消した後のマイページ（2026-10-08 ユーザー役のテスト：消した後も名前・編集ボタンがそのまま出て、消えた感じがしなかった）
+function renderMeDeleted(){
+  const el=$('#meDeleted'); if(!el)return;
+  el.innerHTML=profileDeleted?`<div class="medel"><b>🗑 プロフィールは消えています</b>
+    ほかの人の近くの人・すれ違い・トークには、あなたは出ていません。この画面の名前とアイコンは、この端末の中にだけ残っています。
+    <button class="btn btn-ghost" onclick="setNearVis('on')">もう一度はじめる</button></div>`:'';
+  ['#meEditBtn','#mePrevBtn'].forEach(s=>{ const b=$(s); if(b)b.style.display=profileDeleted?'none':''; });
 }
 // talksOk=false：DBの関数が無くトークを消せなかった時（友達・コミュニティの参加は消えている）
 function leaveDoneSheet(talksOk){
@@ -5729,7 +5744,7 @@ function go(t){
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='near')loadRooms();if(t==='friends')loadFriends();
-  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
+  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
@@ -5842,7 +5857,7 @@ async function fesRefreshCount(){
   renderFesBar(fesPhase());
 }
 function renderFesBar(ph){
-  const wel=$('#fesLiveWel'); if(wel)wel.textContent=(ph.state==='open'&&fesLive)?'● いま '+fesLive+'人が参加中':'';
+  const wel=$('#fesLiveWel'); if(wel)wel.textContent=(ph.state==='open'&&fesLive>=10)?'● いま '+fesLive+'人が参加中':'';   // 少ない数は逆効果なので10人未満は出さない（2026-10-08）
   const no=$('#fesNo'); if(no)no.textContent=fesNo()||'—';
   const bar=$('#fesBar'); if(!bar)return;
   // 終わりの時刻が無い（いつでも使える）間は帯を出さない
