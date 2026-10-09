@@ -786,6 +786,7 @@
   #ckSheet .cksep{height:1px;background:var(--line);margin:14px 0 4px}
   #ckSheet .ckthx{font-size:15px;padding:18px 0}#ckSheet .ckthx small{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:6px}
   #ckSheet .ckn{margin-top:12px}
+  #ckSheet .cknot{display:block;margin:10px auto 0;border:0;background:none;font-family:inherit;font-size:12px;color:var(--muted);text-decoration:underline;cursor:pointer}
   #ckSheet .ckskip{width:100%;padding:12px;margin-top:14px;font-size:14px;color:var(--muted)}#ckSheet .ckskip small{display:block;font-size:11px;font-weight:500;margin-top:2px}
   /* トークの「💡 話題に困ったら」の横の「🤝 会うときは」（2026-10-07） */
   .topics .tbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -5252,7 +5253,7 @@ function answerDaily(a){
   toast('🎲 答えました。みんなの答えを見てみよう');
   askPushSoon('daily'); visitMaybeUpdate();
   setTimeout(()=>checkFriendCommons('daily'),2800);   // 同じ答えの友達へ（「答えました」の表示が消えてから）
-  setTimeout(()=>maybeCheckinPopup(),4500);            // 「☕ ひとこと」を1問だけ（みんなの答えを少し見てから）
+  // 「☕ ひとこと」はお題に答えた直後には出さない（2026-10-08。アプリを開いて少したった時に maybeCheckinPopup）
   { const s=startState(); s.daily=true; saveStart(s); }   // はじめにやることの「お題に答える」を ✅ に
 }
 
@@ -5343,19 +5344,27 @@ function checkinOpen(){
   return CHECKIN.filter(x=>!done.has(x.k)).map(x=>({...x,wave:w}));
 }
 function ckSkippedAt(){ try{ return +localStorage.getItem('tama_ckSkipAt')||0; }catch(e){ return 0; } }
-// ポップアップで聞く質問（無ければ null）：今日のお題に答えた日だけ・1日1問まで・「とばす」から14日たっている
+// ポップアップで聞く質問（無ければ null）。2026-10-08 ユーザー役のテストで「使い始めて数分・お題に答えた直後に聞かれるのはつらい」と言われたので：
+// ・登録した日（この端末で初めて使った日）は出さない ・お題に答えた直後ではなく、アプリを開いて少したった時（maybeCheckinPopup を開いた時に呼ぶ）
+// ・1日1問まで ・「今回はとばす」から14日は出さない
 function checkinDue(){
-  if(!checkinOn()||!dailyAnswer(profile))return null;
+  if(!checkinOn())return null;
+  if(firstUseDay()>=jstTodayStart().getTime())return null;
   if(Date.now()-ckSkippedAt()<CK_SPAN())return null;
   if(checkins.some(c=>c.at>=jstTodayStart().getTime()))return null;
   return checkinOpen()[0]||null;
 }
-// 今日のお題に答えた少しあとに呼ぶ。通知の許可・使い方・ほかのシートが出ている間は、閉じるのを待つ（5秒おきに4回まで）
+// この端末で初めて ちかく を使った日（日本時間の0時）。無ければ今日を覚える
+function firstUseDay(){
+  try{ let v=+localStorage.getItem('tama_firstDay'); if(!v){ v=jstTodayStart().getTime(); localStorage.setItem('tama_firstDay',String(v)); } return v; }catch(e){ return 0; }
+}
+// アプリを開いてから少したった時に呼ぶ（startLoops から20秒後）。通知の許可・使い方・ほかのシートが出ている間や、
+// 近くの人の画面にいない時は、閉じるのを待つ（10秒おきに6回まで）
 function maybeCheckinPopup(tries=0){
   clearTimeout(ckPopTimer);
   if(!checkinDue())return;
-  if($('.overlay.show')||$('#pushGate').classList.contains('show')||$('#guide').classList.contains('show')||!$('#s-near').classList.contains('active')){
-    if(tries<4)ckPopTimer=setTimeout(()=>maybeCheckinPopup(tries+1),5000); return; }
+  if(document.hidden||$('.overlay.show')||$('#pushGate').classList.contains('show')||$('#guide').classList.contains('show')||!$('#s-near').classList.contains('active')){
+    if(tries<6)ckPopTimer=setTimeout(()=>maybeCheckinPopup(tries+1),10000); return; }
   openCheckin('pop');
 }
 // mode：'pop'＝ポップアップ（1問だけ）／'me'＝マイページから（その回のまだの質問を全部）
@@ -5364,7 +5373,8 @@ function closeCheckin(){ $('#ckOverlay').classList.remove('show'); renderCheckin
 function nextCheckinDate(){ return new Date(ckFirstDay()+checkinWave()*CK_SPAN()).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'}); }
 function renderCheckinSheet(thanks){
   const list=ckMode==='pop'?[checkinDue()].filter(Boolean):checkinOpen();
-  const q=it=>`<div class="ckq">${esc(it.q)}</div><div class="ckopts">${CHECKIN_OPTS.map((o,i)=>`<button onclick="answerCheckin('${it.k}',${i+1})">${o}</button>`).join('')}</div>`;
+  // 選択肢は「よくある」から並べる（2026-10-08。「ない」から始まると重いという声）。値は 1＝ない〜4＝よくある のまま。「答えたくない」は null を記録して次の質問へ
+  const q=it=>`<div class="ckq">${esc(it.q)}</div><div class="ckopts">${[3,2,1,0].map(i=>`<button onclick="answerCheckin('${it.k}',${i+1})">${CHECKIN_OPTS[i]}</button>`).join('')}</div><button class="cknot" onclick="answerCheckin('${it.k}',null)">答えたくない</button>`;
   const body=thanks?'<div class="ckthx">ありがとう！</div>'
     :list.length?list.map(q).join('<div class="cksep"></div>')
     :`<div class="ckthx">今回の分は答えてくれました。ありがとう！<small>次は ${nextCheckinDate()} ごろにまた聞きます</small></div>`;
@@ -5388,6 +5398,8 @@ async function answerCheckin(k,v){
   const {error}=await sb.from(T('checkins')).insert({user_id:myId,wave:w,item:k,value:v,ver:APP_VER});
   if(error&&error.code!=='23505')console.warn('[checkin] 保存できませんでした',error.message);
 }
+// 何日かあとにアプリを開き直した時も、少したってから聞く
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&profile)ckPopTimer=setTimeout(maybeCheckinPopup,20000); });
 function skipCheckin(){
   try{ localStorage.setItem('tama_ckSkipAt',String(Date.now())); }catch(e){}
   closeCheckin(); toast('とばしました。マイページの「☕ ひとこと」からいつでも答えられます');
@@ -5701,7 +5713,8 @@ function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBoot
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
   publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
   restoreMyPresence();loadTimetable();loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
-  loadSurveyStatus(); loadCheckins();
+  // ☕ ひとことは、開いて20秒ほどたってから（2026-10-08）。この端末で使い始めた日も覚える（その日は出さない）
+  firstUseDay(); loadSurveyStatus(); loadCheckins().then(()=>setTimeout(maybeCheckinPopup,20000));
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden){presenceTick();renderStatusRow();}},60000);}
 
 /* ---------- 多摩キャン版：開催時間・参加人数・アンケート ---------- */
