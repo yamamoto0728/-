@@ -225,6 +225,34 @@
   .me-hero{padding:22px 22px 6px;text-align:center}
   .me-hero .ring2{width:88px;height:88px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 0 30px rgba(255,176,102,.35)}
   .me-hero h2{font-size:19px;font-weight:900}
+  /* きせかえのフレーム（2026-10-09。丸いアイコンのまわりの輪。一覧・トーク・プロフィール・マイページ） */
+  .mebdg span.on{background:var(--amber);border-color:var(--amber);color:#3a2410}
+  .lookbtn{position:relative}.lookbtn small{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:1px}.lookdot{position:absolute;top:10px;right:14px;width:10px;height:10px;border-radius:50%;background:var(--rose)}
+  .lk .lkprev{margin:-4px -2px 0}.lk .lkcover{height:96px;border-radius:18px;display:flex;align-items:center;gap:14px;padding:0 18px;color:#fff;position:relative;overflow:hidden}
+  .lk .lkcover::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,16,40,.35),transparent 70%);pointer-events:none}
+  .lk .lkcover b{position:relative;z-index:1;font-size:19px;font-weight:900;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+  .lk .lkav{position:relative;z-index:1;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0}
+  .lk .lkcnt{font-size:12px;font-weight:700;color:var(--amber-deep);margin-left:6px}
+  .lk .lktabs{margin:10px 0 6px}.lk .lkbody{max-height:46vh;overflow-y:auto;padding:4px 2px}
+  .lk .lkh{font-size:13px;font-weight:800;margin:12px 0 6px;display:flex;justify-content:space-between;gap:8px}.lk .lkh span{font-size:11px;font-weight:600;color:var(--muted);text-align:right}
+  .lk .lkg{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.lk .lkg.wide{grid-template-columns:repeat(3,1fr)}
+  .lk .lkc{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;border-radius:14px;border:2px solid transparent;cursor:pointer;text-align:center}
+  .lk .lkc.on{border-color:var(--amber);background:#fff8ea}.lk .lkc.lock .lke,.lk .lkc.lock .lkbg,.lk .lkc.lock .lkb{filter:grayscale(1);opacity:.4}
+  .lk .lkc i{position:absolute;top:2px;right:2px;font-style:normal;font-size:12px}.lk .lkc small{font-size:10.5px;line-height:1.35;color:var(--muted)}.lk .lkc.on small{color:var(--amber-deep);font-weight:700}
+  .lk .lke{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px}
+  .lk .lkg.wide .lke{width:52px;height:52px;font-size:26px;margin:6px 0 4px}
+  .lk .lkbg{width:100%;height:46px;border-radius:12px}
+  .lk .lkbl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.lk .lkbl .lkc{flex-direction:row;justify-content:flex-start;text-align:left;padding:8px 10px;background:#fff;border-color:var(--line)}.lk .lkbl .lkc.on{border-color:var(--amber);background:#fff8ea}
+  .lk .lkb{font-size:24px;flex-shrink:0}.lk .lkbl .lkc small{font-size:11.5px;color:var(--ink)}.lk .lkbl .lkc{gap:8px}.lk .lkbl .lkc i{display:none}
+  .lk .lkbt{display:flex;flex-direction:column;min-width:0}.lk .lkbt b{font-size:12.5px;line-height:1.35}.lk .lkbt em{font-style:normal;font-size:10.5px;line-height:1.4;color:var(--muted);margin-top:2px}.lk .lkbl .lkc.lock .lkbt b{color:var(--muted)}
+  .lk .lknote{font-size:12px;color:var(--muted);line-height:1.6;margin:6px 0 10px}
+  .fr-white{box-shadow:0 0 0 3px #fff,0 2px 8px rgba(30,40,90,.25)!important}
+  .fr-amber{box-shadow:0 0 0 2px #fff,0 0 0 4.5px #f5972f!important}.fr-mint{box-shadow:0 0 0 2px #fff,0 0 0 4.5px #3cc98f!important}
+  .fr-sakura{box-shadow:0 0 0 2px #fff,0 0 0 4.5px #ff8fb8!important}.fr-blue{box-shadow:0 0 0 2px #fff,0 0 0 4.5px #4b8bf0!important}
+  .fr-royal{box-shadow:0 0 0 2px #fff,0 0 0 4.5px #8a5cf6!important}.fr-silver{box-shadow:0 0 0 2px #fff,0 0 0 4.5px #aab3c2,0 0 0 6px #e8ecf2!important}
+  .fr-gold{box-shadow:0 0 0 2px #fff7d6,0 0 0 4.5px #e0a030,0 0 10px 1px rgba(224,160,48,.6)!important}
+  .fr-rainbow{box-shadow:0 0 0 2px #ff7e9d,0 0 0 4px #ffd166,0 0 0 6px #6bd98b,0 0 0 8px #63d6e8!important}
+  .fr-star{box-shadow:0 0 0 2px #fff,0 0 0 4.5px #ffd166,0 0 16px 3px rgba(255,209,102,.95)!important}
   .me-hero .h{font-size:12px;color:var(--muted);margin-top:4px}
   .setting{margin:12px 16px;background:var(--glass);border:1px solid var(--line);border-radius:16px}
   .setrow{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-size:14px;border-bottom:1px solid var(--line)}
@@ -1124,6 +1152,7 @@
         <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
         <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="mebdg" id="meBadges"></div><div class="h" id="meFac"></div><div class="h" id="meLoc">📍 &mdash;</div><div id="meWorry"></div></div>
         <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
+        <button class="btn btn-ghost lookbtn" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14.5px" onclick="document.getElementById('lookDot').hidden=true;openLook()">🎨 きせかえ<small>アイコン・背景・フレーム・バッジ</small><span class="lookdot" id="lookDot" hidden></span></button>
         <!-- 自分のプロフィールが相手にどう見えるか（2026-10-02 追加） -->
         <button class="btn btn-ghost" id="mePrevBtn" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openPreview('near')">👀 周りからの見え方を見る</button>
         <div class="listhead" style="margin-top:10px">🗓 時間割</div>
@@ -1423,21 +1452,103 @@ const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#
   '🐉':['#6bd98b','#4b8bf0'],'🦁':['#ffb066','#c89b6b'],'🧸':['#ffcf8a','#c89b6b'],'🍣':['#ff7e6b','#ffd6c0'],'🎀':['#ff7e9d','#ffd1e0']};
 // アンケートの特典（2026-10-05）。限定アイコンとバッジ。バッジは profile.fa.badges に入れて、ほかの人の画面にも出す
 const EMO_SP=['👑','💎','🦋','🪐','🌟','🐉','🦁','🧸','🍣','🎀',...EMO_MOVED];
-const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケートに協力してくれた人'},
-  // 今日のミッション・招待の特典（2026-10-09）
-  mis3:{icon:'🌱',label:'ちかくデビュー',desc:'今日のミッションを3日やった人'},
-  mis10:{icon:'🔥',label:'ちかく常連',desc:'今日のミッションを10日やった人'},
-  inv1:{icon:'📨',label:'ちかく案内人',desc:'友達をちかくに招待した人'},
-  inv5:{icon:'🏅',label:'ちかく大使',desc:'5人をちかくに招待した人'}};
-// ごほうびの限定アイコン（2026-10-09）。has：使えるか／how：鍵を押した時の案内
-const REWARD_ICONS={
-  mis5:{icons:['🌈','🍀','🎯','🪁'],t:'🎯 今日のミッション5日の限定アイコン',has:()=>misN()>=5,how:'今日のミッションでスタンプを5個ためると使えます'},
-  inv3:{icons:['🚀','🎁','🧭','🌻'],t:'📨 3人招待した人の限定アイコン',has:()=>(attrsOf(profile).inv_n||0)>=3,how:'友達を3人ちかくに招待すると使えます（マイページの「📨 友達を招待」から）'},
-  invited:{icons:['🐣','🎈'],t:'🐣 招待されて来た人の限定アイコン',has:()=>!!attrsOf(profile).inv_by,how:'招待コードを入れて始めた人が使えます'}};
+/* ---------- きせかえ（2026-10-09 あおの依頼「何もしてない人のアイコンとバッジをそれぞれ管理して、もっと報酬をもらいたくなるように。背景の色やフレームも」） ----------
+   アイコン・背景の色・フレーム・バッジを、この1か所（LOOK_*）で管理する。もらう条件は c（'free' / 'survey' / '種類:数'）：
+     mis：今日のミッションのスタンプ　inv：招待して数えた人数　invited：招待コードで始めた　daily：お題に答えた日数
+     cross：すれ違った人数（これまで）　friend：友達の人数　owner：コミュニティを作った
+   あおの決定：何もしてない人が選べるアイコンは12個のまま（EMO）／背景はプロフィールの上、フレームは一覧・トーク・プロフィールのアイコンに付く（ほかの人にも見える）／
+   バッジは持っているものから1つ選んで名前の横に（選んでいなければ最初にもらったもの。全部はプロフィールに並ぶ）。
+   選んだものは fa.look = {bg, fr, badge}。数は fa.stat に「これまでの一番大きい数」を残す（友達が減っても、もらったものは消えない）。
+   ⚠️ 「本来は有料」の2つの機能は特典にしない（料金のテストの結果がくずれるため） */
+const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケートに協力してくれた人',c:'survey'},
+  mis3:{icon:'🌱',label:'ちかくデビュー',desc:'今日のミッションを3日やった人',c:'mis:3'},
+  mis10:{icon:'🔥',label:'ちかく常連',desc:'今日のミッションを10日やった人',c:'mis:10'},
+  mis30:{icon:'🏆',label:'ちかくマスター',desc:'今日のミッションを30日やった人',c:'mis:30'},
+  daily7:{icon:'📅',label:'お題マスター',desc:'今日のお題に7日答えた人',c:'daily:7'},
+  cross10:{icon:'👟',label:'すれちがい名人',desc:'10人とすれ違った人',c:'cross:10'},
+  friend1:{icon:'🤝',label:'はじめての友達',desc:'ちかくで友達ができた人',c:'friend:1'},
+  owner:{icon:'🏠',label:'コミュニティのオーナー',desc:'コミュニティを作った人',c:'owner:1'},
+  inv1:{icon:'📨',label:'ちかく案内人',desc:'友達をちかくに招待した人',c:'inv:1'},
+  inv5:{icon:'🏅',label:'ちかく大使',desc:'5人をちかくに招待した人',c:'inv:5'}};
+// ごほうびのアイコン（何もしてない人の12個＝EMO と、アンケートの36個＝EMO_SP は別に持つ）
+const LOOK_ICONS=[
+  {id:'invited',name:'招待されて来た人',c:'invited',icons:['🐣','🎈']},
+  {id:'mis5',name:'ミッション5日',c:'mis:5',icons:['🦉','🐙','🦩','🪼']},
+  {id:'daily7',name:'お題7日',c:'daily:7',icons:['🧁','🍰','🍡','🍪']},
+  {id:'friend1',name:'はじめての友達',c:'friend:1',icons:['🐨','🐹','🦔','🦦']},
+  {id:'cross10',name:'10人とすれ違い',c:'cross:10',icons:['👟','🛹','🚲','🛼']},
+  {id:'inv3',name:'3人招待',c:'inv:3',icons:['🚀','🎁','🧭','🛸']},
+  {id:'owner',name:'コミュニティのオーナー',c:'owner:1',icons:['🏰','🎪']},
+  {id:'mis15',name:'ミッション15日',c:'mis:15',icons:['🦚','🐢','🦭','🐝']},
+  {id:'daily30',name:'お題30日',c:'daily:30',icons:['🍕','🍔','🌮','🍦']},
+  {id:'cross30',name:'30人とすれ違い',c:'cross:30',icons:['🗺️','🏔️','🏝️','🗼']}];
+// プロフィールの背景の色（プロフィールの上の大きな帯）。auto＝アイコンの色
+const LOOK_BG={auto:{name:'アイコンの色',c:'free'},
+  sky:{name:'空',c:'free',g:['#8ec5ff','#dceeff']},mint:{name:'ミント',c:'free',g:['#7be0b0','#d8f8e8']},peach:{name:'ピーチ',c:'free',g:['#ffb4a2','#ffe5d9']},
+  sakura:{name:'さくら',c:'mis:3',g:['#ff9dc4','#ffe0ef']},lavender:{name:'ラベンダー',c:'survey',g:['#b8a6ff','#efe8ff']},
+  sunset:{name:'夕焼け',c:'daily:7',g:['#ff7e5f','#feb47b']},ocean:{name:'海',c:'friend:1',g:['#0fb0cd','#4b8bf0']},
+  night:{name:'夜空',c:'cross:10',g:['#2b2d6e','#7b6fd6']},gold:{name:'ゴールド',c:'inv:1',g:['#f7c948','#e0a030']},
+  rainbow:{name:'にじ',c:'mis:10',g:['#ff9a9e','#fad0c4','#a1c4fd']},forest:{name:'森',c:'daily:30',g:['#3a7d44','#9bd770']},
+  aurora:{name:'オーロラ',c:'inv:5',g:['#43e97b','#38f9d7','#7b6fd6']},galaxy:{name:'銀河',c:'cross:30',g:['#141e30','#6a3093']}};
+// アイコンのフレーム（丸いアイコンのまわりの輪。CSS の .fr-◯◯）
+const LOOK_FR={none:{name:'なし',c:'free'},white:{name:'しろ',c:'free'},
+  amber:{name:'オレンジ',c:'mis:5'},mint:{name:'ミント',c:'friend:1'},sakura:{name:'さくら',c:'daily:7'},blue:{name:'ブルー',c:'survey'},
+  silver:{name:'シルバー',c:'cross:10'},royal:{name:'むらさき',c:'owner:1'},gold:{name:'ゴールド',c:'inv:3'},
+  rainbow:{name:'にじ',c:'mis:20'},star:{name:'きらきら',c:'inv:5'}};
+const LOOK_KIND={mis:['今日のミッション','日'],inv:['招待','人'],daily:['今日のお題に答える','日'],cross:['すれ違う','人'],friend:['友達','人'],owner:['コミュニティを作る','']};
+// いまの数（これまでの一番大きい数）
+function lookCount(k){
+  const fa=attrsOf(profile), st=fa.stat||{};
+  if(k==='mis')return misN();
+  if(k==='inv')return fa.inv_n||0;
+  if(k==='daily')return st.daily||0;
+  if(k==='cross')return Math.max(st.cross||0,Object.keys(encMap||{}).length);
+  if(k==='friend')return Math.max(st.friend||0,allFriendRows().filter(r=>r.status==='accepted').length);
+  if(k==='owner')return Math.max(st.owner||0,(typeof rooms!=='undefined'&&rooms.some(r=>isRoomOwner(r)))?1:0);
+  return 0;
+}
+function lookHas(c){
+  if(!profile)return false;
+  if(!c||c==='free')return true;
+  if(c==='survey')return !!surveyDone||(attrsOf(profile).badges||[]).includes('survey');
+  if(c==='invited')return !!attrsOf(profile).inv_by;
+  const [k,n]=c.split(':'); return lookCount(k)>=+n;
+}
+// もらい方の文（あといくつ）
+function lookHow(c){
+  if(c==='survey')return 'アンケートに答える';
+  if(c==='invited')return '招待コードを入れて始める';
+  const [k,n]=c.split(':'), K=LOOK_KIND[k]||[k,''], left=Math.max(0,+n-lookCount(k));
+  if(k==='owner')return 'コミュニティを作る';
+  if(k==='inv')return `${n}人を招待する（あと${left}人）`;
+  if(k==='cross')return `${n}人とすれ違う（あと${left}人）`;
+  if(k==='friend')return `友達を${n}人つくる（あと${left}人）`;
+  if(k==='mis')return `今日のミッションを${n}日（あと${left}日）`;
+  if(k==='daily')return `今日のお題に${n}日答える（あと${left}日）`;
+  return `${K[0]}を${n}${K[1]}（あと${left}${K[1]}）`;
+}
+// 前の版の名前（今日のミッション・招待の画面が使う）
+// how は読む時に作る（読み込みの時点では profile がまだ無いので、先に作ると止まる）
+const REWARD_ICONS=Object.fromEntries(LOOK_ICONS.map(s=>[s.id,{icons:s.icons,t:`🎁 ${s.name}の限定アイコン`,has:()=>lookHas(s.c),get how(){ return lookHow(s.c); }}]));
 // 明日のお題を先に見られる（ミッション10日・5人招待）
+// 種類ごとのごほうびの段（今日のミッション・招待の画面に「あと◯で…」を出すため）。[{n, t:説明, badge, icons}]
+function rewardsAt(k){
+  const m={}, add=(c,txt,extra)=>{ const [kk,n]=String(c).split(':'); if(kk!==k)return; const r=m[n]=m[n]||{n:+n,parts:[]}; r.parts.push(txt); Object.assign(r,extra||{}); };
+  Object.entries(BADGES).forEach(([id,b])=>add(b.c,`${b.icon} バッジ「${b.label}」`,{badge:id}));
+  LOOK_ICONS.forEach(s=>add(s.c,`限定アイコン ${s.icons.join('')}`,{icons:true}));
+  Object.values(LOOK_BG).forEach(b=>add(b.c,`背景「${b.name}」`));
+  Object.values(LOOK_FR).forEach(f=>add(f.c,`フレーム「${f.name}」`));
+  if(k==='mis')add('mis:10','明日のお題を先に見られる'); if(k==='inv')add('inv:5','明日のお題を先に見られる');
+  return Object.values(m).sort((a,b)=>a.n-b.n).map(r=>({...r,t:r.parts.join('・')}));
+}
 const canPeek=()=>misN()>=10||(attrsOf(profile).inv_n||0)>=5;
 const badgeKeys=u=>(attrsOf(u).badges||[]).filter(k=>BADGES[k]);
-const badgeIcons=u=>badgeKeys(u).map(k=>BADGES[k].icon).join('');
+// 名前の横に出すバッジ（選んだ1つ。選んでいなければ最初にもらったもの。「つけない」も選べる）
+const badgeShown=u=>{ const ks=badgeKeys(u), b=(attrsOf(u).look||{}).badge; return b==='none'?null:ks.includes(b)?b:(ks[0]||null); };
+const badgeIcons=u=>{ const k=badgeShown(u); return k?BADGES[k].icon:''; };
+// フレームの class・背景の色（ほかの人の画面でも、その人の fa.look を見て出す）
+const frCls=u=>{ const f=(attrsOf(u).look||{}).fr; return f&&f!=='none'&&LOOK_FR[f]?' fr-'+f:''; };
+const coverBg=u=>{ const b=LOOK_BG[(attrsOf(u).look||{}).bg]; return b&&b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(u.emoji); };
 const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
 const gr=e=>`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
 function uuid(){return (crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(36).slice(2));}
@@ -1815,10 +1926,11 @@ function renderMeWorry(){ const el=$('#meWorry'); if(!el)return; const p=attrsOf
 // マイページの一番上（名前と学部。年齢は恋愛アプリっぽく見えるので出さない）
 function renderMeHero(){
   if(!profile)return; const a=attrsOf(profile);
-  $('#meAv').style.background=gr(profile.emoji); $('#meAv').textContent=profile.emoji;
+  $('#meAv').style.background=gr(profile.emoji); $('#meAv').textContent=profile.emoji; $('#meAv').className='ring2'+frCls(profile);
+  { const b=LOOK_BG[(a.look||{}).bg], hero=$('#s-me .me-hero'); if(hero)hero.style.background=b&&b.g?`linear-gradient(180deg,${b.g[0]}66,transparent 80%)`:''; }   // きせかえの背景の色
   $('#meName').textContent=profile.name;
   // バッジは名前の横の小さな絵文字だけだと何か分からなかったので、名前つきで並べる（2026-10-09。Duolingo の実績のように）
-  const mb=$('#meBadges'); if(mb)mb.innerHTML=badgeKeys(profile).map(k=>`<span title="${esc(BADGES[k].desc)}" onclick="toast('${BADGES[k].icon} ${esc(BADGES[k].desc)}')">${BADGES[k].icon} ${esc(BADGES[k].label)}</span>`).join('');
+  const mb=$('#meBadges'); if(mb)mb.innerHTML=badgeKeys(profile).map(k=>`<span class="${k===badgeShown(profile)?'on':''}" title="${esc(BADGES[k].desc)}" onclick="toast('${BADGES[k].icon} ${esc(BADGES[k].desc)}')">${BADGES[k].icon} ${esc(BADGES[k].label)}</span>`).join('');
   const h=$('#meFac'); if(h)h.textContent=[a.faculty,a.dept,a.grade].filter(Boolean).join(' ');
 }
 
@@ -2370,7 +2482,7 @@ function distText(d,id){ if(isFriend(id)||isTest(id))return Math.round(d)+"m"; r
 function nearRow({u,d,common,closed}){
   const st=statusOf(u);
   return `<div class="urow${closed?' closed':''}" onclick="openNear('${String(u.id).replace(/[^\w-]/g,'')}')">
-    <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+    <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
     <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>
       ${commonLine(common)}${crossBadge(u.id)}
       <div class="b">${st&&!closed?`<span class="stchip">${esc(st)}</span> `:''}${esc(u.bio||'')}</div></div>
@@ -2477,7 +2589,7 @@ function renderNearFriends(openFr){
   const chips=openFr.slice().sort((a,b)=>(a.d??1e9)-(b.d??1e9))
     .map(x=>({id:x.u.id,u:x.u,t:x.d!=null?Math.round(x.d)+'m':presenceText(friendPres(x.u.id))||'キャンパス'})).concat(away);
   const h=chips.length?`<div class="nfh">👥 いまキャンパスにいる友達 <span>${chips.length}人</span><a onclick="go('friends')">友達 ›</a></div>
-    <div class="nfl">${chips.map(c=>`<div class="nfc" onclick="openFriend('${c.id}')"><div class="av" style="background:${gr(c.u.emoji)}">${c.u.emoji}</div><div class="nm">${esc(c.u.name)}</div><div class="t">${esc(c.t)}</div></div>`).join('')}</div>`:'';
+    <div class="nfl">${chips.map(c=>`<div class="nfc" onclick="openFriend('${c.id}')"><div class="av${frCls(c.u)}" style="background:${gr(c.u.emoji)}">${c.u.emoji}</div><div class="nm">${esc(c.u.name)}</div><div class="t">${esc(c.t)}</div></div>`).join('')}</div>`:'';
   if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
 }
 // 地図の場所までスクロールする（友達・出店を「地図で見る」時）
@@ -2791,7 +2903,7 @@ function renderCross(){
   const ul=$('#crossList');
   const when=t=>new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
   const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/'/g,"&#39;")},null)'>
-    <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+    <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
     <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${(u.last_at||0)>=today?hhmm(u.last_at||0):when(u.last_at||0)}${(u.last_at||0)>=today?'・'+esc(u.last_place||''):''}${u.first_at&&u.count>=2?`　（これまで${u.count}回）`:''}</div></div>
     <div class="d"><div class="m${u.count>=2?' rep':''}">${u.count}回</div>${relTag(u.id)}</div></div>`;
   // 前の日にすれ違った人（2026-10-09：「本来は有料の予定」の聞き取りの対象。初めて開く時に1回だけ聞く openCrossPast）
@@ -3036,7 +3148,7 @@ async function openBlocked(){
   if(sb&&ids.length){ const {data}=await sb.from(T('profiles')).select('id,name,emoji').in('id',ids); list=data||[]; }
   const known=new Set(list.map(u=>u.id)); ids.filter(id=>!known.has(id)).forEach(id=>list.push({id,name:'（プロフィールを消した人）',emoji:'🙂'}));
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🚫 ブロックした人</h2><p class="psdesc">ブロックした人は、あなたの近くの人・すれ違い・トークに出ません。相手には知らされません。</p>
-    ${list.length?`<div class="sec">${list.map(u=>`<div class="mrow2"><div class="av" style="background:${gr(u.emoji)}">${u.emoji||'🙂'}</div><div class="nm">${esc(u.name||'')}</div><button onclick="unblockUser('${u.id}')">解除</button></div>`).join('')}</div>`:'<div class="sec">ブロックしている人はいません。</div>'}
+    ${list.length?`<div class="sec">${list.map(u=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji||'🙂'}</div><div class="nm">${esc(u.name||'')}</div><button onclick="unblockUser('${u.id}')">解除</button></div>`).join('')}</div>`:'<div class="sec">ブロックしている人はいません。</div>'}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
 }
@@ -3080,8 +3192,8 @@ function openSheet(u,d){
   else if(surveyGateOn()&&!isTest(id)){ const n=likesLeft();
     main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button>${n>0?`<button class="btn btn-wave" onclick="openWave()">👋 いいね<small style="display:block;font-size:11px;font-weight:500;opacity:.85">今日あと${n}回</small></button>`:`<button class="btn btn-wave" style="opacity:.75" onclick="closeSheet();openSurveyGate('like')">👋 いいね（今日の分は終わり）</button>`}`; }
   else main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">👋 いいね</button>`;
-  $('#sheet').innerHTML=`<div class="cover" style="background:${gr(u.emoji)}"><button class="close" onclick="closeSheet()">✕</button>
-    <div class="initial">${u.emoji}</div><div class="idn"><h2>${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''} <span>${esc(facLine(u))}</span></h2>${dist}</div></div>
+  $('#sheet').innerHTML=`<div class="cover" style="background:${coverBg(u)}"><button class="close" onclick="closeSheet()">✕</button>
+    <div class="initial${frCls(u)}">${u.emoji}</div><div class="idn"><h2>${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''} <span>${esc(facLine(u))}</span></h2>${dist}</div></div>
     <div class="body">${reply&&!fr?`<div class="wavein"><div class="wh">👋 ${esc(u.name)} さんからいいねが届いています</div>${esc(reply.text||'いいねを返すと、トークが始まります')}</div>`:''}
       ${metLine(id)}${attrBlock(u)}<div class="bio">${esc(u.bio||'')}</div></div>
     ${fr?friendBtnHTML(u):''}
@@ -3110,8 +3222,8 @@ function openPreview(mode){
   if(mode)pvMode=mode;
   const me=profile, fr=pvMode==='fr', a=attrsOf(me), p=myPresence, act=presenceActive(p);
   // 相手用シートと同じ組み立て（openSheet の cover + body）。ボタン類は付けない
-  const card=asStranger(()=>`<div class="cover" style="background:${gr(me.emoji)}">
-      <div class="initial">${me.emoji}</div><div class="idn"><h2>${esc(me.name)} <span>${esc(facLine(me))}</span></h2>
+  const card=asStranger(()=>`<div class="cover" style="background:${coverBg(me)}">
+      <div class="initial${frCls(me)}">${me.emoji}</div><div class="idn"><h2>${esc(me.name)}${badgeIcons(me)?`<i class="bdg">${badgeIcons(me)}</i>`:''} <span>${esc(facLine(me))}</span></h2>
       <div class="dist">📍 いまここから <b>120m</b>（例）</div></div></div>
     <div class="body">${attrBlock(me)}<div class="bio">${esc(me.bio||'')}</div></div>`);
   // 入れていない項目（相手の画面では、その行ごと出ない）
@@ -3278,7 +3390,7 @@ function renderFriendTalks(frItems){
     // 「ひまです」などのいまの状態は、知らない人には出ていたのに友達には出ていなかった（2026-10-03 修正）。
     // 空きコマに声をかけられる相手を探すのが友達タブの目的なので、居場所より先に出す
     const st=statusOf(friendUser(id)||u);
-    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
+    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
       <div class="info"><div class="nm">${esc(u.name)}${st?`<span class="stchip">💬 ${esc(st)}</span>`:''}${last&&last.at?`<span class="gr" style="font-size:11px;color:var(--muted2);font-weight:500;margin-left:6px">${esc(dayLabel(last.at)==='今日'?hhmm(last.at):dayLabel(last.at))}</span>`:''}</div>
         <div class="last${un?' unread':''}">${sub}</div>${pt?`<div class="mtime" style="color:#0a7f96">📍 ${esc(pt)}</div>`:''}</div>
       ${unreadBadge(id)}</div>${i<frItems.length-1?'<div class="sep"></div>':''}`; }).join('');
@@ -3302,7 +3414,7 @@ function renderMatches(){
   if(talkTab==='fr'){ list.innerHTML=renderFriendTalks(frItems); updateTalkDot(); return; }
   let h=`<div class="cmsub">友達でない人とのトークは24時間で終わります。続けたい相手はトークの中から「👥 友達に誘う」</div>`;
   if(ins.length){
-    h+=`<div class="wavehead">👋 いいねが届いています（${ins.length}人）</div>`+ins.map(({id,u,w})=>`<div class="mrow" onclick="openUserSheet('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+    h+=`<div class="wavehead">👋 いいねが届いています（${ins.length}人）</div>`+ins.map(({id,u,w})=>`<div class="mrow" onclick="openUserSheet('${id}')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
       <div class="info"><div class="nm">${esc(u.name)}<span class="gr" style="font-size:11px;color:var(--muted);font-weight:500;margin-left:5px">${esc(facLine(u))}</span></div><div class="last unread">${esc(w.text||likeCommonText(u)||'👋 いいねが届きました')}</div><div class="mtime">${agoText(w.at)}</div></div>
       <div style="display:flex;flex-direction:column;align-items:center"><button class="wavebtn btn-wave" onclick="event.stopPropagation();openUserSheet('${id}');setTimeout(openWave,50)">いいねを返す</button><button class="later2" onclick="event.stopPropagation();hideWave('${id}')">見送る</button></div></div>`).join('')
       +'<div class="sep" style="margin-top:4px"></div>';
@@ -3317,7 +3429,7 @@ function renderMatches(){
     const sub=last?(last.from===myId?'あなた: ':'')+esc(msgPlain(last.text)):op?(op.from===myId?'あなた: ':'')+'👋 '+esc(op.text):(m?'トークが始まりました':'メッセージを送ってみよう');
     // 緑の点は、いまアプリを開いている人だけ
     const o=findUser(id), online=!!o&&!isClosed(o), un=hasUnread(id);
-    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
+    return `<div class="mrow" onclick="openChat('${id}','match')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}${online?'<span class="on"></span>':''}</div>
       <div class="info"><div class="nm">${esc(u.name)} ${tag}</div><div class="last${un?' unread':''}">${sub}</div></div>
       ${unreadBadge(id)}</div>${i<items.length-1?'<div class="sep"></div>':''}`;}).join('');
   // 自分が話しかけて返事を待っている人（小さく下に）
@@ -3455,7 +3567,7 @@ function meetCardHTML(){
     :ta?`${nm}さんは <b>${esc(ta)}</b>（あなたはまだ答えていません）`:ma?`${nm}さんはまだ答えていません（あなたは <b>${esc(ma)}</b>）`:'';
   const says=topicsFor(u,2);
   return meetHead('🤝 会う前に見る1枚')
-    +`<div class="mtwho"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div><div><div class="nm">${nm}</div><div class="sub">${esc(facLine(u))}${st?`<br>💬 いま「${esc(st)}」`:''}${pt?`<br>📍 ${esc(pt)}`:''}</div></div></div>`
+    +`<div class="mtwho"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div><div><div class="nm">${nm}</div><div class="sub">${esc(facLine(u))}${st?`<br>💬 いま「${esc(st)}」`:''}${pt?`<br>📍 ${esc(pt)}`:''}</div></div></div>`
     +`<div class="mtsec"><div class="mth">🎯 共通点</div>${cd.length?`<div class="fchips">${cd.slice(0,6).map(c=>`<span class="fchip hit">${isRare(c.key)?'✨ ':''}${esc(c.label)}</span>`).join('')}</div>`:`<div class="mtnone">まだ見つかっていません。下の「🎲 ふたりのお題」で探してみよう</div>`}</div>`
     +metLine(id)
     +(same.length?`<div class="mtsec"><div class="mth">📚 同じ授業</div><div class="mtrow">${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')}</div></div>`:'')
@@ -3994,7 +4106,7 @@ function hideStartCard(){ const s=startState(); s.hide=true; saveStart(s); rende
    保存はプロフィール（fa.mis = {d:今日, like, talk, n:スタンプの数, last:最後にスタンプを押した日}）なので、スマホを変えても続く。
    登録した直後は「はじめにやること」を出し、それが終わるか閉じたら、同じ場所にこのカードを出す（renderStartCard）。
    ⚠️ ごほうびに「本来は有料」の2つの機能（前の日のすれ違い・コミュニティを作る）は使わない（料金のテストの結果がくずれるため） */
-const MIS_REWARDS=[{n:3,badge:'mis3',t:'🌱 バッジ「ちかくデビュー」'},{n:5,icons:'mis5',t:'限定アイコン4種'},{n:10,badge:'mis10',peek:true,t:'🔥 バッジ「ちかく常連」と、明日のお題を先に見られる'}];
+const MIS_REWARDS=rewardsAt('mis');   // ごほうびは「きせかえ」（LOOK_*・BADGES）で管理する
 function misState(){ const m=(profile&&profile.fa&&profile.fa.mis)||{}, d=dailyToday().d; return m.d===d?{...m}:{n:m.n||0,last:m.last||null,d}; }
 function misN(){ return ((profile&&profile.fa&&profile.fa.mis)||{}).n||0; }
 // 近くにも、今日のすれ違いにも、だれもいない
@@ -4041,6 +4153,7 @@ function misSave(m,checkOnly){
   saveMyAttrs(); if(got&&got.r&&got.r.badge){ publishMe(); renderMeHero(); }
   renderStartCard();
   if(got)setTimeout(()=>misDone(got),900);
+  setTimeout(()=>lookSync(true),400);
 }
 function misDone(g){
   const nx=misNext(g.n);
@@ -4048,7 +4161,7 @@ function misDone(g){
   $('#memSheet').innerHTML=`<div class="rinfo" style="text-align:center"><div style="font-size:52px;line-height:1.2">🎉</div>
     <h2 class="pstitle" style="text-align:center">今日のミッション達成！</h2>
     <p class="psdesc" style="text-align:center">スタンプが <b style="color:var(--amber-deep);font-size:18px">${g.n}個</b> になりました。</p>
-    ${g.r?`<div class="misgot">🎁 ごほうび：<b>${g.r.t}</b>${g.r.icons?'<br><small>マイページの「プロフィールを編集」のアイコンから選べます</small>':''}</div>`:''}
+    ${g.r?`<div class="misgot">🎁 ごほうび：<b>${g.r.t}</b><br><small>マイページの「🎨 きせかえ」から選べます</small></div>`:''}
     ${nx?`<p class="psdesc" style="text-align:center">あと${nx.n-g.n}個で ${nx.t}</p>`:''}
     <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
@@ -4294,7 +4407,7 @@ async function openRoomInfo(){
     <div class="sec"><b>🚪 入れる人</b>${esc(roomWhoText(r))}${code?`<div style="margin-top:6px">招待コード <span class="code">${esc(code)}</span> <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="copyText('${esc(code)}')">コピー</button></div>`:''}</div>
     <div class="sec"><b>⏳ 期限・👥 定員</b>${roomLeft(r)}${r.expires_at?`（${fesTime(Date.parse(r.expires_at),true)}まで）`:''} ・ 定員 ${r.capacity?r.capacity+'人':'なし'}</div>
     ${meetText(r.meet)?`<div class="sec"><b>📍 集まる約束</b>${esc(meetText(r.meet))}${r.going?`（👍 ${r.going}人）`:''}</div>`:''}
-    ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.map(u=>`<div class="mrow2"><div class="av" style="background:${gr(u.emoji)}">${u.emoji||'🙂'}</div><div class="nm">${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}</div>
+    ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.map(u=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji||'🙂'}</div><div class="nm">${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}</div>
       ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button><button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
       :`<div class="sec"><b>👑 オーナー</b>${!r.owner_id&&isClassRoom(r)?'なし（運営が見守る授業の部屋）':esc(r.owner_name||'なし')}<br><span style="font-size:11.5px;color:var(--muted)">参加者は、参加すると見られます</span></div>`}
     ${joined?`<div class="sharerow" style="margin-bottom:6px"><div class="lab">🔔 この部屋の通知<small>オフにすると、投稿があっても通知しません</small></div><div class="toggle${r.muted?'':' on'}" onclick="toggleRoomMute()"><div class="k"></div></div></div>`:''}
@@ -4735,7 +4848,7 @@ async function openMembers(){
         let d=null; if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.round(Math.hypot(r.e,r.n));}
         const me=u.id===myId;
         return `<div class="urow" ${me?'':`onclick='closeMembers();openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':d})'`}>
-          <div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+          <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
           <div class="info"><div class="n">${esc(u.name)}${me?' <span class="joined-tag">あなた</span>':''}</div>
           <div class="b">${esc(u.bio||'')}</div></div>
           <div class="d">${me?'':`<div class="m" style="font-size:12.5px">見る ›</div>`}</div></div>`;}).join('')}
@@ -4935,7 +5048,7 @@ function showFrNudge(){
   const f=frNudgeCur=frNudgeQ.shift(), el=$('#frNudge'), day=f.c.key.startsWith('day:');
   const text=day?`🎲 友達の<b>${esc(f.u.name)}</b>さんも、今日のお題で「<b>${esc(dailyAnswer(f.u))}</b>」！`
     :`✨ <b>${esc(f.u.name)}</b>さんと新しい共通点：${esc(f.c.label)}${f.more>0?` ほか${f.more}つ`:''}`;
-  el.innerHTML=`<div class="av" style="background:${gr(f.u.emoji)}">${f.u.emoji}</div><div class="tx">${text}</div><button class="go" onclick="frNudgeTalk()">💬 話す</button><button class="x" onclick="hideFrNudge()" aria-label="閉じる">✕</button>`;
+  el.innerHTML=`<div class="av${frCls(f.u)}" style="background:${gr(f.u.emoji)}">${f.u.emoji}</div><div class="tx">${text}</div><button class="go" onclick="frNudgeTalk()">💬 話す</button><button class="x" onclick="hideFrNudge()" aria-label="閉じる">✕</button>`;
   el.classList.add('show');
   clearTimeout(frNudgeTimer); frNudgeTimer=setTimeout(hideFrNudge,10000);
 }
@@ -5086,12 +5199,12 @@ function renderFriends(){
   if(friendTablesMissing) h+=`<div class="frnote">⚠️ 友達機能のデータベースがまだ準備されていません（運営向け：supabase/tama_friends.sql を実行）</div>`;
   if(incoming.length){
     h+=`<div class="listhead">📩 届いた友達申請</div><div class="ulist">`+incoming.map(r=>{ const u=who(r.from_id);
-      return `<div class="urow" style="cursor:default"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">友達申請が届いています</div></div>
+      return `<div class="urow" style="cursor:default"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">友達申請が届いています</div></div>
         <div class="frbtns"><button class="btn btn-primary" onclick="acceptFriend(${r.id},'${r.from_id}','${nm(u)}')">承認</button><button class="btn btn-ghost" onclick="removeFriendRow(${r.id},false)">断る</button></div></div>`; }).join('')+`</div>`;
   }
   h+=`<div class="listhead">👥 友達はいまどこ？</div><div class="ulist">`;
   h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
-      return `<div class="urow" onclick="openFriend('${id}')"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div>
+      return `<div class="urow" onclick="openFriend('${id}')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div>
         <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}${sameDaily(u)?`<span class="stchip same">🎲 お題が同じ</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}${freeText(id)?`<div class="mtime frfreeline">${esc(freeText(id))}</div>`:''}</div>
         <div class="d">${map?`<button class="frmapbtn" onclick="event.stopPropagation();showFriendOnMap('${id}')">🗺 地図</button>`:''}</div></div>`; }).join('')
     :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>目の前にいる人とは、4桁のコードで<br>すぐ友達になれます。</p>
@@ -5100,7 +5213,7 @@ function renderFriends(){
   h+=freeTogetherHTML();   // 今日、いっしょに空いているコマ（2026-10-08）
   if(sent.length){
     h+=`<div class="listhead">⏳ 送った申請</div><div class="ulist">`+sent.map(r=>{ const u=who(r.to_id);
-      return `<div class="urow" style="cursor:default"><div class="av" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">承認待ち</div></div>
+      return `<div class="urow" style="cursor:default"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${u.emoji}</div><div class="info"><div class="n">${esc(u.name)}</div><div class="b">承認待ち</div></div>
         <div class="frbtns"><button class="btn btn-ghost" onclick="removeFriendRow(${r.id},false)">取り消す</button></div></div>`; }).join('')+`</div>`;
   }
   box.innerHTML=h;
@@ -5547,6 +5660,7 @@ function answerDaily(a){
   profile.fa=profile.fa||{};
   const prev=profile.fa.daily; if(prev&&prev.d!==t.d)profile.fa.daily_prev=prev;   // 前の日の答えは「昨日の結果」に数えるため残す
   profile.fa.daily={d:t.d,q:t.n,a,n:normAns(a)};
+  profile.fa.stat={...(profile.fa.stat||{}),daily:((profile.fa.stat||{}).daily||0)+1};   // お題に答えた日数（きせかえのごほうび）
   dailyOpen=true;   // 答えたらすぐ「みんなの答え」を見せる
   publishMe(); saveMyAttrs().then(()=>loadDailyStats(t,true)); renderDaily(); renderNearby(); renderCross();
   toast('🎲 答えました。みんなの答えを見てみよう');
@@ -5555,6 +5669,7 @@ function answerDaily(a){
   // 「☕ ひとこと」はお題に答えた直後には出さない（2026-10-08。アプリを開いて少したった時に maybeCheckinPopup）
   { const s=startState(); s.daily=true; saveStart(s); }   // はじめにやることの「お題に答える」を ✅ に
   misCheck();   // 今日のミッション①
+  setTimeout(()=>lookSync(),1500);   // きせかえ（お題の日数）
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
@@ -5960,6 +6075,7 @@ async function saveEdit(){
   profile.fa={...attrToFa(edAttr),status:old.status||'',status_until:old.status_until||null,daily:old.daily||null,daily_prev:old.daily_prev||null};
   if(old.badges)profile.fa.badges=old.badges;   // バッジ（アンケートの特典）もこの画面では変えないので引き継ぐ
   if(old.match_off)profile.fa.match_off=old.match_off;   // マッチングに使う共通点（マイページで選ぶ）も引き継ぐ
+  if(old.look)profile.fa.look=old.look; if(old.stat)profile.fa.stat=old.stat; if(old.inv_n)profile.fa.inv_n=old.inv_n;   // きせかえ（2026-10-09）
   if(old.mis)profile.fa.mis=old.mis; if(old.inv_by)profile.fa.inv_by=old.inv_by;   // 今日のミッションのスタンプ・招待してくれた人も引き継ぐ（2026-10-09）
   renderNearby(); renderCross(); renderMeHero();
   await publishMe();
@@ -5987,7 +6103,7 @@ function buildInvite(){}
    ・招待した人に数えるのは、招待された人が「コードを入れた日とは別の日に、もう一度開いた」時（水増しを防ぐ。SQL の tama_invite_tick）
    ・特典：招待された人は限定アイコン2種、招待した人は 1人でバッジ「📨 ちかく案内人」、3人で限定アイコン4種、5人でバッジ「🏅 ちかく大使」と明日のお題を先に見られる
    ・招待した人数は fa.inv_n に、招待してくれた人は fa.inv_by に入れる（スマホを変えても特典が残るように） */
-const INV_REWARDS=[{n:1,badge:'inv1',t:'📨 バッジ「ちかく案内人」'},{n:3,t:'限定アイコン4種 🚀🎁🧭🌻'},{n:5,badge:'inv5',t:'🏅 バッジ「ちかく大使」と、明日のお題を先に見られる'}];
+const INV_REWARDS=rewardsAt('inv');   // ごほうびは「きせかえ」（LOOK_*・BADGES）で管理する
 let inviteInfo=null, inviteMissing=false;
 const refFromUrl=(()=>{ try{ const r=(new URL(location.href).searchParams.get('ref')||'').toUpperCase(); if(/^[A-Z0-9]{6}$/.test(r)){ localStorage.setItem('tama_ref',r); return r; } }catch(e){} return ''; })();
 function savedRef(){ try{ return localStorage.getItem('tama_ref')||''; }catch(e){ return ''; } }
@@ -6024,7 +6140,7 @@ async function useInvite(code,quiet){
   const nm=data.name||'招待してくれた人'; invBy={id:data.id,name:nm};
   $('#invSheet').innerHTML=`<div style="text-align:center"><div style="font-size:52px;line-height:1.2">🎁</div>
     <h2 class="pstitle" style="text-align:center">招待コードを入れました</h2>
-    <p class="psdesc" style="text-align:center">限定アイコン <b style="font-size:20px">🐣 🎈</b> が使えるようになりました。<br>（マイページの「プロフィールを編集」のアイコンから）</p>
+    <p class="psdesc" style="text-align:center">限定アイコン <b style="font-size:20px">🐣 🎈</b> が使えるようになりました。<br>（マイページの「🎨 きせかえ」から）</p>
     <p class="psdesc" style="text-align:center"><b style="color:var(--ink)">${esc(nm)}さん</b>に友達申請を送りますか？<br>友達になると、いる建物・空きコマが分かります。</p>
     <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px" onclick="closeInvite();requestFriend(invBy.id,invBy.name)">👥 友達申請を送る</button>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeInvite()">あとで</button></div>`;
@@ -6051,6 +6167,69 @@ function openInvite(){
   if(!I&&!inviteMissing)loadInvite();
 }
 function closeInvite(){ $('#invOverlay').classList.remove('show'); }
+/* ---------- きせかえの画面（2026-10-09。マイページの「🎨 きせかえ」） ----------
+   アイコン・背景・フレーム・バッジのタブ。持っていないものも鍵つきで全部見せて、もらい方と「あと◯」を出す（集めたくなるように）。
+   押すとすぐ変わる（上の見本も変わる）。保存は fa.look（アイコンは profile.emoji） */
+let lookTab='icon';
+function openLook(tab){ if(!profile){ toast('先にプロフィールを登録してね'); return; } if(tab)lookTab=tab; lookSync(true); renderLook(); $('#memOverlay').classList.add('show'); }
+function lookCell(on,has,inner,how,click,label){
+  return `<div class="lkc${on?' on':''}${has?'':' lock'}" onclick="${has?click:`toast('🔒 ${esc(how)}')`}">${inner}${label?`<small>${esc(label)}</small>`:''}${has?'':'<i>🔒</i>'}</div>`;
+}
+function renderLook(){
+  const p=profile, L=attrsOf(p).look||{}, tabs=[['icon','アイコン'],['bg','背景'],['fr','フレーム'],['badge','バッジ']];
+  // 全部でいくつ持っているか（集める楽しみ）
+  const all=[...EMO.map(()=>'free'),...EMO_SP.map(()=>'survey'),...LOOK_ICONS.flatMap(s=>s.icons.map(()=>s.c)),...Object.values(LOOK_BG).map(x=>x.c),...Object.values(LOOK_FR).map(x=>x.c),...Object.values(BADGES).map(x=>x.c)];
+  const got=all.filter(c=>lookHas(c)).length;
+  let body='';
+  if(lookTab==='icon'){
+    const cell=(e,c)=>lookCell(p.emoji===e,lookHas(c)||p.emoji===e,`<span class="lke" style="background:${gr(e)}">${e}</span>`,lookHow(c),`lookSet('emoji','${e}')`);
+    body=`<div class="lkh">はじめから使えるアイコン</div><div class="lkg">${EMO.map(e=>cell(e,'free')).join('')}</div>`
+      +`<div class="lkh">${BADGES.survey.icon} アンケートに答えた人<span>${lookHas('survey')?'':'🔒 '+lookHow('survey')}</span></div><div class="lkg">${EMO_SP.map(e=>cell(e,'survey')).join('')}</div>`
+      +LOOK_ICONS.map(s=>`<div class="lkh">🎁 ${esc(s.name)}<span>${lookHas(s.c)?'✅ もらいました':'🔒 '+esc(lookHow(s.c))}</span></div><div class="lkg">${s.icons.map(e=>cell(e,s.c)).join('')}</div>`).join('');
+  }else if(lookTab==='bg'){
+    body=`<div class="lkg wide">${Object.entries(LOOK_BG).map(([id,b])=>lookCell((L.bg||'auto')===id,lookHas(b.c),`<span class="lkbg" style="background:${b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(p.emoji)}"></span>`,lookHow(b.c),`lookSet('bg','${id}')`,lookHas(b.c)?b.name:lookHow(b.c))).join('')}</div>`;
+  }else if(lookTab==='fr'){
+    body=`<div class="lkg wide">${Object.entries(LOOK_FR).map(([id,f])=>lookCell((L.fr||'none')===id,lookHas(f.c),`<span class="lke${id==='none'?'':' fr-'+id}" style="background:${gr(p.emoji)}">${p.emoji}</span>`,lookHow(f.c),`lookSet('fr','${id}')`,lookHas(f.c)?f.name:lookHow(f.c))).join('')}</div>`;
+  }else{
+    const sh=badgeShown(p);
+    body=`<div class="lknote">持っているバッジから1つ、名前の横に出せます。持っているバッジは全部プロフィールに並びます。</div>`
+      +`<div class="lkbl">${lookCell(sh===null,true,'<span class="lkb">🚫</span>','', "lookSet('badge','none')",'つけない')}`
+      +Object.entries(BADGES).map(([id,b])=>{ const has=badgeKeys(p).includes(id); return lookCell(sh===id,has,`<span class="lkb">${b.icon}</span><span class="lkbt"><b>${esc(b.label)}</b><em>${esc(has?b.desc:'🔒 '+lookHow(b.c))}</em></span>`,lookHow(b.c),`lookSet('badge','${id}')`); }).join('')+`</div>`;
+  }
+  $('#memSheet').innerHTML=`<div class="lk">
+    <div class="lkprev"><div class="lkcover" style="background:${coverBg(p)}"><span class="lkav${frCls(p)}" style="background:${gr(p.emoji)}">${p.emoji}</span><b>${esc(p.name)}${badgeIcons(p)?' '+badgeIcons(p):''}</b></div></div>
+    <h2 class="pstitle" style="margin:12px 0 2px">🎨 きせかえ <span class="lkcnt">${got}/${all.length} 集めました</span></h2>
+    <div class="seg lktabs">${tabs.map(([k,t])=>`<button class="${lookTab===k?'on':''}" onclick="lookTab='${k}';renderLook()">${t}</button>`).join('')}</div>
+    <div class="lkbody">${body}</div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+}
+async function lookSet(k,v){
+  if(!profile)return;
+  if(k==='emoji'){ profile.emoji=v; renderMeHero(); renderNearby(); if(sb&&myId&&!String(myId).startsWith('local-'))sb.from(T('profiles')).update({emoji:v}).eq('id',myId).then(()=>{},()=>{}); }
+  else{ profile.fa={...(profile.fa||{}),look:{...((profile.fa||{}).look||{}),[k]:v}}; saveMyAttrs(); renderMeHero(); renderNearby(); }
+  publishMe(); renderLook();
+}
+// 数を残し、条件を満たしたバッジを足し、新しくもらったものを知らせる。quiet：知らせない（画面を開く時）
+function lookSync(quiet){
+  if(!profile||String(myId||'').startsWith('local-'))return;
+  const fa=profile.fa||{}, st={...(fa.stat||{})}; let ch=false;
+  ['cross','friend','owner'].forEach(k=>{ const n=lookCount(k); if(n>(st[k]||0)){ st[k]=n; ch=true; } });
+  const b=new Set(fa.badges||[]), newB=[];
+  Object.entries(BADGES).forEach(([id,x])=>{ if(!b.has(id)&&x.c!=='survey'&&lookHas(x.c)){ b.add(id); newB.push(id); ch=true; } });
+  if(ch){ profile.fa={...fa,stat:st,badges:[...b]}; saveMyAttrs(); if(newB.length){ publishMe(); renderMeHero(); } }
+  // 新しく使えるようになったもの（この端末で、まだ知らせていないもの）
+  let seen=[]; try{ seen=JSON.parse(localStorage.getItem('tama_lookSeen')||'null'); }catch(e){}
+  const now=[...LOOK_ICONS.filter(s=>lookHas(s.c)).map(s=>'i:'+s.id),...Object.entries(LOOK_BG).filter(([,x])=>x.c!=='free'&&lookHas(x.c)).map(([id])=>'b:'+id),
+    ...Object.entries(LOOK_FR).filter(([,x])=>x.c!=='free'&&lookHas(x.c)).map(([id])=>'f:'+id),...[...b].map(id=>'g:'+id)];
+  if(seen===null){ try{ localStorage.setItem('tama_lookSeen',JSON.stringify(now)); }catch(e){} return; }   // 初めての時は、いま持っているものを知らせない
+  const fresh=now.filter(x=>!seen.includes(x));
+  if(!fresh.length)return;
+  try{ localStorage.setItem('tama_lookSeen',JSON.stringify(seen.concat(fresh))); }catch(e){}
+  const dot=$('#lookDot'); if(dot)dot.hidden=false;
+  if(quiet||$('.overlay.show'))return;
+  const nm=fresh.map(x=>{ const [t,id]=x.split(':'); return t==='g'?`${BADGES[id].icon} バッジ「${BADGES[id].label}」`:t==='i'?'限定アイコン '+LOOK_ICONS.find(s=>s.id===id).icons.join(''):t==='b'?`背景「${LOOK_BG[id].name}」`:`フレーム「${LOOK_FR[id].name}」`; });
+  toast(`🎁 きせかえが増えました：${esc(nm.slice(0,2).join('・'))}${nm.length>2?' ほか':''}<br><small>マイページの「🎨 きせかえ」から選べます</small>`);
+}
 function renderQR(url){const box=$('#qrbox');const img=new Image();
   img.onload=()=>{box.innerHTML='';box.appendChild(img);};
   img.onerror=()=>{box.innerHTML=`<div class="qrfallback">QR画像を読み込めませんでした。<br>下のリンクをコピーして共有してください。</div>`;};
@@ -6083,6 +6262,7 @@ function go(t){
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
   loadInvite();   // 招待コード・招待した人数（2026-10-09）
+  setTimeout(()=>lookSync(),9000); setInterval(()=>{ if(!document.hidden)lookSync(); },60000);   // きせかえ（すれ違い・友達・バッジ）
   publishMe();loadBlocks().then(()=>pollUsers());loadEncounters();setInterval(()=>{if(!document.hidden){publishMeIfNeeded();pollUsers();}},6000);
   restoreMyPresence();loadTimetable();loadFriends();setInterval(()=>{if(!document.hidden)loadFriends();},20000);
   // ☕ ひとことは、開いて20秒ほどたってから（2026-10-08）。登録した日は出さない（firstUseDay）
