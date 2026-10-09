@@ -878,6 +878,9 @@
   /* はじめにやること・授業の部屋（2026-10-08） */
   /* 登録では悩み・不安を聞かない（2026-10-08 ユーザー役のテスト：初めてのアプリでいきなり弱みを出すようで身構える）。プロフィール編集では選べる */
   #obStep2 .worryf{display:none}
+  .empty .emptycnt{font-size:13px;margin:6px 0 2px}.empty .emptycnt b{color:var(--signal);font-size:15px}
+  .empty .emptyacts{margin:14px auto 4px;max-width:280px;display:flex;flex-direction:column;gap:8px}.empty .emptyacts .btn{margin:0;padding:12px;font-size:14px}
+  .empty .emptyacts .eah{font-size:11.5px;font-weight:700;color:var(--muted)}
   .nearjump{margin:0 16px 8px;padding:9px 14px;border-radius:14px;background:linear-gradient(90deg,rgba(15,176,205,.12),rgba(32,180,131,.10));border:1px solid rgba(15,176,205,.35);font-size:13px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer}
   .nearjump:empty{display:none}.nearjump b{color:#0a7f96;font-size:14.5px}.nearjump span{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal)}
   .startcard{margin:2px 16px 10px;padding:10px 12px 6px;border-radius:16px;background:#fff;border:1.5px solid rgba(245,151,47,.5);box-shadow:0 4px 14px rgba(245,151,47,.12)}
@@ -2329,7 +2332,7 @@ function renderNearby(){
   const openAll=all.sort(byScore), frNow=openAll.filter(x=>isFriend(x.u.id)), open=openAll.filter(x=>!isFriend(x.u.id));
   renderNearFriends(frNow);
   { const nc=open.filter(x=>x.common.length).length, el=$("#nearJump");
-    const jh=!open.length?"":nc?`👀 いま近くに、共通点のある人 <b>${nc}人</b><span>見る ↓</span>`:`👀 いまキャンパスにいる人 <b>${open.length}人</b><span>見る ↓</span>`;
+    const jh=!open.length?(frNow.length?"":"🕊 いまは近くに人がいません<span>昼休みに多いです</span>"):nc?`👀 いま近くに、共通点のある人 <b>${nc}人</b><span>見る ↓</span>`:`👀 いまキャンパスにいる人 <b>${open.length}人</b><span>見る ↓</span>`;
     if(el&&el.dataset.h!==jh){ el.dataset.h=jh; el.innerHTML=jh; } }
   lastOpenCount=openAll.filter(x=>!isTest(x.u.id)).length; visitMaybeUpdate();
   $('#nearSub').textContent=openAll.length?'いま'+openAll.length+'人'+(frNow.length?`（友達${frNow.length}人）`:''):'まだ誰もいません';
@@ -2340,7 +2343,14 @@ function renderNearby(){
     return;
   }
   if(!all.length){
-    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>まだ近くに使っている人がいません。<br>平日の昼休み（12:50〜13:40）に、<br>食堂のあたりで開いてみてください。</p>${emptyPushHTML()}<button class="btn btn-primary" onclick="openInvite()">📨 友達をアプリに誘う（QRを出す）</button>${debugMode()?`<br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button>`:''}</div>`;
+    // 2026-10-08 ユーザー役のテスト（1年生）：ひとりで入れた人に「友達を誘う」が一番目立つのは合わない。いまできることと、使っている人の数を先に出す
+    if(!emptyCountAsked&&sb&&myId&&!String(myId).startsWith('local-')){ emptyCountAsked=true; sb.rpc('tama_public_count').then(({data})=>{ if(data){ gateCount=data; renderNearby(); } },()=>{}); }
+    const today=gateCount&&gateCount.today>=5?`<div class="emptycnt">👥 今日は多摩キャンで <b>${gateCount.today}人</b> が使っています</div>`:'';
+    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>いまは近くにアプリを開いている人がいません。<br>平日の昼休み（12:50〜13:40）の<br>食堂のあたりに多いです。</p>${today}
+      <div class="emptyacts"><div class="eah">いまできること</div>
+        ${dailyAnswer(profile)?'':`<button class="btn btn-primary" onclick="$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})">🎲 今日のお題に答える</button>`}
+        <button class="btn btn-ghost" onclick="go('comm')">📚 授業の部屋をのぞく</button></div>
+      ${emptyPushHTML()}<button class="btn btn-ghost" style="margin-top:10px;padding:10px 16px;font-size:12.5px" onclick="openInvite()">📨 友達をアプリに誘う</button>${debugMode()?`<br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button>`:''}</div>`;
     return;
   }
   // 授業中は、同じ授業（同じ曜日・時限・授業名）を時間割に入れている人を一番上にまとめる（2026-09-28）
@@ -2353,6 +2363,7 @@ function renderNearby(){
         +(more>0?`<button class="btn btn-ghost nearmore" onclick="nearShowAll=true;renderNearby()">もっと見る（あと${more}人）</button>`:'')
       :clsNow.length?'':`<div class="nearsec">${frNow.length?'友達のほかに、いまアプリを開いている人はいません':'いまアプリを開いている人はいません'}</div>`);
 }
+let emptyCountAsked=false;   // 近くに誰もいない時に、今日の利用人数を1回だけ聞く
 const NEAR_LIMIT=20;   // 一覧に最初に出す人数（共通点の多い順。2026-10-08）
 let nearShowAll=false;
 // いまキャンパスにいる友達を横並びに（開いている友達は距離、そうでなければ友達に見せている建物）。押すとプロフィール
