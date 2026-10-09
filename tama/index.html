@@ -876,6 +876,10 @@
   .nearfr .nfc .nm{font-size:11.5px;font-weight:700;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .nearfr .nfc .t{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* はじめにやること・授業の部屋（2026-10-08） */
+  /* 登録では悩み・不安を聞かない（2026-10-08 ユーザー役のテスト：初めてのアプリでいきなり弱みを出すようで身構える）。プロフィール編集では選べる */
+  #obStep2 .worryf{display:none}
+  .nearjump{margin:0 16px 8px;padding:9px 14px;border-radius:14px;background:linear-gradient(90deg,rgba(15,176,205,.12),rgba(32,180,131,.10));border:1px solid rgba(15,176,205,.35);font-size:13px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer}
+  .nearjump:empty{display:none}.nearjump b{color:#0a7f96;font-size:14.5px}.nearjump span{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal)}
   .startcard{margin:2px 16px 10px;padding:10px 12px 6px;border-radius:16px;background:#fff;border:1.5px solid rgba(245,151,47,.5);box-shadow:0 4px 14px rgba(245,151,47,.12)}
   .startcard:empty{display:none}
   .startcard .sth{display:flex;align-items:center;gap:8px;margin-bottom:4px}.startcard .sth b{font-size:13.5px}
@@ -971,13 +975,12 @@
         <div class="obstep" id="obStep1">
           <div class="obh">① あなたのこと</div>
           <div class="obd">ニックネームと学部を教えてください。本名は入れないでください。</div>
-          <div class="field"><label>ニックネーム<span class="req">必須</span></label><input id="obName" maxlength="12" placeholder="れい"></div>
+          <div class="field"><label>ニックネーム<span class="req">必須</span></label><input id="obName" maxlength="12" placeholder="例：れい"></div>
           <div id="obAttrs1"></div>
-          <div class="field"><label>年齢<span class="req">必須</span></label><input id="obAge" type="number" inputmode="numeric" min="18" max="99" placeholder="19"><div class="hint">18歳以上の方だけ使えます。年齢はほかの人には表示されません</div></div>
+          <div class="field"><label>年齢<span class="req">必須</span></label><input id="obAge" type="number" inputmode="numeric" min="18" max="99" placeholder="例：19"><div class="hint">18歳以上の方だけ使えます。年齢はほかの人には表示されません</div></div>
           <div class="terms">📄 ご利用にあたって<br><a onclick="openTerms()">利用規約を読む</a>
             <label class="termschk"><input type="checkbox" id="obTerms"><span>利用規約に同意します</span></label></div>
-          <div class="agegate">🎓 <b>18歳以上の方のみご利用いただけます</b>
-            <label class="agechk"><input type="checkbox" id="obAge18"><span>18歳以上です</span></label></div>
+          <!-- 「18歳以上です」のチェックは、年齢の入力（18未満は進めない）と重なるので外した（2026-10-08 ユーザー役のテスト：年齢の確認が3つあって重い） -->
         </div>
         <div class="obstep" id="obStep2" hidden>
           <div class="obh">② 共通点になること</div>
@@ -1003,6 +1006,8 @@
       <div class="scroll">
       <div class="fesbar" id="fesBar" onclick="if(this.classList.contains('warn'))openSurvey()"></div>
       <!-- 「いまの自分」と「時間割」の2枚のタイル（renderStatusRow）。2026-09-24 のUXテストで「人が1人も見えない」と言われたので、1行に小さくした -->
+      <!-- いま近くにいる人へ飛ぶ1行（2026-10-08 ユーザー役のテスト：登録直後の最初の画面に人が1人も見えなかった） -->
+      <div class="nearjump" id="nearJump" onclick="showNearList()"></div>
       <div class="nowbar" id="nowBar"></div>
       <!-- はじめにやること（2026-10-08。renderStartCard） -->
       <div class="startcard" id="startCard"></div>
@@ -1685,14 +1690,13 @@ function obCheck(step){
     if(!age)miss.push([$('#obAge'),'年齢']);
     else if(age<18)miss.push([$('#obAge'),'18歳以上の方だけ使えます']);
     if(!$('#obTerms').checked)miss.push([$('#obTerms'),'利用規約への同意']);
-    if(!$('#obAge18').checked)miss.push([$('#obAge18'),'「18歳以上です」のチェック']);
   }
   if(step===2){
-    if(!obAttr.artist.trim())miss.push([$('#obArtist'),'アーティスト']);
-    else if(ngCheck(obAttr.artist))miss.push([$('#obArtist'),'アーティスト名に使えない言葉があります']);
-    if(obAttr.aruaru.length<FA.aruaruPick)miss.push([$('#obAruaruBox'),'あるあるを'+FA.aruaruPick+'つ']);
-    if(!obAttr.course.trim())miss.push([$('#obCourse'),'取りたい科目']);
-    else if(ngCheck(obAttr.course))miss.push([$('#obCourse'),'科目名に使えない言葉があります']);
+    // 2026-10-08 ユーザー役のテスト（1年生）：必須が重い・「特にない」が選べない・「今季絶対取りたい科目」が分かりにくい。
+    // アーティストと科目は任意、あるあるは1つ以上に（入れるほど共通点が見つかりやすい、と書く）
+    if(obAttr.artist.trim()&&ngCheck(obAttr.artist))miss.push([$('#obArtist'),'アーティスト名に使えない言葉があります']);
+    if(obAttr.aruaru.length<1)miss.push([$('#obAruaruBox'),'あるあるを1つ以上']);
+    if(obAttr.course.trim()&&ngCheck(obAttr.course))miss.push([$('#obCourse'),'授業名に使えない言葉があります']);
   }
   if(step===3&&ngCheck($('#obBio').value))miss.push([$('#obBio'),'自己紹介に使えない言葉があります']);
   // agegate・terms のチェックボックスは .field の外なので、枠の代わりに親の箱を揺らさず目立たせる
@@ -1976,9 +1980,7 @@ function attrToFa(st){ return {faculty:st.faculty,dept:st.dept,grade:st.grade,pu
 // よく聴くアーティスト・わかる！あるあるは 2026-09-24 に必須にした。前に登録した人は起動時に編集画面が開いて入れてもらう
 function attrMissing(st){
   if(!st.faculty)return '学部・所属を選んでください';
-  if(!st.course.trim())return '今季絶対取りたい科目を入れてください';
-  if(!st.artist.trim())return 'いちばんよく聴くアーティストを入れてください';
-  if(st.aruaru.length<FA.aruaruPick)return '「わかる！あるある」を'+FA.aruaruPick+'つ選んでください';
+  if(st.aruaru.length<1)return '「わかる！あるある」を1つ以上選んでください';   // アーティスト・授業は 2026-10-08 から任意
   return null;
 }
 // 必須が足りずに保存できなかった時、その項目が折りたたみの中なら開いて見せる
@@ -1992,11 +1994,11 @@ function openMissingFold(p,miss){
 function attrFieldsHTML(p,part){
   const who=`<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>`;
-  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="req">必須</span></label><input id="${p}Artist" data-sugg="artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
-    <div class="field"><label>わかる！あるある<span class="req">必須・${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
+  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="opt">任意・入れると同じアーティストの人が見つかります</span></label><input id="${p}Artist" data-sugg="artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
+    <div class="field"><label>わかる！あるある<span class="req">必須・1〜${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
       <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
         <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
-    <div class="field"><label>今季絶対取りたい科目<span class="req">必須</span></label><input id="${p}Course" data-sugg="course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
+    <div class="field"><label>気になっている授業<span class="opt">任意・取っている授業・取りたい授業など1つ</span></label><input id="${p}Course" data-sugg="course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ科目を書いた人には「同じ！」と出ます</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field worryf"><label>${WORRY_LABEL}<span class="opt">任意・${FA.purposePick}つまで</span></label>
       <div class="hint" style="margin:0 0 8px">選ばなくても大丈夫です。あとで、プロフィール編集からいつでも変えられます。</div>
@@ -2057,7 +2059,7 @@ function bindAttrForm(p,st){
 const MATCH_KINDS=[
   {k:'art', icon:'🎧', label:'よく聴くアーティスト'},
   {k:'cls', icon:'📚', label:'時間割の授業（同じ曜日・時限）'},
-  {k:'crs', icon:'📝', label:'今季取りたい科目'},
+  {k:'crs', icon:'📝', label:'気になっている授業'},
   {k:'day', icon:'🎲', label:'今日のお題の答え'},
   {k:'aru', icon:'💬', label:'わかる！あるある'},
   {k:'goal',icon:'🌱', label:'これから・目標'},
@@ -2109,7 +2111,7 @@ function commonRaw(u){
   (me.goals||[]).forEach(x=>{ if(!FA.weak.includes(x)&&(th.goals||[]).includes(x))add('goal:'+x,x); });
   const ma=normAns(me.artist); if(ma&&ma===normAns(th.artist))add('art:'+ma,'同じアーティスト「'+th.artist+'」');
   (me.aruaru||[]).forEach(x=>{ if((th.aruaru||[]).includes(x))add('aru:'+x,'わかる「'+x+'」'); });
-  if(sameCourse(u))add('crs:'+normCourse(me.course),'取りたい科目「'+th.course+'」');
+  if(sameCourse(u))add('crs:'+normCourse(me.course),'気になっている授業「'+th.course+'」');
   // 時間割で同じ曜日・時限に同じ授業名を入れている人（毎週会える人なので、共通点に数える）
   (samePeers[u.id]||[]).forEach(r=>add('cls:'+r.slot+':'+normAns(r.course),'同じ授業「'+r.course+'」'));
   // 今日のお題で同じ答え（その日だけの共通点。偶然の出会いを作るため）
@@ -2239,7 +2241,7 @@ function attrBlock(u){
     ${shownWorry.length?`<div class="fh">${openWorry?'いま、気になっていること':'いま、おたがいに気になっていること'}</div><div class="fchips">${shownWorry.map(x=>`<span class="fchip worry${sharedPurposes.includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>${sharedPurposes.length?'<div class="worrysame">🤝 あなたと同じことが気になっています</div>':''}`:''}
     ${(a.goals||[]).length?`<div class="fh">これから・目標</div><div class="fchips">${a.goals.map(chip).join('')}</div>`:''}
     ${a.hometown?`<div class="frow" style="margin-top:8px">🏠 出身 <b>${esc(a.hometown)}</b></div>`:''}
-    ${a.course?`<div class="qline"><span class="qt">今季絶対取りたい科目</span><b>${esc(a.course)}</b>${courseHit?'<span class="same">同じ！</span>':''}</div>`:''}
+    ${a.course?`<div class="qline"><span class="qt">気になっている授業</span><b>${esc(a.course)}</b>${courseHit?'<span class="same">同じ！</span>':''}</div>`:''}
   </div>`;
 }
 // 近くの人の一番上に「いまの自分」と「時間割」の2枚のタイル（2026-09-24。ちかくの強みなので、いちばん目立つ所に大きく置いた）。
@@ -2326,6 +2328,9 @@ function renderNearby(){
   const byScore=(x,y)=>(y.score-x.score)||((x.d??1e9)-(y.d??1e9));
   const openAll=all.sort(byScore), frNow=openAll.filter(x=>isFriend(x.u.id)), open=openAll.filter(x=>!isFriend(x.u.id));
   renderNearFriends(frNow);
+  { const nc=open.filter(x=>x.common.length).length, el=$("#nearJump");
+    const jh=!open.length?"":nc?`👀 いま近くに、共通点のある人 <b>${nc}人</b><span>見る ↓</span>`:`👀 いまキャンパスにいる人 <b>${open.length}人</b><span>見る ↓</span>`;
+    if(el&&el.dataset.h!==jh){ el.dataset.h=jh; el.innerHTML=jh; } }
   lastOpenCount=openAll.filter(x=>!isTest(x.u.id)).length; visitMaybeUpdate();
   $('#nearSub').textContent=openAll.length?'いま'+openAll.length+'人'+(frNow.length?`（友達${frNow.length}人）`:''):'まだ誰もいません';
   lastNearList=openAll; drawMap(lastNearList); const ul=$('#ulist');
@@ -2363,6 +2368,8 @@ function renderNearFriends(openFr){
   if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
 }
 // 地図の場所までスクロールする（友達・出店を「地図で見る」時）
+// 「👀 共通点のある人 ◯人」を押した時：人の一覧までスクロール
+function showNearList(){ const l=$("#ulist"); if(l)l.scrollIntoView({behavior:"smooth",block:"start"}); }
 function showMapArea(){ const w=$('#mapWrap'); if(w)w.scrollIntoView({behavior:'smooth',block:'center'}); }
 /* ---------- 地図（多摩キャンパスだけを映す。campus-geo.js の図形で描くイラスト地図、Leaflet） ---------- */
 // 建物名は OpenStreetMap に登録されている名前（2026-09-13取得）。
@@ -2985,7 +2992,7 @@ function openPreview(mode){
   if(!me.bio)miss.push('自己紹介');
   if(!a.artist)miss.push('よく聴くアーティスト');
   if(!(a.aruaru||[]).length)miss.push('わかる！あるある');
-  if(!a.course)miss.push('今季絶対取りたい科目');
+  if(!a.course)miss.push('気になっている授業');
   // 悩み・不安は「入れていない項目」として催促しない（任意で、入れないのも大事な選択なので）
   if(!(a.goals||[]).length)miss.push('これから・目標');
   if(!a.hometown)miss.push('出身');
@@ -3217,7 +3224,7 @@ function topicsFor(u,n=3,exclude=[]){
     if(kind==='art') add(`${th.artist}、自分もよく聴きます！いちばん好きな曲ってなんですか？`,rare);
     else if(kind==='aru'){ const x=c.key.slice(4); add(`「${x}」、自分もです笑　わかる人がいてうれしい`,rare); }
     else if(kind==='cls'){ const r=(samePeers[u.id]||[]).find(r=>c.key==='cls:'+r.slot+':'+normAns(r.course)); if(r)add(`${slotLabel(r.slot)}の${r.course}、同じ授業ですよね！あの授業どうですか？`,rare); }
-    else if(kind==='crs') add(`${th.course}、自分も取りたいんです！気になってる理由ってありますか？`,rare);
+    else if(kind==='crs') add(`${th.course}、自分も気になってるんです！どんな授業か知ってますか？`,rare);
     else if(kind==='day') add(`今日のお題、同じ「${dailyAnswer(u)}」でしたね！`,rare);
     else if(kind==='pur') add(FA.purposeTopic[c.label]||`「${c.label}」、自分もです`,rare);
     else if(kind==='goal') add(`${c.label}、どんなことしてるんですか？`,rare);
@@ -3232,7 +3239,7 @@ function topicsFor(u,n=3,exclude=[]){
   const td=dailyAnswer(u), md=dailyAnswer(profile);
   if(td&&md&&!sameDaily(u)) add(`今日のお題、「${td}」なんですね！自分は「${md}」でした。なんでですか？`);
   if(th.artist&&normAns(th.artist)!==normAns(me.artist)) add(`${th.artist}よく聴くんですね！はじめて聴くならおすすめの曲ありますか？`);
-  if(th.course) add(`${th.course}、取りたいんですね！どんな授業なんですか？`);
+  if(th.course) add(`${th.course}、気になってるんですね！どんな授業なんですか？`);
   (th.aruaru||[]).forEach(x=>{ if(!(me.aruaru||[]).includes(x)) add(`「${x}」ってどういうときですか？笑`); });
   if(th.artist&&normAns(th.artist)===normAns(me.artist)) add(`${th.artist}のライブって行ったことありますか？`);
   add('はじめまして！すれ違ったみたいですね😊');
@@ -3826,11 +3833,15 @@ function renderStartCard(){
       {done:allFriendRows().some(r=>r.status==='accepted'), icon:'👥', t:'友達を1人追加する', d:'いまどの建物にいるか・空きコマが分かります', go:'openFrAdd()'},
     ];
     const n=items.filter(x=>x.done).length;
-    if(n<items.length) h=`<div class="sth"><b>🚀 はじめにやること</b><span>${n}/${items.length}</span><button onclick="hideStartCard()" aria-label="閉じる">✕</button></div>`
+    // 2026-10-08 ユーザー役のテスト：登録直後の最初の画面が、タイル・このカード・お題で埋まって人が見えなかったので、最初は1行にたたむ（押すと開く）
+    if(n<items.length) h=!st.open
+      ?`<div class="sth" style="margin:0;cursor:pointer" onclick="toggleStartCard(true)"><b>🚀 はじめにやること</b><span>あと${items.length-n}つ</span><span class="go" style="margin-left:auto">›</span></div>`
+      :`<div class="sth"><b>🚀 はじめにやること</b><span>${n}/${items.length}</span><button onclick="toggleStartCard(false)" aria-label="たたむ" style="font-size:12px">たたむ</button><button onclick="hideStartCard()" aria-label="閉じる" style="margin-left:0">✕</button></div>`
       +items.map(x=>`<div class="strow${x.done?' done':''}"${x.done?'':` onclick="${x.go}"`}><span class="sti">${x.done?'✅':x.icon}</span><div class="stt"><b>${x.t}</b><small>${x.d}</small></div>${x.done?'':'<span class="go">›</span>'}</div>`).join('');
   }
   if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
 }
+function toggleStartCard(v){ const s=startState(); s.open=v; saveStart(s); renderStartCard(); }
 function hideStartCard(){ const s=startState(); s.hide=true; saveStart(s); renderStartCard(); }
 
 /* 作る・編集する（同じシート） */
@@ -4631,7 +4642,7 @@ function frOpener(c,u){
   if(kind==='day')return `今日のお題、同じ「${dailyAnswer(u)}」だったね！`;
   if(kind==='art')return `${a.artist}聴くんだね！いちばん好きな曲なに？`;
   if(kind==='aru')return `「${c.key.slice(4)}」わかる笑`;
-  if(kind==='crs')return `${a.course}取りたいの？自分も！`;
+  if(kind==='crs')return `${a.course}気になってるの？自分も！`;
   if(kind==='goal')return `${c.label}、一緒にがんばろう！`;
   return 'おつかれ！';
 }
