@@ -69,6 +69,12 @@
   .emojis .em.lock::after{content:'🔒';position:absolute;right:-4px;bottom:-4px;font-size:12px}
   .surveyperk{margin:7px 16px 0;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.7}
   .surveyperk a{color:var(--signal);font-weight:700;cursor:pointer}
+  .svcard{margin:12px 16px 4px;padding:16px;border-radius:20px;background:linear-gradient(135deg,#ff9d5c,#f5972f 55%,#ffcf66);color:#fff;box-shadow:0 10px 24px -10px rgba(245,151,47,.7)}
+  .svcard .svh{font-size:16.5px;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .svcard .svperks{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px}.svcard .svperks span{font-size:12px;font-weight:700;background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:4px 10px}
+  .svcard .svbtn{display:block;width:100%;border:0;border-radius:14px;background:#fff;color:#c4620e;font-family:inherit;font-size:16px;font-weight:900;padding:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+  .svcard .svnote{font-size:11.5px;margin-top:8px;opacity:.95;line-height:1.6}.svcard .svchk{display:inline-block;font-size:11.5px;margin-top:6px;color:#fff;text-decoration:underline;cursor:pointer;opacity:.9}
+  .lk .lkgate{background:#fff8ea;border:1px solid rgba(245,151,47,.5);border-radius:14px;padding:12px;margin:4px 0 10px;text-align:center}.lk .lkgate b{display:block;font-size:13.5px}.lk .lkgate span{display:block;font-size:11.5px;color:var(--muted);margin:4px 0 10px;line-height:1.5}.lk .lkgate .btn{width:100%;padding:12px;font-size:14.5px}
   .surveydone{margin:14px 16px 0;padding:12px;border-radius:14px;text-align:center;font-size:13px;font-weight:700;color:#1d8a63;background:rgba(32,180,131,.1);border:1px solid rgba(32,180,131,.3)}
   .bdg{margin-left:4px;font-style:normal}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
@@ -1153,7 +1159,9 @@
       <div class="scroll">
         <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
         <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="mebdg" id="meBadges"></div><div class="h" id="meFac"></div><div class="h" id="meLoc">📍 &mdash;</div><div id="meWorry"></div></div>
+        <!-- アンケートの欄（答えると特典。中身は renderSurveyBox）。2026-10-09 あおの指示「見やすく」で、マイページの一番下からここ（プロフィールを編集のすぐ下）へ -->
         <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
+        <div id="surveyBox"></div>
         <button class="btn btn-ghost lookbtn" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14.5px" onclick="document.getElementById('lookDot').hidden=true;openLook()">🎨 きせかえ<small>アイコン・背景・フレーム・バッジ</small><span class="lookdot" id="lookDot" hidden></span></button>
         <!-- 自分のプロフィールが相手にどう見えるか（2026-10-02 追加） -->
         <button class="btn btn-ghost" id="mePrevBtn" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openPreview('near')">👀 周りからの見え方を見る</button>
@@ -1176,8 +1184,6 @@
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openInvite()">📨 友達をアプリに誘う（🎁 特典あり）</button>
         <!-- 「☕ ひとこと」にいつでも答えられる所（2026-10-08。ふだんは今日のお題の後にポップアップで1問だけ。中身は renderCheckinRow） -->
         <div class="setting" id="ckRow" hidden><div class="setrow visrow" style="border:0" onclick="openCheckin('me')"><div class="lab">☕ ひとこと<small id="ckRowTxt">&mdash;</small></div><span class="go">›</span></div></div>
-        <!-- アンケートの欄（答えると特典。中身は renderSurveyBox） -->
-        <div id="surveyBox"></div>
         <div style="margin:6px 16px 0;text-align:center;font-size:11.5px;color:var(--muted2)">参加者番号 <b id="fesNo" style="font-family:'JetBrains Mono',monospace;color:var(--muted)">&mdash;</b></div>
         <!-- テストモードは運営が動作確認する時だけ（URLの末尾に #debug を付けて開く） -->
         <div class="setting" id="debugBox" style="border-color:rgba(99,214,232,.3)" hidden>
@@ -1560,8 +1566,10 @@ const badgeKeys=u=>(attrsOf(u).badges||[]).filter(k=>BADGES[k]);
 const badgeShown=u=>{ const ks=badgeKeys(u), b=(attrsOf(u).look||{}).badge; return b==='none'?null:ks.includes(b)?b:(ks[0]||null); };
 const badgeIcons=u=>{ const k=badgeShown(u); return k?BADGES[k].icon:''; };
 // フレームの class・背景の色（ほかの人の画面でも、その人の fa.look を見て出す）
-const frCls=u=>{ const f=(attrsOf(u).look||{}).fr; return f&&f!=='none'&&LOOK_FR[f]?' fr-'+f:''; };
-const coverBg=u=>{ const b=LOOK_BG[(attrsOf(u).look||{}).bg]; return b&&b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(u.emoji); };
+// 背景・フレームは、アンケートに答えた人だけが変えられる（2026-10-09 あおの指示）。答えていない人の設定は出さない
+const lookOpen=u=>(attrsOf(u).badges||[]).includes('survey');
+const frCls=u=>{ if(!lookOpen(u))return ''; const f=(attrsOf(u).look||{}).fr; return f&&f!=='none'&&LOOK_FR[f]?' fr-'+f:''; };
+const coverBg=u=>{ const b=lookOpen(u)&&LOOK_BG[(attrsOf(u).look||{}).bg]; return b&&b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(u.emoji); };
 const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
 const gr=e=>`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
 function uuid(){return (crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(36).slice(2));}
@@ -1940,7 +1948,7 @@ function renderMeWorry(){ const el=$('#meWorry'); if(!el)return; const p=attrsOf
 function renderMeHero(){
   if(!profile)return; const a=attrsOf(profile);
   $('#meAv').style.background=gr(profile.emoji); $('#meAv').textContent=profile.emoji; $('#meAv').className='ring2'+frCls(profile);
-  { const b=LOOK_BG[(a.look||{}).bg], hero=$('#s-me .me-hero'); if(hero)hero.style.background=b&&b.g?`linear-gradient(180deg,${b.g[0]}66,transparent 80%)`:''; }   // きせかえの背景の色
+  { const b=lookOpen(profile)&&LOOK_BG[(a.look||{}).bg], hero=$('#s-me .me-hero'); if(hero)hero.style.background=b&&b.g?`linear-gradient(180deg,${b.g[0]}66,transparent 80%)`:''; }   // きせかえの背景の色
   $('#meName').textContent=profile.name;
   // バッジは名前の横の小さな絵文字だけだと何か分からなかったので、名前つきで並べる（2026-10-09。Duolingo の実績のように）
   const mb=$('#meBadges'); if(mb)mb.innerHTML=badgeKeys(profile).map(k=>`<span class="${k===badgeShown(profile)?'on':''}" title="${esc(BADGES[k].desc)}" onclick="toast('${BADGES[k].icon} ${esc(BADGES[k].desc)}')">${BADGES[k].icon} ${esc(BADGES[k].label)}</span>`).join('');
@@ -4153,6 +4161,7 @@ function misCardHTML(){
   const m=misState();
   if(!m.k){ m.k=misPick(m); profile.fa={...(profile.fa||{}),mis:m}; saveMyAttrs(); }
   const p=MIS_POOL.find(x=>x.k===m.k)||MIS_POOL[0], n=m.n||0, nx=misNext(n), done=m.last===m.d;
+  if(done)return '';   // 2026-10-09 あおの指示：達成したら画面から消す（達成のお知らせはポップアップで出る）
   const sub=done?`🏅 スタンプ ${n}個${nx?` ・ あと${nx.n-n}個で ${esc(nx.t)}`:''} ・ 次は${misNextDay()}`
     :`${esc(p.d)}<br><span class="misst">🏅 達成でスタンプ1個${nx?` ・ あと${nx.n-n}個で ${esc(nx.s)}`:''}</span>`;
   return `<div class="strow mis1${done?' done':''}"${done?'':` onclick="${p.go}"`}><span class="sti">${done?'✅':p.icon}</span>
@@ -6194,6 +6203,8 @@ function lookCell(on,has,inner,how,click,label){
   return `<div class="lkc${on?' on':''}${has?'':' lock'}" onclick="${has?click:`toast('🔒 ${esc(how)}')`}">${inner}${label?`<small>${esc(label)}</small>`:''}${has?'':'<i>🔒</i>'}</div>`;
 }
 function renderLook(){
+  // 背景・フレームは、アンケートに答えた人だけが変えられる（2026-10-09 あおの指示）
+  const svOpen=!!surveyDone||lookOpen(profile), svGate=svOpen?'':`<div class="lkgate"><b>🔒 背景とフレームは、アンケートに答えた人が変えられます</b><span>答えると、下の中から選べるようになります（もらったものは、そのまま残ります）</span><button class="btn btn-primary" onclick="closeMembers();openSurvey()">📝 アンケートに答える</button></div>`;
   const p=profile, L=attrsOf(p).look||{}, tabs=[['icon','アイコン'],['bg','背景'],['fr','フレーム'],['badge','バッジ']];
   // 全部でいくつ持っているか（集める楽しみ）
   const all=[...EMO.map(()=>'free'),...EMO_SP.map(()=>'survey'),...LOOK_ICONS.flatMap(s=>s.icons.map(()=>s.c)),...Object.values(LOOK_BG).map(x=>x.c),...Object.values(LOOK_FR).map(x=>x.c),...Object.values(BADGES).map(x=>x.c)];
@@ -6205,9 +6216,9 @@ function renderLook(){
       +`<div class="lkh">${BADGES.survey.icon} アンケートに答えた人<span>${lookHas('survey')?'':'🔒 '+lookHow('survey')}</span></div><div class="lkg">${EMO_SP.map(e=>cell(e,'survey')).join('')}</div>`
       +LOOK_ICONS.map(s=>`<div class="lkh">🎁 ${esc(s.name)}<span>${lookHas(s.c)?'✅ もらいました':'🔒 '+esc(lookHow(s.c))}</span></div><div class="lkg">${s.icons.map(e=>cell(e,s.c)).join('')}</div>`).join('');
   }else if(lookTab==='bg'){
-    body=`<div class="lkg wide">${Object.entries(LOOK_BG).map(([id,b])=>lookCell((L.bg||'auto')===id,lookHas(b.c),`<span class="lkbg" style="background:${b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(p.emoji)}"></span>`,lookHow(b.c),`lookSet('bg','${id}')`,lookHas(b.c)?b.name:lookHow(b.c))).join('')}</div>`;
+    body=svGate+`<div class="lkg wide">${Object.entries(LOOK_BG).map(([id,b])=>lookCell((svOpen?L.bg||'auto':'auto')===id,svOpen&&lookHas(b.c),`<span class="lkbg" style="background:${b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(p.emoji)}"></span>`,(svOpen?lookHow(b.c):'アンケートに答えると変えられます'),`lookSet('bg','${id}')`,lookHas(b.c)?b.name:lookHow(b.c))).join('')}</div>`;
   }else if(lookTab==='fr'){
-    body=`<div class="lkg wide">${Object.entries(LOOK_FR).map(([id,f])=>lookCell((L.fr||'none')===id,lookHas(f.c),`<span class="lke${id==='none'?'':' fr-'+id}" style="background:${gr(p.emoji)}">${p.emoji}</span>`,lookHow(f.c),`lookSet('fr','${id}')`,lookHas(f.c)?f.name:lookHow(f.c))).join('')}</div>`;
+    body=svGate+`<div class="lkg wide">${Object.entries(LOOK_FR).map(([id,f])=>lookCell((svOpen?L.fr||'none':'none')===id,svOpen&&lookHas(f.c),`<span class="lke${id==='none'?'':' fr-'+id}" style="background:${gr(p.emoji)}">${p.emoji}</span>`,(svOpen?lookHow(f.c):'アンケートに答えると変えられます'),`lookSet('fr','${id}')`,lookHas(f.c)?f.name:lookHow(f.c))).join('')}</div>`;
   }else{
     const sh=badgeShown(p);
     body=`<div class="lknote">持っているバッジから1つ、名前の横に出せます。持っているバッジは全部プロフィールに並びます。</div>`
@@ -6222,6 +6233,7 @@ function renderLook(){
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
 }
 async function lookSet(k,v){
+  if((k==='bg'||k==='fr')&&!surveyDone&&!lookOpen(profile)){ openSurveyGate('look'); return; }   // 背景・フレームはアンケートに答えた人だけ
   if(!profile)return;
   if(k==='emoji'){ profile.emoji=v; renderMeHero(); renderNearby(); if(sb&&myId&&!String(myId).startsWith('local-'))sb.from(T('profiles')).update({emoji:v}).eq('id',myId).then(()=>{},()=>{}); }
   else{ profile.fa={...(profile.fa||{}),look:{...((profile.fa||{}).look||{}),[k]:v}}; saveMyAttrs(); renderMeHero(); renderNearby(); }
@@ -6355,10 +6367,10 @@ function onSurveyDone(){
 }
 // 上限を始める前（FES.likeLimitStart まで）は、だれでも無制限なので「その日から上限がかからない」と書く
 const limitDayText=()=>{ const d=new Date(Date.parse(FES.likeLimitStart)+9*3600000); return (d.getUTCMonth()+1)+'/'+d.getUTCDate(); };
-const surveyPerksHTML=()=>`<div class="vishint" style="margin:0 0 10px">${likeLimitStarted()?'👋 自分からのいいねが<b>無制限</b>に':`👋 ${limitDayText()}から始まる、いいねの上限（1日${FES.likeLimitFree}回）が<b>かからない</b>`}<br>${EMO_SP.join(' ')}　限定アイコン${EMO_SP.length}種<br>${BADGES.survey.icon} プロフィールに「${BADGES.survey.label}」バッジ</div>`;
+const surveyPerksHTML=()=>`<div class="vishint" style="margin:0 0 10px">${likeLimitStarted()?'👋 自分からのいいねが<b>無制限</b>に':`👋 ${limitDayText()}から始まる、いいねの上限（1日${FES.likeLimitFree}回）が<b>かからない</b>`}<br>${EMO_SP.join(' ')}　限定アイコン${EMO_SP.length}種<br>🎨 プロフィールの<b>背景とフレーム</b>を変えられる<br>${BADGES.survey.icon} プロフィールに「${BADGES.survey.label}」バッジ</div>`;
 // いいねの上限に達した時・限定アイコンを押した時の案内
 function openSurveyGate(why){
-  const head=why==='like'?`今日の「自分からのいいね」は${FES.likeLimitFree}回まで送りました`:why==='icon'?'アンケートに答えた人の限定アイコンです':'アンケートに答えると、特典がもらえます';
+  const head=why==='like'?`今日の「自分からのいいね」は${FES.likeLimitFree}回まで送りました`:why==='icon'?'アンケートに答えた人の限定アイコンです':why==='look'?'背景とフレームは、アンケートに答えた人が変えられます':'アンケートに答えると、特典がもらえます';
   $('#invSheet').innerHTML=`<h2 class="pstitle">📝 ${head}</h2>
     <p class="psdesc">アンケートに答えると、すぐに次の特典が使えるようになります。</p>
     <div class="pssec"><div class="psh">🎁 特典</div>${surveyPerksHTML()}</div>
@@ -6367,15 +6379,18 @@ function openSurveyGate(why){
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeInvite()">あとで</button>`;
   $('#invOverlay').classList.add('show');
 }
-// マイページのアンケート欄
+// マイページのアンケート欄（2026-10-09 あおの指示「アンケートに答えるボタンを見やすく」：一番下の小さなボタンをやめ、上の方に特典つきの大きなカードで出す）
 function renderSurveyBox(){
   const el=$('#surveyBox'); if(!el)return;
   if(surveyDone){ el.innerHTML=`<div class="surveydone">✅ アンケートに回答済み・${BADGES.survey.icon} 特典が使えます</div>`; return; }
   if(!surveyOpen()){ el.innerHTML=''; return; }   // フォームのURLが無い間は欄ごと出さない
-  const note=surveyGateOn()?`<br>（答えるまで、自分からのいいねは1日${FES.likeLimitFree}回・今日はあと${likesLeft()}回）`
-    :likeLimitStarted()?'':`<br>（${limitDayText()}から、答えていない人は自分からのいいねが1日${FES.likeLimitFree}回までになります）`;
-  el.innerHTML=`<button class="btn btn-primary" style="margin:14px 16px 0;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openSurvey()">📝 アンケートに答える</button>
-    ${!surveyMissing?`<div class="surveyperk">答えると：いいね無制限・限定アイコン・${BADGES.survey.icon}バッジ${note}<br><a onclick="loadSurveyStatus(true)">答えたのに変わらない時 ›</a></div>`:''}`;
+  const note=surveyGateOn()?`答えるまで、自分からのいいねは1日${FES.likeLimitFree}回（今日はあと${likesLeft()}回）`
+    :likeLimitStarted()?'':`${limitDayText()}から、答えていない人は自分からのいいねが1日${FES.likeLimitFree}回までになります`;
+  el.innerHTML=`<div class="svcard"><div class="svh">📝 アンケートに答えて、特典をもらう</div>
+    <div class="svperks"><span>👋 いいね無制限</span><span>${EMO_SP.slice(0,3).join('')} 限定アイコン</span><span>🎨 背景・フレーム</span><span>${BADGES.survey.icon} バッジ</span></div>
+    <button class="svbtn" onclick="openSurvey()">📝 アンケートに答える ›</button>
+    ${note?`<div class="svnote">${note}</div>`:''}
+    ${!surveyMissing?`<a class="svchk" onclick="loadSurveyStatus(true)">答えたのに変わらない時 ›</a>`:''}</div>`;
 }
 // フォームから戻ってきた時に、回答が届いたかを確かめる
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&surveyOpen()&&!surveyDone&&!surveyMissing)loadSurveyStatus(); });
