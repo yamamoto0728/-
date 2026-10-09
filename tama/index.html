@@ -902,13 +902,11 @@
   .startcard .sti{font-size:19px;width:24px;text-align:center}.startcard .stt{flex:1;min-width:0}
   .startcard .stt b{display:block;font-size:13px}.startcard .stt small{display:block;font-size:11px;color:var(--muted);line-height:1.5}
   .startcard .go{color:var(--muted2);font-size:18px;font-weight:700}
-  .clsbox{margin:8px 4px 6px;padding:12px;border-radius:16px;background:linear-gradient(135deg,#fff7ee,#fff);border:1px solid rgba(245,151,47,.45)}
-  .clsbox .clsh{font-size:14px;font-weight:900}.clsbox .clsd{font-size:11.5px;color:var(--muted);line-height:1.6;margin:3px 0 8px}
-  .clsbox .clsbtn{width:100%;padding:11px;font-size:13.5px}
-  .clsbox .clsrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
-  .clsbox .clsrow .ct{flex:1;min-width:0}.clsbox .clsrow b{display:block;font-size:13px}.clsbox .clsrow small{font-size:11px;color:var(--muted)}
-  .clsbox .clsrow button{flex-shrink:0;border:1px solid rgba(245,151,47,.6);background:#fff;color:#9a5a10;border-radius:12px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer}
-  .clsbox .clsrow button.pri{background:var(--amber);border-color:var(--amber);color:#3a2410}
+  .clslist{margin-bottom:6px}
+  .clslist .clsrow{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+  .clslist .clsrow .ct{flex:1;min-width:0}.clslist .clsrow b{display:block;font-size:14px}.clslist .clsrow small{font-size:11.5px;color:var(--muted)}
+  .clslist .clsrow button{flex-shrink:0;border:1px solid rgba(245,151,47,.6);background:#fff;color:#9a5a10;border-radius:12px;padding:8px 14px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
+  .clslist .clsrow button.pri{background:var(--amber);border-color:var(--amber);color:#3a2410}
   .commbox{margin:16px 16px 18px;padding:12px 12px 12px;border-radius:18px;background:linear-gradient(135deg,rgba(99,214,232,.12),rgba(139,157,255,.10));border:1px solid rgba(15,176,205,.35)}
   .commbox .cbh{display:flex;align-items:center;font-size:14px;font-weight:900;color:var(--ink)}.commbox .cbh a{margin-left:auto;font-size:12px;font-weight:700;color:var(--signal);cursor:pointer}
   .commbox .cbd{font-size:11.5px;color:var(--muted);line-height:1.6;margin:3px 0 8px}
@@ -959,7 +957,7 @@
           </div>
           <div class="shot">
             <div class="sh">📚 同じ授業の人に、授業のことを聞ける</div>
-            <div class="sd">時間割に授業を入れると、同じ授業の人が作ったコミュニティが見つかります。課題・テスト・休講の情報交換に。</div>
+            <div class="sd">授業ごとのコミュニティを作れます。課題・テスト・休講の情報交換に。</div>
             <div class="mini">
               <div class="mroom"><b>📚 月3 統計学</b><span>👥 12人 ・ 同じ授業の人だけ</span></div>
               <div class="mbub them">第5回の課題、提出は来週でしたっけ？</div>
@@ -1039,7 +1037,7 @@
         <div class="cbh"><span>💬 コミュニティ</span><a onclick="go('comm')">すべて見る ›</a></div>
         <div class="cbd">同じ趣味・同じ授業の人が集まる部屋。オーナーが作って、期限が来たら消えます。</div>
         <div class="ulist" id="homeRoomList"></div>
-        <div class="cbb"><button class="btn btn-ghost" onclick="go('comm')">📚 授業のコミュニティ</button><button class="btn btn-primary" onclick="go('comm');createRoom()">＋ 部屋を作る</button></div>
+        <div class="cbb"><button class="btn btn-primary" onclick="go('comm');newRoom()">＋ コミュニティを作る</button></div>
       </div>
       </div>
     </section>
@@ -1057,7 +1055,7 @@
       <div class="scroll" id="commPane" hidden>
         <div class="cmsub" id="commSub"></div>
         <div class="ulist" id="roomList"></div>
-        <div style="padding:4px 16px 18px"><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="createRoom()">＋ 新しいコミュニティを作る</button>
+        <div style="padding:4px 16px 18px"><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="newRoom()">＋ 新しいコミュニティを作る</button>
           <button class="btn btn-ghost" id="roomCodeBtn" style="width:100%;padding:11px;font-size:13px;margin-top:8px" onclick="openRoomCodeJoin()" hidden>🔑 招待コードで入る</button></div>
       </div>
     </section>
@@ -2359,8 +2357,7 @@ function renderNearby(){
     const today=gateCount&&gateCount.today>=5?`<div class="emptycnt">👥 今日は多摩キャンで <b>${gateCount.today}人</b> が使っています</div>`:'';
     ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>いまは近くにアプリを開いている人がいません。<br>平日の昼休み（12:50〜13:40）の<br>食堂のあたりに多いです。</p>${today}
       <div class="emptyacts"><div class="eah">いまできること</div>
-        ${dailyAnswer(profile)?'':`<button class="btn btn-primary" onclick="$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})">🎲 今日のお題に答える</button>`}
-        <button class="btn btn-ghost" onclick="go('comm')">📚 授業のコミュニティを見る</button></div>
+        ${dailyAnswer(profile)?'':`<button class="btn btn-primary" onclick="$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})">🎲 今日のお題に答える</button>`}</div>
       ${emptyPushHTML()}<button class="btn btn-ghost" style="margin-top:10px;padding:10px 16px;font-size:12.5px" onclick="openInvite()">📨 友達をアプリに誘う</button>${debugMode()?`<br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button>`:''}</div>`;
     return;
   }
@@ -3810,55 +3807,54 @@ function roomRow(r){
 function renderRooms(){
   if(!roomsV2)return renderRoomsLegacy();
   const by=(a,b)=>((roomStats[rid(b.id)]||{}).unread||0)-((roomStats[rid(a.id)]||{}).unread||0)||(Date.parse(b.last_at||b.created_at)||0)-(Date.parse(a.last_at||a.created_at)||0);
-  const joined=rooms.filter(r=>r.joined&&!roomEnded(r)).sort(by), forYou=rooms.filter(r=>!r.joined&&r.visibility==='common'&&!(r.conditions||[]).some(x=>x.k==='cname')).sort(by),
-        open=rooms.filter(r=>!r.joined&&r.visibility!=='common').sort(by), ended=rooms.filter(r=>r.joined&&roomEnded(r));
+  const ci=classRoomIds(), cls=rooms.filter(r=>!r.joined&&ci.has(rid(r.id))).sort(by);   // 自分の授業と同じ名前のコミュニティ（あれば）
+  const joined=rooms.filter(r=>r.joined&&!roomEnded(r)).sort(by), forYou=rooms.filter(r=>!r.joined&&!ci.has(rid(r.id))&&r.visibility==='common'&&!(r.conditions||[]).some(x=>x.k==='cname')).sort(by),
+        open=rooms.filter(r=>!r.joined&&!ci.has(rid(r.id))&&r.visibility!=='common').sort(by), ended=rooms.filter(r=>r.joined&&roomEnded(r));
   const sec=(t,arr)=>arr.length?`<div class="listhead" style="padding-left:6px">${t} <span class="cnt">${arr.length}</span></div>`+arr.map(roomRow).join(''):'';
   const el=$('#roomList');
   if(el){
     $('#commSub').textContent='部屋ごとにオーナーがいて、入れる人と期限が決まっています';
     if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
-    el.innerHTML=classRoomsHTML()+(rooms.length?sec('参加中',joined)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
+    el.innerHTML=(rooms.length?sec('参加中',joined)+sec('📚 あなたの授業',cls)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
       :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`);
   }
-  const hr=$('#homeRoomList'), top=joined.concat(forYou,open).slice(0,3);
+  const hr=$('#homeRoomList'), top=joined.concat(cls,forYou,open).slice(0,3);
   if(hr)hr.innerHTML=top.length?top.map(roomRow).join(''):`<div style="padding:14px 16px;font-size:12.5px;color:var(--muted)">まだコミュニティがありません。<span onclick="go('comm')" style="color:var(--signal);font-weight:700;cursor:pointer">作ってみる ›</span></div>`;
 }
 
-/* ---------- 授業の部屋（2026-10-08 あおの依頼「授業について聞けるコミュニティを立ち上げる、くらいまで多摩キャン生にとっての良さを考えて」） ----------
-   時間割に入れた授業ごとに、「同じ曜日・時限に同じ授業を入れた人だけが入れる部屋」をのぞく・作るを1タップで。
-   部屋そのものはふつうのコミュニティ（共通点のある人だけ・条件は授業1つ・期限なし）なので、新しいテーブルは要らない。
-   同じ授業の部屋がもうあればそこへ（条件の授業の曜日・時限と名前で探す）、無ければ作る画面を、名前・ひとこと・ルールを入れた状態で開く */
-function classRoomFor(c){
-  return rooms.find(r=>!roomEnded(r)&&(r.conditions||[]).some(x=>x.k==='cls'&&x.slot===c.slot&&normCourse(x.v)===normCourse(c.v)));
+/* ---------- 授業のコミュニティ（2026-10-09 あおの指示で作り直し） ----------
+   ・勝手に作らない。だれかがオーナーとして作ったコミュニティだけ
+   ・前面に出さない。自分の時間割の授業と、名前が一言一句同じコミュニティがある時だけ、コミュニティの一覧に「📚 あなたの授業」として出す（無ければ何も出さない）
+   ・作る時：「＋ 新しいコミュニティを作る」→「📚 授業のコミュニティ」→ 時間割の授業の一覧。もうあれば人数と一緒に出し、無ければ「作る」
+     （名前＝授業名・共通点のある人だけ（同じ授業）・期限なし を入れた状態で、ふつうの作る画面を開く。作った人がオーナー。授業のコミュニティは無料なので「本来は有料」は聞かない） */
+function myCourseNames(){ return [...new Set(myClassOptions().map(c=>c.v))]; }
+function classRoomsFor(name){ return rooms.filter(r=>!roomEnded(r)&&r.owner_id&&String(r.name||'').trim()===name.slice(0,20)); }   // 部屋の名前は20文字まで
+function classRoomIds(){ const s=new Set(); myCourseNames().forEach(n=>classRoomsFor(n).forEach(r=>s.add(rid(r.id)))); return s; }
+function newRoom(){
+  if(!roomsV2)return createRoomLegacy();
+  if(!profile){ toast('先にプロフィールを登録してね'); return; }
+  $('#memSheet').innerHTML=`<h2 class="pstitle">＋ コミュニティを作る</h2><p class="psdesc">どんなコミュニティを作りますか？</p>
+    <button class="rbtn" onclick="pickClassRoom()">📚 授業のコミュニティ<small>あなたの時間割の授業から選ぶ</small></button>
+    <button class="rbtn" onclick="closeMembers();createRoom()">💬 そのほか<small>趣味・目標・ひとりごはん など</small></button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">やめる</button>`;
+  $('#memOverlay').classList.add('show');
 }
-// 2026-10-09 あおの指示：授業の部屋を勝手に作らない（10/9 の「オーナーなし・1タップで入る（無ければ作る）」はやめた）。
-// 自分の時間割の授業について、だれかがオーナーとして作ったコミュニティがあれば表示するだけ。
-// 見つけ方：条件が同じ授業名（時間割の授業 'cls'・授業名 'cname'）、または部屋の名前に授業名が入っている部屋。曜日・時限が違っても同じ授業名ならまとめる。
-// オーナーのいない部屋（10/9 の版が作ったもの）は出さない。部屋が無い授業は、下の「＋ 新しいコミュニティを作る」から作れる（作った人がオーナー）
-function myCourseNames(){
-  const seen=new Map(); myClassOptions().forEach(c=>{ const k=normCourse(c.v); if(k&&!seen.has(k))seen.set(k,c.v); }); return [...seen.entries()].map(([k,v])=>({k,v}));
-}
-function classRoomsFor(k){
-  return rooms.filter(r=>!roomEnded(r)&&r.owner_id&&((r.conditions||[]).some(x=>(x.k==='cls'||x.k==='cname')&&normCourse(x.v)===k)||normCourse(r.name).includes(k)));
-}
-function classRoomsHTML(){
-  if(!roomsV2||!profile)return '';
+function pickClassRoom(){
   const cs=myCourseNames();
-  if(!cs.length) return `<div class="clsbox"><div class="clsh">📚 授業のコミュニティ</div>
-    <div class="clsd">時間割に授業を入れると、同じ授業のコミュニティがあればここに出ます。</div>
-    <button class="btn btn-ghost clsbtn" onclick="openTimetable()">🗓 時間割に授業を入れる</button></div>`;
-  return `<div class="clsbox"><div class="clsh">📚 あなたの授業のコミュニティ</div><div class="clsd">あなたの時間割の授業について、だれかが作ったコミュニティです。</div>`
-    +cs.map(c=>{ const rs=classRoomsFor(c.k);
-      return rs.length?rs.slice(0,3).map(r=>{ const k=rid(r.id), n=(roomStats[k]||{}).members||0;
-          return `<div class="clsrow"><div class="ct"><b>${esc(r.name)}</b><small>${esc(c.v)} ・ 👥 ${n}人${r.joined?' ・ 参加中':''}</small></div><button class="${r.joined?'':'pri'}" onclick="openRoom('${k}')">${r.joined?'開く':'のぞく'}</button></div>`; }).join('')
-        :`<div class="clsrow"><div class="ct"><b>${esc(c.v)}</b><small>まだコミュニティはありません</small></div></div>`; }).join('')
-    +`<div class="clsd" style="margin:8px 0 0">コミュニティが無い授業は、下の「＋ 新しいコミュニティを作る」から作れます（作った人がオーナーになります）。</div></div>`;
+  $('#memSheet').innerHTML=`<h2 class="pstitle">📚 授業のコミュニティ</h2>`
+    +(cs.length?`<p class="psdesc">どの授業のコミュニティを作りますか？もうある授業は、人数と一緒に出ます。</p><div class="clslist">`
+      +cs.map((n,i)=>{ const rs=classRoomsFor(n);
+        return rs.length?rs.map(r=>{ const k=rid(r.id), m=(roomStats[k]||{}).members||0;
+            return `<div class="clsrow"><div class="ct"><b>${esc(n)}</b><small>もうあります ・ 👥 ${m}人${r.joined?' ・ 参加中':''}</small></div><button onclick="closeMembers();openRoom('${k}')">${r.joined?'開く':'のぞく'}</button></div>`; }).join('')
+          :`<div class="clsrow"><div class="ct"><b>${esc(n)}</b><small>まだありません</small></div><button class="pri" onclick="createClassRoom(${i})">作る</button></div>`; }).join('')+`</div>`
+      :`<p class="psdesc">時間割に授業を入れると、その授業のコミュニティを作れます。</p><button class="btn btn-primary" style="width:100%;padding:13px" onclick="closeMembers();openTimetable()">🗓 時間割に授業を入れる</button>`)
+    +`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="newRoom()">‹ もどる</button>`;
 }
 function createClassRoom(i){
-  const c=myClassOptions()[i]; if(!c)return;
-  createRoom(false,true); if(!roomForm)return;   // 授業の部屋は無料なので「本来は有料」は聞かない
-  roomForm.vis='common'; roomForm.cond=[c]; roomForm.days=0;
-  $('#rmName').value=(slotLabel(c.slot)+' '+c.v).slice(0,20);
+  const n=myCourseNames()[i]; if(!n)return;
+  closeMembers(); createRoom(false,true); if(!roomForm)return;
+  roomForm.vis='common'; roomForm.cond=myClassOptions().filter(c=>c.v===n); roomForm.days=0;
+  $('#rmName').value=n.slice(0,20);
   $('#rmTopic').value='授業のこと・課題・テストの情報交換';
   $('#rmRules').value='・授業に関係ない話はほどほどに\n・課題の答えをそのまま渡さない\n・いやな言い方をしない';
   renderRoomFormChips();
@@ -3875,9 +3871,8 @@ function renderStartCard(){
   let h='';
   if(profile&&!st.hide){
     const items=[
-      {done:myClassOptions().length>0, icon:'🗓', t:'時間割に授業を入れる', d:'同じ授業の人が「共通点」に出て、授業のコミュニティが見つかります', go:'openTimetable()'},
+      {done:myClassOptions().length>0, icon:'🗓', t:'時間割に授業を入れる', d:'同じ授業の人が「共通点」に出ます', go:'openTimetable()'},
       {done:!!st.daily||!!dailyAnswer(profile), icon:'🎲', t:'今日のお題に答える', d:'同じ答えの人と、会った時の話題ができます', go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})"},
-      {done:myCourseNames().some(c=>classRoomsFor(c.k).some(r=>r.joined)), icon:'📚', t:'授業のコミュニティをのぞく', d:'同じ授業の人が作ったコミュニティで、課題やテストのことを聞けます', go:"go('comm')"},
       {done:allFriendRows().some(r=>r.status==='accepted'), icon:'👥', t:'友達を1人追加する', d:'いまどの建物にいるか・空きコマが分かります', go:'openFrAdd()'},
     ];
     const n=items.filter(x=>x.done).length;
