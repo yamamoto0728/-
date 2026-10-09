@@ -327,7 +327,11 @@
   .wel{padding:22px 22px 18px;height:100%;overflow-y:auto;display:flex;flex-direction:column}
   .wel::-webkit-scrollbar{width:0}
   .wel .wlogo{font-family:"Zen Maru Gothic";font-weight:900;font-size:36px;letter-spacing:1px;text-align:center;background:linear-gradient(90deg,var(--amber),var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .wel .wtag{text-align:center;font-size:13.5px;color:var(--muted);margin:8px 0 18px;line-height:1.75}
+  .wel .wtag{text-align:center;font-size:14px;color:var(--ink);margin:8px 0 12px;line-height:1.75}.wel .wtag b{color:var(--amber-deep)}
+  .wsteps{display:flex;gap:6px;margin:0 0 16px}
+  .wsteps>div{flex:1;min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:9px 6px;text-align:center}
+  .wsteps span{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--amber);color:#fff;font-size:11px;font-weight:900;align-items:center;justify-content:center;margin-bottom:4px}
+  .wsteps b{display:block;font-size:11.5px;line-height:1.4;color:var(--ink)}.wsteps small{display:block;font-size:10px;line-height:1.4;color:var(--muted);margin-top:2px}
   .shots{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}
   .shots::-webkit-scrollbar{height:0}
   .shot{flex:0 0 76%;scroll-snap-align:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 8px 22px -12px rgba(50,70,150,.35)}
@@ -881,6 +885,13 @@
   .empty .emptycnt{font-size:13px;margin:6px 0 2px}.empty .emptycnt b{color:var(--signal);font-size:15px}
   .empty .emptyacts{margin:14px auto 4px;max-width:280px;display:flex;flex-direction:column;gap:8px}.empty .emptyacts .btn{margin:0;padding:12px;font-size:14px}
   .empty .emptyacts .eah{font-size:11.5px;font-weight:700;color:var(--muted)}
+  .cmncnt{margin:12px auto 2px;max-width:300px;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,#fff7ee,#fff);border:1px solid rgba(245,151,47,.45);text-align:center}
+  .cmncnt .ch{font-size:13px;line-height:1.6;color:var(--ink)}.cmncnt .ch b{color:var(--amber-deep)}.cmncnt .ch span{font-size:20px;font-weight:900;color:var(--amber-deep)}
+  .cmncnt .cp{font-size:12px;color:var(--ink);margin-top:6px;line-height:1.6}.cmncnt .cn{font-size:11px;color:var(--muted);margin-top:4px}
+  .smp .smptag{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);background:var(--surface2);border-radius:999px;padding:3px 10px;margin-bottom:8px}
+  .smp .mini{padding:12px}.smp .mrow2 .mn{font-size:13.5px}.smp .mrow2 .mb{font-size:11.5px;white-space:normal}.smp .mrow2 .mav{width:36px;height:36px;font-size:19px}
+  .smp .mbub{font-size:13px;padding:8px 12px}.smp .mline{font-size:12.5px}.smp .mline span{font-size:11.5px}
+  .smpdots{display:flex;justify-content:center;gap:6px;margin:14px 0}.smpdots i{width:7px;height:7px;border-radius:50%;background:var(--line)}.smpdots i.on{background:var(--amber)}
   .medel{margin:0 16px 10px;padding:12px 14px;border-radius:14px;background:var(--surface2);border:1px dashed var(--muted2);font-size:12.5px;line-height:1.7;color:var(--muted)}
   .medel b{display:block;color:var(--ink);font-size:14px;margin-bottom:3px}.medel .btn{margin-top:8px;width:100%;padding:11px;font-size:13.5px}
   .frfreeline{color:#14805c!important;font-weight:700}
@@ -933,7 +944,13 @@
       <div class="wel">
         <div class="wlogo">ちかく</div>
         <div class="fesbadge">🍛 多摩キャン限定版</div>
-        <div class="wtag">多摩キャンパスで、いま近くにいる<br>共通点のある人と、気軽につながる。</div>
+        <!-- 2026-10-09 あおの依頼「何をするアプリで、どんなメリットがあるのか分かるように」：1文で言い切り、使い方を3つの手順で見せる -->
+        <div class="wtag">同じキャンパスの、<b>共通点がある人</b>が分かる。<br>だから、会ったときに話しかけやすい。</div>
+        <div class="wsteps">
+          <div><span>1</span><b>共通点を入れる</b><small>授業・好きなもの</small></div>
+          <div><span>2</span><b>近くの人に 👋</b><small>両方いいねで話せる</small></div>
+          <div><span>3</span><b>会ったら話題に</b><small>共通点から話せる</small></div>
+        </div>
         <div class="notlove">🙅 <b>恋愛目的のアプリではありません。</b><br>同じ授業・同じアーティスト・同じ「あるある」の人と<br>友達になるためのアプリです。</div>
         <div class="feslive" id="fesLiveWel"></div>
         <!-- 2026-10-08 あおの依頼「多摩キャン生にとって何がいいかが伝わるように」：①会った時の話題 ②友達のいまどこ・履修 ③授業の部屋 ④新しい出会い の4枚 -->
@@ -2355,9 +2372,11 @@ function renderNearby(){
     // 2026-10-08 ユーザー役のテスト（1年生）：ひとりで入れた人に「友達を誘う」が一番目立つのは合わない。いまできることと、使っている人の数を先に出す
     if(!emptyCountAsked&&sb&&myId&&!String(myId).startsWith('local-')){ emptyCountAsked=true; sb.rpc('tama_public_count').then(({data})=>{ if(data){ gateCount=data; renderNearby(); } },()=>{}); }
     const today=gateCount&&gateCount.today>=5?`<div class="emptycnt">👥 今日は多摩キャンで <b>${gateCount.today}人</b> が使っています</div>`:'';
-    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>いまは近くにアプリを開いている人がいません。<br>平日の昼休み（12:50〜13:40）の<br>食堂のあたりに多いです。</p>${today}
+    loadCommonCount();
+    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>いまは近くにアプリを開いている人がいません。<br>平日の昼休み（12:50〜13:40）の<br>食堂のあたりに多いです。</p>${today}${commonCountHTML()}
       <div class="emptyacts"><div class="eah">いまできること</div>
-        ${dailyAnswer(profile)?'':`<button class="btn btn-primary" onclick="$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})">🎲 今日のお題に答える</button>`}</div>
+        ${dailyAnswer(profile)?'':`<button class="btn btn-primary" onclick="$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})">🎲 今日のお題に答える</button>`}
+        <button class="btn btn-ghost" onclick="openSample()">👀 共通点のある人が来たら、どう見える？</button></div>
       ${emptyPushHTML()}<button class="btn btn-ghost" style="margin-top:10px;padding:10px 16px;font-size:12.5px" onclick="openInvite()">📨 友達をアプリに誘う</button>${debugMode()?`<br><button class="btn btn-ghost" style="margin-top:10px;padding:11px 18px;font-size:13px" onclick="spawnTest()">🧪 1台で動作確認する</button>`:''}</div>`;
     return;
   }
@@ -2372,6 +2391,41 @@ function renderNearby(){
       :clsNow.length?'':`<div class="nearsec">${frNow.length?'友達のほかに、いまアプリを開いている人はいません':'いまアプリを開いている人はいません'}</div>`);
 }
 let emptyCountAsked=false;   // 近くに誰もいない時に、今日の利用人数を1回だけ聞く
+
+/* ---------- 近くにだれもいない時に、ちかくの良さを見せる（2026-10-09 あおの依頼「何をするアプリで、どんなメリットがあるのか分かるように」） ----------
+   ①ちかくに登録している人のうち、自分と共通点がある人の「数だけ」（supabase/tama_common_count.sql。だれかは出さない。SQL が無ければ出さない）
+   ②「共通点のある人が来たら、どう見える？」のサンプル（3枚。自分のアーティスト・授業を使って見せる。本物の人ではないと分かるよう「サンプル」と書く） */
+let commonCount=null, commonCountAt=0;
+function loadCommonCount(force){
+  if(!sb||!myId||String(myId).startsWith('local-')||!profile)return;
+  if(!force&&commonCountAt&&Date.now()-commonCountAt<10*60000)return;
+  commonCountAt=Date.now();
+  sb.rpc('tama_common_count').then(({data,error})=>{ if(error||!data)return; commonCount=data; renderNearby(); },()=>{});
+}
+function commonCountHTML(){
+  const c=commonCount; if(!c||!(c.total>0))return '';
+  const parts=[c.cls?`📚 同じ授業 ${c.cls}人`:'',c.art?`🎧 同じアーティスト ${c.art}人`:'',c.aru?`💬 同じあるある ${c.aru}人`:''].filter(Boolean).join(' ・ ');
+  return `<div class="cmncnt"><div class="ch">ちかくを使っている人のうち<br>あなたと<b>共通点がある人</b>は <span>${c.total}人</span></div>${parts?`<div class="cp">${parts}</div>`:''}
+    <div class="cn">キャンパスで近くに来たら、共通点つきでここに出ます</div></div>`;
+}
+let sampleIdx=0;
+function openSample(){ sampleIdx=0; renderSample(); $('#memOverlay').classList.add('show'); }
+function renderSample(){
+  const fa=(profile&&profile.fa)||{}, art=(fa.artist||'').trim()||'ヨルシカ', crs=(myClassOptions()[0]||{}).v||(fa.course||'').trim()||'統計学';
+  const P=[
+    {h:'① 近くに来ると、こう出ます',d:'同じキャンパスにいる人のうち、<b>共通点がある人</b>ほど上に出ます。何度もすれ違っている人には回数も。',
+      m:`<div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい <span style="font-weight:500;color:var(--muted)">社会 2年</span></div><div class="mb">🎧 同じアーティスト「${esc(art)}」</div><div class="mb">📚 同じ授業「${esc(crs)}」 ・ 🚶 3回すれ違い</div></div><div class="md">👋</div></div>`},
+    {h:'② 👋 いいね → トーク',d:'気になったら <b>👋 いいね</b>。相手もいいねを返すと、24時間だけ話せます。最初の一言は、共通点から選べます。',
+      m:`<div class="mbub me">${esc(art)}、好きなんですか？自分もです！</div><div class="mbub them">そうなんです！${esc(crs)}も一緒ですよね</div>`},
+    {h:'③ 会ったら、共通点が最初の話題に',d:'会う時は、共通点・すれ違った回数・2人で答える「ふたりのお題」を1枚で見られます。<b>話しかける最初の一言に困りません。</b>',
+      m:`<div class="mline">✨ これまで <b>3回</b> すれ違っています<span>🎧 同じアーティスト「${esc(art)}」</span></div><div class="mbub them">🎲 ふたりのお題「犬派？猫派？」→ 同じ！</div>`}
+  ], p=P[sampleIdx], last=sampleIdx===P.length-1;
+  $('#memSheet').innerHTML=`<div class="smp"><div class="smptag">サンプル（本物の人ではありません）</div>
+    <h2 class="pstitle">${p.h}</h2><p class="psdesc">${p.d}</p><div class="mini">${p.m}</div>
+    <div class="smpdots">${P.map((_,i)=>`<i class="${i===sampleIdx?'on':''}"></i>`).join('')}</div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px" onclick="${last?'closeMembers()':'sampleIdx++;renderSample()'}">${last?'わかった':'次へ'}</button>
+    ${sampleIdx?`<button class="btn btn-ghost" style="width:100%;padding:11px;margin-top:8px;color:var(--muted)" onclick="sampleIdx--;renderSample()">戻る</button>`:''}</div>`;
+}
 const NEAR_LIMIT=20;   // 一覧に最初に出す人数（共通点の多い順。2026-10-08）
 let nearShowAll=false;
 // いまキャンパスにいる友達を横並びに（開いている友達は距離、そうでなければ友達に見せている建物）。押すとプロフィール
@@ -4503,6 +4557,7 @@ function closeGuide(){ $('#guide').classList.remove('show'); markGuideSeen(); se
 function renderGuide(){
   if(guideMode==='intro'){
     $('#guideBody').innerHTML=`<div class="gicon">🧭</div><h3>ちかくの使い方</h3>
+      <p style="margin:0 0 10px">同じキャンパスの、<b>共通点がある人</b>が分かる。<br>だから、会ったときに話しかけやすい。</p>
       <div class="introl">
         <div><span>📍</span><div>今日キャンパスにいた人が、地図と一覧に出ます。<b>めずらしい共通点</b>のある人ほど上に。</div></div>
         <div><span>👋</span><div>共通点があって、すれ違った人に<b>いいね</b>。おたがいにいいねでトーク（24時間）、もっと話したい人とは友達に。</div></div>
@@ -5255,7 +5310,7 @@ async function saveTimetable(){
   const row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=rooms;
   const {error}=await sb.from(T('timetable')).upsert(row);
   if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
-  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms();   // 授業のコミュニティの一覧も新しく
+  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadCommonCount(true);   // 授業のコミュニティの一覧・共通点のある人の数も新しく
   toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました');
   if(Object.keys(slots).length)askPushSoon('tt');
 }
@@ -5794,7 +5849,7 @@ async function saveEdit(){
     const {error}=await sb.from(T('profiles')).update(row).eq('id',myId);
     if(error)console.warn('[profile] プロフィールを保存できませんでした',error.message);
   }
-  toast('プロフィールを更新しました');
+  loadCommonCount(true); toast('プロフィールを更新しました');
   closeEdit();
   setTimeout(()=>checkFriendCommons('edit'),2800);   // 変更で友達と新しい共通点ができたら知らせる
 }
