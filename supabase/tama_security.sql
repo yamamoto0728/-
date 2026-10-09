@@ -43,7 +43,7 @@ end $$;
 drop trigger if exists tama_profiles_keep_age_private on public.tama_profiles;
 create trigger tama_profiles_keep_age_private before insert or update on public.tama_profiles
   for each row execute function public.tama_profiles_keep_age_private();
--- ãã­ãã£ã¼ã«ãæ¶ãããå¹´é½¢ãæ¶ã
+-- プロフィールを消したら年齢も消す
 create or replace function public.tama_profiles_drop_private()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
