@@ -925,8 +925,8 @@
             <div class="sh">🤝 会ったとき、話すことがある</div>
             <div class="sd">共通点・何度もすれ違っていること・その場で2人で答える「ふたりのお題」が、最初の一言になります。</div>
             <div class="mini">
-              <div class="mline">✨ これまで <b>5回</b> すれ違っています<span>📅 水曜の昼休みに、よく近くにいます</span></div>
-              <div class="mbub me">水曜の昼休み、よく近くにいますよね！</div>
+              <div class="mline">✨ これまで <b>5回</b> すれ違っています<span>🎧 同じアーティスト「ヨルシカ」</span></div>
+              <div class="mbub me">ヨルシカ好きなんですか？自分もです！</div>
               <div class="mbub them">🎲 ふたりのお題「犬派？猫派？」→ 同じ！</div>
             </div>
           </div>
@@ -2153,9 +2153,10 @@ function metLine(id){
   const e=encMap[id]; if(!e||!e.count)return '';
   const d=t=>new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
   const first=e.first_at&&e.first_at<e.last_at-60000?`はじめては ${d(e.first_at)}・`:'';
-  const where=e.last_place&&!VAGUE_PLACES.includes(e.last_place)?`${esc(e.last_place)}のあたり`:'';
+  const where=isFriend(id)&&e.last_place&&!VAGUE_PLACES.includes(e.last_place)?`${esc(e.last_place)}のあたり`:'';
   const last=`最後は ${e.last_at>=jstTodayStart().getTime()?'今日 '+hhmm(e.last_at):d(e.last_at)}${where?' '+where:''}`;
-  const p=encPattern(id);
+  // 2026-10-08 ユーザー役のテスト（慎重派）：曜日・時間帯・場所の習慣が、すれ違っただけの知らない人に分かるのが怖い、という声があったので友達にだけ出す
+  const p=isFriend(id)?encPattern(id):null;
   return `<div class="metline${e.count>=2?' rep':''}">${e.count>=2?'✨ ':'🚶 '}これまで <b>${e.count}回</b> すれ違っています<span>${first}${last}</span>${p?`<i class="mpat">📅 ${esc(p.text)}に、よく近くにいます（${p.n}日${p.place?'・'+esc(p.place)+'のあたり':''}）</i>`:''}</div>`;
 }
 /* ---------- すれ違いを1回ずつ記録する（2026-10-07、提案③「会った最初の1分」） ----------
@@ -3174,11 +3175,11 @@ function topicsFor(u,n=3,exclude=[]){
     else if(kind==='goal') add(`${c.label}、どんなことしてるんですか？`,rare);
   }
   // 何度もすれ違っている相手には、それを最初の一言にする（ちかくにしかない材料なので共通点の次に優先）
-  const enc=encMap[u.id], pat=encPattern(u.id);
+  const enc=encMap[u.id], pat=isFriend(u.id)?encPattern(u.id):null;   // 習慣（曜日・時間帯）の話題は友達にだけ（2026-10-08）
   // （text は表示のときに esc されるので、ここでは生の文字列のまま作る）
   // 同じ曜日・時間帯によく近くにいる（2026-10-07、すれ違いを1回ずつ記録するようにしてから）
   if(pat&&pat.weekly) add(`${pat.text}、よく近くにいますよね！${pat.place?pat.place+'にはよく行くんですか？':'その時間っていつも何してるんですか？'}`,true);
-  if(enc&&enc.count>=2) add(`${enc.count}回もすれ違ってるみたいです！${enc.last_place&&enc.last_place!=='この付近'?enc.last_place+'のあたり':'キャンパス'}によくいますか？`,enc.count>=3);
+  if(enc&&enc.count>=2) add(`${enc.count}回もすれ違ってるみたいです！キャンパスでよく行く場所ってありますか？`,enc.count>=3);   // 場所は入れない（2026-10-08）
   // 共通点でなくても、相手のプロフィールから聞けること
   const td=dailyAnswer(u), md=dailyAnswer(profile);
   if(td&&md&&!sameDaily(u)) add(`今日のお題、「${td}」なんですね！自分は「${md}」でした。なんでですか？`);
@@ -4256,7 +4257,7 @@ const HELP={
     can:['同じ時限に同じ授業を入れた人が「📚 同じ授業」の共通点で見つかります。授業中は、同じ授業の人が一覧の一番上に出ます','教室を入れておくと、「いまの自分」に教室の候補が出ます','友達がいると、その日最初の授業の始まりに「いまどこ？」の通知が届きます'],
     see:'時間割はあなたにしか見えません。見せたい友達にだけ、マイページの「🔒 見せる範囲」で見せられます。'},
   cross:{icon:'🚶',title:'すれ違い',lead:'アプリを開いたままキャンパスを歩くと、近くを通った人が記録されます。一覧に出るのは今日すれ違った人だけです（回数はプロフィールに残ります）。',
-    can:[`${FES.encounterRangeM}m以内に入った人が記録され、会うほど回数が増えます`,'何度もすれ違う人は、生活のリズムが近い人かもしれません。プロフィールにも「これまで◯回すれ違っています」と出ます','同じ人は30分以内なら数え直しません','同じ曜日・同じ時間帯に何度もすれ違うと、プロフィールに「📅 木曜の昼休みに、よく近くにいます」のように出ます'],
+    can:[`${FES.encounterRangeM}m以内に入った人が記録され、会うほど回数が増えます`,'何度もすれ違う人は、生活のリズムが近い人かもしれません。プロフィールにも「これまで◯回すれ違っています」と出ます','同じ人は30分以内なら数え直しません','友達とは、同じ曜日・同じ時間帯に何度もすれ違うと「📅 木曜の昼休みに、よく近くにいます」と出ます（友達でない人には、回数だけが出ます）'],
     see:'記録するのは、アプリを開いていて、キャンパスの中にいる間だけです。',
     tip:'何度もすれ違う共通点のある人には「👋 いいね」してみよう。トークでは「よくすれ違いますね」もきっかけになります。'},
   talk:{icon:'💬',title:'トーク',lead:'おたがいにいいねした人・友達・コミュニティと話す所です。',
