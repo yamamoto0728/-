@@ -910,6 +910,7 @@
   #paySheet .condsub{font-size:12px;font-weight:700;color:var(--ink);margin:12px 0 6px}#paySheet .condsub span{font-weight:500;color:var(--muted);font-size:11px;margin-left:6px}
   .sugg{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 4px;align-items:center}
   .sugg .sh{width:100%;font-size:10.5px;color:var(--muted)}
+  .sugg button.off{border-color:rgba(245,151,47,.6);background:#fff8ea;color:#9a5a10}   /* 正式な授業名（2026-10-09） */
   .sugg button small{margin-left:5px;font-size:10px;font-weight:500;color:var(--muted)}   /* その書き方を入れている人数（小さく） */
   .sugg button{border:1px solid rgba(15,176,205,.45);background:rgba(15,176,205,.08);color:#0a7f96;border-radius:14px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #paySheet .pledge{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.7;padding:11px 12px;border-radius:14px;background:#fff7ee;border:1px solid rgba(245,151,47,.45);margin-bottom:14px;cursor:pointer}
@@ -992,6 +993,7 @@
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/fes/campus-geo.js"></script>
 <script src="/tama/daily-qs.js"></script>
+<script src="/tama/courses-shakai.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -2200,7 +2202,7 @@ function attrFieldsHTML(p,part){
     <div class="field"><label>わかる！あるある<span class="req">必須・1〜${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
       <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
         <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
-    <div class="field"><label>これだけは落としたくない授業<span class="opt">任意・いま取っている授業から1つ</span></label><input id="${p}Course" data-sugg="course" maxlength="24" placeholder="例：マーケティング論"><div class="hint">同じ授業を書いた人には「同じ！」と出ます。テスト前に情報交換できる仲間が見つかるかも</div></div>
+    <div class="field"><label>これだけは落としたくない授業<span class="opt">任意・いま取っている授業から1つ</span></label><input id="${p}Course" data-sugg="course" maxlength="48" placeholder="例：マーケティング論"><div class="hint">同じ授業を書いた人には「同じ！」と出ます。テスト前に情報交換できる仲間が見つかるかも</div></div>
     <div class="field"><label>これから・目標（任意・複数OK）</label><div class="chips" id="${p}Goals"></div></div>
     <div class="field worryf"><label>${WORRY_LABEL}<span class="opt">任意・${FA.purposePick}つまで</span></label>
       <div class="hint" style="margin:0 0 8px">選ばなくても大丈夫です。あとで、プロフィール編集からいつでも変えられます。</div>
@@ -5527,7 +5529,12 @@ function freeTogetherHTML(){
 }
 const slotKeys=o=>Object.keys(o).sort((a,b)=>{ const [ad,ap]=a.split('-').map(Number),[bd,bp]=b.split('-').map(Number); return ad-bd||ap-bp; });
 let ttOpen=false;   // 同じシート（#placeSheet）を「いまの自分」と共用しているので、どちらが開いているか
-function openTimetable(){ loadSuggest(); ttOpen=true; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
+// 保存の前に出す「正式名は？」（ttOffFix の時限だけ。押すとその名前が入る）
+let ttOffAsked=false, ttOffFix=[];
+function ttFixHTML(k){ if(!ttOffFix.includes(k))return ''; const l=officialList(ttDraft[k]||'',3,true); if(!l.length)return '';
+  return `<div class="sugg ttfix"><span class="sh">📘 「${esc(ttDraft[k])}」の正式な授業名は？（押すと入ります）</span>${l.map((v,i)=>`<button type="button" class="off" onclick="ttUseOff('${k}',${i})">${esc(v)}</button>`).join('')}</div>`; }
+function ttUseOff(k,i){ const v=officialList(ttDraft[k]||'',3,true)[i]; if(!v)return; ttDraft[k]=v; ttOffFix=ttOffFix.filter(x=>x!==k); renderTimetable(); }
+function openTimetable(){ loadSuggest(); ttOpen=true; ttOffAsked=false; ttOffFix=[]; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
 function renderTimetable(){
   const keys=slotKeys(ttDraft);
   let grid='<div class="ttgrid"><div></div>'+TT_DAYS.map(d=>`<div class="tth">${d}</div>`).join('');
@@ -5542,7 +5549,7 @@ function renderTimetable(){
     ${grid}
     ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
       <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
-      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input data-sugg="course" maxlength="24" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>`).join('')}</div>`:''}
+      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input data-sugg="course" maxlength="48" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>${ttFixHTML(k)}`).join('')}</div>`:''}
     <div class="edbar"><button class="btn btn-ghost" onclick="closeTimetable()">閉じる</button><button class="btn btn-primary" onclick="saveTimetable()">保存する</button></div>`;
 }
 // 授業名を入れたコマを押した時は、名前ごと消えてしまうので確かめる
@@ -5560,6 +5567,8 @@ function closeTimetable(){
 async function saveTimetable(){
   const slots={}, rooms={}; for(const k of slotKeys(ttDraft)){ slots[k]=(ttDraft[k]||'').trim(); const r=(roomsDraft[k]||'').trim(); if(r)rooms[k]=r; }
   if(Object.values(slots).concat(Object.values(rooms)).some(ngCheck)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  // 正式な授業名にそろっていない授業があれば、保存の前に1回だけ候補を出す（2026-10-09 あおの依頼「授業名を完全一致させたい」）。そのままでよければ、もう一度「保存」で保存する
+  if(!ttOffAsked){ const fix=slotKeys(slots).filter(k=>slots[k]&&!isOfficial(slots[k])&&officialList(slots[k],3,true).length); ttOffAsked=true; if(fix.length){ ttOffFix=fix; renderTimetable(); toast('📘 正式な授業名にそろえると、同じ授業の人が見つかりやすくなります。このままでよければ、もう一度「保存」'); return; } }
   if(!sb||String(myId).startsWith('local-')||timetableMissing){ toast('時間割はまだ準備中です'); return; }
   const row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=rooms;
   const {error}=await sb.from(T('timetable')).upsert(row);
@@ -5720,10 +5729,29 @@ async function loadSuggest(){
 }
 // 打った文字の並びが、順番どおりに入っているか（「メディアa」→「メディア社会学a」）
 function isSubseq(n,x){ let i=0; for(const ch of x){ if(ch===n[i])i++; if(i===n.length)return true; } return i===n.length; }
+// 授業の正式名称（2026-10-09 あおの依頼「授業名を完全一致させるために、正式名称を選択肢に。打った文字と50%以上合えば予測変換で出す」）。
+// 一覧は tama/courses-shakai.js（法政大学Webシラバスの社会学部 全科目一覧・2026年度）。
+// 近さ＝打った文字と正式名称で、順番どおりに一致する文字の数 ÷ 長いほうの文字数（「公共性と民」→「公共性と民主主義Ⅱ」は 5/9＝56%）。
+// 50%以上か、打った文字がそのまま入っている正式名称を、近い順に出す（2文字から）。正式名称が見つかった時は、みんなが入れた書き方（略した名前など）は出さない
+const OFFICIAL=typeof OFFICIAL_COURSES!=='undefined'?OFFICIAL_COURSES:[];
+const officialSet=new Set(OFFICIAL.map(v=>normAns(v)));
+const isOfficial=v=>officialSet.has(normAns(v));
+function courseSim(n,x){
+  const a=[...n], b=[...x]; let prev=new Array(b.length+1).fill(0);
+  for(const ca of a){ const cur=[0]; for(let j=1;j<=b.length;j++)cur[j]=ca===b[j-1]?prev[j-1]+1:Math.max(prev[j],cur[j-1]); prev=cur; }
+  return prev[b.length]/Math.max(a.length,b.length,1);
+}
+// strict：保存の前の「正式名は？」用。打った文字が全部、順番どおりに入っている正式名称だけ（略した名前）。「マーケティング論」→「マーケティング実践」のような別の授業を出さないため
+function officialList(q,lim,strict){
+  const n=normAns(q); if([...n].length<2)return [];
+  return OFFICIAL.map(v=>{ const x=normAns(v), s=courseSim(n,x); return {v,s:x===n?9:x.startsWith(n)?2+s:x.includes(n)?1+s:s}; })
+    .filter(o=>o.s>=0.5&&(!strict||isSubseq([...n],[...normAns(o.v)]))).sort((a,b)=>b.s-a.s).slice(0,lim||6).map(o=>o.v);
+}
 // 候補の並び：打った文字で始まる → 打った文字を含む → 略した書き方（文字が順番どおりに入っている）。それぞれの中は多い順（関数の返した順）。
 // 2026-10-08 あおの依頼：「メディア社会学A」を「メディアA」と書く人がいるので、略して打っても正式な書き方を候補に出し、そろえてもらう。
 // 略した書き方は2文字以上打った時だけ（1文字だと何にでも当たるため）。同じものはもう入っているので出さない
 function suggList(kind,q){
+  if(kind==='course'&&normAns(q)){ const off=officialList(q); if(off.length)return off; }   // 正式名称が見つかれば、それだけ出す
   const all=suggestData[kind]||[], n=normAns(q);
   if(!n)return all.slice(0,8);
   const rank=v=>{ const x=normAns(v); if(x===n)return -1; if(x.startsWith(n))return 0; if(x.includes(n))return 1; if([...n].length>=2&&isSubseq([...n],[...x]))return 2; return -1; };
@@ -5733,7 +5761,8 @@ function showSugg(inp){
   hideSugg();
   const list=suggList(inp.dataset.sugg,inp.value); if(!list.length)return;
   const box=document.createElement('div'); box.className='sugg';
-  box.innerHTML=`<span class="sh">${inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>{ const n=(suggestN[inp.dataset.sugg]||{})[v]; return `<button type="button">${esc(v)}${n?`<small>${n}人</small>`:''}</button>`; }).join('');
+  const off=inp.dataset.sugg==='course'&&list.length&&list.every(isOfficial);
+  box.innerHTML=`<span class="sh">${off?'📘 正式な授業名（押すと入ります。同じ授業の人と名前がそろいます）':inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>{ const n=(suggestN[inp.dataset.sugg]||{})[v]||(suggestN.course&&off?suggestN.course[v]:0); return `<button type="button"${off?' class="off"':''}>${esc(v)}${n?`<small>${n}人</small>`:''}</button>`; }).join('');
   box.querySelectorAll('button').forEach((b,i)=>{
     b.addEventListener('pointerdown',e=>e.preventDefault());   // 押した時に入力欄からフォーカスが外れて、候補が先に消えないように
     b.addEventListener('click',()=>{ inp.value=list[i]; inp.dispatchEvent(new Event('input',{bubbles:true})); hideSugg(); inp.blur(); });
