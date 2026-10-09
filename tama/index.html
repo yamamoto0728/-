@@ -1605,6 +1605,8 @@ async function tryResumeSession(){
     const {data,error}=await sb.from(T('profiles')).select('*').eq('id',myId).maybeSingle();
     if(error||!data) return false;
     profile={id:myId,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[],fa:data.fes_attrs||{}};
+    // 年齢は本人だけが読める tama_private にある（2026-10-10 セキュリティの見直し。supabase/tama_security.sql）。無ければ前のまま
+    if(data.age==null)sb.from(T('private')).select('age').eq('id',myId).maybeSingle().then(({data:pv})=>{ if(pv&&pv.age&&profile)profile.age=pv.age; },()=>{});
     renderMeHero();
     $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
     startGeo();buildInvite();startLoops();
@@ -2929,7 +2931,7 @@ function renderCross(){
   $('#crossSub').textContent=arr.length?'今日 '+arr.length+'人':'今日はまだ0人';
   const ul=$('#crossList');
   const when=t=>new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
-  const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/'/g,"&#39;")},null)'>
+  const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'>
     <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
     <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${(u.last_at||0)>=today?hhmm(u.last_at||0):when(u.last_at||0)}${(u.last_at||0)>=today?'・'+esc(u.last_place||''):''}${u.first_at&&u.count>=2?`　（これまで${u.count}回）`:''}</div></div>
     <div class="d"><div class="m${u.count>=2?' rep':''}">${u.count}回</div>${relTag(u.id)}</div></div>`;
@@ -4905,7 +4907,7 @@ async function openMembers(){
       ${list.map(u=>{
         let d=null; if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.round(Math.hypot(r.e,r.n));}
         const me=u.id===myId;
-        return `<div class="urow" ${me?'':`onclick='closeMembers();openSheet(${JSON.stringify(u).replace(/'/g,"&#39;")},${d==null?'null':d})'`}>
+        return `<div class="urow" ${me?'':`onclick='closeMembers();openSheet(${JSON.stringify(u).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},${d==null?'null':d})'`}>
           <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
           <div class="info"><div class="n">${esc(u.name)}${me?' <span class="joined-tag">あなた</span>':''}</div>
           <div class="b">${esc(u.bio||'')}</div></div>
