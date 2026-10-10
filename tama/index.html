@@ -163,6 +163,17 @@
   /* 今日のお題 */
   .daily{margin:2px 16px 8px;padding:13px 15px;border-radius:18px;background:linear-gradient(135deg,rgba(255,176,102,.16),rgba(120,140,255,.10));border:1px solid rgba(245,151,47,.35)}
   .daily:empty{display:none}
+  /* ちかくタイム（2026-10-10）。10分だけのお題なので、今日のお題より目立つ色に */
+  .ctcard{margin:2px 16px 8px;padding:11px 14px;border-radius:18px;background:linear-gradient(135deg,rgba(15,176,205,.16),rgba(120,140,255,.14));border:1.5px solid rgba(15,176,205,.55)}
+  .ctcard:empty{display:none}
+  .ctcard .cth{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:800;color:#0a7f96}
+  .ctcard .ctleft{font-family:"JetBrains Mono",monospace;font-size:12px;color:#fff;background:#0a7f96;border-radius:10px;padding:1px 8px}
+  .ctcard .ctq{font-size:15px;font-weight:900;margin:4px 0 8px;line-height:1.5}
+  .ctcard .ctbtns{display:flex;gap:8px}.ctcard .ctbtns button{flex:1;padding:10px 8px;border-radius:14px;border:1.5px solid #0fb0cd;background:#fff;color:#0a7f96;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+  .ctcard .ctmine{font-size:13.5px}.ctcard .ctmine b{color:#0a7f96}
+  .ctcard .ctres{font-size:12.5px;margin-top:5px;line-height:1.7}.ctcard .ctres b{color:var(--signal)}
+  .ctcard .ctnote{font-size:10.5px;color:var(--muted);margin-top:5px}
+  .ctcard.after{padding:9px 14px;background:rgba(15,176,205,.07);border-width:1px}.ctcard.after .ctline{font-size:12.5px;line-height:1.55}
   .daily .dh{font-size:11.5px;font-weight:700;color:#b0651a;display:flex;justify-content:space-between}
   .daily .dq{font-size:15.5px;font-weight:900;margin:4px 0 10px;line-height:1.5}
   .daily .chips{gap:6px}.daily .chips .c{font-size:13px;padding:8px 13px}
@@ -1103,6 +1114,7 @@
       <div class="nowbar" id="nowBar"></div>
       <!-- はじめにやること（2026-10-08。renderStartCard） -->
       <div class="startcard" id="startCard"></div>
+      <div class="ctcard" id="ctCard"></div>
       <div class="daily" id="dailyCard"></div>
       <!-- いまキャンパスにいる友達（2026-10-08。だれが友達か分かるよう、一覧とは分けて一番上に横並び。renderNearFriends） -->
       <div class="nearfr" id="nearFriends"></div>
@@ -1179,6 +1191,7 @@
           <div class="setrow visrow" onclick="openMatchPrefs()"><div class="lab">🎯 マッチングに使う共通点<small id="matchSumTxt">&mdash;</small></div><span class="go">›</span></div>
           <div class="setrow visrow" onclick="openBlocked()"><div class="lab">🚫 ブロックした人<small>一覧と解除</small></div><span class="go">›</span></div>
           <div class="setrow"><div class="lab">通知<small id="pushHint">いいね・メッセージ・友達申請をスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
+          <div class="setrow visrow" onclick="openNotifPrefs()"><div class="lab">🔔 通知の種類・テスト通知<small id="notifSumTxt">届かない時は、ここからテスト</small></div><span class="go">›</span></div>
         </div>
         <button class="btn btn-ghost" style="margin:4px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
         <!-- 緊急時・問い合わせの連絡先（2026-10-02 追加）。中身は CONTACT で決まる -->
@@ -1231,6 +1244,7 @@
   <div class="overlay" id="visOverlay" onclick="if(event.target===this)closeVisHub()"><div class="sheet" id="visSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()"><div class="sheet" id="helpSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="matchOverlay" onclick="if(event.target===this)closeMatchPrefs()"><div class="sheet" id="matchSheet" style="padding:24px 22px 28px"></div></div>
+  <div class="overlay" id="notifOverlay" onclick="if(event.target===this)closeNotifPrefs()"><div class="sheet" id="notifSheet" style="padding:24px 22px 28px"></div></div>
   <div class="overlay" id="ckOverlay" onclick="if(event.target===this)closeCheckin()"><div class="sheet" id="ckSheet" style="padding:22px 20px 26px"></div></div>
   <div class="overlay" id="meetOverlay" onclick="if(event.target===this)closeMeet()"><div class="sheet" id="meetSheet" style="padding:22px 20px 26px"></div></div>
   <!-- 機能を初めて見た時だけ出す吹き出し（showTip） -->
@@ -1669,12 +1683,9 @@ async function enablePush(){
     if(perm!=='granted'){ toast('通知が許可されませんでした。端末の設定から許可してください'); return false; }
     if(!swReg) swReg = await registerSW();
     if(!swReg){ toast('通知の準備に失敗しました'); return false; }
-    let sub = await swReg.pushManager.getSubscription();
-    if(!sub){
-      sub = await swReg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
-    }
-    const { error } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
-    if(error){ console.error('[push] 購読情報の保存に失敗', error); toast('通知の登録に失敗しました'); return false; }
+    // 自分で「オン」にした時は、端末に残っている登録を使わず作り直す（切れた登録が残っていて届かない、を直すため。2026-10-10）
+    const sub = await freshSubscription();
+    if(!await savePushSub(sub)){ toast('通知の登録に失敗しました'); return false; }
     setPushOptOut(false);
     return true;
   }catch(e){ console.error('[push] 通知の有効化に失敗', e); toast('通知を有効にできませんでした'); return false; }
@@ -1683,10 +1694,42 @@ async function disablePush(){
   try{
     if(!swReg) swReg = await navigator.serviceWorker.getRegistration();
     const sub = swReg ? await swReg.pushManager.getSubscription() : null;
-    if(sub) await sub.unsubscribe();
+    if(sub){ if(sb&&myId) await sb.from(T('push_devices')).delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); }
     if(sb && myId) await sb.from('push_subscriptions').delete().eq('id', myId);
+    try{ localStorage.removeItem('tama_pushEp'); }catch(e){}
     setPushOptOut(true);
   }catch(e){}
+}
+/* ---------- 通知が届かない、を直す（2026-10-10 あおの依頼「通知がオンなのに来ない人がいる」） ----------
+   iPhone の通知の登録は、本人が何もしなくても無効になることがある。無効な登録あてに送ると、Edge Function が登録を消す。
+   前のアプリは、開くたびに端末に残っている「同じ無効な登録」を送り直していたので、送る→消える→送り直す、を繰り返し、ずっと届かなかった
+   （「通知」のスイッチは端末の中の状態しか見ないので、オンのまま）。
+   いまは、前に送った登録（localStorage tama_pushEp）がサーバーから消えていたら、無効になったとみなして作り直す。
+   送り先は端末ごとに tama_push_devices にも持つ（前は1人1つで、ほかの端末で開くと上書きされていた）。supabase/tama_notify.sql */
+const newSubscription=()=>swReg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+async function freshSubscription(){
+  const old=await swReg.pushManager.getSubscription();
+  if(old){ try{ await old.unsubscribe(); }catch(e){} }
+  return newSubscription();
+}
+// 送り先をサーバーに保存する（端末ごとの表と、通常版・学園祭版と共用の表の両方）
+async function savePushSub(sub){
+  const j=sub.toJSON();
+  const r1=await sb.rpc('tama_push_register',{p_sub:j});   // SQL の実行前は失敗するだけ
+  const { error } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: j, updated_at: new Date().toISOString() });
+  if(error&&r1.error){ console.warn('[push] 購読情報の保存に失敗', error.message); return false; }
+  try{ localStorage.setItem('tama_pushEp', sub.endpoint); }catch(e){}
+  return true;
+}
+// 前にサーバーへ送った登録が、サーバーから消えているか（＝送ろうとして無効だったので消された）
+async function pushSubLost(sub){
+  let sentBefore=false; try{ sentBefore=localStorage.getItem('tama_pushEp')===sub.endpoint; }catch(e){}
+  if(!sentBefore) return false;
+  const d=await sb.from(T('push_devices')).select('endpoint').eq('endpoint', sub.endpoint).maybeSingle();
+  if(!d.error) return !d.data;
+  // 端末ごとの表がまだ無い時（SQL の実行前）は、共用の表に自分の行が無いかで見る（ほかの端末に上書きされた時は消えていないので作り直さない）
+  const s=await sb.from('push_subscriptions').select('id').eq('id', myId).maybeSingle();
+  return !s.error&&!s.data;
 }
 
 /* ---------- 開いた時点で通知の許可を聞く ---------- */
@@ -1716,9 +1759,9 @@ async function syncPushSubscription(){
     if(!swReg) swReg = await navigator.serviceWorker.getRegistration() || await registerSW();
     if(!swReg) return false;
     let sub = await swReg.pushManager.getSubscription();
-    if(!sub) sub = await swReg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
-    const { error } = await sb.from('push_subscriptions').upsert({ id: myId, subscription: sub.toJSON(), updated_at: new Date().toISOString() });
-    if(error){ console.warn('[push] 購読情報の保存に失敗', error.message); return false; }
+    if(sub && await pushSubLost(sub)){ console.log('[push] 登録がサーバーから消えていたので作り直します'); sub = await freshSubscription(); }
+    if(!sub) sub = await newSubscription();
+    if(!await savePushSub(sub)) return false;
     refreshPushToggle();
     return true;
   }catch(e){ console.warn('[push] 購読の登録し直しに失敗', e); return false; }
@@ -2312,6 +2355,70 @@ async function setMatchOff(off){
   renderMatchPrefs(); renderMatchSum(); renderNearby(); renderCross();
   await saveMyAttrs();
 }
+/* ---------- 通知の種類・テスト通知（2026-10-10） ----------
+   種類ごとにオフにできる（全部まとめて切られるのを防ぐ。多すぎる・関係ない通知が来ると通知を切る人が多いため）。
+   オフにした種類はプロフィールの fes_attrs.push_off に入れ、送る側（send-match-push・tama-remind）が見て送らない。
+   テスト通知は自分あてに1通送り、届かなければ登録を作り直してもう一度送る。それでもだめなら端末の設定の確かめ方を出す */
+const PUSH_KINDS=[
+  {k:'msg',   icon:'💬', label:'メッセージ', sub:'友達・24時間トーク'},
+  {k:'like',  icon:'👋', label:'いいね・トークの始まり'},
+  {k:'friend',icon:'👥', label:'友達', sub:'申請・承認・新しい共通点'},
+  {k:'nearby',icon:'👀', label:'近くに共通点のある人がいる時'},
+  {k:'room',  icon:'🏠', label:'コミュニティ', sub:'部屋ごとの通知は部屋の中で切れます'},
+  {k:'ct',    icon:'⏰', label:'ちかくタイム', sub:'週2〜3回・休み時間に10分だけのお題'},
+  {k:'daily', icon:'🎲', label:'今日のお題', sub:'平日の昼休み（まだ答えていない日だけ）'},
+  {k:'class', icon:'📍', label:'授業の始まり', sub:'その日最初の授業（友達がいる人だけ）'},
+];
+const pushOffOf=u=>{ const o=attrsOf(u).push_off; return Array.isArray(o)?o:[]; };
+function openNotifPrefs(){ if(!profile){ toast('先にプロフィールを登録してね'); return; } renderNotifPrefs(); $('#notifOverlay').classList.add('show'); }
+function closeNotifPrefs(){ $('#notifOverlay').classList.remove('show'); renderNotifSum(); }
+function renderNotifSum(){ const el=$('#notifSumTxt'); if(!el||!profile)return; const n=pushOffOf(profile).length; el.textContent=n?`${n}種類をオフにしています`:'届かない時は、ここからテスト'; }
+function renderNotifPrefs(){
+  const off=pushOffOf(profile);
+  $('#notifSheet').innerHTML=`<h2 class="pstitle">🔔 通知の種類</h2>
+    <p class="psdesc">いらない通知だけオフにできます。自動で届く通知（お題・ちかくタイム・授業）は、1日2通まで（ちかくタイムの日だけ3通）です。</p>
+    ${PUSH_KINDS.map(m=>{ const on=!off.includes(m.k);
+      return `<div class="sharerow" style="margin-bottom:7px"><div class="lab">${m.icon} ${m.label}${m.sub?`<small>${m.sub}</small>`:''}</div><div class="toggle${on?' on':''}" onclick="toggleNotifKind('${m.k}')"><div class="k"></div></div></div>`; }).join('')}
+    <h2 class="pstitle" style="margin-top:18px;font-size:16px">📨 通知が届かない時</h2>
+    <p class="psdesc">自分あてにテストの通知を1通送ります。届かなければ、登録を作り直してもう一度送ります。</p>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="testPush()">🔔 テスト通知を送る</button>
+    <div id="notifTest" class="vishint" style="margin:10px 0 0;line-height:1.7"></div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:14px" onclick="closeNotifPrefs()">閉じる</button>`;
+}
+async function toggleNotifKind(k){
+  const off=pushOffOf(profile), next=off.includes(k)?off.filter(x=>x!==k):off.concat(k);
+  profile.fa=profile.fa||{}; if(next.length)profile.fa.push_off=next; else delete profile.fa.push_off;
+  renderNotifPrefs(); renderNotifSum();
+  await saveMyAttrs();
+}
+// 届かない時に確かめること（端末の設定は、アプリからは見えない・変えられないため）
+function pushCheckList(){
+  return isIOS()
+    ?'<b>iPhoneの設定を確かめてください</b><br>・設定 → 通知 → 「ちかく多摩キャン」で「通知を許可」「ロック画面」「通知センター」「バナー」をオン<br>・集中モード（おやすみモードなど）がオンになっていないか<br>・設定 → 通知 → 「時刻指定要約」に入っていないか（入っていると、決まった時刻にまとめてしか出ません）'
+    :'<b>スマホの設定を確かめてください</b><br>・設定 → アプリ → Chrome（またはちかく）→ 通知 をオン<br>・サイレント・おやすみ時間・省電力モードで止まっていないか';
+}
+async function testPush(){
+  const say=h=>{ const el=$('#notifTest'); if(el)el.innerHTML=h; };
+  if(!pushSupported()){ say('このブラウザは通知に対応していません'); return; }
+  if(isIOS()&&!isStandalone()){ say('📲 iPhoneは、ホーム画面に追加したアプリでだけ通知が届きます'); return; }
+  if(Notification.permission==='denied'){ say('🚫 通知が「許可しない」になっています。端末の設定から許可してください<br><br>'+pushCheckList()); return; }
+  if(!sb||!myId||String(myId).startsWith('local-')){ say('いまはテストできません（通信できていません）'); return; }
+  say('送っています…');
+  try{
+    if(Notification.permission!=='granted'||isPushOptOut()){ if(!await enablePush()){ say('通知を許可できませんでした'); return; } refreshPushToggle(); }
+    if(!swReg) swReg=await navigator.serviceWorker.getRegistration()||await registerSW();
+    const send=async()=>{
+      const {data,error}=await sb.functions.invoke('send-match-push',{body:{to:myId,title:'🔔 テスト通知',body:'通知はこのように届きます',url:'/tama/?n=test',kind:'test',tag:'test'}});
+      return error?{ok:false,why:error.message}:{ok:!!(data&&data.ok),why:data&&(data.reason||data.error)};
+    };
+    let sub=await swReg.pushManager.getSubscription(); if(!sub)sub=await newSubscription();
+    await savePushSub(sub);
+    let r=await send();
+    if(!r.ok){ await savePushSub(await freshSubscription()); r=await send(); }   // 送れなければ、登録を作り直してもう一度
+    if(r.ok)say('✅ 送りました。<b>10秒たっても届かなければ</b>、通知はサーバーからは出ています。<br><br>'+pushCheckList());
+    else say('⚠️ 送れませんでした'+(r.why?`（${esc(String(r.why))}）`:'')+'。マイページの「通知」のスイッチを一度オフにして、もう一度オンにしてみてください<br><br>'+pushCheckList());
+  }catch(e){ say('⚠️ テストできませんでした。少し待ってからもう一度どうぞ'); console.warn('[push] テスト通知に失敗',e); }
+}
 const commonFor=(u,off)=>commonRaw(u).filter(c=>!off.includes(c.key.split(':')[0]));
 function commonDetail(u){ return profile?commonFor(u,matchOffOf(profile)):[]; }
 function commonRaw(u){
@@ -2327,6 +2434,8 @@ function commonRaw(u){
   (samePeers[u.id]||[]).forEach(r=>add('cls:'+r.slot+':'+normAns(r.course),'同じ授業「'+r.course+'」'));
   // 今日のお題で同じ答え（その日だけの共通点。偶然の出会いを作るため）
   if(sameDaily(u))add('day:'+normAns(dailyAnswer(u)),'今日のお題「'+dailyAnswer(u)+'」');
+  // ちかくタイムで同じ答え（その日だけ。「今日のお題の答え」と同じスイッチでマッチングから外せる）
+  if(sameCt(u))add('day:ct'+ctCur.id,'ちかくタイム「'+ctAnswer(u)+'」');
   return out;
 }
 function commonWith(u){ return commonDetail(u).map(x=>x.label); }
@@ -2529,6 +2638,7 @@ function openNear(id){
 }
 function renderNearby(){
   renderStartCard();
+  renderCt();
   renderDaily();
   updateRarity();
   // 全員を出す（2026-09-24 に変更。以前は共通点のある人だけ出していたが、たまたま近くにいた人が見えず、すれ違いの偶然が最初から絞られてしまうため）。
@@ -2816,7 +2926,7 @@ async function checkClosedNearby(){
       const {error:ie}=await sb.from(T('push_log')).insert({recipient_id:u.id,kind:'nearby'});
       if(ie){ console.warn('[push] 通知の記録に失敗',ie.message); continue; }
       // 相手の名前は出さず、共通点だけ伝える
-      notifyPush(u.id,'近くに共通点のある人がいます👀','「'+common[0]+'」が同じ人が、いまあなたの近くにいます。アプリを開いてみて！');
+      notifyPush(u.id,'近くに共通点のある人がいます👀','「'+common[0]+'」が同じ人が、いまあなたの近くにいます。アプリを開いてみて！',{kind:'nearby',go:'near',tag:'nearby'});
     }
   }catch(e){ console.warn('[push] 近くの人への通知に失敗',e); }
 }
@@ -3038,11 +3148,11 @@ async function sendWave(u,text){
     // 相手が先にいいねしていた → おたがいにいいねになり、トークが始まる
     const opener=[{from:uid,text:data.reason||(theirs&&theirs.text)||'',at:Date.parse(data.created_at)||now-1},{from:myId,text,at:now}].filter(x=>x.text);
     await createMatch(uid,false,now,data.reason,opener);
-    notifyPush(uid,restarting?'💬 '+me+'さんが、もう一度話したいようです':'💬 '+me+'さんがいいねを返しました',restarting?'トークがまた24時間ひらきました':'トークが始まりました（24時間）。最初の一言を送ってみよう');
+    notifyPush(uid,restarting?'💬 '+me+'さんが、もう一度話したいようです':'💬 '+me+'さんがいいねを返しました',restarting?'トークがまた24時間ひらきました':'トークが始まりました（24時間）。最初の一言を送ってみよう',{kind:'like',go:'chat',u:myId,tag:'like-'+myId,badge:true});
     toast(restarting?'💬 トークを始め直しました（24時間）':'💬 おたがいにいいね！トークが始まりました（24時間）');
     openChat(uid,'match');
   }else{
-    notifyPush(uid,'👋 '+me+'さんからいいね',likeCommonText(tu,true)||'「トーク」から見てみよう。いいねを返すとトークが始まります');
+    notifyPush(uid,'👋 '+me+'さんからいいね',likeCommonText(tu,true)||'「トーク」から見てみよう。いいねを返すとトークが始まります',{kind:'like',go:'talk',tag:'like-'+myId,badge:true});
     toast(gated?`👋 いいねしました。今日はあと${likesLeft()}回（アンケートに答えると無制限）`:'👋 いいねしました。相手がいいねを返すとトークが始まります');
   }
 }
@@ -3402,16 +3512,64 @@ function updateTalkDot(){
   const frN=unreadTalks(frIds), dmN=unreadTalks(dmIds);
   const seg=(el,n)=>{ if(!el)return; if(n>0){ el.style.display='block'; el.textContent=n>99?'99+':n; } else el.style.display='none'; };
   seg($('#dotFrTalk'),frN); seg($('#dotDm'),dmN);
-  const n=talkNew+Object.keys(wavesIn).length+frN+dmN, dm=$('#dotMatch'); if(!dm)return;
+  const n=talkNew+Object.keys(wavesIn).length+frN+dmN, dm=$('#dotMatch');
+  setAppBadgeCount(n);   // ホーム画面のアイコンの数字も同じ数に（2026-10-10）
+  if(!dm)return;
   // トークの画面を開いていても、別の切り替えに未読が残っていれば出す
   const open=$('#s-match').classList.contains('active');
   const hidden=open?(talkTab==='fr'?frN:talkTab==='dm'?dmN:0):0;
   const show=n-hidden;
   if(show>0){ dm.style.display='block'; dm.textContent=show; } else dm.style.display='none';
 }
-function notifyPush(uid,title,body){
+/* ---------- 通知を押した時に、その画面を開く（2026-10-10。前はアプリが前に出るだけだった） ----------
+   通知の url は /tama/?go=…&n=…（go＝開く所、u＝トークの相手、r＝コミュニティ、n＝通知の種類）。
+   アプリを閉じていた時は、その url で開くので起動のあとに（pushRoute）、開いていた時は sw.js が postMessage で知らせる。
+   押して開いた記録（tama_push_events の open）を残し、どの通知が効いているかを比べる（supabase/tama_notify.sql の見るための SQL） */
+let pushRoute=null;
+function routeFromUrl(href){
+  try{ const p=new URL(href,location.href).searchParams; if(!p.get('go')&&!p.get('n'))return null;
+    return {go:p.get('go')||'',u:p.get('u')||'',r:p.get('r')||'',n:(p.get('n')||'').slice(0,16)}; }catch(e){ return null; }
+}
+function logPushOpen(kind){
+  if(!kind||!sb||!myId||String(myId).startsWith('local-')||debugMode())return;
+  sb.from(T('push_events')).insert({user_id:myId,kind,ev:'open'}).then(({error})=>{ if(error)console.log('[push] 開いた記録を書けません（tama_notify.sql の実行前?）',error.message); },()=>{});
+}
+// 読み込みが終わるまで待ってから開く（トークの相手・部屋は、起動の直後はまだ手元に無いことがある）
+function whenReady(ok,run,fallback,ms=15000){ const t0=Date.now(); const f=()=>{ if(ok())return run(); if(Date.now()-t0<ms)return setTimeout(f,500); if(fallback)fallback(); }; f(); }
+function openFromPush(rt){
+  if(!rt)return;
+  if(!profile){ pushRoute=rt; return; }   // ログインの前なら、起動が終わってから（startLoops）
+  pushRoute=null; logPushOpen(rt.n);
+  $$('.overlay.show').forEach(o=>o.classList.remove('show'));
+  switch(rt.go){
+    case 'chat': whenReady(()=>!!matches[rt.u]||isFriend(rt.u),()=>openChat(rt.u),()=>go('match')); break;
+    case 'talk': go('match'); setTalkTab('dm'); break;
+    case 'friends': go('friends'); break;
+    case 'room': go('match'); setTalkTab('comm'); whenReady(()=>rooms.some(x=>rid(x.id)===rid(rt.r)),()=>openRoom(rt.r)); break;
+    case 'where': go('near'); setTimeout(()=>openPlaceEdit(false),300); break;
+    case 'daily': go('near'); dailyOpen=true; dailyShown=null; renderDaily(); setTimeout(()=>{ const el=$('#dailyCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300); break;
+    case 'ct': go('near'); loadCt(true).then(()=>{ const el=$('#ctCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); }); break;
+    default: go('near');
+  }
+}
+// 起動した時の url（通知から開いた時）。見たら url から消す（再読み込みで同じ所が開き直さないように）
+pushRoute=routeFromUrl(location.href);
+if(pushRoute)try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){}
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.type==='push-open')openFromPush(routeFromUrl(e.data.url)); });
+// アプリのアイコンの数字（未読のトーク・いいね・友達申請の数）。sw.js は通知が来るたびに1つ増やし、開くとここで本当の数にそろえる
+let appBadgeNow=-1;
+function setAppBadgeCount(n){
+  if(n===appBadgeNow||!('setAppBadge' in navigator))return; appBadgeNow=n;
+  try{ (n>0?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{}); }catch(e){}
+  try{ caches.open('chikaku-badge').then(c=>c.put('/__badge',new Response(String(n)))).catch(()=>{}); }catch(e){}
+}
+// o（2026-10-10）：kind＝通知の種類（相手が「通知の種類」でオフにしていたら送らない・記録に使う。PUSH_KINDS）、
+// go・u・r＝押した時に開く所（openFromPush）、tag＝同じ tag の通知は前のものを置きかえる、badge＝アイコンの数字を増やす
+function notifyPush(uid,title,body,o={}){
   if(!sb||isTest(uid))return;
-  sb.functions.invoke('send-match-push',{body:{to:uid,title,body,url:'/tama/'}})
+  const q=new URLSearchParams(); if(o.go)q.set('go',o.go); if(o.u)q.set('u',o.u); if(o.r)q.set('r',o.r); if(o.kind)q.set('n',o.kind);
+  const s=q.toString();
+  sb.functions.invoke('send-match-push',{body:{to:uid,title,body,url:'/tama/'+(s?'?'+s:''),kind:o.kind,tag:o.tag,badge:!!o.badge}})
     .catch(err=>console.error('[push] 送信失敗',err));
 }
 // 話しかけた相手から返事が来た時のお知らせ（2026-09-24 に紙吹雪・ハートをやめ、背景も透けないようにした）
@@ -3849,7 +4007,7 @@ function notifyMsg(uid,c,text){
   lastMsgPush[uid]=now;
   text=msgPlain(text);   // ふたりのお題のしるし（#duo:…）は通知に出さない
   const body=text.length>40?text.slice(0,40)+'…':text;
-  notifyPush(uid,'💬 '+(profile?profile.name:'だれか')+'さんからメッセージ',body);
+  notifyPush(uid,'💬 '+(profile?profile.name:'だれか')+'さんからメッセージ',body,{kind:'msg',go:'chat',u:myId,tag:'msg-'+myId,badge:true});
 }
 
 /* ---------- コミュニティ（グループチャット） ---------- */
@@ -4009,7 +4167,7 @@ async function notifyRoomMembers(room,text){
     const cutoff=Date.now()-5*60*1000;
     const body=(profile?profile.name:'誰か')+'：'+(text.length>40?text.slice(0,40)+'…':text);
     data.filter(m=>m.user_id!==myId&&!m.muted&&new Date(m.last_read_at).getTime()<cutoff)
-        .forEach(m=>notifyPush(m.user_id,room.name||'コミュニティ',body));
+        .forEach(m=>notifyPush(m.user_id,room.name||'コミュニティ',body,{kind:'room',go:'room',r:String(room.id),tag:'room-'+room.id,badge:true}));
   }catch(e){ console.error('[push] コミュニティ通知の送信に失敗',e); }
 }
 
@@ -4520,7 +4678,7 @@ async function transferRoom(uid,name){
   const {data,error}=await sb.rpc('tama_room_transfer',{p_room:rid(curRoom.id),p_user:uid});
   if(error||data!=='ok'){ toast('譲れませんでした'); return; }
   toast(`👑 ${name}さんがオーナーになりました`); closeMembers(); await loadRooms();
-  notifyPush(uid,'👑 コミュニティのオーナーになりました',`「${curRoom.name}」のオーナーを譲られました。部屋を見守ってください`);
+  notifyPush(uid,'👑 コミュニティのオーナーになりました',`「${curRoom.name}」のオーナーを譲られました。部屋を見守ってください`,{kind:'room',go:'room',r:String(curRoom.id),tag:'room-'+curRoom.id});
 }
 async function closeRoomV2(){
   const r=curRoom; if(!r)return;
@@ -4737,6 +4895,10 @@ const HELP={
     can:['答えると、みんなの答えが見られます（5人以上が答えると割合が出ます）','同じ答えの人が、その日だけの共通点として「近くの人」に出ます','次の日には、カードの上に昨日の結果が出ます'],
     see:'あなたの答えは、その日だけプロフィールに出ます。答えられるのは1日1回で、あとから変えられません。',
     tip:'まだ答えていない日は、昼休みにお題の通知が届くことがあります。'},
+  ct:{icon:'⏰',title:'ちかくタイム',lead:'週に2〜3回、平日の休み時間のどこかで始まる、10分だけのお題です。いつ始まるかは決まっていません。',
+    can:['始まると通知が届きます。2つのうち1つを選ぶだけです','10分のあいだに答えた人どうしで、同じ答えの人がその日だけの共通点として「近くの人」に出ます','終わってから1時間は、みんなの答えの割合が見られます（5人以上が答えた時）'],
+    see:'あなたの答えは、その日だけプロフィールに出ます。答えられるのは1回で、あとから変えられません。',
+    tip:'通知がいらない時は、マイページの「通知の種類」でちかくタイムだけオフにできます。'},
   now:{icon:'📍',title:'いまの自分',lead:'いまの状態と、いる場所を入れておく所です。',
     can:['「ひまです」「一緒にごはん行ける」などの状態は、近くの人みんなに見えます（授業の時限の終わりで消えます）','いる建物は自動で入ります。教室・メモを入れると友達に見えます（建物を出るか、90分で消えます）','「いま、気になっていること（悩み・不安）」は、プロフィール編集でいつでも選べます'],
     see:'建物・教室が見えるのは友達だけです。どこまで見せるかは、マイページの「🔒 見せる範囲」で変えられます。'},
@@ -5098,7 +5260,7 @@ function checkFriendCommons(source){
     st.pushes++; st.pushedTo[f.id]=true;
     const me=profile.name, day=f.c.key.startsWith('day:');
     notifyPush(f.id, day?`🎲 ${me}さんも今日のお題「${dailyAnswer(profile)}」`:`✨ ${me}さんと新しい共通点`,
-      day?'同じ答えでした。トークで話してみよう':f.c.label.replace(/^同じ/,'')+(f.more>0?` ほか${f.more}つ`:''));
+      day?'同じ答えでした。トークで話してみよう':f.c.label.replace(/^同じ/,'')+(f.more>0?` ほか${f.more}つ`:''),{kind:'friend',go:'chat',u:myId,tag:'fr-'+myId});
   });
   lsPut('tama_frDay',st);
   found.forEach(f=>frNudgeQ.push(f));
@@ -5135,14 +5297,14 @@ async function requestFriend(id,name){
   if(r)return;
   const {error}=await sb.from(T('friends')).insert({from_id:myId,to_id:id});
   if(error){ console.warn('[friends] 申請できません:',error.message); toast('申請できませんでした'); return; }
-  notifyPush(id,'👥 友達申請が届きました',(profile?profile.name:'だれか')+'さんから友達申請が届きました');
+  notifyPush(id,'👥 友達申請が届きました',(profile?profile.name:'だれか')+'さんから友達申請が届きました',{kind:'friend',go:'friends',tag:'fr-'+myId,badge:true});
   toast('友達申請を送りました'); await loadFriends(); refreshFriendSuggest(id);
 }
 async function acceptFriend(rowId,id,name){
   if(!sb)return;
   const {error}=await sb.from(T('friends')).update({status:'accepted',responded_at:new Date().toISOString()}).eq('id',rowId);
   if(error){ console.warn('[friends] 承認できません:',error.message); toast('承認できませんでした'); return; }
-  notifyPush(id,'👥 友達になりました',(profile?profile.name:'')+'さんが友達申請を承認しました');
+  notifyPush(id,'👥 友達になりました',(profile?profile.name:'')+'さんが友達申請を承認しました',{kind:'friend',go:'chat',u:myId,tag:'fr-'+myId});
   toast('🎉 '+esc(name||'')+'さんと友達になりました'); await loadFriends(); refreshFriendSuggest(id); misMark('friend');
   // 友達になると24時間の縛りが外れるので、終わっていたトークの表示も作り直す
   if(curSheetUser&&curSheetUser.id===id)openSheet(curSheetUser,null);
@@ -5447,7 +5609,7 @@ async function addFriendByCode(){
   await loadFriends();
   const u=friendUser(row.friend_id);
   toast('🎉 '+esc(u?u.name:'')+'さんと友達になりました');
-  notifyPush(row.friend_id,'👥 友達になりました',(profile?profile.name:'だれか')+'さんとコードで友達になりました');
+  notifyPush(row.friend_id,'👥 友達になりました',(profile?profile.name:'だれか')+'さんとコードで友達になりました',{kind:'friend',go:'chat',u:myId,tag:'fr-'+myId});
 }
 
 /* ---------- 時間割（履修） ---------- */
@@ -5509,7 +5671,7 @@ async function toggleTTShare(id){
   if(error){ console.warn('[timetable] 見せる設定を保存できません',error.message); toast('保存できませんでした'); return; }
   if(on)ttSharesTo.add(id); else ttSharesTo.delete(id);
   const u=friendUser(id); toast(on?'🗓 '+esc(u?u.name:'')+'さんに時間割を見せるようにしました':'時間割を見せるのをやめました');
-  if(on&&u)notifyPush(id,'🗓 時間割が見られるようになりました',(profile?profile.name:'友達')+'さんが時間割を見せてくれました');
+  if(on&&u)notifyPush(id,'🗓 時間割が見られるようになりました',(profile?profile.name:'友達')+'さんが時間割を見せてくれました',{kind:'friend',go:'friends',tag:'fr-'+myId});
   refreshSheetFriendBtn(id); afterVisChange();
 }
 // 友達の時間割を見る（読むだけ）
@@ -5738,6 +5900,80 @@ function answerDaily(a){
   { const s=startState(); s.daily=true; saveStart(s); }   // はじめにやることの「お題に答える」を ✅ に
   misMark('daily');   // 今日のミッション
   setTimeout(()=>lookSync(),1500);   // きせかえ（お題の日数）
+}
+
+/* ---------- ちかくタイム（2026-10-10 あおの決定） ----------
+   週2〜3回、平日の休み時間のどこかで10分だけのお題（2択）。いつ来るかは決まっていない（BeReal のように、同じ時間にみんなが開くように）。
+   予定とお題は DB の tama_ct_slots（supabase/tama_notify.sql。毎週月曜に tama_ct_plan が作る）。アプリからは始まった後のものだけ読める。
+   通知は tama-remind（kind: ct）が送る。ちかくタイムの日だけ、自動の通知は1日3通まで。
+   答えはプロフィール（fes_attrs.ct = {id, a, at}）に入れる。10分のあいだだけ答えられ、同じ答えの人はその日だけ共通点になる（commonRaw）。
+   答えの数は tama_ct_stats（今日のお題と同じく、5人未満の間は人数だけ） */
+const CT_MIN=10, CT_AFTER_MIN=60;   // 答えられる時間・終わってから結果を出す時間（分）
+let ctCur=null, ctMissing=false, ctStats=null, ctStatsAt=0, ctTimer=null;
+async function loadCt(force){
+  if(!sb||!myId||String(myId).startsWith('local-')||ctMissing)return;
+  try{
+    const {data,error}=await sb.from(T('ct_slots')).select('id,starts_at,q,o1,o2').gte('starts_at',jstTodayStart().toISOString()).order('starts_at',{ascending:false}).limit(1);
+    if(error){ if(/does not exist|schema cache/i.test(error.message)){ ctMissing=true; console.warn('[ct] ちかくタイムの表がありません。supabase/tama_notify.sql を実行してください'); } return; }
+    const s=(data||[])[0]||null, changed=(s&&s.id)!==(ctCur&&ctCur.id);
+    ctCur=s; if(changed){ ctStats=null; ctStatsAt=0; }
+    if(ctPhase()==='live'||ctPhase()==='after')await loadCtStats(force);
+    renderCt(); if(changed)renderNearby();
+  }catch(e){}
+}
+// live＝答えられる10分、after＝終わってから1時間（結果を出す）、day＝その日のうち（共通点だけ残す）
+function ctPhase(now=Date.now()){
+  if(!ctCur)return null;
+  const t=now-Date.parse(ctCur.starts_at);
+  if(t<0)return null; if(t<CT_MIN*60000)return 'live'; if(t<(CT_MIN+CT_AFTER_MIN)*60000)return 'after'; return 'day';
+}
+function ctAnswer(u){ const x=attrsOf(u).ct; return ctCur&&x&&String(x.id)===String(ctCur.id)&&x.a?x.a:null; }
+function sameCt(u){ const a=ctAnswer(profile), b=ctAnswer(u); return !!a&&a===b; }
+async function loadCtStats(force){
+  if(!ctCur||(!force&&Date.now()-ctStatsAt<60000))return;
+  ctStatsAt=Date.now();
+  const {data,error}=await sb.rpc('tama_ct_stats',{p_id:ctCur.id});
+  if(!error)ctStats=data;
+}
+// 同じ答えの人（今日キャンパスにいた人のうち）
+function ctSameCount(){ return others.filter(u=>!isTest(u.id)&&!blocked.has(u.id)&&sameCt(u)).length; }
+function ctResultText(){
+  const s=ctStats; if(!s||s.total==null)return '';
+  if(!s.groups)return `答えた人 ${s.total}人（5人になったら割合が出ます）`;
+  return [ctCur.o1,ctCur.o2].map(o=>{ const g=s.groups.find(x=>x.a===o); return `${esc(o)} <b>${Math.round((g?g.c:0)/s.total*100)}%</b>`; }).join('・')+`（${s.total}人）`;
+}
+function renderCt(){
+  const el=$('#ctCard'); if(!el)return;
+  const ph=ctPhase(), mine=ctAnswer(profile);
+  clearInterval(ctTimer); ctTimer=null;
+  if(!profile||!ph||ph==='day'){ el.innerHTML=''; el.className='ctcard'; return; }
+  if(ph==='after'){
+    el.className='ctcard after';
+    const r=ctResultText();
+    el.innerHTML=`<div class="ctline">⏰ さっきのちかくタイム「${esc(ctCur.q)}」${mine?`→ <b>${esc(mine)}</b>`:''}${r?`<br>${r}`:''}${mine?'':'<br><span style="color:var(--muted)">次は通知が来たら答えてみよう</span>'}</div>`;
+    return;
+  }
+  el.className='ctcard';
+  const left=()=>{ const ms=Math.max(0,Date.parse(ctCur.starts_at)+CT_MIN*60000-Date.now()); return Math.floor(ms/60000)+':'+String(Math.floor(ms/1000)%60).padStart(2,'0'); };
+  const head=`<div class="cth"><span>⏰ ちかくタイム<span class="qhelp" role="button" aria-label="ちかくタイムの説明" onclick="event.stopPropagation();openHelp('ct')">?</span></span><span class="ctleft">あと <span id="ctLeft">${left()}</span></span></div>`;
+  if(!mine){
+    el.innerHTML=head+`<div class="ctq">${esc(ctCur.q)}</div><div class="ctbtns">${[ctCur.o1,ctCur.o2].map((o,i)=>`<button onclick="answerCt(${i})">${esc(o)}</button>`).join('')}</div>`;
+  }else{
+    const n=ctSameCount(), r=ctResultText();
+    el.innerHTML=head+`<div class="ctq" style="margin-bottom:4px">${esc(ctCur.q)}</div><div class="ctmine">あなた：<b>${esc(mine)}</b>　同じ答えの人 キャンパスに <b style="color:var(--signal)">${n}</b>人</div>${r?`<div class="ctres">${r}</div>`:''}
+      <div class="ctnote">同じ答えの人は、今日だけ「近くの人」に共通点つきで出ます</div>`;
+  }
+  // 残り時間は1秒ごと。0になったら結果の表示へ
+  ctTimer=setInterval(()=>{ const t=$('#ctLeft'); if(ctPhase()!=='live'){ renderCt(); renderNearby(); return; } if(t)t.textContent=left(); },1000);
+}
+function answerCt(i){
+  if(!profile||ctPhase()!=='live'||ctAnswer(profile))return;
+  const a=i===0?ctCur.o1:ctCur.o2;
+  profile.fa=profile.fa||{}; profile.fa.ct={id:ctCur.id,a,at:Date.now()};
+  publishMe(); saveMyAttrs().then(()=>loadCtStats(true)).then(()=>renderCt());
+  renderCt(); renderNearby(); renderCross();
+  toast('⏰ 答えました。同じ答えの人が「近くの人」に出ます');
+  askPushSoon('daily');
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
@@ -6372,7 +6608,7 @@ function go(t){
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='near')loadRooms();if(t==='friends')loadFriends();
-  if(t==='me'){refreshPushToggle();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
+  if(t==='me'){refreshPushToggle();renderNotifSum();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
@@ -6383,6 +6619,8 @@ function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBoot
   // ☕ ひとことは、開いて20秒ほどたってから（2026-10-08）。登録した日は出さない（firstUseDay）
   loadPaywall();   // 本来は有料の予定（2026-10-09）
   loadSurveyStatus(); loadCheckins().then(()=>setTimeout(maybeCheckinPopup,20000));
+  loadCt(); setInterval(()=>{ if(!document.hidden)loadCt(); },60000);   // ちかくタイム（2026-10-10）
+  if(pushRoute)setTimeout(()=>openFromPush(pushRoute),600);   // 通知を押して開いた時は、その画面へ（2026-10-10）
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden){presenceTick();renderStatusRow();}},60000);}
 
 /* ---------- 多摩キャン版：開催時間・参加人数・アンケート ---------- */
