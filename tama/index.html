@@ -995,6 +995,7 @@
 <script src="/fes/campus-geo.js"></script>
 <script src="/tama/daily-qs.js"></script>
 <script src="/tama/courses-shakai.js"></script>
+<script src="/tama/artists.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -2204,7 +2205,7 @@ function openMissingFold(p,miss){
 function attrFieldsHTML(p,part){
   const who=`<div class="field"><label>学部・所属<span class="req">必須</span></label><div class="chips" id="${p}Faculty"></div></div>
     <div class="field" id="${p}DeptWrap" style="display:none"><label>学科・学年（任意）</label><div class="chips" id="${p}Dept"></div><div class="chips" id="${p}Grade" style="margin-top:8px"></div></div>`;
-  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="opt">任意・入れると同じアーティストの人が見つかります</span></label><input id="${p}Artist" data-sugg="artist" maxlength="24" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
+  const common=`<div class="field"><label>いちばんよく聴くアーティスト<span class="opt">任意・入れると同じアーティストの人が見つかります</span></label><input id="${p}Artist" data-sugg="artist" maxlength="32" placeholder="例：ヨルシカ"><div class="hint">知る人ぞ知る名前ほど、一致した時にレアな共通点になります</div></div>
     <div class="field"><label>わかる！あるある<span class="req">必須・1〜${FA.aruaruPick}つ</span> <span id="${p}AruaruCnt" style="font-weight:700;color:var(--signal)"></span></label>
       <details class="fold" id="${p}AruaruBox"><summary><span class="fsel" id="${p}AruaruSel"></span><span class="fopen"></span></summary>
         <div class="chips" id="${p}Aruaru"></div><div class="hint" id="${p}AruaruHint"></div></details></div>
@@ -5746,7 +5747,7 @@ function answerDaily(a){
    入力欄（data-sugg="artist" / "course"）のすぐ下に候補のボタンを自分で出すようにした。何も打っていない時は多い順、打つと合うものだけ（ひらがな・カタカナ・全角半角のちがいはそろえる）。
    候補はDBの関数 tama_suggest（supabase/tama_class_suggest.sql）が名前だけ返す（だれが入れたかは返さない）。NGワードは出さない。
    読めた時だけ10分は読み直さない（前は失敗しても10分待っていたので、SQLを実行した直後に出なかった） */
-let suggestData={artist:[],course:[]}, suggestN={artist:{},course:{}}, suggestAt=0, suggEl=null;
+let suggestData={artist:[],course:[]}, suggestN={artist:{},course:{}}, suggestNN={artist:{},course:{}}, suggestAt=0, suggEl=null;
 async function loadSuggest(){
   if(!sb||!myId||String(myId).startsWith('local-')||Date.now()-suggestAt<10*60000)return;
   try{
@@ -5754,8 +5755,8 @@ async function loadSuggest(){
     if(error||!data){ if(error)console.warn('[suggest] 候補を読めません。supabase/tama_class_suggest.sql を実行してください:',error.message); return; }
     suggestAt=Date.now();
     // 人数（artist_n・course_n。名前と同じ順）は横に小さく出す。その書き方を入れている人が多いほど、同じ人と共通点になりやすい
-    const ok=(a,ns,kind)=>{ (a||[]).forEach((v,i)=>{ if(ns&&ns[i])suggestN[kind][v]=ns[i]; }); return (a||[]).filter(v=>v&&!ngCheck(v)); };
-    suggestN={artist:{},course:{}};
+    const ok=(a,ns,kind)=>{ (a||[]).forEach((v,i)=>{ if(ns&&ns[i]){ suggestN[kind][v]=ns[i]; const k=normAns(v); suggestNN[kind][k]=(suggestNN[kind][k]||0)+ns[i]; } }); return (a||[]).filter(v=>v&&!ngCheck(v)); };
+    suggestN={artist:{},course:{}}; suggestNN={artist:{},course:{}};
     suggestData={artist:ok(data.artist,data.artist_n,'artist'),course:ok(data.course,data.course_n,'course')};
     const a=document.activeElement; if(a&&a.dataset&&a.dataset.sugg)showSugg(a);   // 読み込みの間に入力欄を押していた時
   }catch(e){}
@@ -5765,7 +5766,9 @@ function isSubseq(n,x){ let i=0; for(const ch of x){ if(ch===n[i])i++; if(i===n.
 // 授業の正式名称（2026-10-09 あおの依頼「授業名を完全一致させるために、正式名称を選択肢に。打った文字と50%以上合えば予測変換で出す」）。
 // 一覧は tama/courses-shakai.js（法政大学Webシラバスの社会学部 全科目一覧・2026年度）。
 // 近さ＝打った文字と正式名称で、順番どおりに一致する文字の数 ÷ 長いほうの文字数（「公共性と民」→「公共性と民主主義Ⅱ」は 5/9＝56%）。
-// 50%以上か、打った文字がそのまま入っている正式名称を、近い順に出す（2文字から）。正式名称が見つかった時は、みんなが入れた書き方（略した名前など）は出さない
+// 20%以上か、打った文字がそのまま入っている正式名称を、近い順に出す（2文字から）。正式名称が見つかった時は、みんなが入れた書き方（略した名前など）は出さない
+// 2026-10-10 あおの依頼で 50%→20% に（アーティストも同じ）。ゆるいので、打った文字で始まる・含むものを先に、近い順に並べる
+const MATCH_MIN=0.2;
 const OFFICIAL=typeof OFFICIAL_COURSES!=='undefined'?OFFICIAL_COURSES:[];
 const officialSet=new Set(OFFICIAL.map(v=>normAns(v)));
 const isOfficial=v=>officialSet.has(normAns(v));
@@ -5775,16 +5778,36 @@ function courseSim(n,x){
   return prev[b.length]/Math.max(a.length,b.length,1);
 }
 // strict：保存の前の「正式名は？」用。打った文字が全部、順番どおりに入っている正式名称だけ（略した名前）。「マーケティング論」→「マーケティング実践」のような別の授業を出さないため
+// 近さの点：同じ＝9、打った文字で始まる＝2＋近さ、含む＝1＋近さ、それ以外＝近さ。読みや別の書き方があれば、いちばん近いもの
+function nameScore(n,keys){
+  let best=0;
+  for(const k of keys){ const x=normAns(k), s=courseSim(n,x), v=x===n?9:x.startsWith(n)?2+s:x.includes(n)?1+s:s; if(v>best)best=v; }
+  return best;
+}
 function officialList(q,lim,strict){
   const n=normAns(q); if([...n].length<2)return [];
-  return OFFICIAL.map(v=>{ const x=normAns(v), s=courseSim(n,x); return {v,s:x===n?9:x.startsWith(n)?2+s:x.includes(n)?1+s:s}; })
-    .filter(o=>o.s>=0.5&&(!strict||isSubseq([...n],[...normAns(o.v)]))).sort((a,b)=>b.s-a.s).slice(0,lim||6).map(o=>o.v);
+  return OFFICIAL.map(v=>({v,s:nameScore(n,[v])}))
+    .filter(o=>o.s>=MATCH_MIN&&(!strict||isSubseq([...n],[...normAns(o.v)]))).sort((a,b)=>b.s-a.s).slice(0,lim||6).map(o=>o.v);
 }
+// 主要なアーティスト（tama/artists.js。2026-10-10 あおの依頼）。1件は [名前, 読み・略した呼び方…]、入るのは名前。
+// 打った文字と名前・読みの近さが20%以上のものを、みんなが入れた名前（一覧に無いもの）と合わせて近い順に出す（2文字から）。同じくらいなら入れている人が多い順
+const ARTISTS=(typeof MAJOR_ARTISTS!=='undefined'?MAJOR_ARTISTS:[]).map(e=>Array.isArray(e)?e:[e]);
+const artistSet=new Set(ARTISTS.map(e=>normAns(e[0])));
+function artistList(q){
+  const n=normAns(q); if([...n].length<2)return null;
+  const cnt=v=>suggCount('artist',v);
+  const extra=(suggestData.artist||[]).filter(v=>!artistSet.has(normAns(v))).map(v=>[v]);
+  return ARTISTS.concat(extra).map(e=>({v:e[0],s:nameScore(n,e)})).filter(o=>o.s>=MATCH_MIN)
+    .sort((a,b)=>b.s-a.s||cnt(b.v)-cnt(a.v)).slice(0,8).map(o=>o.v);
+}
+// その名前を入れている人数（書き方のゆれはまとめる）
+function suggCount(kind,v){ return (suggestNN[kind]||{})[normAns(v)]||0; }
 // 候補の並び：打った文字で始まる → 打った文字を含む → 略した書き方（文字が順番どおりに入っている）。それぞれの中は多い順（関数の返した順）。
 // 2026-10-08 あおの依頼：「メディア社会学A」を「メディアA」と書く人がいるので、略して打っても正式な書き方を候補に出し、そろえてもらう。
 // 略した書き方は2文字以上打った時だけ（1文字だと何にでも当たるため）。同じものはもう入っているので出さない
 function suggList(kind,q){
   if(kind==='course'&&normAns(q)){ const off=officialList(q); if(off.length)return off; }   // 正式名称が見つかれば、それだけ出す
+  if(kind==='artist'){ const a=artistList(q); if(a)return a; }   // 2文字からは、主要なアーティストとみんなが入れた名前を近い順に
   const all=suggestData[kind]||[], n=normAns(q);
   if(!n)return all.slice(0,8);
   const rank=v=>{ const x=normAns(v); if(x===n)return -1; if(x.startsWith(n))return 0; if(x.includes(n))return 1; if([...n].length>=2&&isSubseq([...n],[...x]))return 2; return -1; };
@@ -5795,7 +5818,7 @@ function showSugg(inp){
   const list=suggList(inp.dataset.sugg,inp.value); if(!list.length)return;
   const box=document.createElement('div'); box.className='sugg';
   const off=inp.dataset.sugg==='course'&&list.length&&list.every(isOfficial);
-  box.innerHTML=`<span class="sh">${off?'📘 正式な授業名（押すと入ります。同じ授業の人と名前がそろいます）':inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>{ const n=(suggestN[inp.dataset.sugg]||{})[v]||(suggestN.course&&off?suggestN.course[v]:0); return `<button type="button"${off?' class="off"':''}>${esc(v)}${n?`<small>${n}人</small>`:''}</button>`; }).join('');
+  box.innerHTML=`<span class="sh">${off?'📘 正式な授業名（押すと入ります。同じ授業の人と名前がそろいます）':inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>{ const n=suggCount(inp.dataset.sugg,v); return `<button type="button"${off?' class="off"':''}>${esc(v)}${n?`<small>${n}人</small>`:''}</button>`; }).join('');
   box.querySelectorAll('button').forEach((b,i)=>{
     b.addEventListener('pointerdown',e=>e.preventDefault());   // 押した時に入力欄からフォーカスが外れて、候補が先に消えないように
     b.addEventListener('click',()=>{ inp.value=list[i]; inp.dispatchEvent(new Event('input',{bubbles:true})); hideSugg(); inp.blur(); });
