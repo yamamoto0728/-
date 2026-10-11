@@ -166,6 +166,14 @@
   /* ちかくタイム（2026-10-10）。10分だけのお題なので、今日のお題より目立つ色に */
   .ctcard{margin:2px 16px 8px;padding:11px 14px;border-radius:18px;background:linear-gradient(135deg,rgba(15,176,205,.16),rgba(120,140,255,.14));border:1.5px solid rgba(15,176,205,.55)}
   .ctcard:empty{display:none}
+  /* 多摩祭の参加人数（2026-10-11） */
+  .tscard{margin:2px 16px 8px;padding:11px 14px;border-radius:18px;background:linear-gradient(135deg,rgba(255,120,150,.14),rgba(255,190,90,.16));border:1.5px solid rgba(240,110,140,.45)}
+  .tscard:empty{display:none}
+  .tscard .tsh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#c0456a}
+  .tscard .tsn{font-size:14px;font-weight:800;margin:4px 0 6px;line-height:1.5}.tscard .tsn b{font-size:20px;color:#c0456a}
+  .tscard .tsbar{height:8px;border-radius:6px;background:rgba(192,69,106,.14);overflow:hidden}.tscard .tsbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#f0729a,#ffb35c)}
+  .tscard .tsfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .tscard .tsfoot button{flex-shrink:0;padding:7px 11px;border-radius:12px;border:0;background:#c0456a;color:#fff;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
   .ctcard .cth{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:800;color:#0a7f96}
   .ctcard .ctleft{font-family:"JetBrains Mono",monospace;font-size:12px;color:#fff;background:#0a7f96;border-radius:10px;padding:1px 8px}
   .ctcard .ctq{font-size:15px;font-weight:900;margin:4px 0 8px;line-height:1.5}
@@ -1114,6 +1122,7 @@
       <div class="nowbar" id="nowBar"></div>
       <!-- はじめにやること（2026-10-08。renderStartCard） -->
       <div class="startcard" id="startCard"></div>
+      <div class="tscard" id="tamasaiCard"></div>
       <div class="ctcard" id="ctCard"></div>
       <div class="daily" id="dailyCard"></div>
       <!-- いまキャンパスにいる友達（2026-10-08。だれが友達か分かるよう、一覧とは分けて一番上に横並び。renderNearFriends） -->
@@ -1304,6 +1313,11 @@ const FES={
   likeLimitStart:'2026-10-14T00:00:00+09:00',
   // 終了の何分前から「まもなく終了・アンケートへ」の案内を出すか
   surveyBeforeEndMin:30,
+  // 多摩祭（2026-10-11 あおの決定）。学園祭版 /fes/ は使わず、この版のまま、この日付の間だけ「多摩祭モード」にする
+  //   ・近くの人の画面に「🎪 多摩祭 参加◯人／目標」（当日にキャンパスで開いた人を2日の合計で数える。showFrom 人までは数を出さない）
+  //   ・バッジ 🎪多摩祭2026（当日にキャンパスで開いた）・🎆多摩祭ですれ違い（当日に3人）・🎉多摩祭100人達成（目標に届いたら参加した全員）
+  //   人数は supabase/tama_tamasai.sql の tama_tamasai_count（日付は SQL にも書いてある。変える時は両方）
+  tamasai:{days:['2026-10-17','2026-10-18'], goal:100, showFrom:10, crossN:3},
   // 「ひとこと」（つながりの感じ方を、今日のお題の後に1日1問だけ聞く。2026-10-07）の3問を、何日ごとにくり返すか。0で出さない
   checkinEveryDays:14,
   // true の間は、多摩キャンパスの外では位置の機能だけ止める（位置を送らない・近くの人の一覧と地図・すれ違い・通知・出店の判定をしない）。
@@ -1496,7 +1510,11 @@ const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケー�
   friend1:{icon:'🤝',label:'はじめての友達',desc:'ちかくで友達ができた人',c:'friend:1'},
   owner:{icon:'🏠',label:'コミュニティのオーナー',desc:'コミュニティを作った人',c:'owner:1'},
   inv1:{icon:'📨',label:'ちかく案内人',desc:'友達をちかくに招待した人',c:'inv:1'},
-  inv5:{icon:'🏅',label:'ちかく大使',desc:'5人をちかくに招待した人',c:'inv:5'}};
+  inv5:{icon:'🏅',label:'ちかく大使',desc:'5人をちかくに招待した人',c:'inv:5'},
+  // 多摩祭の限定（2026-10-11）。あとからは手に入らない（FES.tamasai）
+  fes26:{icon:'🎪',label:'多摩祭2026',desc:'多摩祭2026の日にキャンパスでちかくを使った人',c:'fes26:1'},
+  fes26x:{icon:'🎆',label:'多摩祭ですれ違い',desc:'多摩祭2026で3人とすれ違った人',c:'fes26x:3'},
+  fesgoal:{icon:'🎉',label:'多摩祭100人達成',desc:'多摩祭2026で参加者100人を達成した時に参加していた人',c:'fesgoal:1'}};
 // ごほうびのアイコン（何もしてない人の12個＝EMO と、アンケートの36個＝EMO_SP は別に持つ）
 const LOOK_ICONS=[
   {id:'mis1',name:'はじめてのミッション',c:'mis:1',icons:['🐶','🐰','🐻','🦊']},
@@ -1542,6 +1560,9 @@ function lookCount(k){
   if(k==='cross')return Math.max(st.cross||0,Object.keys(encMap||{}).length);
   if(k==='friend')return Math.max(st.friend||0,allFriendRows().filter(r=>r.status==='accepted').length);
   if(k==='owner')return Math.max(st.owner||0,(typeof rooms!=='undefined'&&rooms.some(r=>isRoomOwner(r)))?1:0);
+  if(k==='fes26')return st.fes26||0;
+  if(k==='fes26x')return Math.max(st.fes26x||0,tamasaiCrossN());
+  if(k==='fesgoal')return (st.fes26&&tamasaiN!=null&&tamasaiN>=FES.tamasai.goal)?1:0;
   return 0;
 }
 function lookHas(c){
@@ -1557,6 +1578,10 @@ function lookHow(c){
   if(c==='invited')return '招待コードを入れて始める';
   const [k,n]=c.split(':'), K=LOOK_KIND[k]||[k,''], left=Math.max(0,+n-lookCount(k));
   if(k==='owner')return 'コミュニティを作る';
+  if(/^fes/.test(k)&&tamasaiOver())return '多摩祭2026の限定（もう手に入りません）';
+  if(k==='fes26')return '多摩祭（10/17・18）の日に、キャンパスでちかくを開く';
+  if(k==='fes26x')return `多摩祭の日に${n}人とすれ違う（あと${left}人）`;
+  if(k==='fesgoal')return `多摩祭の参加者が2日で${FES.tamasai.goal}人になったら、参加した全員に`;
   if(k==='inv')return `${n}人を招待する（あと${left}人）`;
   if(k==='cross')return `${n}人とすれ違う（あと${left}人）`;
   if(k==='friend')return `友達を${n}人つくる（あと${left}人）`;
@@ -2638,6 +2663,7 @@ function openNear(id){
 }
 function renderNearby(){
   renderStartCard();
+  renderTamasai();
   renderCt();
   renderDaily();
   updateRarity();
@@ -5976,6 +6002,50 @@ function answerCt(i){
   askPushSoon('daily');
 }
 
+/* ---------- 多摩祭モード（2026-10-11 あおの決定） ----------
+   学園祭版 /fes/ は使わず（/fes/ は vercel.json で /tama/ に転送）、FES.tamasai.days の日だけ、この版に多摩祭のものを出す。
+   ・近くの人の画面のいちばん上に「🎪 多摩祭 参加◯人／目標100人」。数えるのは当日にキャンパスで開いた人（2日の合計・同じ人は1回）。
+     少ないと人がいないように見えて逆効果なので、showFrom 人になるまでは数を出さない。横に招待のボタン（いっしょに目標に向かう形に）
+   ・バッジ 🎪（当日にキャンパスで開いた）・🎆（当日に3人とすれ違った）・🎉（目標に届いたら、参加した全員）。条件は lookCount、付けるのは lookSync。
+     🎉は祭りのあとに開いた時にも付く（参加していて、まだ持っていなければ人数を読みに行く）
+   人数はサーバーの関数 tama_tamasai_count（supabase/tama_tamasai.sql）。SQL の実行前は数を出さずに目標だけ出す */
+let tamasaiN=null, tamasaiAt=0, tamasaiMissing=false;
+const jstDayOf=ms=>new Date(ms+9*3600000).toISOString().slice(0,10);
+const tamasaiDay=()=>FES.tamasai.days.includes(jstDayOf(Date.now()));
+const tamasaiOver=()=>jstDayOf(Date.now())>FES.tamasai.days[FES.tamasai.days.length-1];
+// 多摩祭の日にすれ違った人数（同じ人は1回。すれ違いの記録 encLog から）
+function tamasaiCrossN(){ return Object.values(encLog||{}).filter(a=>a.some(x=>FES.tamasai.days.includes(jstDayOf(x.at)))).length; }
+async function loadTamasai(force){
+  if(!sb||!myId||String(myId).startsWith('local-')||tamasaiMissing||!profile)return;
+  const st=attrsOf(profile).stat||{}, needGoal=st.fes26&&!badgeKeys(profile).includes('fesgoal');
+  if(!tamasaiDay()&&!needGoal)return;
+  if(!force&&Date.now()-tamasaiAt<120000)return;   // 2分に1回まで
+  tamasaiAt=Date.now();
+  try{
+    const {data,error}=await sb.rpc('tama_tamasai_count');
+    if(error){ if(error.code==='PGRST202'||/schema cache|does not exist/i.test(error.message)){ tamasaiMissing=true; console.warn('[tamasai] 人数を読めません。supabase/tama_tamasai.sql を実行してください'); } return; }
+    tamasaiN=+data||0; renderTamasai();
+    if(needGoal&&tamasaiN>=FES.tamasai.goal)lookSync();   // 目標に届いていたら🎉を付ける
+  }catch(e){}
+}
+function renderTamasai(){
+  const el=$('#tamasaiCard'); if(!el)return;
+  if(!profile||!tamasaiDay()){ el.innerHTML=''; return; }
+  const T_=FES.tamasai, st=attrsOf(profile).stat||{}, n=tamasaiN, goal=T_.goal;
+  const me=st.fes26?'✅ 参加中 🎪':'キャンパスで開くと参加（🎪バッジ）';
+  const cross=`🎆 すれ違い ${Math.min(lookCount('fes26x'),T_.crossN)}/${T_.crossN}人`;
+  const invite=`<button onclick="openInvite()">📨 友達を誘う</button>`;
+  if(n!=null&&n>=goal){
+    el.innerHTML=`<div class="tsh"><span>🎪 多摩祭2026</span><span>${me}</span></div><div class="tsn">🎉 <b>${goal}</b>人達成！ 参加した全員に🎉バッジ</div><div class="tsbar"><i style="width:100%"></i></div><div class="tsfoot"><span>参加 ${n}人 ・ ${cross}</span>${invite}</div>`;
+    return;
+  }
+  if(n==null||n<T_.showFrom){
+    el.innerHTML=`<div class="tsh"><span>🎪 多摩祭2026</span><span>${me}</span></div><div class="tsn">2日間で <b>${goal}</b>人参加が目標！</div><div class="tsfoot"><span>届いたら、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`;
+    return;
+  }
+  el.innerHTML=`<div class="tsh"><span>🎪 多摩祭2026</span><span>${me}</span></div><div class="tsn">参加 <b>${n}</b>人 ／ 目標${goal}人</div><div class="tsbar"><i style="width:${Math.round(n/goal*100)}%"></i></div><div class="tsfoot"><span>あと<b style="color:#c0456a">${goal-n}</b>人で、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`;
+}
+
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
    アーティスト・取りたい科目・時間割の授業名を、だれかが一度でも入れたものから予測変換のように出す。
    書き方がそろうと「同じアーティスト」「同じ授業」の共通点が見つかりやすくなる。
@@ -6544,7 +6614,7 @@ function renderLook(){
     const sh=badgeShown(p);
     body=`<div class="lknote">持っているバッジから1つ、名前の横に出せます。持っているバッジは全部プロフィールに並びます。</div>`
       +`<div class="lkbl">${lookCell(sh===null,true,'<span class="lkb">🚫</span>','', "lookSet('badge','none')",'つけない')}`
-      +Object.entries(BADGES).map(([id,b])=>{ const has=badgeKeys(p).includes(id); return lookCell(sh===id,has,`<span class="lkb">${b.icon}</span><span class="lkbt"><b>${esc(b.label)}</b><em>${esc(has?b.desc:'🔒 '+lookHow(b.c))}</em></span>`,lookHow(b.c),`lookSet('badge','${id}')`); }).join('')+`</div>`;
+      +Object.entries(BADGES).filter(([id,b])=>!(/^fes/.test(b.c)&&tamasaiOver()&&!badgeKeys(p).includes(id))).map(([id,b])=>{ const has=badgeKeys(p).includes(id); return lookCell(sh===id,has,`<span class="lkb">${b.icon}</span><span class="lkbt"><b>${esc(b.label)}</b><em>${esc(has?b.desc:'🔒 '+lookHow(b.c))}</em></span>`,lookHow(b.c),`lookSet('badge','${id}')`); }).join('')+`</div>`;
   }
   $('#memSheet').innerHTML=`<div class="lk">
     <div class="lkprev"><div class="lkcover" style="background:${coverBg(p)}"><span class="lkav${frCls(p)}" style="background:${gr(p.emoji)}">${esc(p.emoji)}</span><b>${esc(p.name)}${badgeIcons(p)?' '+badgeIcons(p):''}</b></div></div>
@@ -6565,6 +6635,9 @@ function lookSync(quiet){
   if(!profile||String(myId||'').startsWith('local-'))return;
   const fa=profile.fa||{}, st={...(fa.stat||{})}; let ch=false;
   ['cross','friend','owner'].forEach(k=>{ const n=lookCount(k); if(n>(st[k]||0)){ if(k==='friend'&&st.friend!==undefined)misMark('friend'); st[k]=n; ch=true; } });   // 友達が増えた（相手が承認した時も）＝ミッション
+  // 多摩祭（2026-10-11）：当日にキャンパスで開いた・当日にすれ違った人数を残す（バッジの条件。だれとすれ違ったかは残さない）
+  if(tamasaiDay()&&visitNow().on&&!st.fes26){ st.fes26=1; ch=true; setTimeout(()=>{ loadTamasai(true); renderTamasai(); },500); }
+  { const n=tamasaiCrossN(); if(n>(st.fes26x||0)){ st.fes26x=n; ch=true; } }
   const b=new Set(fa.badges||[]), newB=[];
   Object.entries(BADGES).forEach(([id,x])=>{ if(!b.has(id)&&x.c!=='survey'&&lookHas(x.c)){ b.add(id); newB.push(id); ch=true; } });
   if(ch){ profile.fa={...(profile.fa||{}),stat:st,badges:[...b]}; saveMyAttrs(); if(newB.length){ publishMe(); renderMeHero(); } }
@@ -6620,6 +6693,7 @@ function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBoot
   loadPaywall();   // 本来は有料の予定（2026-10-09）
   loadSurveyStatus(); loadCheckins().then(()=>setTimeout(maybeCheckinPopup,20000));
   loadCt(); setInterval(()=>{ if(!document.hidden)loadCt(); },60000);   // ちかくタイム（2026-10-10）
+  setTimeout(()=>loadTamasai(),3000); setInterval(()=>{ if(!document.hidden)loadTamasai(); },120000);   // 多摩祭の参加人数（2026-10-11。多摩祭の日と、🎉をまだ持っていない参加者だけ）
   if(pushRoute)setTimeout(()=>openFromPush(pushRoute),600);   // 通知を押して開いた時は、その画面へ（2026-10-10）
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden){presenceTick();renderStatusRow();}},60000);}
 
