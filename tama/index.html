@@ -182,6 +182,8 @@
   .tscard .tscp,.tscard .tssv{display:block;width:100%;margin-top:8px;padding:9px 12px;border-radius:12px;border:1.5px solid #c0456a;background:#fff;color:#c0456a;font:inherit;font-size:13px;font-weight:800;text-align:left;cursor:pointer}
   .tscard .tssv{background:#c0456a;color:#fff;margin:6px 0 8px}
   .tscard .tsnote{margin-top:8px;font-size:12px;line-height:1.6;color:var(--ink)}.tscard .tsnote b{color:#c0456a}
+  .tstoday{display:flex;flex-direction:column;gap:3px;margin:0 0 14px;padding:11px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(255,120,150,.14),rgba(255,190,90,.16));border:1.5px solid rgba(240,110,140,.45);font-size:12.5px;line-height:1.6;text-align:left;color:var(--ink)}
+  .tstoday b{color:#c0456a;font-size:13.5px}.tstoday .tsnotalk{font-size:11.5px;color:var(--muted)}
   /* ちかくプラスのアンケート（2026-10-14） */
   .wtpq{font-size:13.5px;font-weight:800;margin:14px 0 7px}.wtpq .opt{margin-left:6px;font-size:10.5px;font-weight:500;color:var(--muted)}
   .wtpf{display:flex;flex-direction:column;gap:6px}
@@ -1074,6 +1076,7 @@
           <div><span>3</span><b>会ったら話題に</b><small>共通点から話せる</small></div>
         </div>
         <div class="notlove">🙅 <b>恋愛目的のアプリではありません。</b><br>同じ授業・同じアーティスト・同じ「あるある」の人と<br>友達になるためのアプリです。</div>
+        <div id="tamasaiWel"></div>
         <div class="feslive" id="fesLiveWel"></div>
         <!-- 2026-10-08 あおの依頼「多摩キャン生にとって何がいいかが伝わるように」：①会った時の話題 ②友達のいまどこ・履修 ③授業の部屋 ④新しい出会い の4枚 -->
         <div class="shots">
@@ -4933,6 +4936,7 @@ function renderHomeGate(){
   const flow=gateFlowHTML(inApp?'inapp':ios?(ios26?'ios26':'ios'):other?'':'android');
   g.innerHTML=`<div class="hglogo">ちかく</div>
     <div class="hgtag">同じキャンパスの、<b style="color:var(--amber-deep)">共通点がある人</b>が分かる。<br>だから、会ったときに話しかけやすい。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
+    ${tamasaiDay()?tamasaiTodayHTML():''}
     <div class="hgvals"><div>🤝 会ったとき、話すことがある</div><div>👥 友達のいまどこ・空きコマが分かる</div><div>📚 同じ授業の人に、授業のことを聞ける</div><div>✨ キャンパスで、新しい出会い</div></div>
     <div class="hgcount" id="hgCount">${gateCountHTML()}</div>
     ${savedRef()?`<div class="hgref">🎁 招待コード <b>${esc(savedRef())}</b><small>登録の最後の「招待コード」に入れると、あなたと招待してくれた人に特典があります。ホーム画面から開くと消えていることがあるので、メモしておいてください。</small></div>`:""}
@@ -6194,6 +6198,17 @@ async function useCoupon(id){
   if(error&&!/duplicate|unique/i.test(error.message)){ toast('記録できませんでした。電波の良い所でもう一度どうぞ'); console.warn('[coupon] 記録できません',error.message); return; }
   couponUsed[id]={amount,at:Date.now()}; toast('✅ 使用済みにしました'); openCoupon(id);
 }
+// 多摩祭の日に、はじめて見る人へ「今日は何ができるか」（ホーム画面に追加する案内・ようこそ画面。2026-10-14 チームの意見「どんなアプリか分からない」）。
+// 会話しなくても楽しめることを先に書く（知らない人と話すのが苦手な人でも入れるように）
+function tamasaiTodayHTML(){
+  const T_=FES.tamasai;
+  return `<div class="tstoday"><b>🎪 多摩祭の日のちかく</b>
+    <span>🍡 同じ屋台・同じステージが楽しみな人が分かる</span>
+    <span>⏰ ${T_.ctTimes&&T_.ctTimes.length?T_.ctTimes.join('と')+'に':''}10分だけのお題（2択でタップするだけ）</span>
+    <span>🎪 キャンパスで開くだけで、多摩祭の限定バッジ</span>
+    <span class="tsnotalk">話しかけなくても楽しめます</span></div>`;
+}
+function renderTamasaiWel(){ const el=$('#tamasaiWel'); if(el)el.innerHTML=tamasaiDay()?tamasaiTodayHTML():''; }
 function renderTamasai(){
   const el=$('#tamasaiCard'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
@@ -7115,6 +7130,7 @@ function fesTick(){
 
 /* ---------- boot ---------- */
 buildOnboard();
+renderTamasaiWel();   // 多摩祭の日だけ、ようこそ画面に「多摩祭の日のちかく」（2026-10-14）
 $$('.encR').forEach(e=>e.textContent=FES.encounterRangeM);
 registerSW();
 (async()=>{
