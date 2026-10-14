@@ -180,7 +180,7 @@
   .tscard .tsqo button{flex-shrink:0;padding:7px 11px;border-radius:14px;border:1.5px solid #f0729a;background:#fff;color:#c0456a;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
   .tscard .tsq.done{font-size:12.5px;font-weight:700}
   .tscard .tscp,.tscard .tssv{display:block;width:100%;margin-top:8px;padding:9px 12px;border-radius:12px;border:1.5px solid #c0456a;background:#fff;color:#c0456a;font:inherit;font-size:13px;font-weight:800;text-align:left;cursor:pointer}
-  .tscard .tssv{background:#c0456a;color:#fff;margin:6px 0 8px}
+  .tscard .tssv{background:#c0456a;color:#fff;margin:6px 0 8px}.tscard .tssv small{display:block;font-size:10.5px;font-weight:500;opacity:.9}
   .tscard .tsnote{margin-top:8px;font-size:12px;line-height:1.6;color:var(--ink)}.tscard .tsnote b{color:#c0456a}
   .tstoday{display:flex;flex-direction:column;gap:3px;margin:0 0 14px;padding:11px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(255,120,150,.14),rgba(255,190,90,.16));border:1.5px solid rgba(240,110,140,.45);font-size:12.5px;line-height:1.6;text-align:left;color:var(--ink)}
   .tstoday b{color:#c0456a;font-size:13.5px}.tstoday .tsnotalk{font-size:11.5px;color:var(--muted)}
@@ -6143,13 +6143,20 @@ function tamasaiQHTML(){
 function tamasaiTomorrowHTML(){
   const T_=FES.tamasai, now=Date.now(), d=jstDayOf(now);
   if(d!==T_.days[0]||T_.days.length<2||new Date(now+9*3600000).getUTCHours()<15)return '';
-  const n=Object.values(encLog||{}).filter(a=>a.some(x=>jstDayOf(x.at)===d)).length;
-  return `<div class="tsnote">🌙 明日も多摩祭で開いてね。${T_.ctTimes&&T_.ctTimes.length?`<b>${T_.ctTimes.join('</b> と <b>')}</b> にちかくタイム。`:''}${n?`今日すれ違った<b>${n}人</b>に、もう一度会えるかも`:'開いたまま歩くと、すれ違いが記録されます'}</div>`;
+  const n=Object.values(encLog||{}).filter(a=>a.some(x=>jstDayOf(x.at)===d)).length, fw=T_.fireworks;
+  return `<div class="tsnote">🌙 明日も多摩祭で開いてね。${T_.ctTimes&&T_.ctTimes.length?`<b>${T_.ctTimes.join('</b> と <b>')}</b> にちかくタイム。`:''}${fw&&fw.day===T_.days[1]?`<b>${fw.at}</b> からの花火の前（${fw.ct}）にも。`:''}${n?`今日すれ違った<b>${n}人</b>に、もう一度会えるかも`:'開いたまま歩くと、すれ違いが記録されます'}</div>`;
+}
+// 花火の日（2日目）の昼すぎから「18:00 花火・17:45 花火のちかくタイム」（2026-10-15 あおの決定）
+function tamasaiFireworksHTML(){
+  const fw=FES.tamasai.fireworks, now=Date.now(); if(!fw||jstDayOf(now)!==fw.day)return '';
+  const h=new Date(now+9*3600000).getUTCHours(); if(h<12||h>=19)return '';
+  return `<div class="tsnote">🎆 <b>${fw.at}</b> から花火。<b>${fw.ct}</b> に花火のちかくタイム。開いたまま見ると、近くで見ている人とのすれ違いが記録されます</div>`;
 }
 // アンケートの案内（URL があって、期間中で、まだ押していない人だけ）
 function tamasaiSurveyOn(){
   const T_=FES.tamasai, now=Date.now();
-  return !!T_.surveyUrl&&now>=(Date.parse(T_.surveyFrom)||Infinity)&&now<(Date.parse(T_.surveyUntil)||0)&&!!profile&&!attrsOf(profile).fes26sv;
+  return !!T_.surveyUrl&&now>=(Date.parse(T_.surveyFrom)||Infinity)&&now<(Date.parse(T_.surveyUntil)||0)&&!!profile&&!attrsOf(profile).fes26sv
+    &&!surveyDone&&!(attrsOf(profile).badges||[]).includes('survey');   // いつものアンケートに答えた人には出さない（2026-10-15）
 }
 function openTamasaiSurvey(){
   const T_=FES.tamasai; if(!T_.surveyUrl)return;
@@ -6157,7 +6164,7 @@ function openTamasaiSurvey(){
   if(profile){ profile.fa={...(profile.fa||{}),fes26sv:Date.now()}; saveMyAttrs(); }   // 押した人には通知・案内を出さない（自己申告）
   setTimeout(renderTamasai,800);
 }
-const tamasaiSurveyHTML=()=>tamasaiSurveyOn()?`<button class="tssv" onclick="openTamasaiSurvey()">📝 多摩祭のアンケート（2分）に答える ›</button>`:'';
+const tamasaiSurveyHTML=()=>tamasaiSurveyOn()?`<button class="tssv" onclick="openTamasaiSurvey()">📝 アンケートに答えて特典をもらう ›<small>限定アイコン・背景とフレーム・バッジ</small></button>`:'';
 // 出店のクーポン
 let couponUsed={}, couponMissing=false;
 const couponBooths=()=>(booths||[]).filter(b=>b.coupon);
@@ -6204,7 +6211,7 @@ function tamasaiTodayHTML(){
   const T_=FES.tamasai;
   return `<div class="tstoday"><b>🎪 多摩祭の日のちかく</b>
     <span>🍡 同じ屋台・同じステージが楽しみな人が分かる</span>
-    <span>⏰ ${T_.ctTimes&&T_.ctTimes.length?T_.ctTimes.join('と')+'に':''}10分だけのお題（2択でタップするだけ）</span>
+    <span>⏰ ${T_.ctTimes&&T_.ctTimes.length?T_.ctTimes.join('と')+'に':''}10分だけのお題（2択でタップするだけ）${T_.fireworks?`。${(+T_.fireworks.day.slice(8))}日は${T_.fireworks.at}の花火の前にも`:''}</span>
     <span>🎪 キャンパスで開くだけで、多摩祭の限定バッジ</span>
     <span class="tsnotalk">話しかけなくても楽しめます</span></div>`;
 }
@@ -6224,7 +6231,7 @@ function renderTamasai(){
     :n==null||n<T_.showFrom
     ?`<div class="tsn">2日間で <b>${goal}</b>人参加が目標！</div><div class="tsfoot"><span>届いたら、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`
     :`<div class="tsn">参加 <b>${n}</b>人 ／ 目標${goal}人</div><div class="tsbar"><i style="width:${Math.round(n/goal*100)}%"></i></div><div class="tsfoot"><span>あと<b style="color:#c0456a">${goal-n}</b>人で、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`;
-  el.innerHTML=head+tamasaiSurveyHTML()+prog+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML();
+  el.innerHTML=head+tamasaiSurveyHTML()+prog+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML();
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------

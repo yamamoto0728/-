@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
     // いまの時刻（前後4分）に予定があって、まだ送っていないものを1つ取る。先に sent_at を入れて二重に送らないようにする
     const lo = new Date(Date.now() - 4 * 60000).toISOString(), hi = new Date(Date.now() + 4 * 60000).toISOString();
     const { data: slot, error } = await supabase.from("tama_ct_slots").update({ sent_at: new Date().toISOString() })
-      .gte("starts_at", lo).lte("starts_at", hi).is("sent_at", null).select("id,q,o1,o2").maybeSingle();
+      .gte("starts_at", lo).lte("starts_at", hi).is("sent_at", null).select("*").maybeSingle();
     if (error) return json({ ok: false, reason: error.message });
     if (!slot) return json({ ok: true, skipped: "no slot now" });
     // 送り先：通知を許可している全員。ただし平日は、時間割を入れていて今日は授業が1つもない人には送らない（キャンパスにいないはずなので）。
@@ -200,8 +200,9 @@ Deno.serve(async (req) => {
     const { data: prof } = await supabase.from("tama_profiles").select("id");
     const tama = new Set((prof ?? []).map((p) => String(p.id)));
     ids = [...all].filter((id) => tama.has(id) && !noClassToday.has(id));
-    title = "⏰ ちかくタイム（10分間）";
-    text = `「${slot.q}」${slot.o1}？${slot.o2}？ 10分のあいだに答えた人どうしで、同じ答えの人が見つかります`;
+    // 回ごとに文を変えたい時は push_title・push_body（多摩祭の花火の回。2026-10-15）
+    title = slot.push_title || "⏰ ちかくタイム（10分間）";
+    text = slot.push_body || `「${slot.q}」${slot.o1}？${slot.o2}？ 10分のあいだに答えた人どうしで、同じ答えの人が見つかります`;
     url = "/tama/?go=ct&n=ct"; tag = "tama-ct"; pref = "ct";
   } else if (body.kind === "recap") {
     // 多摩祭1日目の夜：その日にキャンパスで開いた人に、その日すれ違った人数を（2日目に開く理由。チームの意見）
@@ -232,14 +233,17 @@ Deno.serve(async (req) => {
     const { data: vs, error } = await supabase.from("tama_visits").select("user_id").in("day", conf.days).eq("on_campus", true);
     if (error) return json({ ok: false, reason: error.message });
     const cand = [...new Set((vs ?? []).map((v) => String(v.user_id)))];
+    // 案内を押した人（fes26sv）と、いつものアンケートにもう答えた人（ちかく協力隊のバッジ・回答の記録 tama_survey_done）には送らない（2026-10-15）
     const done = new Set<string>();
     for (let i = 0; i < cand.length; i += 200) {
-      const { data } = await supabase.from("tama_profiles").select("id,sv:fes_attrs->fes26sv").in("id", cand.slice(i, i + 200));
-      for (const r of data ?? []) if (r.sv) done.add(String(r.id));
+      const { data } = await supabase.from("tama_profiles").select("id,sv:fes_attrs->fes26sv,badges:fes_attrs->badges").in("id", cand.slice(i, i + 200));
+      for (const r of data ?? []) if (r.sv || (Array.isArray(r.badges) && r.badges.includes("survey"))) done.add(String(r.id));
     }
-    ids = cand.filter((id) => !done.has(id));
-    title = "📝 多摩祭のアンケート（2分）";
-    text = "来てくれてありがとう。答えてもらえると、ちかくがもっと良くなります";
+    const { data: answered } = await supabase.from("tama_survey_done").select("participant_no");
+    const answeredNo = new Set((answered ?? []).map((a) => String(a.participant_no)));
+    ids = cand.filter((id) => !done.has(id) && !answeredNo.has(id.slice(0, 8)));
+    title = "📝 アンケートに答えて、特典をもらおう（2分）";
+    text = "多摩祭に来てくれてありがとう。答えると限定アイコン・背景とフレーム・バッジが使えるようになります";
     url = "/tama/?go=tamasai&n=tamasai"; tag = "tama-fsurvey"; pref = "tamasai";
   } else {
     return json({ ok: false, reason: "bad kind" });
