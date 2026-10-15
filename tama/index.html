@@ -196,6 +196,13 @@
   .daily.fesq .fqq{font-size:15px;font-weight:800;margin:4px 0 8px;line-height:1.45}
   .daily.fesq .fqnote{font-size:11px;color:var(--muted);margin-top:6px}
   .daily.fesq .fqmine{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.daily.fesq .fqmine span{font-size:12.5px;font-weight:700;background:#fff3e6;border:1px solid rgba(212,67,42,.3);border-radius:999px;padding:3px 10px}
+  /* 🤝 ちかくコラボ団体（2026-10-15）：ステージの⭐と、コミュニティへの1行 */
+  .tscard .tsst1.collab .nm,.tscard .tsst.collab b{color:#a8335a}
+  .collabrow{display:flex;align-items:center;gap:10px;width:calc(100% - 12px);margin:4px 6px 8px;padding:10px 12px;border:1.5px solid rgba(192,69,106,.45);border-radius:14px;background:linear-gradient(135deg,#fff3f6,#fff8ec);font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+  .collabrow.ints{width:100%;margin:8px 0 0;padding:8px 10px}
+  .collabrow .ci{font-size:20px;flex-shrink:0}.collabrow .ct{flex:1;min-width:0}.collabrow b{display:block;font-size:13px;color:#a8335a}.collabrow small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+  .collabrow .go{color:var(--muted2)}
+  .joined-tag.co{color:#a8335a}
   .tscard .tsqh{font-size:13.5px;font-weight:800;line-height:1.5}.tscard .tsqh span,.tscard .tsq.done span{display:block;font-size:10.5px;font-weight:500;color:var(--muted)}
   .tscard .tsqo{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:6px;padding-bottom:2px}.tscard .tsqo::-webkit-scrollbar{height:0}
   .tscard .tsqo button{flex-shrink:0;padding:7px 11px;border-radius:14px;border:1.5px solid #f0729a;background:#fff;color:#c0456a;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
@@ -4506,7 +4513,8 @@ function roomRow(r){
   const k=rid(r.id), s=roomStats[k]||{}, joined=myRoomIds.has(k), un=s.unread||0, ended=roomEnded(r);
   const right=un?`<div class="unread">${un>99?'99+':un}</div>`:`<div class="m" style="font-size:12.5px">${joined?'開く':'見る'} ›</div>`;
   const meta=[`👥 ${s.members||0}${r.capacity?'/'+r.capacity:''}人`,roomLeft(r),s.last?'最終 '+agoText(s.last):''].filter(Boolean).join(' ・ ');
-  const tag=isRoomOwner(r)?' <span class="joined-tag own">👑 オーナー</span>':joined?' <span class="joined-tag">参加中</span>':'';
+  const isCo=!!collabConf()&&collabRoomId()===rid(r.id);   // 🤝 ちかくコラボ団体の部屋（tamasai.js の collab.room か roomName）
+  const tag=(isCo?' <span class="joined-tag co">🤝 ちかくコラボ</span>':'')+(isRoomOwner(r)?' <span class="joined-tag own">👑 オーナー</span>':joined?' <span class="joined-tag">参加中</span>':'');
   const cond=r.visibility==='common'?`<div class="rcond">🎯 ${esc(condText(r))}の人向け${!joined&&r.fits?'（あなたも当てはまります）':''}</div>`:r.visibility==='invite'?'<div class="rcond">🔑 招待制</div>':'';
   const mt=meetText(r.meet), meet=mt?`<div class="rcond meet">📍 ${esc(mt)}${r.going?` 👍${r.going}人`:''}</div>`:'';
   return `<div class="urow${ended?' endrow':''}" onclick="openRoom('${k}')"><div class="av" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">${roomIcon(r)}</div>
@@ -4523,7 +4531,7 @@ function renderRooms(){
   if(el){
     $('#commSub').textContent='部屋ごとにオーナーがいて、入れる人と期限が決まっています';
     if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
-    el.innerHTML=(roomListErr?`<div class="roomerr">⚠️ コミュニティの一覧を読み込めませんでした。<button onclick="loadRooms()">もう一度</button><small>${esc(roomListErr)}</small></div>`:'')+(rooms.length?sec('参加中',joined)+sec('📚 あなたの授業',cls)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
+    el.innerHTML=collabPromoHTML()+(roomListErr?`<div class="roomerr">⚠️ コミュニティの一覧を読み込めませんでした。<button onclick="loadRooms()">もう一度</button><small>${esc(roomListErr)}</small></div>`:'')+(rooms.length?sec('参加中',joined)+sec('📚 あなたの授業',cls)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
       :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`);
   }
   const hr=$('#homeRoomList'), top=joined.concat(cls,forYou,open).slice(0,3);
@@ -6648,8 +6656,10 @@ function tamasaiStageHTML(){
   const live=today.filter(s=>s.s<=hm&&hm<s.e), next=today.filter(s=>s.s>hm).sort((a,b)=>a.s<b.s?-1:1)[0];
   const ofc='<a class="tsofc" href="https://www.hosei-tamafes.com/" target="_blank" rel="noopener">📅 タイムテーブル・企画マップ（公式サイト）›</a>';
   if(!live.length&&!next)return `<div class="tsstage"><div class="tsqh">🎤 ステージ</div><div class="tsst">今日のステージは終わりました</div>${ofc}</div>`;
-  const row=(s,on)=>`<div class="tsst${on?' on':''}"><span class="tm">${on?'▶ いま':s.s+'〜'}</span><span class="nm"><b>${esc(s.n)}</b><small>${esc(s.p||'')}${s.g&&s.g!==s.n?' ・ '+esc(s.g):''}${on?' ・ 〜'+s.e:''}</small></span></div>`;
-  return `<div class="tsstage"><div class="tsqh">🎤 いま・つぎのステージ</div>${live.slice(0,2).map(s=>row(s,true)).join('')}${next?row(next,false):''}${ofc}</div>`;
+  // ⭐ ちかくコラボ団体のステージ（collab:true）は印を付け、次の次でも今日これからなら並べる（2026-10-15 案3）
+  const row=(s,on)=>`<div class="tsst${on?' on':''}${s.collab?' collab':''}"><span class="tm">${on?'▶ いま':s.s+'〜'}</span><span class="nm"><b>${s.collab?'⭐ ':''}${esc(s.n)}</b><small>${s.collab?'🤝 ちかくコラボ ・ ':''}${esc(s.p||'')}${s.g&&s.g!==s.n?' ・ '+esc(s.g):''}${on?' ・ 〜'+s.e:''}</small></span></div>`;
+  const co=today.find(s=>s.collab&&s.s>hm&&s!==next);
+  return `<div class="tsstage"><div class="tsqh">🎤 いま・つぎのステージ</div>${live.slice(0,2).map(s=>row(s,true)).join('')}${next?row(next,false):''}${co?row(co,false):''}${ofc}</div>`;
 }
 function tamasaiFireworksHTML(){
   const fw=FES.tamasai.fireworks, now=tamasaiNow(); if(!fw||jstDayOf(now)!==fw.day)return '';
@@ -6807,17 +6817,68 @@ function renderTamasai(){
   const more=tsOpen?`<div class="tsmore"><div class="tsfoot"><span>${done?`多摩祭に参加した全員に🎉バッジ ・ いま ${n}人`:`${n!=null&&n>=T_.showFrom?`あと<b style="color:#c0456a">${goal-n}</b>人で`:'届いたら'}、多摩祭に参加した全員に🎉バッジ`} ・ ${cross}</span></div>${tamasaiStageHTML()}</div>`:'';
   const toggle=`<button class="tsmorebtn" onclick="toggleTsOpen()">${tsOpen?'とじる ▴':'くわしく ▾'}</button>`;
   // 中身が変わった時だけ描き直す（6秒ごとに作り直すと、選択肢の横スクロールが戻り、押している途中のタップが消えるため。2026-10-15 のレビューで直した）
-  const html=head+geoNote+tamasaiSurveyHTML()+prog+(tsOpen?'':tamasaiStageLine())+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML()+more+toggle;
+  const html=head+geoNote+tamasaiSurveyHTML()+prog+(tsOpen?'':tamasaiStageLine())+collabPromoHTML('collabrow ints')+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML()+more+toggle;
   if(el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; }
 }
 let tsOpen=false;
 function toggleTsOpen(){ tsOpen=!tsOpen; renderTamasai(); }
+/* ---------- 🤝「ちかく」コラボ団体（2026-10-15 あおの決定。設定は tama/tamasai.js の collab） ----------
+   チームのメンバーがいる Saenggi（センギ）のステージを盛り上げる。見た目は大きく変えない：
+   ・ステージの行に「⭐ … 🤝 ちかくコラボ」（tamasaiStageLine・tamasaiStageHTML。始まる90分前からは、カードの1行に先に出す）
+   ・collab.room（だれでも入れる部屋の番号）か collab.code（招待コード）を入れた時だけ、コラボのコミュニティへの1行を出す
+     （多摩祭のカードの中と、コミュニティのページの一覧のいちばん上。promoUntil の日まで。もう入っている人には出さない） */
+function collabConf(){
+  const c=FES.tamasai&&FES.tamasai.collab; if(!c||!(c.room||c.code||c.roomName))return null;
+  if(c.promoUntil&&jstDayOf(Date.now())>c.promoUntil)return null;
+  return c;
+}
+// コラボのコミュニティの番号。room が無ければ、だれでも入れる部屋の中から名前（roomName）で探す（2026-10-15：番号を調べなくても、作った部屋の名前を書けば出る）
+function collabRoomId(){
+  const c=FES.tamasai&&FES.tamasai.collab; if(!c)return '';
+  if(c.room)return rid(c.room);
+  if(!c.roomName)return '';
+  const k=normAns(c.roomName), r=(rooms||[]).filter(x=>x.visibility!=='invite'&&normAns(x.name||'').includes(k)).sort((a,b)=>(Date.parse(a.created_at)||0)-(Date.parse(b.created_at)||0))[0];
+  return r?rid(r.id):'';
+}
+function collabJoined(){
+  const c=collabConf(); if(!c)return false;
+  const id=collabRoomId(); if(id&&myRoomIds.has(id))return true;
+  try{ return localStorage.getItem('tama_collabJoined')===String(c.code||c.room); }catch(e){ return false; }
+}
+// 名前で探す時は、部屋が見つかった時だけ出す（まだ作られていない・閉じられた時は出さない）
+const collabPromoHTML=cls=>{ const c=collabConf(); if(!c||collabJoined()||!profile)return ''; if(!c.room&&!c.code&&!collabRoomId())return '';
+  return `<button class="${cls||'collabrow'}" onclick="openCollabRoom()"><span class="ci">🤝</span><span class="ct"><b>ちかくコラボ：${esc(c.name)}のコミュニティ</b><small>${esc([c.desc,c.stage].filter(Boolean).join(' ・ '))}</small></span><span class="go">›</span></button>`; };
+async function openCollabRoom(){
+  const c=collabConf(); if(!c)return;
+  if(c.room||c.roomName){   // だれでも入れる部屋：部屋の画面（ルールと「参加する」）を開く
+    if(!collabRoomId()||!rooms.some(r=>rid(r.id)===collabRoomId()))await loadRooms();
+    const id=collabRoomId(); if(id&&rooms.some(r=>rid(r.id)===id))return openRoom(id);
+    if(!c.code){ toast('コミュニティが見つかりません（準備中かもしれません）'); return; }
+  }
+  // 招待コードの部屋：入る前に、どんなコミュニティか見せる
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🤝 ${esc(c.name)}のコミュニティ</h2><p class="psdesc">「ちかく」のコラボ団体です。${esc(c.desc||'')}${c.stage?`<br>🎤 ${esc(c.stage)}`:''}</p>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="joinCollabRoom()">参加する</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">やめる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function joinCollabRoom(){
+  const c=collabConf(); if(!c||!c.code||!sb||String(myId).startsWith('local-')){ toast('いまは参加できません'); return; }
+  const {data,error}=await sb.rpc('tama_room_join_code',{p_code:c.code});
+  if(error||!data){ toast('参加できませんでした'); return; }
+  toast(ROOM_JOIN_MSG[data.status]||'参加できませんでした');
+  if(data.status!=='ok')return;
+  try{ localStorage.setItem('tama_collabJoined',String(c.code)); }catch(e){}
+  closeMembers(); await loadRooms(); openRoom(data.room);
+}
 // ステージの1行（いまやっているもの、無ければ次のもの）。押すと「くわしく」が開く
 function tamasaiStageLine(){
   const ss=FES.tamasai.stages||[], now=tamasaiNow(), d=jstDayOf(now), hm=new Date(now+9*3600000).toISOString().slice(11,16);
-  const today=ss.filter(s=>s.d===d), live=today.find(s=>s.s<=hm&&hm<s.e), next=today.filter(s=>s.s>hm).sort((a,b)=>a.s<b.s?-1:1)[0], s=live||next;
+  // ⭐ ちかくコラボ団体のステージ（collab:true）は、やっている間と、始まる90分前からは、ほかより先にこの1行に出す（2026-10-15 案3）
+  const mins=t=>(+t.slice(0,2))*60+(+t.slice(3,5)), today=ss.filter(s=>s.d===d);
+  const coLive=today.find(s=>s.collab&&s.s<=hm&&hm<s.e), coSoon=today.find(s=>s.collab&&s.s>hm&&mins(s.s)-mins(hm)<=90);
+  const live=coLive||today.find(s=>s.s<=hm&&hm<s.e), next=today.filter(s=>s.s>hm).sort((a,b)=>a.s<b.s?-1:1)[0], s=coLive||coSoon||live||next, on=!!s&&s.s<=hm&&hm<s.e;
   if(!s)return '';
-  return `<div class="tsst1" onclick="toggleTsOpen()"><span class="tm${live?' on':''}">${live?'▶ いま':'つぎ '+s.s}</span><span class="nm">${esc(s.n)}<small>${esc(s.p||'')}${live?' 〜'+s.e:''}</small></span><span class="go">›</span></div>`;
+  return `<div class="tsst1${s.collab?' collab':''}" onclick="toggleTsOpen()"><span class="tm${on?' on':''}">${on?'▶ いま':'つぎ '+s.s}</span><span class="nm">${s.collab?'⭐ ':''}${esc(s.n)}<small>${s.collab?'🤝 ちかくコラボ ・ ':''}${esc(s.p||'')}${on?' 〜'+s.e:''}</small></span><span class="go">›</span></div>`;
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
