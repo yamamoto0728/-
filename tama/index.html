@@ -357,6 +357,41 @@
   .fr-gold{box-shadow:0 0 0 2px #fff7d6,0 0 0 4.5px #e0a030,0 0 10px 1px rgba(224,160,48,.6)!important}
   .fr-rainbow{box-shadow:0 0 0 2px #ff7e9d,0 0 0 4px #ffd166,0 0 0 6px #6bd98b,0 0 0 8px #63d6e8!important}
   .fr-star{box-shadow:0 0 0 2px #fff,0 0 0 4.5px #ffd166,0 0 16px 3px rgba(255,209,102,.95)!important}
+  /* ちかくの開発者へのプレゼント（2026-10-15）：アイコン「ち」＝ロゴの画像・フレーム「開発者ゴールド」 */
+  .ic-chi{background:url(/icons/icon-192.png) center/cover no-repeat!important;color:transparent!important;text-shadow:none!important;font-size:0!important}
+  .fr-devgold{box-shadow:0 0 0 2px #fff6cc,0 0 0 4px #f5c542,0 0 0 6px #b8860b,0 0 0 7.5px #ffe48a!important;animation:devgold 2.6s ease-in-out infinite}
+  @keyframes devgold{0%,100%{filter:drop-shadow(0 0 3px rgba(255,200,60,.75))}50%{filter:drop-shadow(0 0 10px rgba(255,214,90,1)) brightness(1.08)}}
+  .lkh.dev{color:#9a6a00}
+  /* 解放の演出（2026-10-15）：紙吹雪とカード */
+  .ufx{position:absolute;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:rgba(20,22,50,.45);backdrop-filter:blur(2px);padding:24px}
+  .ufx.show{display:flex;animation:uffade .25s ease}
+  .ufconf{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+  .ufconf i{position:absolute;top:-14px;width:8px;height:13px;border-radius:2px;opacity:.95;animation-name:uffall;animation-timing-function:cubic-bezier(.3,.6,.5,1);animation-fill-mode:forwards}
+  @keyframes uffall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+  @keyframes uffade{from{opacity:0}to{opacity:1}}
+  .ufcard{position:relative;width:100%;max-width:330px;background:#fff;border-radius:22px;padding:20px 18px 16px;text-align:center;box-shadow:0 20px 50px -18px rgba(20,30,90,.6);animation:ufpop .5s cubic-bezier(.2,1.4,.4,1)}
+  .ufcard.dev{background:linear-gradient(160deg,#fffaf0,#fff2cf);border:2px solid #f5c542}
+  @keyframes ufpop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+  .ufh{font-family:"Zen Maru Gothic";font-weight:900;font-size:18px;color:var(--ink)}
+  .ufs{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6}
+  .ufitems{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:16px 0 14px}
+  .ufi{min-width:84px;max-width:150px;opacity:0;animation:ufin .55s cubic-bezier(.2,1.5,.4,1) forwards}
+  @keyframes ufin{0%{transform:scale(.3) rotate(-25deg);opacity:0}100%{transform:none;opacity:1}}
+  .ufp{height:58px;display:flex;align-items:center;justify-content:center;gap:2px}
+  .ufp .lke{flex-shrink:0;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
+  .ufp .lkbg{display:block;width:72px;height:46px;border-radius:12px}
+  .ufp .ufb{font-size:38px}
+  .ufi small{display:block;font-size:11px;font-weight:700;color:var(--ink);line-height:1.4;margin-top:4px}
+  .ufcard .btn{display:block;width:100%;padding:12px;font-size:14.5px;margin-top:8px}
+  /* コミュニティの招待（2026-10-15） */
+  .invlist{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow:auto;margin-top:6px}
+  .invrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:14px;background:#fff}
+  .invrow .av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .invrow .nm{flex:1;min-width:0}.invrow .nm b{display:block;font-size:13.5px}.invrow .nm small{font-size:11px;color:var(--muted)}
+  .invrow button{flex-shrink:0;border:0;border-radius:10px;padding:7px 13px;background:var(--amber-deep);color:#fff;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
+  .invrow .done{font-size:11.5px;font-weight:700;color:var(--ok)}
+  .bub .rinvbtn{display:block;margin-top:7px;width:100%;border:0;border-radius:10px;padding:8px 10px;background:rgba(255,255,255,.92);color:#0a7f96;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
+  @media (prefers-reduced-motion:reduce){.fr-devgold{animation:none}.ufcard,.ufi{animation:none;opacity:1}}
   .me-hero .h{font-size:12px;color:var(--muted);margin-top:4px}
   .setting{margin:12px 16px;background:var(--glass);border:1px solid var(--line);border-radius:16px}
   .setrow{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-size:14px;border-bottom:1px solid var(--line)}
@@ -1700,6 +1735,21 @@ const LOOK_FR={none:{name:'なし',c:'free'},white:{name:'しろ',c:'free'},
   amber:{name:'オレンジ',c:'mis:5'},mint:{name:'ミント',c:'friend:1'},sakura:{name:'さくら',c:'daily:7'},blue:{name:'ブルー',c:'survey'},
   silver:{name:'シルバー',c:'cross:10'},royal:{name:'むらさき',c:'owner:1'},gold:{name:'ゴールド',c:'inv:3'},
   rainbow:{name:'にじ',c:'mis:20'},star:{name:'きらきら',c:'inv:5'}};
+/* ---------- ちかくの開発者へのプレゼント（2026-10-15 あおの依頼） ----------
+   開発者（参加者番号＝IDの頭8文字）だけが使える、アイコン「ち」（ホーム画面に追加した時のロゴ）・フレーム「開発者ゴールド」・背景「ちかく」。
+   ほかの人の画面でも、その人が開発者の時だけ出す（設定を書き換えても、開発者でなければ出ない）。人が増えたら DEVS に足す */
+const DEVS=['7e4dda65','cacc25fd','b5cac0fa','5267fbf2','1dc61a09','56ed5ec3'];
+const DEV_ICON='ち';   // アイコンの値（画面ではロゴの画像 /icons/icon-192.png。古い版のアプリでは「ち」の字で出る）
+const isDev=u=>!!u&&DEVS.includes(String(u.id||(u===profile?myId:'')||'').slice(0,8));
+GRADS[DEV_ICON]=['#e8962e','#1fb3c9'];   // ロゴと同じ色（画像が出ない所の「ち」の字の背景）
+LOOK_BG.chikaku={name:'ちかく',c:'dev',g:['#f3a24a','#e8962e','#1fb3c9'],txt:'ちかく'};
+LOOK_FR.devgold={name:'開発者ゴールド',c:'dev'};
+// 背景の CSS（「ちかく」の背景は、文字の柄を重ねる）
+function lookBgCss(b){
+  const g=`linear-gradient(135deg,${b.g.join(',')})`; if(!b.txt)return g;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="132" height="60"><g font-family="sans-serif" font-weight="900" font-size="17" fill="#fff" fill-opacity=".3"><text x="6" y="24">${b.txt}</text><text x="72" y="52">${b.txt}</text></g></svg>`;
+  return `url('data:image/svg+xml,${encodeURIComponent(svg)}') 0 0/132px 60px repeat,${g}`;
+}
 const LOOK_KIND={mis:['今日のミッション','回'],inv:['招待','人'],daily:['今日のお題に答える','日'],cross:['すれ違う','人'],friend:['友達','人'],owner:['コミュニティを作る','']};
 // いまの数（これまでの一番大きい数）
 function lookCount(k){
@@ -1719,6 +1769,7 @@ function lookHas(c){
   if(!profile)return false;
   if(!c||c==='free')return true;
   if(c==='survey')return !!surveyDone||(attrsOf(profile).badges||[]).includes('survey');
+  if(c==='dev')return isDev(profile);   // ちかくの開発者だけ（2026-10-15）
   if(c==='invited')return !!attrsOf(profile).inv_by;
   if(c==='wtp')return !!wtpMine||!!attrsOf(profile).wtp;   // ちかくプラスのアンケート（2026-10-14）
   const [k,n]=c.split(':'); return lookCount(k)>=+n;
@@ -1726,6 +1777,7 @@ function lookHas(c){
 // もらい方の文（あといくつ）
 function lookHow(c){
   if(c==='survey')return 'アンケートに答える';
+  if(c==='dev')return 'ちかくの開発者だけ';
   if(c==='invited')return '招待コードを入れて始める';
   if(c==='wtp')return 'ちかくプラスのアンケート（3問）に答える';
   const [k,n]=c.split(':'), K=LOOK_KIND[k]||[k,''], left=Math.max(0,+n-lookCount(k));
@@ -1762,9 +1814,12 @@ const badgeShown=u=>{ const ks=badgeKeys(u), b=(attrsOf(u).look||{}).badge; retu
 const badgeIcons=u=>{ const k=badgeShown(u); return k?BADGES[k].icon:''; };
 // フレームの class・背景の色（ほかの人の画面でも、その人の fa.look を見て出す）
 // 背景・フレームは、アンケートに答えた人だけが変えられる（2026-10-09 あおの指示）。答えていない人の設定は出さない
-const lookOpen=u=>(attrsOf(u).badges||[]).includes('survey');
-const frCls=u=>{ if(!lookOpen(u))return ''; const f=(attrsOf(u).look||{}).fr; return f&&f!=='none'&&LOOK_FR[f]?' fr-'+f:''; };
-const coverBg=u=>{ const b=lookOpen(u)&&LOOK_BG[(attrsOf(u).look||{}).bg]; return b&&b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(u.emoji); };
+// 開発者は、アンケートに関係なく変えられる（開発者のプレゼントの背景・フレームを使うため。2026-10-15）
+const lookOpen=u=>(attrsOf(u).badges||[]).includes('survey')||isDev(u);
+// 開発者のアイコン「ち」はロゴの画像にする（.ic-chi）。開発者でない人の「ち」は、ふつうの字のまま
+const frCls=u=>{ const ic=u&&u.emoji===DEV_ICON&&isDev(u)?' ic-chi':''; if(!lookOpen(u))return ic; const f=(attrsOf(u).look||{}).fr;
+  return ic+(f&&f!=='none'&&LOOK_FR[f]&&(LOOK_FR[f].c!=='dev'||isDev(u))?' fr-'+f:''); };
+const coverBg=u=>{ const b=lookOpen(u)&&LOOK_BG[(attrsOf(u).look||{}).bg]; return b&&b.g&&(b.c!=='dev'||isDev(u))?lookBgCss(b):gr(u.emoji); };
 const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
 const gr=e=>`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
 function uuid(){return (crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(36).slice(2));}
@@ -4024,7 +4079,7 @@ function meetCardHTML(){
 const DUO_RE=/\s*#duo:(\d+):(\d+)$/;
 function duoParse(text){ const mm=DUO_RE.exec(text||''); return mm&&DAILY_QS[+mm[1]]?{q:+mm[1],a:+mm[2]}:null; }
 // 画面・通知・トークの一覧に出す時は、しるしを外す
-function msgPlain(text){ return String(text||'').replace(DUO_RE,''); }
+function msgPlain(text){ return String(text||'').replace(DUO_RE,'').replace(/\s*#room:[\w-]{1,64}(?::[A-Z0-9]{6})?$/,''); }   // コミュニティの招待（#room:…。2026-10-15）も外す
 const duoPool=()=>DAILY_QS.map((x,i)=>x.o&&x.o.length<=3?i:-1).filter(i=>i>=0);
 // このトークのふたりのお題。番号 → {me, them（選んだ番号）, meMsg, themMsg, at}。同じお題に2回答えていたら最初の答え
 function duoState(m){
@@ -4154,7 +4209,7 @@ async function openChat(uid,from){
   }
   chatPeer=uid; chatReturn=from||(matches[uid]?'match':'friends'); const m=chatOf(uid);
   markTalkRead(uid); updateTalkDot();
-  $('#chatAv').style.background=gr(m.u.emoji);$('#chatAv').textContent=m.u.emoji;$('#chatNm').textContent=m.u.name;renderChat();go('chat');
+  $('#chatAv').style.background=gr(m.u.emoji);$('#chatAv').textContent=m.u.emoji;$('#chatAv').className='av'+frCls(m.u);$('#chatNm').textContent=m.u.name;renderChat();go('chat');
   clearInterval(chatPoll);if(isTest(uid)||!sb)return;
   chatPoll=setInterval(async()=>{if(chatPeer!==uid)return;const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at');const c=chatOf(uid);if(data&&c){c.msgs=data.map(x=>({id:x.id!=null?String(x.id):'',from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0}));if((++reactTick)%2===0)await loadReacts(uid);markTalkRead(uid);renderChat();}},2500);
 }
@@ -4235,7 +4290,7 @@ function renderChat(){const m=chatOf(chatPeer);if(!m)return;const box=$('#msgs')
   const body=all.map(x=>{ let sep=''; if(x.at){ const dl=dayLabel(x.at); if(dl!==lastDay){ lastDay=dl; sep=`<div class="day">${dl}</div>`; } }
     const d=!x.wave&&duoParse(x.text); if(d)return sep+duoBubble(x,d,duo,m);
     const rid=!x.wave&&x.id&&reactOn()&&!expired?x.id:'';   // リアクションを付けられる吹き出しだけ、押すと選ぶ所が出る
-    return sep+`<div class="bub ${x.from===myId?'me':'them'}${x.wave?' wave':''}${rid?' rxable':''}"${rid?` onclick="openReact('${rid}',this)"`:''}>${x.wave?'<span class="wl">👋 最初の一言</span>':''}${esc(x.text)}${x.at?`<span class="tm">${hhmm(x.at)}</span>`:''}${reactChipsHTML(m,x.id)}</div>`; }).join('');
+    return sep+`<div class="bub ${x.from===myId?'me':'them'}${x.wave?' wave':''}${rid?' rxable':''}"${rid?` onclick="openReact('${rid}',this)"`:''}>${x.wave?'<span class="wl">👋 最初の一言</span>':''}${esc(msgPlain(x.text))}${x.wave?'':roomInvBtn(x.text)}${x.at?`<span class="tm">${hhmm(x.at)}</span>`:''}${reactChipsHTML(m,x.id)}</div>`; }).join('');
   const html=banner+body;
   // 2.5秒ごとに描き直すので、中身が変わった時だけ差し替える（読んでいる途中で一番下に戻されないように）
   if(box.dataset.h!==html){ const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60||box.dataset.peer!==String(chatPeer); box.dataset.h=html; box.dataset.peer=chatPeer; box.innerHTML=html; if(atBottom)box.scrollTop=box.scrollHeight; }
@@ -5073,6 +5128,7 @@ async function openRoomInfo(){
   }
   roomInfoMembers=members;
   let code=null; if(owner&&r.visibility==='invite'){ const {data}=await sb.rpc('tama_room_code',{p_room:k}); code=data; }
+  roomInfoCode=code;   // 招待を送る時に、招待制の部屋はコードも一緒に送る
   const nm=u=>jsq(u.name||'');
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">${roomIcon(r)} ${esc(r.name)}</h2><p class="psdesc">${esc(r.topic||'')}</p>
     <div class="sec"><b>📜 ルール</b><div class="pre">${esc(r.rules||'（まだありません）')}</div></div>
@@ -5084,6 +5140,7 @@ async function openRoomInfo(){
       ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button>`:''}${canModRoom(r)&&u.id!==myId&&u.id!==r.owner_id?`<button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
       :`<div class="sec"><b>👑 オーナー</b>${isOfficialClassRoom(r)?'なし（だれでも入れる授業のコミュニティ。運営が見守っています）':esc(r.owner_name||'なし')}<br><span style="font-size:11.5px;color:var(--muted)">参加者は、参加すると見られます</span></div>`}
     ${joined?`<div class="sharerow" style="margin-bottom:6px"><div class="lab">🔔 この部屋の通知<small>オフにすると、投稿があっても通知しません</small></div><div class="toggle${r.muted?'':' on'}" onclick="toggleRoomMute()"><div class="k"></div></div></div>`:''}
+    ${joined&&canModRoom(r)&&!roomEnded(r)?`<button class="rbtn" onclick="openRoomInvite()">📨 友達を招待する<small>友達・トーク中の人に、トークで招待を送ります</small></button>`:''}
     ${owner?`<button class="rbtn" onclick="closeMembers();createRoom(true)">✏️ 部屋を編集する<small>名前・ルール・入れる人・定員・期限・集まる約束</small></button>
       <button class="rbtn warn" onclick="closeRoomV2()">🗑 コミュニティを閉じる<small>投稿も参加者もすべて消えます。元に戻せません</small></button>`:''}
     ${canModRoom(r)?`<button class="rbtn" onclick="openRoomNoticeEdit()">📌 お知らせを${r.notice?'変える・消す':'出す'}<small>部屋のいちばん上に固定で出ます（休講・テストの案内など）</small></button>`:''}
@@ -5093,6 +5150,60 @@ async function openRoomInfo(){
       :`<button class="rbtn warn" onclick="reportRoom()">⚠ このコミュニティを運営に知らせる<small>ルール違反・危ない部屋など</small></button>`}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
+}
+/* ---------- コミュニティに招待する（2026-10-15 あおの依頼「オーナーからユーザーを招待できるように」） ----------
+   オーナー（と運営）が、部屋の「ⓘ」→「📨 友達を招待する」から、友達・トーク中の人を選んで招待を送る。
+   招待はトークのメッセージとして送る（末尾の「#room:部屋の番号[:招待コード]」で見分ける。ふたりのお題の #duo と同じしくみで、新しい表は要らない）。
+   相手のトークには「🚪 コミュニティを見る」のボタンが出て、押すと部屋（ルールと「参加する」）が開く。招待制の部屋はコードも一緒に送るので、押すだけで入れる。
+   相手には、いつものメッセージの通知が届く */
+let roomInfoCode=null, roomInvited=new Set();
+function roomInviteCands(){
+  const r=curRoom; if(!r)return [];
+  const inRoom=new Set((roomInfoMembers||[]).map(u=>u.id)), seen=new Set(), out=[];
+  const add=(id,u,how)=>{ if(!u||seen.has(id)||inRoom.has(id)||blocked.has(id)||isTest(id)||id===myId)return; seen.add(id); out.push({id,u,how}); };
+  allFriendRows().filter(x=>x.status==='accepted').map(otherIdOf).forEach(id=>add(id,friendUser(id),'👥 友達'));
+  Object.keys(matches).filter(id=>!isExpired(matches[id])).forEach(id=>add(id,matches[id].u,'💬 トーク中'));
+  return out;
+}
+function openRoomInvite(){
+  const r=curRoom; if(!r)return;
+  const cs=roomInviteCands();
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">📨 「${esc(r.name)}」に招待する</h2>
+    <p class="psdesc">友達・トーク中の人に、トークで招待を送ります。相手は「🚪 コミュニティを見る」から参加できます。${r.visibility==='common'?'<br>⚠️ この部屋は「共通点のある人だけ」なので、条件に当てはまる人だけが入れます。':''}</p>
+    ${cs.length?`<div class="invlist">${cs.map((c,i)=>`<div class="invrow"><div class="av${frCls(c.u)}" style="background:${gr(c.u.emoji)}">${esc(c.u.emoji)}</div><div class="nm"><b>${esc(c.u.name||'')}</b><small>${c.how}</small></div>${roomInvited.has(rid(r.id)+':'+c.id)?'<span class="done">✅ 送りました</span>':`<button onclick="inviteToRoom(${i})">招待</button>`}</div>`).join('')}</div>`
+      :'<div class="ncempty">招待できる人がいません。<br>友達か、トーク中の人を招待できます（もう参加している人は出ません）。</div>'}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="openRoomInfo()">‹ もどる</button></div>`;
+  roomInviteList=cs;
+  $('#memOverlay').classList.add('show');
+}
+let roomInviteList=[];
+async function inviteToRoom(i){
+  const r=curRoom, c=roomInviteList[i]; if(!r||!c||!sb||String(myId).startsWith('local-'))return;
+  const k=rid(r.id), code=r.visibility==='invite'&&roomInfoCode?':'+roomInfoCode:'';
+  const t=`📨 コミュニティ「${r.name}」に招待しました。よかったら参加してね！ #room:${k}${code}`;
+  const {error}=await sb.from(T('messages')).insert({match_key:chatKey(c.id),from_id:myId,text:t});
+  if(error){ console.warn('[rooms] 招待を送れません',error.code,error.message); toast('⚠️ 招待を送れませんでした'+(/row-level security|violates/i.test(error.message)?'（この人とはトークできません）':'（'+String(error.message).slice(0,50)+'）')); return; }
+  const ch=chatOf(c.id); if(ch)ch.msgs.push({from:myId,text:t,at:Date.now()});
+  notifyPush(c.id,'📨 '+(profile?profile.name:'だれか')+'さんからコミュニティの招待',`「${r.name}」`,{kind:'msg',go:'chat',u:myId,tag:'msg-'+myId,badge:true});
+  roomInvited.add(k+':'+c.id); toast('📨 招待を送りました'); openRoomInvite();
+}
+// トークに届いた招待のボタン
+const ROOM_INV_RE=/\s*#room:([\w-]{1,64})(?::([A-Z0-9]{6}))?$/;
+function roomInvBtn(text){
+  const m=ROOM_INV_RE.exec(text||''); if(!m)return '';
+  return `<button class="rinvbtn" onclick="event.stopPropagation();openInvitedRoom('${m[1]}','${m[2]||''}')">🚪 コミュニティを見る ›</button>`;
+}
+async function openInvitedRoom(id,code){
+  if(!sb||!profile)return;
+  if(code){
+    const {data,error}=await sb.rpc('tama_room_join_code',{p_code:code});
+    if(error||!data){ toast('⚠️ 参加できませんでした'+(error?'（'+String(error.message).slice(0,50)+'）':'')); return; }
+    if(data.status!=='ok'){ toast(ROOM_JOIN_MSG[data.status]||'参加できませんでした'); return; }
+    toast('✅ 参加しました'); await loadRooms(); return openRoom(data.room);
+  }
+  if(!rooms.some(r=>rid(r.id)===rid(id)))await loadRooms();
+  if(rooms.some(r=>rid(r.id)===rid(id)))return openRoom(id);
+  toast('このコミュニティには入れません（閉じられたか、条件に当てはまりません）');
 }
 // 参加者のプロフィールを開く（いいね・友達申請はプロフィールから。いつもの安全の仕組みのまま：おたがいにいいねでトーク）
 let roomInfoMembers=[];
@@ -7364,22 +7475,24 @@ function lookCell(on,has,inner,how,click,label){
   return `<div class="lkc${on?' on':''}${has?'':' lock'}" onclick="${has?click:`toast('🔒 ${esc(how)}')`}">${inner}${label?`<small>${esc(label)}</small>`:''}${has?'':'<i>🔒</i>'}</div>`;
 }
 function renderLook(){
-  // 背景・フレームは、アンケートに答えた人だけが変えられる（2026-10-09 あおの指示）
+  // 背景・フレームは、アンケートに答えた人だけが変えられる（2026-10-09 あおの指示）。開発者は、プレゼントを使えるように開けておく（2026-10-15）
   const svOpen=!!surveyDone||lookOpen(profile), svGate=svOpen?'':`<div class="lkgate"><b>🔒 背景とフレームは、アンケートに答えた人が変えられます</b><span>答えると、下の中から選べるようになります（もらったものは、そのまま残ります）</span><button class="btn btn-primary" onclick="closeMembers();openSurvey()">📝 アンケートに答える</button></div>`;
-  const p=profile, L=attrsOf(p).look||{}, tabs=[['icon','アイコン'],['bg','背景'],['fr','フレーム'],['badge','バッジ']];
+  const p=profile, L=attrsOf(p).look||{}, tabs=[['icon','アイコン'],['bg','背景'],['fr','フレーム'],['badge','バッジ']], dev=isDev(p);
+  const vis=x=>x.c!=='dev'||dev;   // 開発者の限定は、開発者にだけ見せる
   // 全部でいくつ持っているか（集める楽しみ）
-  const all=[...EMO.map(()=>'free'),...EMO_SP.map(()=>'survey'),...LOOK_ICONS.flatMap(s=>s.icons.map(()=>s.c)),...Object.values(LOOK_BG).map(x=>x.c),...Object.values(LOOK_FR).map(x=>x.c),...Object.values(BADGES).map(x=>x.c)];
+  const all=[...EMO.map(()=>'free'),...EMO_SP.map(()=>'survey'),...LOOK_ICONS.flatMap(s=>s.icons.map(()=>s.c)),...(dev?['dev']:[]),...Object.values(LOOK_BG).filter(vis).map(x=>x.c),...Object.values(LOOK_FR).filter(vis).map(x=>x.c),...Object.values(BADGES).map(x=>x.c)];
   const got=all.filter(c=>lookHas(c)).length;
   let body='';
   if(lookTab==='icon'){
-    const cell=(e,c)=>lookCell(p.emoji===e,lookHas(c)||p.emoji===e,`<span class="lke" style="background:${gr(e)}">${e}</span>`,lookHow(c),`lookSet('emoji','${e}')`);
-    body=`<div class="lkh">はじめから使えるアイコン</div><div class="lkg">${EMO.map(e=>cell(e,'free')).join('')}</div>`
+    const cell=(e,c)=>lookCell(p.emoji===e,lookHas(c)||p.emoji===e,`<span class="lke${e===DEV_ICON&&dev?' ic-chi':''}" style="background:${gr(e)}">${e}</span>`,lookHow(c),`lookSet('emoji','${e}')`);
+    body=(dev?`<div class="lkh dev">🛠 ちかく開発者の限定<span>🎁 プレゼント</span></div><div class="lkg">${cell(DEV_ICON,'dev')}</div>`:'')
+      +`<div class="lkh">はじめから使えるアイコン</div><div class="lkg">${EMO.map(e=>cell(e,'free')).join('')}</div>`
       +`<div class="lkh">${BADGES.survey.icon} アンケートに答えた人<span>${lookHas('survey')?'':'🔒 '+lookHow('survey')}</span></div><div class="lkg">${EMO_SP.map(e=>cell(e,'survey')).join('')}</div>`
       +LOOK_ICONS.map(s=>`<div class="lkh">🎁 ${esc(s.name)}<span>${lookHas(s.c)?'✅ もらいました':'🔒 '+esc(lookHow(s.c))}</span></div><div class="lkg">${s.icons.map(e=>cell(e,s.c)).join('')}</div>`).join('');
   }else if(lookTab==='bg'){
-    body=svGate+`<div class="lkg wide">${Object.entries(LOOK_BG).map(([id,b])=>lookCell((svOpen?L.bg||'auto':'auto')===id,svOpen&&lookHas(b.c),`<span class="lkbg" style="background:${b.g?`linear-gradient(135deg,${b.g.join(',')})`:gr(p.emoji)}"></span>`,(svOpen?lookHow(b.c):'アンケートに答えると変えられます'),`lookSet('bg','${id}')`,lookHas(b.c)?b.name:lookHow(b.c))).join('')}</div>`;
+    body=svGate+`<div class="lkg wide">${Object.entries(LOOK_BG).filter(([,b])=>vis(b)).map(([id,b])=>lookCell((svOpen?L.bg||'auto':'auto')===id,svOpen&&lookHas(b.c),`<span class="lkbg" style="background:${b.g?lookBgCss(b):gr(p.emoji)}"></span>`,(svOpen?lookHow(b.c):'アンケートに答えると変えられます'),`lookSet('bg','${id}')`,lookHas(b.c)?(b.c==='dev'?'🛠 ':'')+b.name:lookHow(b.c))).join('')}</div>`;
   }else if(lookTab==='fr'){
-    body=svGate+`<div class="lkg wide">${Object.entries(LOOK_FR).map(([id,f])=>lookCell((svOpen?L.fr||'none':'none')===id,svOpen&&lookHas(f.c),`<span class="lke${id==='none'?'':' fr-'+id}" style="background:${gr(p.emoji)}">${esc(p.emoji)}</span>`,(svOpen?lookHow(f.c):'アンケートに答えると変えられます'),`lookSet('fr','${id}')`,lookHas(f.c)?f.name:lookHow(f.c))).join('')}</div>`;
+    body=svGate+`<div class="lkg wide">${Object.entries(LOOK_FR).filter(([,f])=>vis(f)).map(([id,f])=>lookCell((svOpen?L.fr||'none':'none')===id,svOpen&&lookHas(f.c),`<span class="lke${id==='none'?'':' fr-'+id}${p.emoji===DEV_ICON&&dev?' ic-chi':''}" style="background:${gr(p.emoji)}">${esc(p.emoji)}</span>`,(svOpen?lookHow(f.c):'アンケートに答えると変えられます'),`lookSet('fr','${id}')`,lookHas(f.c)?(f.c==='dev'?'🛠 ':'')+f.name:lookHow(f.c))).join('')}</div>`;
   }else{
     const sh=badgeShown(p);
     body=`<div class="lknote">持っているバッジから1つ、名前の横に出せます。持っているバッジは全部プロフィールに並びます。</div>`
@@ -7413,17 +7526,50 @@ function lookSync(quiet){
   if(ch){ profile.fa={...(profile.fa||{}),stat:st,badges:[...b]}; saveMyAttrs(); if(newB.length){ publishMe(); renderMeHero(); } }
   // 新しく使えるようになったもの（この端末で、まだ知らせていないもの）
   let seen=[]; try{ seen=JSON.parse(localStorage.getItem('tama_lookSeen')||'null'); }catch(e){}
-  const now=[...LOOK_ICONS.filter(s=>lookHas(s.c)).map(s=>'i:'+s.id),...Object.entries(LOOK_BG).filter(([,x])=>x.c!=='free'&&lookHas(x.c)).map(([id])=>'b:'+id),
-    ...Object.entries(LOOK_FR).filter(([,x])=>x.c!=='free'&&lookHas(x.c)).map(([id])=>'f:'+id),...[...b].map(id=>'g:'+id)];
-  if(seen===null){ try{ localStorage.setItem('tama_lookSeen',JSON.stringify(now)); }catch(e){} return; }   // 初めての時は、いま持っているものを知らせない
+  const devItems=isDev(profile)?['i:dev',...Object.entries(LOOK_BG).filter(([,x])=>x.c==='dev').map(([id])=>'b:'+id),...Object.entries(LOOK_FR).filter(([,x])=>x.c==='dev').map(([id])=>'f:'+id)]:[];
+  const now=[...LOOK_ICONS.filter(s=>lookHas(s.c)).map(s=>'i:'+s.id),...Object.entries(LOOK_BG).filter(([,x])=>x.c!=='free'&&x.c!=='dev'&&lookHas(x.c)).map(([id])=>'b:'+id),
+    ...Object.entries(LOOK_FR).filter(([,x])=>x.c!=='free'&&x.c!=='dev'&&lookHas(x.c)).map(([id])=>'f:'+id),...[...b].map(id=>'g:'+id),...devItems];
+  // 初めての時は、いま持っているものを知らせない（開発者のプレゼントだけは、初めてでも知らせる）
+  if(seen===null){ seen=now.filter(x=>!devItems.includes(x)); try{ localStorage.setItem('tama_lookSeen',JSON.stringify(seen)); }catch(e){} }
   const fresh=now.filter(x=>!seen.includes(x));
   if(!fresh.length)return;
-  try{ localStorage.setItem('tama_lookSeen',JSON.stringify(seen.concat(fresh))); }catch(e){}
   const dot=$('#lookDot'); if(dot)dot.hidden=false;
-  if(quiet||$('.overlay.show'))return;
-  const nm=fresh.map(x=>{ const [t,id]=x.split(':'); return t==='g'?`${BADGES[id].icon} バッジ「${BADGES[id].label}」`:t==='i'?'限定アイコン '+LOOK_ICONS.find(s=>s.id===id).icons.join(''):t==='b'?`背景「${LOOK_BG[id].name}」`:`フレーム「${LOOK_FR[id].name}」`; });
-  toast(`🎁 きせかえが増えました：${esc(nm.slice(0,2).join('・'))}${nm.length>2?' ほか':''}<br><small>マイページの「🎨 きせかえ」から選べます</small>`);
+  // 2026-10-15 あおの依頼「新しいアイコン等が解放されたら演出」：紙吹雪とポップアップ（showUnlockFx）。
+  // ほかのシートが出ている時は、閉じてから知らせる（前は、その時は知らせずに済ませていた）
+  if(!quiet&&$('.overlay.show'))return;
+  try{ localStorage.setItem('tama_lookSeen',JSON.stringify(seen.concat(fresh))); }catch(e){}
+  if(quiet)return;
+  showUnlockFx(fresh);
 }
+/* ---------- 解放の演出（2026-10-15 あおの依頼） ----------
+   新しいアイコン・背景・フレーム・バッジが使えるようになった時に、紙吹雪と「🎉 解放されました」のカードを出す。
+   「つけてみる」で、そのきせかえのタブを開く。動きを減らす設定の端末では、紙吹雪は出さない */
+function unlockItem(x){
+  const [t,id]=x.split(':'), p=profile;
+  if(t==='g'){ const b=BADGES[id]; return b&&{tab:'badge',prev:`<span class="ufb">${b.icon}</span>`,name:`バッジ「${b.label}」`}; }
+  if(t==='i'&&id==='dev')return {tab:'icon',prev:`<span class="lke ic-chi" style="background:${gr(DEV_ICON)}">${DEV_ICON}</span>`,name:'アイコン「ち」（ちかくのロゴ）',dev:true};
+  if(t==='i'){ const s=LOOK_ICONS.find(z=>z.id===id); return s&&{tab:'icon',prev:s.icons.slice(0,3).map(e=>`<span class="lke" style="background:${gr(e)}">${e}</span>`).join(''),name:`限定アイコン（${s.name}）`}; }
+  if(t==='b'){ const b=LOOK_BG[id]; return b&&{tab:'bg',prev:`<span class="lkbg" style="background:${b.g?lookBgCss(b):gr(p.emoji)}"></span>`,name:`背景「${b.name}」`,dev:b.c==='dev'}; }
+  if(t==='f'){ const f=LOOK_FR[id]; return f&&{tab:'fr',prev:`<span class="lke fr-${id}${p.emoji===DEV_ICON&&isDev(p)?' ic-chi':''}" style="background:${gr(p.emoji)}">${esc(p.emoji)}</span>`,name:`フレーム「${f.name}」`,dev:f.c==='dev'}; }
+  return null;
+}
+function showUnlockFx(fresh){
+  const items=fresh.map(unlockItem).filter(Boolean).sort((a,b)=>(b.dev?1:0)-(a.dev?1:0)); if(!items.length)return;   // 開発者のプレゼントを先に
+  const dev=items.some(x=>x.dev), first=items.find(x=>x.dev)||items[0];
+  let el=$('#unlockFx'); if(!el){ el=document.createElement('div'); el.id='unlockFx'; el.className='ufx'; (document.querySelector('.phone')||document.body).appendChild(el); }
+  const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cols=['#ffd166','#ff6b8b','#63d6e8','#7be0b0','#b8a6ff','#ff9d5c','#f5c542'];
+  const conf=calm?'':Array.from({length:44},(_,i)=>`<i style="left:${(Math.random()*100).toFixed(1)}%;background:${cols[i%cols.length]};animation-delay:${(Math.random()*.6).toFixed(2)}s;animation-duration:${(1.8+Math.random()*1.4).toFixed(2)}s"></i>`).join('');
+  el.innerHTML=`<div class="ufconf">${conf}</div><div class="ufcard${dev?' dev':''}">
+    <div class="ufh">${dev?'🎁 ちかく開発者のあなたへ':'🎉 きせかえが解放されました！'}</div>
+    ${dev?'<div class="ufs">ちかくを作ってくれてありがとう。開発者だけのアイコン・フレーム・背景です</div>':''}
+    <div class="ufitems">${items.slice(0,4).map((x,i)=>`<div class="ufi" style="animation-delay:${(.15+i*.12).toFixed(2)}s"><div class="ufp">${x.prev}</div><small>${esc(x.name)}</small></div>`).join('')}</div>
+    ${items.length>4?`<div class="ufs">ほか ${items.length-4}個</div>`:''}
+    <button class="btn btn-primary" onclick="closeUnlockFx();openLook('${first.tab}')">🎨 つけてみる</button>
+    <button class="btn btn-ghost" onclick="closeUnlockFx()">あとで</button></div>`;
+  el.classList.add('show');
+}
+function closeUnlockFx(){ const el=$('#unlockFx'); if(el)el.classList.remove('show'); }
 function renderQR(url){const box=$('#qrbox');const img=new Image();
   img.onload=()=>{box.innerHTML='';box.appendChild(img);};
   img.onerror=()=>{box.innerHTML=`<div class="qrfallback">QR画像を読み込めませんでした。<br>下のリンクをコピーして共有してください。</div>`;};
