@@ -1282,8 +1282,8 @@
     <!-- トーク：マッチした相手と友達の1対1のチャット、コミュニティ（グループ）を1つのタブにまとめた（2026-09-24） -->
     <section class="screen" id="s-match">
       <div class="apphead"><h1>トーク<button class="qhelp" onclick="openHelp('talk')" aria-label="トークの説明">?</button></h1><span class="sub" id="matchCount">0</span></div>
-      <!-- 2026-09-28：「個人」を「友達」（期限なし）と「24時間トーク」（話しかけから始まった相手）に分けた -->
-      <div class="seg"><button id="segFr" onclick="setTalkTab('fr')">👥 友達<span class="sdot" id="dotFrTalk" style="display:none"></span></button><button id="segDm" class="on" onclick="setTalkTab('dm')">💬 24時間<span class="sdot" id="dotDm" style="display:none"></span></button><button id="segComm" onclick="setTalkTab('comm')">コミュニティ<span class="sdot" id="dotComm" style="display:none"></span></button></div>
+      <!-- 2026-09-28：「個人」を「友達」（期限なし）と「24時間トーク」（話しかけから始まった相手）に分けた --> <!-- 2026-10-15 あおの指示：「24時間」のタブの名前を「すれ違い」に（中身は同じ。いいね→トークの相手で、24時間で終わる） -->
+      <div class="seg"><button id="segFr" onclick="setTalkTab('fr')">👥 友達<span class="sdot" id="dotFrTalk" style="display:none"></span></button><button id="segDm" class="on" onclick="setTalkTab('dm')">🚶 すれ違い<span class="sdot" id="dotDm" style="display:none"></span></button><button id="segComm" onclick="setTalkTab('comm')">コミュニティ<span class="sdot" id="dotComm" style="display:none"></span></button></div>
       <div class="scroll" id="matchList"></div>
       <div class="scroll" id="commPane" hidden>
         <div class="cmsub" id="commSub"></div>
@@ -2556,7 +2556,7 @@ async function setMatchOff(off){
    オフにした種類はプロフィールの fes_attrs.push_off に入れ、送る側（send-match-push・tama-remind）が見て送らない。
    テスト通知は自分あてに1通送り、届かなければ登録を作り直してもう一度送る。それでもだめなら端末の設定の確かめ方を出す */
 const PUSH_KINDS=[
-  {k:'msg',   icon:'💬', label:'メッセージ', sub:'友達・24時間トーク'},
+  {k:'msg',   icon:'💬', label:'メッセージ', sub:'友達・すれ違いのトーク'},
   {k:'like',  icon:'👋', label:'いいね・トークの始まり'},
   {k:'friend',icon:'👥', label:'友達', sub:'申請・承認・新しい共通点'},
   {k:'nearby',icon:'👀', label:'近くに共通点のある人がいる時'},
@@ -3822,7 +3822,7 @@ async function loadTalkPreviews(){
 function renderFriendTalks(frItems){
   const inc=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length;
   let h=inc?`<div class="mrow" onclick="openCm('fr')"><div class="av" style="background:#e8f7fb">📩</div><div class="info"><div class="nm">友達申請が${inc}件届いています</div><div class="last">「友達」タブで承認できます ›</div></div></div><div class="sep"></div>`:'';
-  if(!frItems.length) return h+`<div class="empty"><div class="big">👥</div><p>まだ友達がいません。<br>24時間トークの中の「👥 友達に誘う」か、<br>目の前の人とは4桁のコードで友達になれます。<br>友達とは期限なしで話せます。</p><button class="btn btn-primary" onclick="openCm('fr');openFrAdd()">＋ 友達を追加</button></div>`;
+  if(!frItems.length) return h+`<div class="empty"><div class="big">👥</div><p>まだ友達がいません。<br>「すれ違い」のトークの中の「👥 友達に誘う」か、<br>目の前の人とは4桁のコードで友達になれます。<br>友達とは期限なしで話せます。</p><button class="btn btn-primary" onclick="openCm('fr');openFrAdd()">＋ 友達を追加</button></div>`;
   return h+frItems.map(({id,u,last},i)=>{
     const pt=presenceText(friendPres(id)), o=findUser(id), online=!!o&&!isClosed(o);
     const sub=last?(last.from===myId?'あなた: ':'')+esc(msgPlain(last.text)):'メッセージを送ってみよう';
@@ -5412,7 +5412,7 @@ const HELP={
   talk:{icon:'💬',title:'トーク',lead:'おたがいにいいねした人・友達・コミュニティと話す所です。',
     can:['💬 24時間：おたがいにいいねすると始まります。最初の一言は共通点の話題から選べます。24時間で終わります',
       '🤝 会うときは：共通点・すれ違い・今日のお題を1枚で見られます。その場で2人で答える「ふたりのお題」と、だんだん深くなる質問も','👥 友達：期限なしで話せます。24時間のトークの上の「👥 友達に誘う」から友達になれます','コミュニティ：オーナー（👑）が作る、期限つきのグループ。入れる人は部屋ごとに「みんな／共通点のある人だけ／招待コード」。投稿は参加した人だけが読めます'],
-    see:'24時間トークの相手には、あなたのいる建物・教室は見えません。'},
+    see:'「すれ違い」のトーク（24時間）の相手には、あなたのいる建物・教室は見えません。'},
   friends:{icon:'👥',title:'友達',lead:'友達がいまどこにいるかが分かります。',
     can:['友達のいる建物・教室（本人が見せている時だけ）と、いまの授業（時間割を見せてくれた時だけ）','友達になるには、トークの「👥 友達に誘う」か、目の前で4桁のコードを交換します','「地図の位置も見せる」にしている友達は、地図に緑のふちで出ます'],
     see:'友達には、あなたのいる建物・教室が見えます。範囲はマイページの「🔒 見せる範囲」で変えられます。'}
