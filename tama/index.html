@@ -3125,7 +3125,7 @@ async function addEncounter(u){
   if(Date.now()-bootAt>60000) toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`+(rare.length?`<br>✨ ${esc(rare[0].label)}`:''));
   crossNew++; bumpCrossDot();
   (encLog[u.id]=encLog[u.id]||[]).push({at:Date.now(),place});
-  if(Date.now()-bootAt>60000)wtpMaybeAsk('cross');   // すれ違った直後に「ちかくプラスのアンケート」（2026-10-14。起動直後のまとめての記録では出さない）
+  if(Date.now()-bootAt>60000)wtpMaybeAsk(Object.keys(encMap).length<=1?'cross':'cross2');   // すれ違った直後に「ちかくプラスのアンケート」（2026-10-14。起動直後のまとめての記録では出さない）
   if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from(T('encounters')).upsert(rec);
     if(!encLogMissing){ const {error}=await sb.from(T('encounter_log')).insert({owner_id:myId,other_id:u.id,place}); if(error){ if(/does not exist|schema cache/i.test(error.message))encLogMissing=true; console.warn('[encounter_log] 記録できませんでした',error.message); } }
   }catch(e){} }
@@ -6320,7 +6320,7 @@ const tamasaiOver=()=>jstDayOf(Date.now())>FES.tamasai.days[FES.tamasai.days.len
 function tamasaiCrossN(){ return Object.values(encLog||{}).filter(a=>a.some(x=>FES.tamasai.days.includes(jstDayOf(x.at)))).length; }
 async function loadTamasai(force){
   if(!sb||!myId||String(myId).startsWith('local-')||tamasaiMissing||!profile)return;
-  const st=attrsOf(profile).stat||{}, needGoal=st.fes26&&!badgeKeys(profile).includes('fesgoal');
+  const st=attrsOf(profile).stat||{}, needGoal=st.fes26&&!badgeKeys(profile).includes('fesgoal')&&!(tamasaiOver()&&tamasaiN!=null);   // 祭りのあとは1回読んだら止める（数はもう変わらない）
   if(!tamasaiDay()&&!needGoal)return;
   if(!force&&Date.now()-tamasaiAt<120000)return;   // 2分に1回まで
   tamasaiAt=Date.now();
@@ -6428,9 +6428,9 @@ function tamasaiTodayHTML(){
 function renderTamasaiWel(){ const el=$('#tamasaiWel'); if(el)el.innerHTML=tamasaiDay()?tamasaiTodayHTML():''; }
 function renderTamasai(){
   const el=$('#tamasaiCard'); if(!el)return;
-  if(!profile){ el.innerHTML=''; return; }
+  if(!profile){ el.dataset.h=''; el.innerHTML=''; return; }
   // 祭りが終わった後は、参加した人にアンケートの案内だけ（翌日のリマインド）
-  if(!tamasaiDay()){ el.innerHTML=(tamasaiSurveyOn()&&(attrsOf(profile).stat||{}).fes26)?`<div class="tsh"><span>🎪 多摩祭2026、来てくれてありがとう</span></div>${tamasaiSurveyHTML()}`:''; return; }
+  if(!tamasaiDay()){ el.dataset.h=''; el.innerHTML=(tamasaiSurveyOn()&&(attrsOf(profile).stat||{}).fes26)?`<div class="tsh"><span>🎪 多摩祭2026、来てくれてありがとう</span></div>${tamasaiSurveyHTML()}`:''; return; }
   const T_=FES.tamasai, st=attrsOf(profile).stat||{}, n=tamasaiN, goal=T_.goal;
   const me=st.fes26?'✅ 参加中 🎪':'キャンパスで開くと参加（🎪バッジ）';
   const cross=`🎆 すれ違い ${Math.min(lookCount('fes26x'),T_.crossN)}/${T_.crossN}人`;
@@ -6441,7 +6441,9 @@ function renderTamasai(){
     :n==null||n<T_.showFrom
     ?`<div class="tsn">2日間で <b>${goal}</b>人参加が目標！</div><div class="tsfoot"><span>届いたら、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`
     :`<div class="tsn">参加 <b>${n}</b>人 ／ 目標${goal}人</div><div class="tsbar"><i style="width:${Math.round(n/goal*100)}%"></i></div><div class="tsfoot"><span>あと<b style="color:#c0456a">${goal-n}</b>人で、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`;
-  el.innerHTML=head+tamasaiSurveyHTML()+prog+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML();
+  // 中身が変わった時だけ描き直す（6秒ごとに作り直すと、選択肢の横スクロールが戻り、押している途中のタップが消えるため。2026-10-15 のレビューで直した）
+  const html=head+tamasaiSurveyHTML()+prog+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML();
+  if(el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; }
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------

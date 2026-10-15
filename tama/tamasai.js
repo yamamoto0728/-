@@ -1,6 +1,6 @@
 // 多摩祭（2026-10-17・18）の設定。tama/index.html が読み込む（FES.tamasai）。
 // Edge Function tama-remind も本番のURLからこのファイルを読み、アンケートのURL（surveyUrl）が空なら、アンケートの通知を送らない。
-// ⚠️ 書き方を変えないこと（tama-remind は surveyUrl:'…' の形を文字で探している）。日付・時刻を変えたら supabase/tama_tamasai.sql も直す。
+// ⚠️ 書き方を変えないこと（tama-remind は、行の頭にある「surveyUrl:'…'」「surveyFrom:」「surveyUntil:」「days:[…]」「ctTimes:[…]」を文字で探す。1行に1つずつ書く）。日付・時刻を変えたら supabase/tama_tamasai.sql も直す。
 //
 // 2026-10-11 あおの決定：学園祭版 /fes/ は使わず、多摩キャン版のまま、この日付の間だけ「多摩祭モード」にする（/fes/ は /tama/ に転送）。
 // 2026-10-14 チームの意見から足したもの：祭りの共通点の質問・昼と夕方のちかくタイム・1日目の夜の「今日のすれ違い」・閉会前のアンケート・出店のクーポン
@@ -22,7 +22,8 @@ const TAMASAI={
   // 答えた人（ちかく協力隊のバッジがある人）には、案内も通知も出さない
   surveyUrl:'https://docs.google.com/forms/d/e/1FAIpQLScbjRvZyBV_Y-8qR9itwdOsMp9ZQULQANJVS7de1Oz1tf0RWA/viewform?usp=pp_url&entry.516725058={id}',
   // アンケートの案内を出す期間（2日目の閉会1〜2時間前から、翌々日の朝まで）
-  surveyFrom:'2026-10-18T15:00:00+09:00', surveyUntil:'2026-10-20T12:00:00+09:00',
+  surveyFrom:'2026-10-18T15:00:00+09:00',
+  surveyUntil:'2026-10-20T12:00:00+09:00',
   // 祭りの共通点の質問（授業の代わり。同じ答えの人が、多摩祭の日だけ共通点になる）。weak は共通点に数えない答え
   qs:[
     {k:'food', icon:'🍡', q:'多摩祭で食べたいのは？', label:'多摩祭で食べたい', o:['たこ焼き','焼きそば','からあげ','クレープ・スイーツ','ドリンク','まだ決めてない'], weak:['まだ決めてない']},

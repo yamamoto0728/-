@@ -60,8 +60,9 @@ async function tamasaiConf(): Promise<{ days: string[]; surveyUrl: string; surve
     const res = await fetch(TAMASAI_URL);
     if (!res.ok) return null;
     const src = await res.text();
-    const str = (k: string) => (new RegExp(`${k}:'([^']*)'`).exec(src) ?? [])[1] ?? "";
-    const list = (k: string) => [...((new RegExp(`${k}:\\[([^\\]]*)\\]`).exec(src) ?? [])[1] ?? "").matchAll(/'([^']*)'/g)].map((m) => m[1]);
+    // 行の頭（空白のあと）から探す。コメントの中の「surveyUrl:'…'」に当たらないように（2026-10-15 のレビューで直した）
+    const str = (k: string) => (new RegExp(`^[ \\t]*${k}:'([^']*)'`, "m").exec(src) ?? [])[1] ?? "";
+    const list = (k: string) => [...((new RegExp(`^[ \\t]*${k}:\\[([^\\]]*)\\]`, "m").exec(src) ?? [])[1] ?? "").matchAll(/'([^']*)'/g)].map((m) => m[1]);
     return { days: list("days"), surveyUrl: str("surveyUrl"), surveyFrom: Date.parse(str("surveyFrom")) || 0, surveyUntil: Date.parse(str("surveyUntil")) || 0, ctTimes: list("ctTimes") };
   } catch {
     return null;
@@ -214,8 +215,9 @@ Deno.serve(async (req) => {
     ids = [...new Set((vs ?? []).map((v) => String(v.user_id)))];
     const start = new Date(Date.parse(`${day}T00:00:00+09:00`)).toISOString(), end = new Date(Date.parse(`${day}T00:00:00+09:00`) + 86400000).toISOString();
     const met = new Map<string, Set<string>>();
-    for (let i = 0; i < ids.length; i += 200) {
-      const { data: logs } = await supabase.from("tama_encounter_log").select("owner_id,other_id").in("owner_id", ids.slice(i, i + 200)).gte("at", start).lt("at", end);
+    // 1回に返るのは1000行までなので、5人ずつ読む（1人が1日に200回以上すれ違うことはまず無い。2026-10-15 のレビューで直した）
+    for (let i = 0; i < ids.length; i += 5) {
+      const { data: logs } = await supabase.from("tama_encounter_log").select("owner_id,other_id").in("owner_id", ids.slice(i, i + 5)).gte("at", start).lt("at", end).limit(1000);
       for (const l of logs ?? []) { const k = String(l.owner_id); if (!met.has(k)) met.set(k, new Set()); met.get(k)!.add(String(l.other_id)); }
     }
     const times = conf?.ctTimes?.length ? `明日も ${conf.ctTimes.join("・")} にちかくタイム。` : "";
@@ -249,6 +251,13 @@ Deno.serve(async (req) => {
     return json({ ok: false, reason: "bad kind" });
   }
   if (ids.length === 0) return json({ ok: true, sent: 0, targets: 0 });
+
+  // 多摩祭の通知（recap・fsurvey）は、その日に1回だけ（公開の鍵で外から何度も呼ばれても、全員に何度も送らないように。2026-10-15 のレビューで直した）。
+  // 記録の表（tama_fes_sent。tama_tamasai.sql）が無い時は、そのまま送る
+  if (body.kind === "recap" || body.kind === "fsurvey") {
+    const { error: onceErr } = await supabase.from("tama_fes_sent").insert({ key: `${body.kind}:${todayJst}` });
+    if (onceErr && (onceErr.code === "23505" || /duplicate/i.test(onceErr.message))) return json({ ok: true, skipped: "already sent today" });
+  }
 
   // 「通知の種類」でオフにした人を除く
   const off = new Set<string>();
