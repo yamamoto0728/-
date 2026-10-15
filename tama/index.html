@@ -181,6 +181,21 @@
   .tscard .tsst .nm small{display:block;font-size:11px;color:var(--muted);font-weight:500}
   .tscard .tsofc{display:inline-block;margin-top:7px;font-size:11.5px;font-weight:700;color:#c8361f;text-decoration:none}
   @keyframes tslive{50%{opacity:.6}}
+  /* 2026-10-15 案B：多摩祭のカードを短く（人数の行・ステージ1行・くわしく） */
+  .tscard .tsrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0 6px}.tscard .tsrow .tsn{margin:0}
+  .tscard .tsrow button{flex-shrink:0;padding:6px 10px;border-radius:12px;border:0;background:#c0456a;color:#fff;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer}
+  .tscard .tsn small{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .tscard .tsst1{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;line-height:1.4;cursor:pointer}
+  .tscard .tsst1 .tm{flex-shrink:0;font-size:11px;font-weight:800;color:#a8335a;background:#fdebe4;border-radius:6px;padding:2px 6px}.tscard .tsst1 .tm.on{color:#fff;background:#c8361f;animation:tslive 1.6s ease-in-out infinite}
+  .tscard .tsst1 .nm{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tscard .tsst1 .nm small{margin-left:6px;font-size:11px;font-weight:500;color:var(--muted)}
+  .tscard .tsst1 .go{color:var(--muted2)}
+  .tscard .tsmore .tsfoot{margin-top:8px}
+  .tscard .tsmorebtn{display:block;margin:6px auto -4px;border:0;background:none;font:inherit;font-size:11.5px;font-weight:700;color:#a8335a;cursor:pointer;padding:4px 10px}
+  /* 2026-10-15 案A：多摩祭の質問（1/3 → 3/3 の1枚） */
+  .daily.fesq .dqh em{font-style:normal;margin-left:4px;font-size:11px;font-weight:800;color:#fff;background:#c8361f;border-radius:999px;padding:1px 7px}
+  .daily.fesq .fqq{font-size:15px;font-weight:800;margin:4px 0 8px;line-height:1.45}
+  .daily.fesq .fqnote{font-size:11px;color:var(--muted);margin-top:6px}
+  .daily.fesq .fqmine{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.daily.fesq .fqmine span{font-size:12.5px;font-weight:700;background:#fff3e6;border:1px solid rgba(212,67,42,.3);border-radius:999px;padding:3px 10px}
   .tscard .tsqh{font-size:13.5px;font-weight:800;line-height:1.5}.tscard .tsqh span,.tscard .tsq.done span{display:block;font-size:10.5px;font-weight:500;color:var(--muted)}
   .tscard .tsqo{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:6px;padding-bottom:2px}.tscard .tsqo::-webkit-scrollbar{height:0}
   .tscard .tsqo button{flex-shrink:0;padding:7px 11px;border-radius:14px;border:1.5px solid #f0729a;background:#fff;color:#c0456a;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
@@ -4738,7 +4753,7 @@ function renderStartCard(){
   const el=$('#startCard'); if(!el)return;
   const st=startState();
   let h='';
-  if(profile&&!st.hide){
+  if(profile&&!st.hide&&!tamasaiDay()){   // 多摩祭の日は出さない（中身が時間割・お題で、祭りの日には関係が薄い。2026-10-15 案C）
     const items=[
       {done:myClassOptions().length>0, icon:'🗓', t:'時間割に授業を入れる', d:'同じ授業の人が「共通点」に出ます', go:'openTimetable()'},
       {done:!!st.daily||!!dailyAnswer(profile), icon:'🎲', t:'今日のお題に答える', d:'同じ答えの人と、会った時の話題ができます', go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})"},
@@ -5452,7 +5467,8 @@ let tipCur=null;
 function markTip(k){ if(!tipsSeen.includes(k))tipsSeen.push(k); try{ localStorage.setItem('tama_tips',JSON.stringify(tipsSeen)); }catch(e){} }
 const curScreen=()=>{ const s=$('.screen.active'); return s?s.id.slice(2):''; };
 function tipBlocked(){
-  return !profile||$('#nav').style.display==='none'||$('#guide').classList.contains('show')||$('#pushGate').classList.contains('show')
+  return !profile||tamasaiDay()||   // 多摩祭の日は、初めて見た時の吹き出しを出さない（カードの上に重なって邪魔になる。2026-10-15 案C）
+    $('#nav').style.display==='none'||$('#guide').classList.contains('show')||$('#pushGate').classList.contains('show')
     ||$('#homeGate').classList.contains('show')||$('#fesClosed').classList.contains('show')||!!$('.overlay.show')||!!$('.map-wrap.full')||$('#matchpop').classList.contains('show');
 }
 function maybeTip(){
@@ -6398,9 +6414,50 @@ function fillDailyStats(){
 }
 let dailyShown=null;   // 入力中に6秒ごとの再描画で消えないよう、まだ答えていない間は、お題が変わった時だけ描き直す
 let dailyOpen=false;   // 答えた後のカードを広げているか（ふだんは1行にたたむ。人の一覧を先に見せるため）
+/* 多摩祭の質問（2026-10-15 あおの依頼「ホームをすっきり」案A）。
+   前は、祭りの質問2問（🍡食べたいもの・🎤楽しみなこと。多摩祭のカードの中）と、今日のお題の「おすすめの出店・企画」が2か所に分かれていた。
+   多摩祭の日は、今日のお題の場所（#dailyCard）に1枚で「1/3 → 2/3 → 3/3」と1問ずつ出し、答え終わったら1行にたたむ（押すと広がる）。
+   答えの入れ場所は前と同じ（祭りの2問は fes26q、出店・企画は daily）なので、共通点の出し方・数え方は変わらない */
+let fesQShown='';
+function renderFesQ(el,t){
+  const qs=FES.tamasai.qs||[], total=qs.length+1, q=qs.find(x=>!tamasaiAns(profile,x.k)), shop=dailyAnswer(profile);
+  const step=q?qs.indexOf(q)+1:shop?total:qs.length+1;
+  const head=n=>`<div class="dqline"><span class="dqh">🏮 多摩祭の質問 <em>${n}/${total}</em></span></div>`;
+  if(q){   // 祭りの質問（押すだけ）
+    const key='q:'+q.k; if(fesQShown===key&&el.innerHTML)return; fesQShown=key;
+    el.className='daily q fesq'; el.onclick=null;
+    el.innerHTML=head(step)+`<div class="fqq">${q.icon} ${esc(q.q)}</div><div class="chips">${q.o.map((o,i)=>`<span class="c" onclick="event.stopPropagation();answerTamasaiQ('${q.k}',${i})">${esc(o)}</span>`).join('')}</div><div class="fqnote">同じ答えの人が、今日だけ共通点として「ホーム」に出ます</div>`;
+    return;
+  }
+  if(!shop){   // おすすめの出店・企画（打つ欄があるので、同じ中身の時は描き直さない＝打っている途中で消えないように）
+    fesDailyOpts=[...new Set((booths||[]).filter(b=>!isTest(b.id)||isTest(myId)).map(b=>(b.name||'').trim()).filter(Boolean))].slice(0,10);
+    const key='shop:'+fesDailyOpts.length+':'+SHOPS().length; if(fesQShown===key&&el.innerHTML)return; fesQShown=key;
+    el.className='daily q fesq'; el.onclick=null;
+    el.innerHTML=head(step)+`<div class="fqq">🏮 ${esc(t.q)}</div>`
+      +(fesDailyOpts.length?`<div class="chips" style="margin-bottom:8px">${fesDailyOpts.map((o,i)=>`<span class="c" onclick="event.stopPropagation();answerDaily(fesDailyOpts[${i}])">${esc(o)}</span>`).join('')}</div>`:'')
+      +(SHOPS().length?`<button class="shopall" onclick="event.stopPropagation();openShopPick()">🏮 出店・企画の一覧から選ぶ（${SHOPS().length}件）</button>`:'')
+      +`<div class="drow"><input id="dailyIn" maxlength="40"${SHOPS().length?' data-sugg="shop"':''} placeholder="${esc(SHOPS().length?'名前・団体・食べ物を打つと候補が出ます':t.free)}"><button class="btn btn-primary" onclick="event.stopPropagation();answerDaily($('#dailyIn').value)">答える</button></div>`;
+    return;
+  }
+  // 全部答えた：1行（押すと、答えと「同じ答えの人」が広がる）
+  fesQShown='done';
+  const c=dailyCounts(), mine=qs.map(x=>`${x.icon} ${esc(tamasaiAns(profile,x.k))}`).concat([`🏮 ${esc(shop)}`]);
+  el.className='daily fesq'+(dailyOpen?'':' done');
+  el.onclick=()=>{ dailyOpen=!dailyOpen; renderDaily(); };
+  if(!dailyOpen){ el.innerHTML=`<div class="dline">${mine.join('　')}　<span class="dc">同じ答え ${c.all}人 ›</span></div>`; return; }
+  loadDailyStats(t);
+  el.innerHTML=`<div class="dh"><span>🏮 多摩祭の質問（答えました）</span><span>閉じる ▲</span></div>
+    <div class="fqmine">${mine.map(x=>`<span>${x}</span>`).join('')}</div>
+    <div class="dq" style="margin-top:8px">${esc(t.q)}</div><div class="ddist" id="dailyDist"></div>
+    <div class="dcount">「${esc(shop)}」を推している人　近くに <b>${c.near}</b>人 ・ 今日すれ違った人に <b>${c.crossed}</b>人 ・ キャンパスに <b>${c.all}</b>人</div>
+    <div class="dnote">同じ答えの人は「ホーム」に共通点つきで出ます。3人以上が同じ出店・企画を答えると、ここに多かった答えが出ます</div>`;
+  fillDailyStats();
+}
 function renderDaily(){
   const el=$('#dailyCard'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
+  { const t0=dailyToday(); if(t0.fes)return renderFesQ(el,t0); }   // 多摩祭の日は「多摩祭の質問」の1枚（案A）
+  fesQShown='';
   // 多摩祭の日は、出店の一覧があとから読み込まれた時にもボタンが出るよう、出店の数も目印に入れる
   const t=dailyToday(), mine=dailyAnswer(profile), key=t.d+'/'+(mine?'a':'q')+(t.fes?'/'+booths.length:'');
   loadDailyStats(dailyYesterday());   // 昨日の結果（1日に何度も変わらないが、2分に1回までしか取りに行かない）
@@ -6499,7 +6556,9 @@ function renderCt(){
   const el=$('#ctCard'); if(!el)return;
   const ph=ctPhase(), mine=ctAnswer(profile);
   clearInterval(ctTimer); ctTimer=null;
-  if(!profile||!ph||ph==='day'){ el.innerHTML=''; el.className='ctcard'; return; }
+  // 多摩祭の日は、終わってからの結果は20分だけ（ホームを短くするため。2026-10-15 案C）
+  const fesHide=ph==='after'&&tamasaiDay()&&Date.now()-Date.parse(ctCur.starts_at)>(CT_MIN+20)*60000;
+  if(!profile||!ph||ph==='day'||fesHide){ el.innerHTML=''; el.className='ctcard'; return; }
   if(ph==='after'){
     el.className='ctcard after';
     const r=ctResultText();
@@ -6583,21 +6642,15 @@ const tamasaiAns=(u,k)=>{ const x=attrsOf(u).fes26q; return x&&x[k]?String(x[k])
 function answerTamasaiQ(k,i){
   const q=(FES.tamasai.qs||[]).find(x=>x.k===k); if(!q||!profile||!q.o[i])return;
   profile.fa=profile.fa||{}; profile.fa.fes26q={...(profile.fa.fes26q||{}),[k]:q.o[i]}; if(tamasaiTester())profile.fa.fes26q_test=1;   // 試しの答えは、本当の1日目に消す
-  publishMe(); saveMyAttrs(); renderTamasai(); renderNearby(); renderCross();
+  publishMe(); saveMyAttrs(); renderTamasai(); renderDaily(); renderNearby(); renderCross();
   toast(`${q.icon} 「${esc(q.o[i])}」同じ答えの人が、今日だけ共通点に出ます`);
-}
-function tamasaiQHTML(){
-  const qs=FES.tamasai.qs||[]; if(!qs.length)return '';
-  const q=qs.find(x=>!tamasaiAns(profile,x.k));
-  if(!q)return `<div class="tsq done">${qs.map(x=>`${x.icon} ${esc(tamasaiAns(profile,x.k))}`).join('　')}<span>同じ答えの人が今日だけ共通点に</span></div>`;
-  return `<div class="tsq"><div class="tsqh">${q.icon} ${esc(q.q)}<span>同じ答えの人が今日だけ共通点に（${qs.indexOf(q)+1}/${qs.length}）</span></div><div class="tsqo">${q.o.map((o,i)=>`<button onclick="answerTamasaiQ('${q.k}',${i})">${esc(o)}</button>`).join('')}</div></div>`;
 }
 // 1日目の夕方から（2日目に開く理由。チームの意見「1日目にすれ違った人にもう一度会える」）
 function tamasaiTomorrowHTML(){
   const T_=FES.tamasai, now=tamasaiNow(), d=jstDayOf(now);
   if(d!==T_.days[0]||T_.days.length<2||new Date(now+9*3600000).getUTCHours()<15)return '';
   const n=Object.values(encLog||{}).filter(a=>a.some(x=>jstDayOf(x.at)===d)).length, fw=T_.fireworks;
-  return `<div class="tsnote">🌙 明日も多摩祭で開いてね。${T_.ctTimes&&T_.ctTimes.length?`<b>${T_.ctTimes.join('</b> と <b>')}</b> にちかくタイム。`:''}${fw&&fw.day===T_.days[1]?`<b>${fw.at}</b> からの花火の前（${fw.ct}）にも。`:''}${n?`今日すれ違った<b>${n}人</b>に、もう一度会えるかも`:'アプリを開いている間に近くを通った人が、すれ違いに記録されます'}</div>`;
+  return `<div class="tsnote">🌙 明日も開いてね：${T_.ctTimes&&T_.ctTimes.length?`<b>${T_.ctTimes.join('・')}</b> ちかくタイム`:''}${fw&&fw.day===T_.days[1]?`・<b>${fw.at}</b> 花火`:''}${n?`。今日すれ違った<b>${n}人</b>にまた会えるかも`:''}</div>`;   // 1行に短く（2026-10-15 案B）
 }
 // 花火の日（2日目）の昼すぎから「18:00 花火・17:45 花火のちかくタイム」（2026-10-15 あおの決定）
 // いま・つぎのステージ（FES.tamasai.stages。2026-10-15 あおの依頼「祭りのアプリ・サイトを調べて試しに」：
@@ -6607,16 +6660,17 @@ function tamasaiStageHTML(){
   const ss=FES.tamasai.stages||[], now=tamasaiNow(), d=jstDayOf(now), hm=new Date(now+9*3600000).toISOString().slice(11,16);
   const today=ss.filter(s=>s.d===d); if(!today.length)return '';
   const live=today.filter(s=>s.s<=hm&&hm<s.e), next=today.filter(s=>s.s>hm).sort((a,b)=>a.s<b.s?-1:1)[0];
-  if(!live.length&&!next)return '';
+  const ofc='<a class="tsofc" href="https://www.hosei-tamafes.com/" target="_blank" rel="noopener">📅 タイムテーブル・企画マップ（公式サイト）›</a>';
+  if(!live.length&&!next)return `<div class="tsstage"><div class="tsqh">🎤 ステージ</div><div class="tsst">今日のステージは終わりました</div>${ofc}</div>`;
   const row=(s,on)=>`<div class="tsst${on?' on':''}"><span class="tm">${on?'▶ いま':s.s+'〜'}</span><span class="nm"><b>${esc(s.n)}</b><small>${esc(s.p||'')}${s.g&&s.g!==s.n?' ・ '+esc(s.g):''}${on?' ・ 〜'+s.e:''}</small></span></div>`;
-  return `<div class="tsstage"><div class="tsqh">🎤 いま・つぎのステージ</div>${live.slice(0,2).map(s=>row(s,true)).join('')}${next?row(next,false):''}<a class="tsofc" href="https://www.hosei-tamafes.com/" target="_blank" rel="noopener">📅 タイムテーブル・企画マップ（公式サイト）›</a></div>`;
+  return `<div class="tsstage"><div class="tsqh">🎤 いま・つぎのステージ</div>${live.slice(0,2).map(s=>row(s,true)).join('')}${next?row(next,false):''}${ofc}</div>`;
 }
 function tamasaiFireworksHTML(){
   const fw=FES.tamasai.fireworks, now=tamasaiNow(); if(!fw||jstDayOf(now)!==fw.day)return '';
   const h=new Date(now+9*3600000).getUTCHours(); if(h<12||h>=19)return '';
   const hm=new Date(now+9*3600000).toISOString().slice(11,16);
-  if(hm>=fw.at)return `<div class="tsnote">🎆 花火の時間です。開いたまま見ると、近くで見ている人とのすれ違いが記録されます <a onclick="fesFireworks()" style="color:#c8361f;font-weight:800;cursor:pointer">🎆 アプリでも ›</a></div>`;
-  return `<div class="tsnote">🎆 <b>${fw.at}</b> から花火。<b>${fw.ct}</b> に花火のちかくタイム。花火の前に一度開くと、近くで見ている人とのすれ違いが記録されます</div>`;
+  if(hm>=fw.at)return `<div class="tsnote">🎆 花火の時間！ 開いたまま見ると、すれ違いが記録されます <a onclick="fesFireworks()" style="color:#c8361f;font-weight:800;cursor:pointer">アプリでも ›</a></div>`;
+  return `<div class="tsnote">🎆 <b>${fw.at}</b> 花火（<b>${fw.ct}</b> 花火のちかくタイム）</div>`;
 }
 // アンケートの案内（URL があって、期間中で、まだ押していない人だけ）
 function tamasaiSurveyOn(){
@@ -6687,9 +6741,10 @@ function renderTamasaiWel(){ const el=$('#tamasaiWel'); if(el)el.innerHTML=tamas
 function placeTamasaiCards(){
   placeNowBar();
   // 目印は「はじめにやること」（#startCard）。前は #nowBar の上に置いていたが、多摩祭の日は #nowBar をマイページへ移すため（2026-10-15）
-  const ts=$('#tamasaiCard'), ct=$('#ctCard'), sc=$('#startCard'), cb=$('#classBar'); if(!ts||!ct||!sc||!cb)return;
-  if(tamasaiDay()){ if(sc.previousElementSibling!==ct){ sc.insertAdjacentElement('beforebegin',ts); sc.insertAdjacentElement('beforebegin',ct); } }
-  else if(cb.nextElementSibling!==ts){ cb.insertAdjacentElement('afterend',ts); ts.insertAdjacentElement('afterend',ct); }
+  // 2026-10-15 案D：多摩祭の日は「近くの共通点のある人」→ 🎪カード → 🏮多摩祭の質問 → ⏰ちかくタイム（始まった時だけ）→ 友達 → 地図の順
+  const ts=$('#tamasaiCard'), ct=$('#ctCard'), dc=$('#dailyCard'), sc=$('#startCard'), cb=$('#classBar'); if(!ts||!ct||!dc||!sc||!cb)return;
+  if(tamasaiDay()){ if(sc.previousElementSibling!==ct||ts.nextElementSibling!==dc){ sc.insertAdjacentElement('beforebegin',ts); sc.insertAdjacentElement('beforebegin',dc); sc.insertAdjacentElement('beforebegin',ct); } }
+  else if(cb.nextElementSibling!==ts||ct.nextElementSibling!==dc){ cb.insertAdjacentElement('afterend',ts); ts.insertAdjacentElement('afterend',ct); ct.insertAdjacentElement('afterend',dc); }
 }
 // 多摩祭の日は「いまの自分・時間割」（#nowBar）をホームからマイページへ移す（2026-10-15 しゅうすけさんの依頼：当日は授業が無く、ホームを祭りのものにするため）。
 // ほかの日はホームのもとの場所（「はじめにやること」のすぐ上）に戻す。中身はどちらでも renderStatusRow が作る
@@ -6753,19 +6808,30 @@ function renderTamasai(){
   const me=st.fes26?'✅ 参加中 🎪':geoDenied?'📍 位置情報オフ':'キャンパスで開くと参加（🎪バッジ）';
   const geoNote=!st.fes26&&geoDenied?'<div class="tsnote">📍 位置情報がオフだと「参加」に数えられず、🎪バッジも付きません。設定 → プライバシー → 位置情報 から、ちかく（Safari）を「使用中のみ」にしてください</div>':'';
   const cross=`🎆 すれ違い ${Math.min(lookCount('fes26x'),T_.crossN)}/${T_.crossN}人`;
-  const invite=`<button onclick="openInvite()">📨 友達を誘う</button>`;
+  const invite=`<button onclick="openInvite()">📨 誘う</button>`;   // 1行に収まるよう短く（2026-10-15 案B）
   // 試す人だけ：1日目／2日目の切りかえ（2026-10-15）
   const td=tamasaiTester()?tamasaiTestDay():'', test=td?`<div class="tstest">🧪 試しの表示（あなただけ）${T_.days.map((d,i)=>`<button class="${d===td?'on':''}" onclick="setTamasaiTestDay('${d}')">${i+1}日目</button>`).join('')}<button class="${fesYoruTest?'on':''}" onclick="toggleYoruTest()">🌙 夜</button><button onclick="fesFireworks()">🎆</button></div>`:'';
   const head=test+`<div class="tsh"><span>🎪 多摩祭2026</span><span>${me}</span></div>`;
   // 数は「ちかく」のユーザー（多摩キャン版＋通常版の登録者。2026-10-15 あおの決定で、目標200人）
-  const prog=n!=null&&n>=goal
-    ?`<div class="tsn">🎉 ちかくのユーザー <b>${goal}</b>人達成！ 多摩祭に参加した全員に🎉バッジ</div><div class="tsbar"><i style="width:100%"></i></div><div class="tsfoot"><span>いま ${n}人 ・ ${cross}</span>${invite}</div>`
-    :n==null||n<T_.showFrom
-    ?`<div class="tsn">ちかくのユーザー <b>${goal}</b>人が目標！</div><div class="tsfoot"><span>届いたら、多摩祭に参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`
-    :`<div class="tsn">ちかくのユーザー <b>${n}</b>人 ／ 目標${goal}人</div><div class="tsbar"><i style="width:${Math.min(100,Math.round(n/goal*100))}%"></i></div><div class="tsfoot"><span>あと<b style="color:#c0456a">${goal-n}</b>人で、多摩祭に参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`;
+  // 2026-10-15 あおの依頼「ホームをすっきり」（案B）：いつも出すのは、人数のバーと、ステージ1行と、その時間だけの1行（アンケート・明日・花火）。
+  // バッジの説明・すれ違いの数・ステージの全部・公式サイトは「くわしく」を押した時だけ。祭りの質問は、今日のお題と1枚にまとめた（案A。renderFesQ）
+  const done=n!=null&&n>=goal;
+  const prog=`<div class="tsrow"><div class="tsn">${done?`🎉 ちかくのユーザー <b>${goal}</b>人達成！`:n==null||n<T_.showFrom?`ちかくのユーザー <b>${goal}</b>人が目標！`:`ちかくのユーザー <b>${n}</b>人 <small>／ 目標${goal}人</small>`}</div>${invite}</div>`
+    +(n!=null&&n>=T_.showFrom?`<div class="tsbar"><i style="width:${done?100:Math.min(100,Math.round(n/goal*100))}%"></i></div>`:'');
+  const more=tsOpen?`<div class="tsmore"><div class="tsfoot"><span>${done?`多摩祭に参加した全員に🎉バッジ ・ いま ${n}人`:`${n!=null&&n>=T_.showFrom?`あと<b style="color:#c0456a">${goal-n}</b>人で`:'届いたら'}、多摩祭に参加した全員に🎉バッジ`} ・ ${cross}</span></div>${tamasaiStageHTML()}</div>`:'';
+  const toggle=`<button class="tsmorebtn" onclick="toggleTsOpen()">${tsOpen?'とじる ▴':'くわしく ▾'}</button>`;
   // 中身が変わった時だけ描き直す（6秒ごとに作り直すと、選択肢の横スクロールが戻り、押している途中のタップが消えるため。2026-10-15 のレビューで直した）
-  const html=head+geoNote+tamasaiSurveyHTML()+prog+tamasaiStageHTML()+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML();
+  const html=head+geoNote+tamasaiSurveyHTML()+prog+(tsOpen?'':tamasaiStageLine())+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML()+more+toggle;
   if(el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; }
+}
+let tsOpen=false;
+function toggleTsOpen(){ tsOpen=!tsOpen; renderTamasai(); }
+// ステージの1行（いまやっているもの、無ければ次のもの）。押すと「くわしく」が開く
+function tamasaiStageLine(){
+  const ss=FES.tamasai.stages||[], now=tamasaiNow(), d=jstDayOf(now), hm=new Date(now+9*3600000).toISOString().slice(11,16);
+  const today=ss.filter(s=>s.d===d), live=today.find(s=>s.s<=hm&&hm<s.e), next=today.filter(s=>s.s>hm).sort((a,b)=>a.s<b.s?-1:1)[0], s=live||next;
+  if(!s)return '';
+  return `<div class="tsst1" onclick="toggleTsOpen()"><span class="tm${live?' on':''}">${live?'▶ いま':'つぎ '+s.s}</span><span class="nm">${esc(s.n)}<small>${esc(s.p||'')}${live?' 〜'+s.e:''}</small></span><span class="go">›</span></div>`;
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
