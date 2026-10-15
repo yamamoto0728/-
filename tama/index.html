@@ -4124,8 +4124,12 @@ async function sendChatText(uid,t){
     setTimeout(()=>{const cc=chatOf(uid);if(cc){cc.msgs.push({from:uid,text:reply(),at:Date.now()});if(chatPeer===uid)renderChat();}},1100);return;}
   if(!sb)return;
   c.msgs.push({from:myId,text:t,at:Date.now()});renderChat();
-  notifyMsg(uid,c,t);
-  await sb.from(T('messages')).insert({match_key:chatKey(uid),from_id:myId,text:t});
+  // 保存できなかった時は、知らせて画面からも外す（2026-10-15 あおの指摘「送りあったのに Supabase に反映されない」。前は失敗しても何も出さず、通知だけ届いていた）
+  const {error}=await sb.from(T('messages')).insert({match_key:chatKey(uid),from_id:myId,text:t});
+  if(error){ console.warn('[chat] 送れませんでした',error.code,error.message); c.msgs=c.msgs.filter(x=>!(x.from===myId&&x.text===t&&Date.now()-x.at<60000)); renderChat();
+    toast('⚠️ 送れませんでした'+(/row-level security|violates/i.test(error.message)?'（このトークに書ける条件に当てはまっていません。おたがいにいいね、か友達になっているか確かめてください）':'（'+esc(String(error.message).slice(0,60))+'）'));
+    const inp=$('#chatInput'); if(inp&&!inp.value)inp.value=t; return; }
+  notifyMsg(uid,c,t);   // 保存できた時だけ、相手に通知
 }
 
 // メッセージのプッシュ通知（マッチ・友達のチャット共通。2026-09-24）。アプリを閉じていても気づけるようにする。
@@ -4287,7 +4291,10 @@ async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(
   if(!sb){toast('バックエンド未接続です');return;}
   const m={room_id:curRoom.id,from_id:myId,name:profile?profile.name:'匿名',emoji:profile?profile.emoji:'🙂',text:t};
   curRoom.msgs=(curRoom.msgs||[]).concat(m); renderRoom();
-  try{await sb.from(T('room_messages')).insert(m);}catch(e){}
+  // 保存できなかった時は、知らせて画面からも外す（2026-10-15。前は失敗しても何も出さず、ほかの人に通知だけ届いていた）
+  const {error:pe}=await sb.from(T('room_messages')).insert(m);
+  if(pe){ console.warn('[room] 投稿できませんでした',pe.code,pe.message); curRoom.msgs=(curRoom.msgs||[]).filter(x=>x!==m); renderRoom(); inp.value=t;
+    toast('⚠️ 投稿できませんでした'+(/row-level security|violates/i.test(pe.message)?'（この部屋に参加しているか確かめてください）':'（'+esc(String(pe.message).slice(0,60))+'）')); return; }
   misMark('post');   // 今日のミッション（コミュニティに書き込む）
   markRoomRead(curRoom.id,true); notifyRoomMembers(curRoom,t);
 }
