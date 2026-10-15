@@ -22,6 +22,20 @@ $$;
 revoke all on function public.tama_tamasai_count() from public, anon;
 grant execute on function public.tama_tamasai_count() to authenticated;
 
+-- 1-2. 「ちかく」のユーザー数（2026-10-15 あおの決定：多摩祭のカードの目標は、ちかくのユーザー200人）。
+--      多摩キャン版（tama_profiles）＋通常版（profiles）の登録者の合計。同じ人が両方に登録していても2人と数える（別のIDのため見分けられない）。
+--      通常版の表が無い時は、多摩キャン版だけを数える
+create or replace function public.tama_chikaku_users()
+returns int language plpgsql stable security definer set search_path = public as $$
+declare n int; m int := 0;
+begin
+  select count(*) into n from public.tama_profiles;
+  if to_regclass('public.profiles') is not null then execute 'select count(*) from public.profiles' into m; end if;
+  return n + m;
+end $$;
+revoke all on function public.tama_chikaku_users() from public, anon;
+grant execute on function public.tama_chikaku_users() to authenticated;
+
 -- ---------------------------------------------------------------------------
 -- 2. 出店とクーポン
 -- ---------------------------------------------------------------------------
@@ -130,7 +144,7 @@ end $$;
 notify pgrst, 'reload schema';
 
 -- 確認：いまの参加人数（多摩祭の前は 0）と、多摩祭の通知の予定（6行）
-select public.tama_tamasai_count() as 多摩祭の参加人数;
+select public.tama_tamasai_count() as 多摩祭の参加人数, public.tama_chikaku_users() as ちかくのユーザー数;
 select jobname, schedule, active from cron.job where jobname like 'tama-fes-%' order by jobname;
 
 -- ---------------------------------------------------------------------------
