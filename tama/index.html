@@ -1091,7 +1091,7 @@
           <div><span>2</span><b>近くの人に 👋</b><small>両方いいねで話せる</small></div>
           <div><span>3</span><b>会ったら話題に</b><small>共通点から話せる</small></div>
         </div>
-        <div class="notlove">🙅 <b>恋愛目的のアプリではありません。</b><br>同じ授業・同じアーティスト・同じ「あるある」の人と<br>友達になるためのアプリです。</div>
+        <div class="notlove">🙅 <b>恋愛目的のアプリではありません。</b><br>同じ授業・同じアーティスト・同じ「あるある」の人と<br>友達になるためのアプリです。<br><span style="font-size:11.5px">🔞 18歳以上の方が使えます</span></div>
         <div id="tamasaiWel"></div>
         <div class="feslive" id="fesLiveWel"></div>
         <!-- 2026-10-08 あおの依頼「多摩キャン生にとって何がいいかが伝わるように」：①会った時の話題 ②友達のいまどこ・履修 ③授業の部屋 ④新しい出会い の4枚 -->
@@ -1518,6 +1518,8 @@ const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形
 // 多摩キャン版のデータは tama_ 付きの別テーブルに保存する（supabase/tama_tables.sql）。
 // push_subscriptions だけは Edge Function が読むので通常版と共用
 const T=name=>'tama_'+name;
+// 表・関数がまだ無い（SQL の実行前）エラーか（2026-10-15 のレビュー：電波が一瞬悪いだけで「表が無い」とみなし、その日ずっと止めていたため。それ以外のエラーは、次の読み込みでやり直す）
+const isSchemaErr=e=>!!e&&(['PGRST202','PGRST205','42P01','42703'].includes(e.code)||/schema cache|does not exist|Could not find/i.test(e.message||''));
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 // アイコンの絵文字。2026-09-24 に12→38種類に増やした（足す時は GRADS に背景の色も足す。無いと青緑の既定色になる）。
@@ -1712,7 +1714,9 @@ async function initBackend(){
     try{ const { data:{ session } } = await sb.auth.getSession(); if(session && session.user) user = session.user; }catch(e){}
     if(!user){ try{ const g = await sb.auth.getUser(); if(g.data && g.data.user) user = g.data.user; }catch(e){} }
     if(!user){ const r = await sb.auth.signInAnonymously();
-      if(r.error){ backendError('匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。'); return false; }
+      // 回数制限（同じ回線から短い時間に多くの人が登録した時など）は、原因と違う文を出さない（2026-10-15 のレビュー：学園祭のブースのWi-Fi）
+      if(r.error){ const m=String(r.error.message||''), rl=r.error.status===429||/rate limit|too many/i.test(m);
+        backendError(rl?'いま登録が混み合っています。1〜2分待ってから開き直すか、Wi-Fiを切ってモバイル回線で開いてください。':/disabled|not enabled|signups not allowed/i.test(m)?'匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。':'うまく始められませんでした（'+m.slice(0,80)+'）。少し待ってから開き直してください。'); return false; }
       user = r.data.user;
     }
     myId = user.id; return true;
@@ -1883,8 +1887,10 @@ const PUSH_WHY={
   near:['共通点のある人が<br>近くに来たら知らせます','アプリを閉じていても、キャンパスで共通点のある人が近くに来たときにお知らせします。いいね・友達申請も届きます。'],
   daily:['明日のお題を<br>お知らせします','平日の昼休みに、まだ答えていないお題を1日1回だけお知らせします。いいね・友達申請も届きます。'],
   tt:['通知で<br>お知らせします','いいね・友達申請と、平日の昼休みのお題（まだ答えていない日だけ）をお知らせします。友達がいれば、その日最初の授業のはじめに「いまどこ？」の確認も届きます。'],
+  // 多摩祭の日（2026-10-15 のレビュー：祭りの日に通知を許可するいちばんの理由が、ちかくタイムの知らせなのに書いていなかった）
+  fes:['ちかくタイムを<br>通知で知らせます','多摩祭の日は、12:30・15:30（18日は花火の前の17:45も）に10分だけのお題をお知らせします。いいね・メッセージも届きます。'],
 };
-function setPushWhy(k){ const [h,p]=PUSH_WHY[k]||PUSH_WHY.wave; const H=$('#pushGateH'), P=$('#pushGateP'); if(H)H.innerHTML=h; if(P)P.textContent=p; }
+function setPushWhy(k){ if(typeof tamasaiDay==='function'&&tamasaiDay()&&['open','daily','tt','near'].includes(k))k='fes'; const [h,p]=PUSH_WHY[k]||PUSH_WHY.wave; const H=$('#pushGateH'), P=$('#pushGateP'); if(H)H.innerHTML=h; if(P)P.textContent=p; }
 function askPushSoon(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} setTimeout(autoAskPush,1200); }
 // ボタンを押した直後に聞く（押した直後なので、iPhoneでもそのまま端末の許可画面を出せる）
 function askPushNow(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} pushGateSkipped=false; openPushGate(); requestPushPermission(); }
@@ -2035,6 +2041,12 @@ function markMissing(list){
   if(list.length){ const f=list[0][0]; f.scrollIntoView({behavior:'smooth',block:'center'}); toast('⚠️ '+(list.length>1?'あと'+list.length+'項目：':'')+list.map(x=>x[1]).join('・')); }
   return list.length===0;
 }
+// 18歳未満の人に（2026-10-15 のレビュー：学園祭には高校生や家族連れも来る。赤い枠だけで止めず、ていねいに）
+function openUnder18(){
+  $('#invSheet').innerHTML=`<h2 class="pstitle">🎪 来てくれてありがとう！</h2><p class="psdesc">「ちかく」は、<b style="color:var(--ink)">18歳以上の方</b>が使えるアプリです。ごめんなさい、いまは使えません。<br>多摩祭を楽しんでください！</p>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="closeInvite()">わかった</button>`;
+  $('#invOverlay').classList.add('show');
+}
 function obCheck(step){
   const miss=[];
   if(step===1){
@@ -2043,7 +2055,7 @@ function obCheck(step){
     else if(ngCheck(name))miss.push([$('#obName'),'ニックネームに使えない言葉があります']);
     if(!obAttr.faculty)miss.push([$('#obFaculty'),'学部']);
     if(!age)miss.push([$('#obAge'),'年齢']);
-    else if(age<18)miss.push([$('#obAge'),'18歳以上の方だけ使えます']);
+    else if(age<18){ miss.push([$('#obAge'),'18歳以上の方だけ使えます']); setTimeout(openUnder18,80); }   // 赤い枠だけでなく、ていねいに伝える（2026-10-15 のレビュー：学園祭には高校生も来る）
     if(!$('#obTerms').checked)miss.push([$('#obTerms'),'利用規約への同意']);
   }
   if(step===2){
@@ -2168,9 +2180,14 @@ function inCampus(lat,lng){
 let fesOutside=false;
 // キャンパスの外にいる間は位置の機能だけ止める（位置を送らない・近くの人の一覧と地図・すれ違い・通知・出店の判定をしない）。
 // プロフィール・マッチ・チャット・コミュニティはそのまま使える。
+// 「外」と決めるのは、位置のずれが100m以内で、外が2回続いた時だけ（2026-10-15 のレビュー：人の多い所・建物の中で位置がぶれて、
+// 1回ずれただけで外になり、地図から消えたり出たりしていた）。中に戻る時は1回ですぐ戻す
+let outsideStreak=0;
 function fesCampusGate(){
   const was=fesOutside;
-  fesOutside=FES.campusOnly&&!!myPos&&!inCampus(myPos.lat,myPos.lng);
+  const out=FES.campusOnly&&!!myPos&&!inCampus(myPos.lat,myPos.lng);
+  if(out&&!was){ if((myPos.acc||0)>100)return; if(++outsideStreak<2)return; } else outsideStreak=0;
+  fesOutside=out;
   if(fesOutside===was)return;
   if(fesOutside){
     insideSet.clear();
@@ -2196,7 +2213,9 @@ function geoState(cls,t){const c=$('#gpsChip');c.className='g '+(cls==='ok'?'on'
 
 /* ---------- presence (Supabase profiles) ---------- */
 async function publishMe(){
-  if(!profile||!myPos||!sharing||!sb||fesOutside)return;let lat=myPos.lat,lng=myPos.lng;
+  if(!profile||!myPos||!sharing||!sb||fesOutside)return;
+  if(FES.campusOnly&&!inCampus(myPos.lat,myPos.lng))return;   // 外の位置は1回でも送らない（外の判定は2回続いた時なので、その間も。2026-10-15）
+  let lat=myPos.lat,lng=myPos.lng;
   if(coarse){lat=Math.round(lat*1000)/1000;lng=Math.round(lng*1000)/1000;}
   const row={id:myId,name:profile.name,age:profile.age,emoji:profile.emoji,bio:profile.bio,tags:profile.tags,work:profile.work,looking:profile.looking,likes:profile.likes,interests:profile.interests,lat,lng,coarse,sharing:true,updated_at:new Date().toISOString()};
   if(!fesAttrColMissing)row.fes_attrs=profile.fa||{};
@@ -2617,7 +2636,7 @@ async function loadEncounterLog(){
   if(!sb||!myId||String(myId).startsWith('local-')||encLogMissing)return;
   const since=new Date(Date.now()-120*86400000).toISOString();
   const {data,error}=await sb.from(T('encounter_log')).select('other_id,at,place').eq('owner_id',myId).gte('at',since).order('at').limit(3000);
-  if(error){ encLogMissing=true; console.warn('[encounter_log] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); return; }
+  if(error){ if(isSchemaErr(error))encLogMissing=true; console.warn('[encounter_log] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); return; }
   const local=encLog; encLog={};
   (data||[]).forEach(r=>{ (encLog[r.other_id]=encLog[r.other_id]||[]).push({at:Date.parse(r.at)||0,place:r.place||''}); });
   // 読み込みより先に、この端末で記録した分（テスト用の人など）は残す
@@ -2761,7 +2780,7 @@ function renderNearby(){
   const openAll=all.sort(byScore), frNow=openAll.filter(x=>isFriend(x.u.id)), open=openAll.filter(x=>!isFriend(x.u.id));
   renderNearFriends(frNow);
   { const nc=open.filter(x=>x.common.length).length, el=$("#nearJump");
-    const jh=!open.length?(frNow.length?"":"🕊 いまは近くに人がいません<span>昼休みに多いです</span>"):nc?`👀 いま近くに、共通点のある人 <b>${nc}人</b><span>見る ↓</span>`:`👀 いまキャンパスにいる人 <b>${open.length}人</b><span>見る ↓</span>`;
+    const jh=!open.length?(frNow.length?"":`🕊 いまは近くに人がいません<span>${tamasaiDay()?(tamasaiNextCt()?"次のちかくタイム "+tamasaiNextCt():"多摩祭を楽しんでね"):"昼休みに多いです"}</span>`):nc?`👀 いま近くに、共通点のある人 <b>${nc}人</b><span>見る ↓</span>`:`👀 いまキャンパスにいる人 <b>${open.length}人</b><span>見る ↓</span>`;
     if(el&&el.dataset.h!==jh){ el.dataset.h=jh; el.innerHTML=jh; } }
   lastOpenCount=openAll.filter(x=>!isTest(x.u.id)).length; visitMaybeUpdate();
   $('#nearSub').textContent=openAll.length?'いま'+openAll.length+'人'+(frNow.length?`（友達${frNow.length}人）`:''):'まだ誰もいません';
@@ -2776,7 +2795,7 @@ function renderNearby(){
     if(!emptyCountAsked&&sb&&myId&&!String(myId).startsWith('local-')){ emptyCountAsked=true; sb.rpc('tama_public_count').then(({data})=>{ if(data){ gateCount=data; renderNearby(); } },()=>{}); }
     const today=gateCount&&gateCount.today>=5?`<div class="emptycnt">👥 今日は多摩キャンで <b>${gateCount.today}人</b> が使っています</div>`:'';
     loadCommonCount();
-    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>いまは近くにアプリを開いている人がいません。<br>平日の昼休み（12:50〜13:40）の<br>食堂のあたりに多いです。</p>${today}${commonCountHTML()}
+    ul.innerHTML=`<div class="empty"><div class="big">📍</div><p>いまは近くにアプリを開いている人がいません。<br>${tamasaiDay()?(tamasaiNextCt()?`次の<b>ちかくタイム（${tamasaiNextCt()}）</b>には、<br>みんなが一斉に開きます。`:"上の🎪カードの質問に答えておくと、<br>同じ答えの人が来た時に共通点に出ます。"):"平日の昼休み（12:50〜13:40）の<br>食堂のあたりに多いです。"}</p>${today}${commonCountHTML()}
       <div class="emptyacts"><div class="eah">いまできること</div>
         ${dailyAnswer(profile)?'':`<button class="btn btn-primary" onclick="$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})">🎲 今日のお題に答える</button>`}
         <button class="btn btn-ghost" onclick="openSample()">👀 共通点のある人が来たら、どう見える？</button></div>
@@ -3029,7 +3048,7 @@ async function checkClosedNearby(){
       .in('recipient_id',cands.map(x=>x.u.id)).eq('kind','nearby')
       .gt('created_at',new Date(now-FES.nearbyPushCooldownMin*60000).toISOString());
     // 記録テーブルが無い状態で送ると回数制限が効かず通知が連打になるので、送らない
-    if(le){ pushLogMissing=true; console.warn('[push] tama_push_log を読み込めません。supabase/tama_tables.sql を実行してください:',le.message); return; }
+    if(le){ if(isSchemaErr(le))pushLogMissing=true; console.warn('[push] tama_push_log を読み込めません。supabase/tama_tables.sql を実行してください:',le.message); return; }
     const recent=new Set((logs||[]).map(x=>x.recipient_id));
     for(const {u,common} of cands){
       if(recent.has(u.id))continue;
@@ -4250,7 +4269,8 @@ async function openRoomLegacy(id){ const k=rid(id);
   roomPoll=setInterval(async()=>{ if(!$('#s-room').classList.contains('active'))return; await loadRoomMsgs(); markRoomRead(curRoom.id); },2500);
 }
 async function loadRoomMsgs(){ if(!sb||!curRoom)return; if(roomsV2&&!myRoomIds.has(rid(curRoom.id)))return;   // 2026-10-07：投稿は参加している人だけ読める
-  try{const {data}=await sb.from(T('room_messages')).select('*').eq('room_id',curRoom.id).order('created_at'); if(data){curRoom.msgs=data;renderRoom();}}catch(e){} }
+  // 新しい方から200件だけ（2026-10-15 のレビュー：全部を2.5秒ごとに読み直していて、通信量が多く、1000件を超えると新しい投稿が見えなくなっていた）
+  try{const {data}=await sb.from(T('room_messages')).select('*').eq('room_id',curRoom.id).order('created_at',{ascending:false}).limit(200); if(data&&curRoom){curRoom.msgs=data.slice().reverse();renderRoom();}}catch(e){} }
 function renderRoomLegacy(){ const box=$('#roomMsgs'); if(!box||!curRoom)return; const msgs=curRoom.msgs||[];
   if(!msgs.length){box.innerHTML='<div class="day">まだメッセージはありません。最初のひとことをどうぞ！</div>';return;}
   let lastDay='';
@@ -4696,7 +4716,7 @@ let paywallAnswered={}, paywallMissing=true, paywallNext=null;
 async function loadPaywall(){
   if(!sb||!myId||String(myId).startsWith('local-'))return;
   const {data,error}=await sb.from(T('paywall')).select('feature,choice');
-  if(error){ paywallMissing=true; return; }
+  if(error){ if(isSchemaErr(error))paywallMissing=true; return; }
   paywallMissing=false; paywallAnswered={}; (data||[]).forEach(r=>{ paywallAnswered[r.feature]=r.choice; });
 }
 function paywallPrice(){ return 500; }   // 2026-10-09 あおの指示で500円に固定（前は人ごとに100・300・500円）
@@ -4997,6 +5017,8 @@ async function reportRoom(){
 function goOnboard(){
   loadSuggest();   // アーティスト・科目の入力の候補
   if($('#obRef')&&!$('#obRef').value)$('#obRef').value=savedRef();   // 招待のリンクから来た人は、招待コードを入力ずみに
+  // 多摩祭の日は、学外の人も多いので、地図の位置を最初から「約100mぼかす」にしておく（2026-10-15 のレビュー。登録の③で変えられる）
+  if(typeof tamasaiDay==='function'&&tamasaiDay())setObCoarse(true);
   $('#s-welcome').classList.remove('active');
   $('#s-onboard').classList.add('active');
 }
@@ -5143,7 +5165,7 @@ function renderHomeGate(){
   // 2026-10-08 あおの指示：上のアプリの見本（宣伝）はやめて、ホーム画面に追加するまでの流れを画面の絵で見せる（gateFlowHTML）
   const flow=gateFlowHTML(inApp?'inapp':ios?(ios26?'ios26':'ios'):other?'':'android');
   g.innerHTML=`<div class="hglogo">ちかく</div>
-    <div class="hgtag">同じキャンパスの、<b style="color:var(--amber-deep)">共通点がある人</b>が分かる。<br>だから、会ったときに話しかけやすい。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b></div>
+    <div class="hgtag">同じキャンパスの、<b style="color:var(--amber-deep)">共通点がある人</b>が分かる。<br>だから、会ったときに話しかけやすい。<br><b style="color:var(--ink)">恋愛目的のアプリではありません。</b><br><span style="font-size:12px">🔞 18歳以上の方が使えます</span></div>
     ${tamasaiDay()?tamasaiTodayHTML():''}
     <div class="hgvals"><div>🤝 会ったとき、話すことがある</div><div>👥 友達のいまどこ・空きコマが分かる</div><div>📚 同じ授業の人に、授業のことを聞ける</div><div>✨ キャンパスで、新しい出会い</div></div>
     <div class="hgcount" id="hgCount">${gateCountHTML()}</div>
@@ -5532,7 +5554,7 @@ async function loadFriends(){
   if(!sb||!myId||String(myId).startsWith('local-')||friendTablesMissing){ renderFriends(); return; }
   const {data,error}=await sb.from(T('friends')).select('*').or(`from_id.eq.${myId},to_id.eq.${myId}`);
   if(error){ console.warn('[friends] tama_friends を読み込めません。supabase/tama_friends.sql を実行してください:',error.message);
-    friendTablesMissing=true; renderFriends(); return; }
+    if(isSchemaErr(error))friendTablesMissing=true; renderFriends(); return; }
   friendRows=(data||[]).filter(r=>!blocked.has(otherIdOf(r)));
   const ids=[...new Set(friendRows.map(otherIdOf))];
   if(ids.length){
@@ -5962,7 +5984,7 @@ async function loadTimetable(){
     roomsColMissing=true; console.warn('[timetable] rooms 列がありません。supabase/tama_timetable_share.sql を実行してください:',error.message);
     ({data,error}=await sb.from(T('timetable')).select('slots').eq('id',myId).maybeSingle());
   }
-  if(error){ timetableMissing=true; console.warn('[timetable] tama_timetable を読み込めません。supabase/tama_timetable.sql を実行してください:',error.message); renderMyPresence(); return; }
+  if(error){ if(isSchemaErr(error))timetableMissing=true; console.warn('[timetable] tama_timetable を読み込めません。supabase/tama_timetable.sql を実行してください:',error.message); renderMyPresence(); return; }
   myTimetable=(data&&data.slots)||{}; myRooms=(data&&data.rooms)||{};
   renderMyPresence(); loadSamePeers();
 }
@@ -5982,7 +6004,7 @@ let ttSharesTo=new Set(), ttSharedFrom=new Set(), friendTT={}, ttShareMissing=fa
 async function loadTTShares(){
   if(!sb||!myId||String(myId).startsWith('local-')||ttShareMissing)return;
   const {data,error}=await sb.from(T('timetable_shares')).select('owner_id,friend_id').or(`owner_id.eq.${myId},friend_id.eq.${myId}`);
-  if(error){ ttShareMissing=true; console.warn('[timetable] tama_timetable_shares を読み込めません。supabase/tama_timetable_share.sql を実行してください:',error.message); return; }
+  if(error){ if(isSchemaErr(error))ttShareMissing=true; console.warn('[timetable] tama_timetable_shares を読み込めません。supabase/tama_timetable_share.sql を実行してください:',error.message); return; }
   ttSharesTo=new Set((data||[]).filter(r=>r.owner_id===myId).map(r=>r.friend_id));
   ttSharedFrom=new Set((data||[]).filter(r=>r.friend_id===myId).map(r=>r.owner_id).filter(isFriend));
   friendTT={};
@@ -6326,6 +6348,12 @@ function tamasaiNow(){
   const hm=new Date(now+9*3600000).toISOString().slice(11,19);   // 日本時間のいまの時刻
   return Date.parse(`${tamasaiTestDay()}T${hm}+09:00`);
 }
+// 多摩祭の日の、次のちかくタイムの時刻（"15:30" など。もう無ければ ''）。土日の画面に「平日の昼休み」と出ていたのを直すため（2026-10-15 のレビュー）
+function tamasaiNextCt(){
+  const T_=FES.tamasai, now=tamasaiNow(), d=jstDayOf(now), hm=new Date(now+9*3600000).toISOString().slice(11,16);
+  const ts=(T_.ctTimes||[]).slice(); if(T_.fireworks&&T_.fireworks.day===d)ts.push(T_.fireworks.ct);
+  return ts.sort().find(t=>t>hm)||'';
+}
 function setTamasaiTestDay(d){ try{ localStorage.setItem('tama_tsTestDay',d); }catch(e){} const el=$('#tamasaiCard'); if(el)el.dataset.h=''; renderTamasai(); renderNearby(); toast(`🧪 試し：${FES.tamasai.days.indexOf(d)+1}日目として表示しています`); }
 const tamasaiDay=()=>FES.tamasai.days.includes(jstDayOf(tamasaiNow()));
 const tamasaiOver=()=>jstDayOf(Date.now())>FES.tamasai.days[FES.tamasai.days.length-1];
@@ -6367,13 +6395,13 @@ function tamasaiTomorrowHTML(){
   const T_=FES.tamasai, now=tamasaiNow(), d=jstDayOf(now);
   if(d!==T_.days[0]||T_.days.length<2||new Date(now+9*3600000).getUTCHours()<15)return '';
   const n=Object.values(encLog||{}).filter(a=>a.some(x=>jstDayOf(x.at)===d)).length, fw=T_.fireworks;
-  return `<div class="tsnote">🌙 明日も多摩祭で開いてね。${T_.ctTimes&&T_.ctTimes.length?`<b>${T_.ctTimes.join('</b> と <b>')}</b> にちかくタイム。`:''}${fw&&fw.day===T_.days[1]?`<b>${fw.at}</b> からの花火の前（${fw.ct}）にも。`:''}${n?`今日すれ違った<b>${n}人</b>に、もう一度会えるかも`:'開いたまま歩くと、すれ違いが記録されます'}</div>`;
+  return `<div class="tsnote">🌙 明日も多摩祭で開いてね。${T_.ctTimes&&T_.ctTimes.length?`<b>${T_.ctTimes.join('</b> と <b>')}</b> にちかくタイム。`:''}${fw&&fw.day===T_.days[1]?`<b>${fw.at}</b> からの花火の前（${fw.ct}）にも。`:''}${n?`今日すれ違った<b>${n}人</b>に、もう一度会えるかも`:'アプリを開いている間に近くを通った人が、すれ違いに記録されます'}</div>`;
 }
 // 花火の日（2日目）の昼すぎから「18:00 花火・17:45 花火のちかくタイム」（2026-10-15 あおの決定）
 function tamasaiFireworksHTML(){
   const fw=FES.tamasai.fireworks, now=tamasaiNow(); if(!fw||jstDayOf(now)!==fw.day)return '';
   const h=new Date(now+9*3600000).getUTCHours(); if(h<12||h>=19)return '';
-  return `<div class="tsnote">🎆 <b>${fw.at}</b> から花火。<b>${fw.ct}</b> に花火のちかくタイム。開いたまま見ると、近くで見ている人とのすれ違いが記録されます</div>`;
+  return `<div class="tsnote">🎆 <b>${fw.at}</b> から花火。<b>${fw.ct}</b> に花火のちかくタイム。花火の前に一度開くと、近くで見ている人とのすれ違いが記録されます</div>`;
 }
 // アンケートの案内（URL があって、期間中で、まだ押していない人だけ）
 function tamasaiSurveyOn(){
@@ -6394,7 +6422,7 @@ const couponBooths=()=>(booths||[]).filter(b=>b.coupon);
 async function loadCouponUses(){
   if(!sb||!myId||String(myId).startsWith('local-')||couponMissing||!couponBooths().length)return;
   const {data,error}=await sb.from(T('coupon_uses')).select('booth_id,amount,created_at').eq('user_id',myId);
-  if(error){ couponMissing=true; console.warn('[coupon] 使った記録を読めません。supabase/tama_tamasai.sql を実行してください',error.message); return; }
+  if(error){ if(isSchemaErr(error))couponMissing=true; console.warn('[coupon] 使った記録を読めません。supabase/tama_tamasai.sql を実行してください',error.message); return; }
   couponUsed={}; (data||[]).forEach(r=>{ couponUsed[String(r.booth_id)]={amount:r.amount,at:Date.parse(r.created_at)||0}; });
 }
 const couponRowHTML=()=>couponBooths().length?`<button class="tscp" onclick="openCoupons()">🎟 出店のクーポン ${couponBooths().length}件 ›</button>`:'';
@@ -6440,15 +6468,24 @@ function tamasaiTodayHTML(){
     <span class="tsnotalk">話しかけなくても楽しめます</span></div>`;
 }
 function renderTamasaiWel(){ const el=$('#tamasaiWel'); if(el)el.innerHTML=tamasaiDay()?tamasaiTodayHTML():''; }
+// 多摩祭の日は、🎪カードと⏰ちかくタイムを「いまの自分・時間割」より上に（2026-10-15 のレビュー：最初の画面に入らなかった）。ほかの日はもとの場所
+function placeTamasaiCards(){
+  const ts=$('#tamasaiCard'), ct=$('#ctCard'), nb=$('#nowBar'), cb=$('#classBar'); if(!ts||!ct||!nb||!cb)return;
+  if(tamasaiDay()){ if(nb.previousElementSibling!==ct){ nb.insertAdjacentElement('beforebegin',ts); nb.insertAdjacentElement('beforebegin',ct); } }
+  else if(cb.nextElementSibling!==ts){ cb.insertAdjacentElement('afterend',ts); ts.insertAdjacentElement('afterend',ct); }
+}
 function renderTamasai(){
   const el=$('#tamasaiCard'); if(!el)return;
+  placeTamasaiCards();
   if(!profile){ el.dataset.h=''; el.innerHTML=''; return; }
   // 試しのあいだの祭りの質問の答えは、本当の多摩祭になったら消す（試しの答えのまま、本番の共通点にならないように）
   if(tamasaiReal()&&attrsOf(profile).fes26q_test){ const fa={...(profile.fa||{})}; delete fa.fes26q; delete fa.fes26q_test; profile.fa=fa; saveMyAttrs(); publishMe(); }
   // 祭りが終わった後は、参加した人にアンケートの案内だけ（翌日のリマインド）
   if(!tamasaiDay()){ el.dataset.h=''; el.innerHTML=(tamasaiSurveyOn()&&(attrsOf(profile).stat||{}).fes26)?`<div class="tsh"><span>🎪 多摩祭2026、来てくれてありがとう</span></div>${tamasaiSurveyHTML()}`:''; return; }
   const T_=FES.tamasai, st=attrsOf(profile).stat||{}, n=tamasaiN, goal=T_.goal;
-  const me=st.fes26?'✅ 参加中 🎪':'キャンパスで開くと参加（🎪バッジ）';
+  // 位置情報を断った人・取れていない人は「参加」に数えられないので、そう伝える（2026-10-15 のレビュー）
+  const me=st.fes26?'✅ 参加中 🎪':geoDenied?'📍 位置情報オフ':'キャンパスで開くと参加（🎪バッジ）';
+  const geoNote=!st.fes26&&geoDenied?'<div class="tsnote">📍 位置情報がオフだと「参加」に数えられず、🎪バッジも付きません。設定 → プライバシー → 位置情報 から、ちかく（Safari）を「使用中のみ」にしてください</div>':'';
   const cross=`🎆 すれ違い ${Math.min(lookCount('fes26x'),T_.crossN)}/${T_.crossN}人`;
   const invite=`<button onclick="openInvite()">📨 友達を誘う</button>`;
   // 試す人だけ：1日目／2日目の切りかえ（2026-10-15）
@@ -6460,7 +6497,7 @@ function renderTamasai(){
     ?`<div class="tsn">2日間で <b>${goal}</b>人参加が目標！</div><div class="tsfoot"><span>届いたら、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`
     :`<div class="tsn">参加 <b>${n}</b>人 ／ 目標${goal}人</div><div class="tsbar"><i style="width:${Math.round(n/goal*100)}%"></i></div><div class="tsfoot"><span>あと<b style="color:#c0456a">${goal-n}</b>人で、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`;
   // 中身が変わった時だけ描き直す（6秒ごとに作り直すと、選択肢の横スクロールが戻り、押している途中のタップが消えるため。2026-10-15 のレビューで直した）
-  const html=head+tamasaiSurveyHTML()+prog+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML();
+  const html=head+geoNote+tamasaiSurveyHTML()+prog+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML();
   if(el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; }
 }
 
@@ -6577,7 +6614,7 @@ let checkins=[], checkinMissing=true, ckPopTimer=null, ckMode='pop';   // テー
 async function loadCheckins(){
   if(!sb||!myId||String(myId).startsWith('local-'))return;
   const {data,error}=await sb.from(T('checkins')).select('wave,item,value,created_at').eq('user_id',myId).order('created_at');
-  if(error){ checkinMissing=true; console.warn('[checkin] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); renderCheckinRow(); return; }
+  if(error){ if(isSchemaErr(error))checkinMissing=true; console.warn('[checkin] 読み込めません。supabase/tama_meet.sql を実行してください:',error.message); renderCheckinRow(); return; }
   checkinMissing=false; checkins=(data||[]).map(r=>({wave:r.wave,item:r.item,value:r.value,at:Date.parse(r.created_at)||0}));
   renderCheckinRow();
 }
@@ -6948,7 +6985,7 @@ async function loadInvite(){
   if(!sb||!myId||String(myId).startsWith('local-')||!profile||inviteMissing)return;
   try{ await sb.rpc('tama_invite_tick'); }catch(e){}
   const {data,error}=await sb.rpc('tama_my_invite');
-  if(error){ inviteMissing=true; console.warn('[invite] 読み込めません。supabase/tama_invite.sql を実行してください:',error.message); return; }
+  if(error){ if(isSchemaErr(error))inviteMissing=true; console.warn('[invite] 読み込めません。supabase/tama_invite.sql を実行してください:',error.message); return; }
   inviteInfo=data||null; if(!inviteInfo)return;
   // 特典をプロフィールに反映（人数・バッジ・招待してくれた人）
   const fa=profile.fa||{}, n=inviteInfo.counted||0, b=new Set(fa.badges||[]), by=inviteInfo.invited_by&&inviteInfo.invited_by.id;
@@ -7257,7 +7294,7 @@ function likesLeft(){ const d=jstTodayStart().getTime(); if(d!==initDay){ initDa
 async function loadSurveyStatus(manual){
   if(!sb||!myId||String(myId).startsWith('local-'))return;
   const {data,error}=await sb.rpc('tama_survey_status');
-  if(error){ surveyMissing=true; console.warn('[survey] 回答を確かめられません。supabase/tama_survey.sql を実行してください:',error.message); renderSurveyBox(); return; }
+  if(error){ if(isSchemaErr(error))surveyMissing=true; console.warn('[survey] 回答を確かめられません。supabase/tama_survey.sql を実行してください:',error.message); renderSurveyBox(); return; }
   surveyMissing=false; surveyDone=!!data;
   if(surveyDone)onSurveyDone();
   else{ await loadInitToday(); if(manual)toast('まだ回答が届いていません。送信してから1分ほど待って、もう一度どうぞ'); }

@@ -201,6 +201,12 @@ Deno.serve(async (req) => {
     const { data: prof } = await supabase.from("tama_profiles").select("id");
     const tama = new Set((prof ?? []).map((p) => String(p.id)));
     ids = [...all].filter((id) => tama.has(id) && !noClassToday.has(id));
+    // 土日（多摩祭）は、その日にキャンパスでアプリを開いた人だけ（2026-10-15 のレビュー：祭りに来ていない人に土日で5通届いて、通知を切られるため）
+    if (weekend) {
+      const { data: vs } = await supabase.from("tama_visits").select("user_id").eq("day", todayJst).eq("on_campus", true);
+      const came = new Set((vs ?? []).map((v) => String(v.user_id)));
+      ids = ids.filter((id) => came.has(id));
+    }
     // 回ごとに文を変えたい時は push_title・push_body（多摩祭の花火の回。2026-10-15）
     title = slot.push_title || "⏰ ちかくタイム（10分間）";
     text = slot.push_body || `「${slot.q}」${slot.o1}？${slot.o2}？ 10分のあいだに答えた人どうしで、同じ答えの人が見つかります`;
