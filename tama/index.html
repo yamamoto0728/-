@@ -1016,6 +1016,14 @@
   .shoplist .shoph{font-size:11.5px;font-weight:800;color:#a8335a;margin:8px 2px 0;position:sticky;top:0;background:var(--night);padding:3px 0;z-index:1}
   .shoplist button b i{font-style:normal;display:inline-block;min-width:26px;margin-right:6px;padding:1px 6px;border-radius:6px;background:#fdebe4;color:#c8361f;font-size:11.5px;text-align:center}
   .shopsrc{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}.shopsrc a{color:#c8361f;font-weight:700}
+  /* 通知センター（2026-10-15）。未読の印は付けない（補助の機能のため） */
+  .nclist{display:flex;flex-direction:column;gap:6px;max-height:56vh;overflow:auto;-webkit-overflow-scrolling:touch}
+  .ncrow{display:flex;gap:10px;align-items:center;text-align:left;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff;font:inherit;color:var(--ink);cursor:pointer}
+  .ncrow.nolink{cursor:default}.ncrow .ic{font-size:20px;flex-shrink:0}.ncrow .tx{flex:1;min-width:0}
+  .ncrow b{display:block;font-size:13.5px;line-height:1.45}.ncrow b em{font-style:normal;margin-left:6px;font-size:10px;font-weight:800;color:#fff;background:var(--rose);border-radius:6px;padding:1px 5px;vertical-align:1px}
+  .ncrow small{display:block;font-size:12px;color:var(--muted);line-height:1.55;margin-top:2px}.ncrow i{display:block;font-style:normal;font-size:10.5px;color:var(--muted2);margin-top:3px}
+  .ncempty{font-size:13px;color:var(--muted);line-height:1.8;text-align:center;padding:18px 4px}.ncempty a{color:var(--signal);font-weight:700;cursor:pointer}
+  .ncclear{display:block;margin:10px auto 0;border:0;background:none;font:inherit;font-size:12px;color:var(--muted);text-decoration:underline;cursor:pointer}
   .sugg button.off{border-color:rgba(245,151,47,.6);background:#fff8ea;color:#9a5a10}   /* 正式な授業名（2026-10-09） */
   .sugg button small{margin-left:5px;font-size:10px;font-weight:500;color:var(--muted)}   /* その書き方を入れている人数（小さく） */
   .sugg button{border:1px solid rgba(15,176,205,.45);background:rgba(15,176,205,.08);color:#0a7f96;border-radius:14px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1327,6 +1335,7 @@
           <div class="setrow visrow" onclick="openBlocked()"><div class="lab">🚫 ブロックした人<small>一覧と解除</small></div><span class="go">›</span></div>
           <div class="setrow"><div class="lab">通知<small id="pushHint">いいね・メッセージ・友達申請をスマホに通知</small></div><div class="toggle" id="tgPush" onclick="togglePush(this)"><div class="k"></div></div></div>
           <div class="setrow visrow" onclick="openWtp()"><div class="lab">💭 ちかくプラスのアンケート<small id="wtpRowTxt">3問・30秒。答えると、みんなの答えが見られます</small></div><span class="go">›</span></div>
+          <div class="setrow visrow" onclick="openNotifCenter()"><div class="lab">🗂 通知センター<small>最近届いた通知を見返す（この端末・14日分）</small></div><span class="go">›</span></div>
           <div class="setrow visrow" onclick="openNotifPrefs()"><div class="lab">🔔 通知の種類・テスト通知<small id="notifSumTxt">届かない時は、ここからテスト</small></div><span class="go">›</span></div>
         </div>
         <button class="btn btn-ghost" style="margin:4px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
@@ -2554,6 +2563,39 @@ const PUSH_KINDS=[
 const pushOffOf=u=>{ const o=attrsOf(u).push_off; return Array.isArray(o)?o:[]; };
 function openNotifPrefs(){ if(!profile){ toast('先にプロフィールを登録してね'); return; } renderNotifPrefs(); $('#notifOverlay').classList.add('show'); }
 function closeNotifPrefs(){ $('#notifOverlay').classList.remove('show'); renderNotifSum(); }
+/* ---------- 通知センター（2026-10-15 あおの依頼） ----------
+   プッシュ通知が来ても、何の通知だったか忘れてしまうので、マイページから見返せるようにする。あくまで補助なので、未読の印・数字は付けない。
+   届いた通知は sw.js が、この端末の Cache Storage（chikaku-notifs）に残している（新しい順に60件・14日まで。サーバーには無い）。
+   押すと、通知を押した時と同じ所を開く（openFromPush）。前に見た時より新しいものだけ、一覧の中に「NEW」を出す */
+const NC_ICON={chat:'💬',talk:'💬',friends:'👥',room:'🏠',where:'📍',daily:'🎲',ct:'⏰',cross:'🚶',tamasai:'🎪'};
+let ncList=[];
+async function readNotifLog(){
+  try{ if(!('caches' in window))return []; const c=await caches.open('chikaku-notifs'), r=await c.match('/__notifs'); const a=r?JSON.parse(await r.text()):[]; return Array.isArray(a)?a.filter(x=>x&&x.at&&Date.now()-x.at<14*86400000):[]; }catch(e){ return []; }
+}
+function ncWhen(ms){
+  const d=Date.now()-ms; if(d<60000)return 'いま'; if(d<3600000)return Math.floor(d/60000)+'分前';
+  const day=jstDayOf(ms), today=jstDayOf(Date.now()), y=jstDayOf(Date.now()-86400000), hm=hhmm(ms);
+  if(day===today)return '今日 '+hm; if(day===y)return '昨日 '+hm;
+  const t=new Date(ms+9*3600000); return `${t.getUTCMonth()+1}/${t.getUTCDate()} ${hm}`;
+}
+async function openNotifCenter(){
+  ncList=await readNotifLog();
+  let seen=0; try{ seen=+localStorage.getItem('tama_ncSeen')||0; localStorage.setItem('tama_ncSeen',String(Date.now())); }catch(e){}
+  const rows=ncList.map((x,i)=>{ const rt=routeFromUrl(x.u||''), em=/^(\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*)\s*/u.exec(x.t||'');   // 題名の頭の絵文字は、左の印に使う（2つ並ばないように）
+    const ic=em?em[1]:NC_ICON[rt&&rt.go]||'🔔', tt=em?(x.t||'').slice(em[0].length):x.t;
+    return `<button class="ncrow${rt?'':' nolink'}" onclick="openNcItem(${i})"><span class="ic">${ic}</span><span class="tx"><b>${esc(tt||'ちかく')}${x.at>seen&&seen?'<em>NEW</em>':''}</b>${x.b?`<small>${esc(x.b)}</small>`:''}<i>${ncWhen(x.at)}</i></span>${rt?'<span class="go">›</span>':''}</button>`; }).join('');
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🗂 通知センター</h2><p class="psdesc">この端末に届いた通知です（14日分）。押すと、その通知の画面を開きます。</p>
+    ${rows?`<div class="nclist">${rows}</div>`:`<div class="ncempty">まだありません。<br>通知が届くと、ここに残ります（この端末で受け取ったものだけ）。<br><a onclick="closeMembers();openNotifPrefs()">🔔 通知の種類・テスト通知 ›</a></div>`}
+    ${rows?'<button class="ncclear" onclick="clearNotifLog()">履歴を消す</button>':''}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+function openNcItem(i){ const x=ncList[i]; if(!x)return; const rt=routeFromUrl(x.u||''); if(!rt)return; closeMembers(); openFromPush({...rt,n:''}); }   // 通知センターから開いた分は「通知を押して開いた」に数えない
+async function clearNotifLog(){
+  if(!confirm('通知センターの履歴を消しますか？（この端末の分だけ）'))return;
+  try{ const c=await caches.open('chikaku-notifs'); await c.delete('/__notifs'); }catch(e){}
+  openNotifCenter();
+}
 function renderNotifSum(){ const el=$('#notifSumTxt'); if(!el||!profile)return; const n=pushOffOf(profile).length; el.textContent=n?`${n}種類をオフにしています`:'届かない時は、ここからテスト'; }
 function renderNotifPrefs(){
   const off=pushOffOf(profile);
