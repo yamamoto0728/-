@@ -184,6 +184,20 @@
   .tscard .tsnote{margin-top:8px;font-size:12px;line-height:1.6;color:var(--ink)}.tscard .tsnote b{color:#c0456a}
   .tstoday{display:flex;flex-direction:column;gap:3px;margin:0 0 14px;padding:11px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(255,120,150,.14),rgba(255,190,90,.16));border:1.5px solid rgba(240,110,140,.45);font-size:12.5px;line-height:1.6;text-align:left;color:var(--ink)}
   .tstoday b{color:#c0456a;font-size:13.5px}.tstoday .tsnotalk{font-size:11.5px;color:var(--muted)}
+  /* 授業のコミュニティ（2026-10-15） */
+  .clsbar{display:flex;align-items:center;gap:10px;margin:2px 16px 10px;padding:11px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(255,176,102,.18),rgba(255,209,102,.16));border:1.5px solid rgba(245,151,47,.55);cursor:pointer}
+  .clsbar .cbi{font-size:24px;flex-shrink:0}.clsbar .cbt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.45}
+  .clsbar .cbt small{font-size:11px;font-weight:700;color:var(--amber-deep)}.clsbar .cbt b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.clsbar .cbt em{font-style:normal;font-size:11.5px;color:var(--muted)}
+  .clsbar .go{color:var(--amber-deep);font-size:20px;font-weight:700}.clsbar .unread{flex-shrink:0}
+  .clsbar.empty{background:#fff;border-style:dashed}.clsbar.empty .cbt b{white-space:normal;font-size:13.5px}
+  .cmseg{margin:0 16px 8px}
+  .cmnote{margin:4px 16px 8px;padding:9px 12px;border-radius:12px;background:var(--surface);font-size:12px;line-height:1.65;color:var(--muted)}.cmnote b{color:var(--ink)}
+  .urow.clslive{background:rgba(245,151,47,.08)}
+  .rnotice{margin:8px 10px 6px;padding:9px 12px;border-radius:12px;background:#fff8ea;border:1.5px solid #f0a030;font-size:13px;line-height:1.6}
+  .rnotice b{color:var(--amber-deep)}.rnotice span{margin-left:8px;font-size:10.5px;color:var(--muted)}.rnotice div{white-space:pre-wrap;margin-top:2px}
+  .rcmhint{font-size:11px;color:var(--muted);margin:2px 0 6px}
+  .mrow2 .nm small.rcm{display:block;font-size:10.5px;font-weight:700;color:#0f8f6f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #cmRoomsHost{flex:1;min-height:0;display:flex;flex-direction:column}#cmRoomsHost[hidden]{display:none}
   /* ちかくプラスのアンケート（2026-10-14） */
   .wtpq{font-size:13.5px;font-weight:800;margin:14px 0 7px}.wtpq .opt{margin-left:6px;font-size:10.5px;font-weight:500;color:var(--muted)}
   .wtpf{display:flex;flex-direction:column;gap:6px}
@@ -1168,6 +1182,8 @@
       <div class="nowbar" id="nowBar"></div>
       <!-- はじめにやること（2026-10-08。renderStartCard） -->
       <div class="startcard" id="startCard"></div>
+      <!-- いまの授業のコミュニティ（2026-10-15 あおの決定。授業中だけ。前はここに今日のミッションがあった） -->
+      <div id="classBar"></div>
       <div class="tscard" id="tamasaiCard"></div>
       <div class="ctcard" id="ctCard"></div>
       <div class="daily" id="dailyCard"></div>
@@ -1182,10 +1198,10 @@
       <div class="ulist" id="ulist"></div>
       <!-- コミュニティ（2026-10-08 あおの指示「分かりづらいのでボックスに入れる」。人の一覧と見分けがつくよう、枠の中に説明と部屋とボタンをまとめた） -->
       <div class="commbox">
-        <div class="cbh"><span>💬 コミュニティ</span><a onclick="go('comm')">すべて見る ›</a></div>
+        <div class="cbh"><span>💬 コミュニティ</span><a onclick="openCm('rooms')">すべて見る ›</a></div>
         <div class="cbd">同じ趣味・同じ授業の人が集まる部屋。オーナーが作って、期限が来たら消えます。</div>
         <div class="ulist" id="homeRoomList"></div>
-        <div class="cbb"><button class="btn btn-primary" onclick="go('comm');newRoom()">＋ コミュニティを作る</button></div>
+        <div class="cbb"><button class="btn btn-primary" onclick="openCm('rooms');newRoom()">＋ コミュニティを作る</button></div>
       </div>
       </div>
     </section>
@@ -1214,14 +1230,19 @@
       <div class="chatbar"><input id="chatInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">↑</button></div>
     </section>
     <section class="screen" id="s-room">
-      <div class="chathead"><button class="back" onclick="go('comm')">‹</button><div class="av" id="roomAv" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div style="flex:1;min-width:0"><div class="nm" id="roomNm"></div><div class="st" id="roomSt"></div></div><button class="joinbtn" id="roomJoinBtn" onclick="toggleRoomJoin()">参加</button><button class="membtn" onclick="roomsV2?openRoomInfo():openMembers()" title="部屋の情報・参加者">👥</button></div>
+      <div class="chathead"><button class="back" onclick="roomBack()">‹</button><div class="av" id="roomAv" style="background:linear-gradient(135deg,#63d6e8,#0fb0cd)">💬</div><div style="flex:1;min-width:0"><div class="nm" id="roomNm"></div><div class="st" id="roomSt"></div></div><button class="joinbtn" id="roomJoinBtn" onclick="toggleRoomJoin()">参加</button><button class="membtn" onclick="roomsV2?openRoomInfo():openMembers()" title="部屋の情報・参加者">👥</button></div>
       <div class="msgs" id="roomMsgs"></div>
       <div class="chatbar"><input id="roomInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendRoomMsg()"><button class="send" onclick="sendRoomMsg()">↑</button></div>
     </section>
     <section class="screen" id="s-friends">
       <!-- 2026-09-24 作り直し：届いた申請 → 友達のいまの自分 → 自分（1行）の順。追加は右上の「＋ 追加」から -->
-      <div class="apphead"><h1>友達<button class="qhelp" onclick="openHelp('friends')" aria-label="友達の説明">?</button> <span class="sub" id="friendSub" style="font-family:inherit">0人</span></h1><button class="headbtn" onclick="openFrAdd()">＋ 追加</button></div>
-      <div class="scroll">
+      <!-- 2026-10-15 あおの決定：下のタブ「友達」を「コミュニティ」にして、中で 📚 授業／🏠 コミュニティ／👥 友達 を切りかえる。
+           🏠 コミュニティは、トークの「コミュニティ」と同じもの（#commPane をここへ移して見せる。トークの方もそのまま使える） -->
+      <div class="apphead"><h1 id="cmTitle">コミュニティ<button class="qhelp" onclick="openHelp(cmTab==='fr'?'friends':cmTab==='rooms'?'talk':'classcom')" aria-label="説明">?</button> <span class="sub" id="friendSub" style="font-family:inherit"></span></h1><button class="headbtn" id="cmHeadBtn" onclick="cmHeadAction()">🗓 時間割</button></div>
+      <div class="seg cmseg"><button id="cmSegCls" class="on" onclick="setCmTab('cls')">📚 授業<span class="sdot" id="dotCmCls" style="display:none"></span></button><button id="cmSegRooms" onclick="setCmTab('rooms')">🏠 コミュニティ<span class="sdot" id="dotCmRooms" style="display:none"></span></button><button id="cmSegFr" onclick="setCmTab('fr')">👥 友達<span class="sdot" id="dotCmFr" style="display:none"></span></button></div>
+      <div class="scroll" id="cmClsPane"><div id="classList"></div></div>
+      <div id="cmRoomsHost" hidden></div>
+      <div class="scroll" id="cmFrPane" hidden>
         <div id="friendBox"></div>
         <div id="myPresence"></div>
       </div>
@@ -1233,6 +1254,8 @@
         <!-- アンケートの欄（答えると特典。中身は renderSurveyBox）。2026-10-09 あおの指示「見やすく」で、マイページの一番下からここ（プロフィールを編集のすぐ下）へ -->
         <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <div id="surveyBox"></div>
+        <!-- 今日のミッション（2026-10-15 あおの決定で、ホームからここへ移した。中身は misCardHTML） -->
+        <div class="startcard memis" id="meMission"></div>
         <button class="btn btn-ghost lookbtn" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14.5px" onclick="document.getElementById('lookDot').hidden=true;openLook()">🎨 きせかえ<small>アイコン・背景・フレーム・バッジ</small><span class="lookdot" id="lookDot" hidden></span></button>
         <!-- 自分のプロフィールが相手にどう見えるか（2026-10-02 追加） -->
         <button class="btn btn-ghost" id="mePrevBtn" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openPreview('near')">👀 周りからの見え方を見る</button>
@@ -1271,7 +1294,7 @@
     <button class="active" data-t="near" onclick="go('near')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-5-6-10a6 6 0 1 1 12 0c0 5-6 10-6 10z"/><circle cx="12" cy="11" r="2.3"/></svg>近くの人</button>
     <button data-t="cross" onclick="go('cross')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6c0 2-1 3-1 5s1 3 3 3M16 4c0 2 1 3 1 5s-1 3-3 4"/><circle cx="7" cy="19" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg>すれ違い<span class="ndot" id="dotCross" style="display:none"></span></button>
     <button data-t="match" onclick="go('match')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/></svg>トーク<span class="ndot" id="dotMatch" style="display:none"></span></button>
-    <button data-t="friends" onclick="go('friends')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.2 4.5 2.1 4.5 4.9"/></svg>友達<span class="ndot" id="dotFriends" style="display:none"></span></button>
+    <button data-t="friends" onclick="go('friends')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.2 4.5 2.1 4.5 4.9"/></svg>コミュニティ<span class="ndot" id="dotFriends" style="display:none"></span></button>
     <button data-t="me" onclick="go('me')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>マイページ</button>
   </nav>
   <div id="configNotice" style="position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px">
@@ -2814,7 +2837,7 @@ function renderNearFriends(openFr){
     .map(id=>({id,u:friendUser(id),t:presenceText(friendPres(id))})).filter(x=>x.u&&x.t);
   const chips=openFr.slice().sort((a,b)=>(a.d??1e9)-(b.d??1e9))
     .map(x=>({id:x.u.id,u:x.u,t:x.d!=null?Math.round(x.d)+'m':presenceText(friendPres(x.u.id))||'キャンパス'})).concat(away);
-  const h=chips.length?`<div class="nfh">👥 いまキャンパスにいる友達 <span>${chips.length}人</span><a onclick="go('friends')">友達 ›</a></div>
+  const h=chips.length?`<div class="nfh">👥 いまキャンパスにいる友達 <span>${chips.length}人</span><a onclick="openCm('fr')">友達 ›</a></div>
     <div class="nfl">${chips.map(c=>`<div class="nfc" onclick="openFriend('${c.id}')"><div class="av${frCls(c.u)}" style="background:${gr(c.u.emoji)}">${esc(c.u.emoji)}</div><div class="nm">${esc(c.u.name)}</div><div class="t">${esc(c.t)}</div></div>`).join('')}</div>`:'';
   if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
 }
@@ -3632,7 +3655,7 @@ function openFromPush(rt){
   switch(rt.go){
     case 'chat': whenReady(()=>!!matches[rt.u]||isFriend(rt.u),()=>openChat(rt.u),()=>go('match')); break;
     case 'talk': go('match'); setTalkTab('dm'); break;
-    case 'friends': go('friends'); break;
+    case 'friends': openCm('fr'); break;   // 2026-10-15：友達は「コミュニティ」のページの「👥 友達」
     case 'room': go('match'); setTalkTab('comm'); whenReady(()=>rooms.some(x=>rid(x.id)===rid(rt.r)),()=>openRoom(rt.r)); break;
     case 'where': go('near'); setTimeout(()=>openPlaceEdit(false),300); break;
     case 'daily': go('near'); dailyOpen=true; dailyShown=null; renderDaily(); setTimeout(()=>{ const el=$('#dailyCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300); break;
@@ -3685,7 +3708,7 @@ async function loadTalkPreviews(){
 // トークの「👥 友達」：最後のメッセージと、いまいる場所（見せてくれている友達だけ）を並べる
 function renderFriendTalks(frItems){
   const inc=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length;
-  let h=inc?`<div class="mrow" onclick="go('friends')"><div class="av" style="background:#e8f7fb">📩</div><div class="info"><div class="nm">友達申請が${inc}件届いています</div><div class="last">「友達」タブで承認できます ›</div></div></div><div class="sep"></div>`:'';
+  let h=inc?`<div class="mrow" onclick="openCm('fr')"><div class="av" style="background:#e8f7fb">📩</div><div class="info"><div class="nm">友達申請が${inc}件届いています</div><div class="last">「友達」タブで承認できます ›</div></div></div><div class="sep"></div>`:'';
   if(!frItems.length) return h+`<div class="empty"><div class="big">👥</div><p>まだ友達がいません。<br>24時間トークの中の「👥 友達に誘う」か、<br>目の前の人とは4桁のコードで友達になれます。<br>友達とは期限なしで話せます。</p><button class="btn btn-primary" onclick="go('friends');openFrAdd()">＋ 友達を追加</button></div>`;
   return h+frItems.map(({id,u,last},i)=>{
     const pt=presenceText(friendPres(id)), o=findUser(id), online=!!o&&!isClosed(o);
@@ -4132,7 +4155,7 @@ async function loadRoomsLegacy(){ if(!sb)return;
   }catch(e){}
 }
 function roomMeta(r){ const s=roomStats[rid(r.id)]||{}; const parts=['👥 '+(s.members||0)+'人']; if(s.last)parts.push('最終 '+agoText(s.last)); return parts.join(' ・ '); }
-function updateCommDot(){ const dc=$('#dotComm'); if(!dc)return;
+function updateCommDot(){ setTimeout(updateCmDots,0); const dc=$('#dotComm'); if(!dc)return;
   let n=0; myRoomIds.forEach(k=>{n+=(roomStats[k]&&roomStats[k].unread)||0;});
   if(n>0){dc.style.display='block';dc.textContent=n>99?'99+':n;} else dc.style.display='none';
 }
@@ -4374,6 +4397,164 @@ function createClassRoom(i){
   renderRoomFormChips();
 }
 
+/* ---------- 授業のコミュニティ（2026-10-15 あおの決定「コミュニティをもっと強みに」で作り直し） ----------
+   ・授業ごとに1つ（同じ授業名なら曜日・時限が違っても1つ）。オーナーはいない（10/9 の「だれかがオーナーとして作る」をやめた）。
+     その授業を時間割に入れている人なら、申請も招待もなく1タップで入れる。部屋が無ければ、最初に入る人の時にサーバーが作る
+   ・運営（tama_admins の人＝あお・しゅうすけさん。「影のオーナー」）は、ほかの人には普通の参加者に見えたまま、
+     投稿を消す・退出してもらう・お知らせを出す・説明を変える、ができる（isAdmin。サーバー側でも tama_room_can_mod で確かめる）
+   ・入り方は2つ：ホームの「いまの授業のコミュニティ」のバー（授業中だけ）と、下のタブ「コミュニティ」の「📚 授業」（自分の時間割の授業の一覧）
+   ・部屋の中では、参加者のうち共通点のある人が分かり、プロフィールからいいねできる。「運営に連絡」もできる
+   サーバーは supabase/tama_class_community.sql（tama_class_rooms・tama_class_room_join・tama_is_admin・tama_room_set_notice・tama_room_set_info） */
+let classRooms=[], classMissing=false, isAdmin=false, roomFrom='comm';
+let cmTab=(()=>{ try{ const v=localStorage.getItem('tama_cmTab'); return ['cls','rooms','fr'].includes(v)?v:'cls'; }catch(e){ return 'cls'; } })();
+async function loadAdmin(){
+  if(!sb||!myId||String(myId).startsWith('local-'))return;
+  try{ const {data,error}=await sb.rpc('tama_is_admin'); if(!error)isAdmin=!!data; }catch(e){}
+}
+const canModRoom=r=>isRoomOwner(r)||isAdmin;   // オーナーか運営（影のオーナー）
+const isOfficialClassRoom=r=>!!r&&!r.owner_id&&(r.conditions||[]).some(x=>x.k==='cname');
+async function loadClassRooms(){
+  if(!sb||!myId||String(myId).startsWith('local-')||classMissing)return;
+  try{
+    const {data,error}=await sb.rpc('tama_class_rooms');
+    if(error){ if(error.code==='PGRST202'||/schema cache|does not exist/i.test(error.message)){ classMissing=true; console.warn('[class] 授業のコミュニティを読めません。supabase/tama_class_community.sql を実行してください'); } renderClassList(); return; }
+    classRooms=data||[]; renderClassList(); renderStartCard(); updateCmDots();
+  }catch(e){}
+}
+// いま授業中の授業（授業中だけ。休み時間・授業が無い時は null）
+function classNow(){ const cs=ttCurrentSlot(); if(!cs||!cs.inClass)return null; const n=String(myTimetable[cs.k]||'').trim(); return n?{name:n,slot:cs.k,i:cs.i}:null; }
+const classOf=n=>classRooms.find(c=>normAns(c.name)===normAns(n));
+function classSlotsText(n){ const D=['','月','火','水','木','金']; return Object.entries(myTimetable||{}).filter(([,v])=>normAns(v)===normAns(n)).map(([k])=>{ const [d,p]=k.split('-'); return D[+d]+p; }).join('・'); }
+// ホームのバー。時間割が空の人には案内（はじめにやることが出ている間は、そちらに「時間割に授業を入れる」があるので出さない）
+function classBarHTML(startShown){
+  if(!profile)return '';
+  if(!myClassOptions().length)return startShown?'':`<div class="clsbar empty" onclick="openTimetable()"><span class="cbi">📚</span><span class="cbt"><b>時間割を入れると、授業のコミュニティに入れます</b><small>同じ授業の人と、課題・テスト・休講の情報交換</small></span><span class="go">›</span></div>`;
+  const now=classNow(); if(!now)return '';
+  const c=classOf(now.name)||{}, un=c.unread||0;
+  return `<div class="clsbar" onclick="openClassRoom('${jsq(now.name)}')"><span class="cbi">📚</span><span class="cbt"><small>いまの授業（${now.i}限）のコミュニティ</small><b>${esc(now.name)}</b><em>${c.joined?`👥 ${c.members||0}人が参加${un?` ・ 新着 ${un}件`:''}`:`同じ授業の人 ${c.takers||0}人 ・ タップで入る`}</em></span>${un?`<span class="unread">${un>99?'99+':un}</span>`:'<span class="go">›</span>'}</div>`;
+}
+async function openClassRoom(name){
+  if(!profile){ toast('先にプロフィールを登録してね'); return; }
+  if(classMissing){ toast('授業のコミュニティは準備中です'); return; }
+  const c=classOf(name);
+  if(c&&c.joined&&c.room_id){ if(!rooms.some(r=>rid(r.id)===rid(c.room_id)))await loadRooms(); return openRoom(c.room_id); }
+  if(!sb||String(myId).startsWith('local-')){ toast('いまは入れません'); return; }
+  const {data,error}=await sb.rpc('tama_class_room_join',{p_name:name});
+  if(error||!data){ toast('入れませんでした'+(error?'：'+error.message:'')); return; }
+  if(data.status==='unfit'){
+    $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">📚 ${esc(name)}</h2><p class="psdesc">授業のコミュニティには、その授業を<b style="color:var(--ink)">時間割に入れている人</b>が入れます。時間割に「${esc(name)}」を入れてから、もう一度どうぞ。</p>
+      <button class="btn btn-primary" style="width:100%;padding:13px" onclick="closeMembers();openTimetable()">🗓 時間割に入れる</button>
+      <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+    $('#memOverlay').classList.add('show'); return;
+  }
+  if(data.status==='banned'){ toast('この授業のコミュニティには参加できません'); return; }
+  if(data.status!=='ok'){ toast('入れませんでした'); return; }
+  toast(`📚 「${esc(name)}」のコミュニティに入りました`);
+  myRoomIds.add(rid(data.room)); await loadRooms(); loadClassRooms(); openRoom(data.room);
+}
+// 「📚 授業」：自分の時間割の授業の一覧（いま授業中のものを先に）
+function renderClassList(){
+  const el=$('#classList'); if(!el)return;
+  if(!profile){ el.innerHTML=''; return; }
+  const cls=myCourseNames();
+  if(!cls.length){ el.innerHTML=`<div class="empty"><div class="big">📚</div><p>時間割に授業を入れると、<br>その授業を取っている人のコミュニティに入れます。<br><span style="font-size:12px">課題・テスト・休講の情報交換に</span></p><button class="btn btn-primary" style="padding:12px 20px;margin-top:12px" onclick="openTimetable()">🗓 時間割に授業を入れる</button></div>`; return; }
+  const now=classNow(), live=n=>!!now&&normAns(now.name)===normAns(n);
+  const rows=cls.slice().sort((a,b)=>live(b)-live(a)).map(n=>{ const c=classOf(n)||{}, un=c.unread||0;
+    return `<div class="urow${live(n)?' clslive':''}" onclick="openClassRoom('${jsq(n)}')"><div class="av" style="background:linear-gradient(135deg,#ffb066,#ffd166)">📚</div>
+      <div class="info"><div class="n">${esc(n)}${live(n)?' <span class="joined-tag own">いま授業中</span>':''}${c.joined?' <span class="joined-tag">参加中</span>':''}</div>
+      <div class="b">🗓 ${esc(classSlotsText(n))}</div>
+      <div class="b" style="color:var(--signal);font-size:11.5px">同じ授業の人 ${c.takers||0}人 ・ 参加 ${c.members||0}人${c.last_at?' ・ 最終 '+agoText(c.last_at):''}</div></div>
+      <div class="d">${un?`<div class="unread">${un>99?'99+':un}</div>`:`<div class="m" style="font-size:12.5px">${c.joined?'開く':'入る'} ›</div>`}</div></div>`; }).join('');
+  el.innerHTML=`<div class="cmnote">📚 授業ごとのコミュニティです。<b>その授業を時間割に入れている人</b>なら、だれでも1タップで入れます。オーナーはいません（運営が見守っています）。</div>`
+    +(classMissing?'<div class="cmnote">⚠️ 授業のコミュニティは準備中です。もう少しお待ちください</div>':'')
+    +`<div class="ulist">${rows}</div><div style="padding:6px 16px 18px"><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="openTimetable()">🗓 時間割に授業を足す・直す</button></div>`;
+}
+// 下のタブ「コミュニティ」の中の切りかえ（📚 授業／🏠 コミュニティ／👥 友達）
+function setCmTab(k){
+  cmTab=k; try{ localStorage.setItem('tama_cmTab',k); }catch(e){}
+  [['cls','#cmSegCls'],['rooms','#cmSegRooms'],['fr','#cmSegFr']].forEach(([x,s])=>{ const b=$(s); if(b)b.classList.toggle('on',x===k); });
+  $('#cmClsPane').hidden=k!=='cls'; $('#cmFrPane').hidden=k!=='fr'; $('#cmRoomsHost').hidden=k!=='rooms';
+  const sub=$('#friendSub'); if(sub)sub.hidden=k!=='fr';
+  const hb=$('#cmHeadBtn'); if(hb)hb.textContent=k==='fr'?'＋ 追加':k==='rooms'?'＋ 作る':'🗓 時間割';
+  if(k==='rooms'){ placeCommPane('cm'); renderRooms(); loadRooms(); }
+  if(k==='cls'){ renderClassList(); loadClassRooms(); }
+  if(k==='fr')loadFriends();
+}
+function cmHeadAction(){ if(cmTab==='fr')openFrAdd(); else if(cmTab==='rooms')newRoom(); else openTimetable(); }
+function openCm(k){ cmTab=k; go('friends'); }   // go('friends') が setCmTab(cmTab) を呼ぶ
+// トークの「コミュニティ」の中身（#commPane）を、見ている方の画面へ移す（同じものを2か所で使うため。同時に2つの画面は出ない）
+function placeCommPane(where){
+  const p=$('#commPane'); if(!p)return;
+  if(where==='cm'){ const h=$('#cmRoomsHost'); if(p.parentNode!==h)h.appendChild(p); p.hidden=false; }
+  else{ const ml=$('#matchList'); if(ml&&p.previousElementSibling!==ml)ml.insertAdjacentElement('afterend',p); }
+}
+// 部屋から戻る先（開いた画面へ）
+function roomBack(){ go(roomFrom==='friends'?'friends':roomFrom==='near'?'near':'comm'); }
+// 下のタブ・切りかえの点（授業の新着・コミュニティの新着・友達申請）
+function updateCmDots(){
+  const cu=classRooms.reduce((s,c)=>s+(c.joined?(c.unread||0):0),0);
+  const officialIds=new Set(classRooms.filter(c=>c.room_id).map(c=>rid(c.room_id)));
+  let ru=0; myRoomIds.forEach(k=>{ if(!officialIds.has(k))ru+=(roomStats[k]&&roomStats[k].unread)||0; });
+  const fr=profile?allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length:0;
+  const set=(id,n)=>{ const d=$(id); if(d){ d.style.display=n?'':'none'; d.textContent=n>99?'99+':(n||''); } };
+  set('#dotCmCls',cu); set('#dotCmRooms',ru); set('#dotCmFr',fr); set('#dotFriends',cu+fr);
+}
+// 部屋のお知らせ（授業のコミュニティで運営が出すもの。オーナーのいる部屋はオーナーも）
+async function loadRoomNotice(){
+  const r=curRoom; if(!r||!sb)return;
+  try{ const {data}=await sb.from(T('rooms')).select('notice,notice_at,topic,rules').eq('id',r.id).maybeSingle();
+    if(data&&curRoom&&rid(curRoom.id)===rid(r.id)){ const ch=curRoom.notice!==data.notice; Object.assign(curRoom,{notice:data.notice||null,notice_at:data.notice_at||null,topic:data.topic,rules:data.rules}); if(ch)renderRoom(); } }catch(e){}
+}
+function openRoomNoticeEdit(){
+  const r=curRoom; if(!r||!canModRoom(r))return;
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">📌 お知らせ</h2><p class="psdesc">部屋のいちばん上に固定で出ます（休講・テスト・課題の案内など）。空にして保存すると消えます。</p>
+    <textarea id="rmNotice" rows="3" maxlength="200" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:14px" placeholder="例：来週（10/22）は休講です">${esc(r.notice||'')}</textarea>
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:10px" onclick="saveRoomNotice()">保存する</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="openRoomInfo()">‹ もどる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function saveRoomNotice(){
+  const t=(($('#rmNotice')||{}).value||'').trim(); if(t&&ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています'); return; }
+  const {data,error}=await sb.rpc('tama_room_set_notice',{p_room:rid(curRoom.id),p_text:t});
+  if(error||data!=='ok'){ toast('保存できませんでした'); return; }
+  curRoom.notice=t||null; curRoom.notice_at=t?new Date().toISOString():null; closeMembers(); renderRoom(); toast(t?'📌 お知らせを出しました':'お知らせを消しました');
+}
+function openRoomTextEdit(){
+  const r=curRoom; if(!r||!canModRoom(r))return;
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">✏️ 部屋の説明</h2>
+    <div class="field"><label>ひとこと<span class="opt">40文字まで</span></label><input id="rmTopicE" maxlength="40" value="${esc(r.topic||'')}"></div>
+    <div class="field"><label>ルール<span class="opt">300文字まで</span></label><textarea id="rmRulesE" rows="5" maxlength="300" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:14px">${esc(r.rules||'')}</textarea></div>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="saveRoomText()">保存する</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="openRoomInfo()">‹ もどる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function saveRoomText(){
+  const topic=$('#rmTopicE').value.trim(), rules=$('#rmRulesE').value.trim();
+  if([topic,rules].some(ngCheck)){ toast('⚠️ 不適切な言葉が含まれています'); return; }
+  const {data,error}=await sb.rpc('tama_room_set_info',{p_room:rid(curRoom.id),p_topic:topic,p_rules:rules});
+  if(error||data!=='ok'){ toast('保存できませんでした'); return; }
+  Object.assign(curRoom,{topic,rules}); toast('保存しました'); await loadRooms(); openRoomInfo();
+}
+// 「運営に連絡」（授業のコミュニティの中から。困ったこと・要望など。運営は admin.reports で見る）
+function openRoomContact(){
+  const r=curRoom; if(!r)return;
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">📮 運営に連絡</h2><p class="psdesc">「${esc(r.name)}」について、運営に知らせたいこと（困った投稿・要望など）を書いてください。運営だけが読みます。</p>
+    <textarea id="rmContact" rows="4" maxlength="300" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:14px" placeholder="例：課題の答えをそのまま貼っている人がいます"></textarea>
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:10px" onclick="sendRoomContact()">送る</button>
+    <div style="margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.7">身の危険を感じている時は、<a onclick="closeMembers();openContact()" style="color:var(--signal);font-weight:700;text-decoration:underline;cursor:pointer">運営・警察への連絡</a>も。</div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="openRoomInfo()">‹ もどる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function sendRoomContact(){
+  const r=curRoom, t=(($('#rmContact')||{}).value||'').trim(); if(!r||!t){ toast('内容を書いてください'); return; }
+  if(!sb||String(myId).startsWith('local-')){ toast('いまは送れません'); return; }
+  const row={reporter_id:myId,target_id:r.owner_id||null,reason:`運営への連絡：コミュニティ「${r.name}」（${rid(r.id)}）`,detail:t,evidence:{room:r.name,room_id:rid(r.id)}};
+  let {error}=await sb.from(T('reports')).insert(row);
+  if(error&&/detail|evidence/.test(error.message)){ delete row.detail; delete row.evidence; row.reason+=`：${t}`; ({error}=await sb.from(T('reports')).insert(row)); }
+  closeMembers(); toast(error?'送れませんでした。マイページの「困ったとき」から連絡してください':'📮 運営に送りました。ありがとうございます');
+  if(error)console.warn('[contact] 送れません',error.message);
+}
+
 /* ---------- はじめにやること（2026-10-08 あおの依頼「入れた直後の離脱を減らす」） ----------
    近くに人がいない時でも、ちかくの良さ（同じ授業の人・授業の部屋・お題・友達のいまどこ）にすぐ触れられるよう、4つの行動を近くの人の画面に出す。
    終わったものに ✅、全部終わったら出さない。✕ で閉じたら二度と出さない（端末に覚える tama_start） */
@@ -4396,8 +4577,11 @@ function renderStartCard(){
       :`<div class="sth"><b>🚀 はじめにやること</b><span>${n}/${items.length}</span><button onclick="toggleStartCard(false)" aria-label="たたむ" style="font-size:12px">たたむ</button><button onclick="hideStartCard()" aria-label="閉じる" style="margin-left:0">✕</button></div>`
       +items.map(x=>`<div class="strow${x.done?' done':''}"${x.done?'':` onclick="${x.go}"`}><span class="sti">${x.done?'✅':x.icon}</span><div class="stt"><b>${x.t}</b><small>${x.d}</small></div>${x.done?'':'<span class="go">›</span>'}</div>`).join('');
   }
-  if(!h)h=misCardHTML();   // はじめにやることが終わったら（閉じたら）、同じ場所に今日のミッション
+  // 2026-10-15 あおの決定：今日のミッションはマイページへ移した（前は、はじめにやることが終わったら同じ場所に出していた）。
+  // ここ（の下の #classBar）には、授業中だけ「いまの授業のコミュニティ」を出す
   if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
+  const cb=$('#classBar'); if(cb){ const b=classBarHTML(!!h); if(cb.dataset.h!==b){ cb.dataset.h=b; cb.innerHTML=b; } }
+  const mm=$('#meMission'); if(mm){ const m=profile?misCardHTML():''; if(mm.dataset.h!==m){ mm.dataset.h=m; mm.innerHTML=m; } }
 }
 function toggleStartCard(v){ const s=startState(); s.open=v; saveStart(s); renderStartCard(); }
 function hideStartCard(){ const s=startState(); s.hide=true; saveStart(s); renderStartCard(); }
@@ -4417,7 +4601,7 @@ const MIS_REWARDS=rewardsAt('mis');   // ごほうびは「きせかえ」（LOO
 const MIS_POOL=[
   {k:'tt',icon:'🗓',t:'時間割に授業を1つ入れる',d:'同じ授業の人が「共通点」で見つかります',go:'openTimetable()',ever:()=>myClassOptions().length>0},
   {k:'invite',icon:'📨',t:'友達をちかくに誘う',d:'招待のリンクをコピーして送る（あなたにも特典あり）',go:'openInvite()',ever:()=>(attrsOf(profile).inv_n||0)>0,rep:true},
-  {k:'friend',icon:'👥',t:'友達を1人追加する',d:'目の前の人とは「＋ 追加」の4桁のコードで',go:"go('friends');openFrAdd()",ever:()=>lookCount('friend')>0},
+  {k:'friend',icon:'👥',t:'友達を1人追加する',d:'目の前の人とは「＋ 追加」の4桁のコードで',go:"openCm('fr');openFrAdd()",ever:()=>lookCount('friend')>0},
   {k:'like',icon:'👋',t:'共通点のある人に いいね',d:'近くの人・すれ違った人の一覧から',go:'showNearList()',ever:()=>liked.size>0,can:()=>!misAlone(),rep:true},
   {k:'talk',icon:'🗣',t:'トークで共通点の話をしてみる',d:'トーク・友達に1回送る',go:"go('match')",ever:()=>false,can:()=>Object.values(matches).some(m=>!isExpired(m))||lookCount('friend')>0,rep:true},
   {k:'post',icon:'💬',t:'コミュニティに1つ書き込む',d:'参加しているコミュニティか、新しく入って',go:"go('match');setTalkTab('comm')",ever:()=>false,rep:true},
@@ -4625,19 +4809,25 @@ async function openRoom(id){
   if(!roomsV2)return openRoomLegacy(id);
   const k=rid(id), r=rooms.find(x=>rid(x.id)===k);
   if(!r){ toast('この部屋は見つかりません（閉じられたか、入れない部屋です）'); loadRooms(); return; }
+  // 戻る先（2026-10-15：ホームのバー・コミュニティのページ・トークのどこから開いても、そこへ戻る）
+  const cur=(($$('.screen.active')[0])||{}).id||''; if(cur!=='s-room')roomFrom=cur==='s-friends'?'friends':cur==='s-near'?'near':'comm';
   curRoom={...r,msgs:[]}; renderRoomHead(); renderRoom(); updateRoomJoinUI(); go('room');
-  if(myRoomIds.has(k)){ await loadRoomMsgs(); if(roomStats[k])roomStats[k].unread=0; renderRooms(); updateCommDot(); markRoomRead(curRoom.id,true); }
+  loadRoomNotice();   // 📌 お知らせ（2026-10-15）
+  if(myRoomIds.has(k)){ await loadRoomMsgs(); if(roomStats[k])roomStats[k].unread=0; const c=classRooms.find(x=>rid(x.room_id||'')===k); if(c)c.unread=0; renderRooms(); updateCommDot(); updateCmDots(); markRoomRead(curRoom.id,true); }
   clearInterval(roomPoll); if(!sb)return;
-  roomPoll=setInterval(async()=>{ if(!$('#s-room').classList.contains('active'))return; await loadRoomMsgs(); markRoomRead(curRoom.id); },2500);
+  let polls=0;
+  roomPoll=setInterval(async()=>{ if(!$('#s-room').classList.contains('active'))return; await loadRoomMsgs(); markRoomRead(curRoom.id); if(++polls%12===0)loadRoomNotice(); },2500);
 }
 function renderRoom(){
   if(!roomsV2)return renderRoomLegacy();
   const box=$('#roomMsgs'); if(!box||!curRoom)return;
   const r=curRoom, joined=myRoomIds.has(rid(r.id));
   let h;
+  // 📌 お知らせ（運営・オーナーが固定で出すもの。2026-10-15）
+  const notice=r.notice?`<div class="rnotice">📌 <b>${r.owner_id?'オーナーから':'お知らせ'}</b>${r.notice_at?`<span>${esc(agoText(r.notice_at))}</span>`:''}<div>${esc(r.notice)}</div></div>`:'';
   if(!joined){
     // 参加していない人には投稿を見せず、ルール・入れる人・オーナーを見せてから参加してもらう
-    h=`<div class="rjoin"><div class="ic">${roomIcon(r)}</div><h3>${esc(r.name)}</h3><div class="tp">${esc(r.topic||'')}</div>
+    h=notice+`<div class="rjoin"><div class="ic">${roomIcon(r)}</div><h3>${esc(r.name)}</h3><div class="tp">${esc(r.topic||'')}</div>
       <div class="sec"><b>📜 ルール</b>${esc(r.rules||'オーナーはまだルールを書いていません。おたがいに気持ちよく使いましょう。')}</div>
       <div class="sec"><b>🚪 入れる人</b>${esc(roomWhoText(r))}${r.visibility==='common'&&r.fits?'（あなたも当てはまります）':''}</div>
       ${meetText(r.meet)?`<div class="sec"><b>📍 集まる約束</b>${esc(meetText(r.meet))}${r.going?`（👍 ${r.going}人が行く）`:''}</div>`:''}
@@ -4646,7 +4836,7 @@ function renderRoom(){
   }else{
     const msgs=(r.msgs||[]).filter(m=>!blocked.has(m.from_id));
     const mt=meetText(r.meet);
-    h=(mt?`<div class="rmeet"><div>📍 <b>集まる約束</b>　${esc(mt)}${r.going?`<br><span style="font-size:11.5px;color:var(--muted)">👍 ${r.going}人が行く</span>`:''}</div>${roomEnded(r)?'':`<button class="${r.i_going?'on':''}" onclick="toggleRoomRsvp()">${r.i_going?'行く ✓':'👍 行く'}</button>`}</div>`:'')
+    h=notice+(mt?`<div class="rmeet"><div>📍 <b>集まる約束</b>　${esc(mt)}${r.going?`<br><span style="font-size:11.5px;color:var(--muted)">👍 ${r.going}人が行く</span>`:''}</div>${roomEnded(r)?'':`<button class="${r.i_going?'on':''}" onclick="toggleRoomRsvp()">${r.i_going?'行く ✓':'👍 行く'}</button>`}</div>`:'')
       +(roomEnded(r)?`<div class="ttlbar over">⌛ この部屋は終わりました。3日後に投稿ごと消えます</div>`:'');
     if(!msgs.length)h+='<div class="day">まだメッセージはありません。最初のひとことをどうぞ！</div>';
     let lastDay='';
@@ -4672,7 +4862,7 @@ async function leaveRoomV2(){
   const r=curRoom; if(!r)return;
   if(isRoomOwner(r)){ alertOwnerLeave(); return; }
   if(!confirm('この部屋を退出しますか？'))return;
-  if(await leaveRoom(r.id)){ toast('退出しました'); await loadRooms(); go('comm'); }
+  if(await leaveRoom(r.id)){ toast('退出しました'); await loadRooms(); loadClassRooms(); roomBack(); }
 }
 function alertOwnerLeave(){ toast('オーナーは、ほかの人にオーナーを譲るか、部屋を閉じてから退出できます'); openRoomInfo(); }
 async function toggleRoomRsvp(){
@@ -4684,9 +4874,9 @@ async function toggleRoomRsvp(){
 // 投稿を押した時：自分の投稿・オーナーは消せる、ほかの人の投稿は通報できる
 function roomMsgMenu(id){
   const r=curRoom, m=r&&(r.msgs||[]).find(x=>String(x.id)===String(id)); if(!m)return;
-  const mine=m.from_id===myId, canDel=mine||isRoomOwner(r);
+  const mine=m.from_id===myId, canDel=mine||canModRoom(r);   // 運営（影のオーナー）も消せる（2026-10-15）
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">この投稿</h2><div class="sec">${esc(m.text)}</div>
-    ${canDel?`<button class="rbtn warn" onclick="deleteRoomMsg('${esc(String(id))}')">🗑 この投稿を消す${mine?'':'<small>オーナーとして消します（書いた人には通知されません）</small>'}</button>`:''}
+    ${canDel?`<button class="rbtn warn" onclick="deleteRoomMsg('${esc(String(id))}')">🗑 この投稿を消す${mine?'':`<small>${isRoomOwner(r)?'オーナー':'運営'}として消します（書いた人には通知されません）</small>`}</button>`:''}
     ${mine?'':`<button class="rbtn warn" onclick="closeMembers();reportContext='コミュニティ「${jsq(r.name)}」の投稿「${jsq(m.text.slice(0,30))}」';openReport('${m.from_id}','${jsq(m.name||'匿名')}')">⚠ この投稿を通報する<small>書いた人はあなたの画面に出なくなります</small></button>`}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
@@ -4706,9 +4896,13 @@ async function openRoomInfo(){
   if(joined){
     const {data:mem}=await sb.from(T('room_members')).select('user_id,joined_at').eq('room_id',r.id);
     const ids=(mem||[]).map(m=>m.user_id);
-    if(ids.length){ const {data:ps}=await sb.from(T('profiles')).select('id,name,emoji').in('id',ids); members=(ps||[]).filter(u=>!blocked.has(u.id)||u.id===r.owner_id); }
-    members.sort((a,b)=>(a.id===r.owner_id?-1:b.id===r.owner_id?1:a.id===myId?-1:b.id===myId?1:0));
+    // 共通点を出すため、プロフィールを丸ごと読む（2026-10-15 あおの決定「コミュニティの中で共通点がある人がいれば、いいね・コンタクトできる」）
+    if(ids.length){ const {data:ps}=await sb.from(T('profiles')).select(USER_COLS).in('id',ids);
+      members=(ps||[]).filter(u=>!blocked.has(u.id)||u.id===r.owner_id).map(u=>({...u,fa:u.fes_attrs||{},tags:u.tags||[],looking:u.looking||[],likes:u.likes||[],interests:u.interests||[]})); }
+    members.forEach(u=>{ u._cm=u.id===myId?[]:commonWith(u); });
+    members.sort((a,b)=>(a.id===r.owner_id?-1:b.id===r.owner_id?1:a.id===myId?-1:b.id===myId?1:b._cm.length-a._cm.length));
   }
+  roomInfoMembers=members;
   let code=null; if(owner&&r.visibility==='invite'){ const {data}=await sb.rpc('tama_room_code',{p_room:k}); code=data; }
   const nm=u=>jsq(u.name||'');
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">${roomIcon(r)} ${esc(r.name)}</h2><p class="psdesc">${esc(r.topic||'')}</p>
@@ -4716,16 +4910,27 @@ async function openRoomInfo(){
     <div class="sec"><b>🚪 入れる人</b>${esc(roomWhoText(r))}${code?`<div style="margin-top:6px">招待コード <span class="code">${esc(code)}</span> <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="copyText('${esc(code)}')">コピー</button></div>`:''}</div>
     <div class="sec"><b>⏳ 期限・👥 定員</b>${roomLeft(r)}${r.expires_at?`（${fesTime(Date.parse(r.expires_at),true)}まで）`:''} ・ 定員 ${r.capacity?r.capacity+'人':'なし'}</div>
     ${meetText(r.meet)?`<div class="sec"><b>📍 集まる約束</b>${esc(meetText(r.meet))}${r.going?`（👍 ${r.going}人）`:''}</div>`:''}
-    ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.map(u=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji||'🙂')}</div><div class="nm">${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}</div>
-      ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button><button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
-      :`<div class="sec"><b>👑 オーナー</b>${!r.owner_id&&isClassRoom(r)?'なし（運営が見守る授業の部屋）':esc(r.owner_name||'なし')}<br><span style="font-size:11.5px;color:var(--muted)">参加者は、参加すると見られます</span></div>`}
+    ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.some(u=>u._cm&&u._cm.length)?'<div class="rcmhint">🎯 共通点のある人が上に出ます。プロフィールから「👋 いいね」できます</div>':''}${members.map((u,i)=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji||'🙂')}</div><div class="nm" ${u.id===myId?'':`onclick="openRoomMember(${i})" style="cursor:pointer"`}>${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}${u._cm&&u._cm.length?`<small class="rcm">🎯 ${esc(u._cm[0])}${u._cm.length>1?` ほか${u._cm.length-1}`:''}</small>`:''}</div>
+      ${u.id!==myId&&u._cm&&u._cm.length&&!owner?`<button onclick="openRoomMember(${i})">👋 いいね</button>`:''}
+      ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button>`:''}${canModRoom(r)&&u.id!==myId?`<button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
+      :`<div class="sec"><b>👑 オーナー</b>${isOfficialClassRoom(r)?'なし（だれでも入れる授業のコミュニティ。運営が見守っています）':esc(r.owner_name||'なし')}<br><span style="font-size:11.5px;color:var(--muted)">参加者は、参加すると見られます</span></div>`}
     ${joined?`<div class="sharerow" style="margin-bottom:6px"><div class="lab">🔔 この部屋の通知<small>オフにすると、投稿があっても通知しません</small></div><div class="toggle${r.muted?'':' on'}" onclick="toggleRoomMute()"><div class="k"></div></div></div>`:''}
     ${owner?`<button class="rbtn" onclick="closeMembers();createRoom(true)">✏️ 部屋を編集する<small>名前・ルール・入れる人・定員・期限・集まる約束</small></button>
       <button class="rbtn warn" onclick="closeRoomV2()">🗑 コミュニティを閉じる<small>投稿も参加者もすべて消えます。元に戻せません</small></button>`:''}
+    ${canModRoom(r)?`<button class="rbtn" onclick="openRoomNoticeEdit()">📌 お知らせを${r.notice?'変える・消す':'出す'}<small>部屋のいちばん上に固定で出ます（休講・テストの案内など）</small></button>`:''}
+    ${canModRoom(r)&&!owner?`<button class="rbtn" onclick="openRoomTextEdit()">✏️ 部屋の説明を変える<small>${isAdmin?'運営として変えます':'ひとこと・ルール'}</small></button>`:''}
     ${joined&&!owner?`<button class="rbtn" onclick="closeMembers();leaveRoomV2()">🚪 退出する</button>`:''}
-    ${owner?'':`<button class="rbtn warn" onclick="reportRoom()">⚠ このコミュニティを運営に知らせる<small>ルール違反・危ない部屋など</small></button>`}
+    ${owner?'':isOfficialClassRoom(r)?`<button class="rbtn" onclick="openRoomContact()">📮 運営に連絡<small>困った投稿・要望など。運営だけが読みます</small></button>`
+      :`<button class="rbtn warn" onclick="reportRoom()">⚠ このコミュニティを運営に知らせる<small>ルール違反・危ない部屋など</small></button>`}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
+}
+// 参加者のプロフィールを開く（いいね・友達申請はプロフィールから。いつもの安全の仕組みのまま：おたがいにいいねでトーク）
+let roomInfoMembers=[];
+function openRoomMember(i){
+  const u=roomInfoMembers[i]; if(!u||u.id===myId)return;
+  closeMembers(); let d=null; if(myPos&&u.lat!=null){ const r=relMeters(myPos,u); d=Math.round(Math.hypot(r.e,r.n)); }
+  openSheet(u,d);
 }
 async function copyText(t){ try{ await navigator.clipboard.writeText(t); toast('コピーしました'); }catch(e){ prompt('コピーしてください',t); } }
 function showRoomCode(code){
@@ -4775,12 +4980,12 @@ async function closeRoomV2(){
   if(!confirm(`「${r.name}」を閉じますか？\n\n投稿も参加者もすべて消えます。元に戻せません。`))return;
   const {data,error}=await sb.rpc('tama_room_close',{p_room:rid(r.id)});
   if(error||data!=='ok'){ toast('閉じられませんでした'); return; }
-  closeMembers(); clearInterval(roomPoll); curRoom=null; toast('コミュニティを閉じました'); await loadRooms(); go('comm');
+  closeMembers(); clearInterval(roomPoll); curRoom=null; toast('コミュニティを閉じました'); await loadRooms(); roomBack();
 }
 async function reportRoom(){
   const r=curRoom; if(!r||!sb)return;
   // オーナーのいない授業の部屋は、通報の宛先（target_id）が無いので、お問い合わせから知らせてもらう（2026-10-08）
-  if(!r.owner_id){ closeMembers(); toast('部屋の名前と、困ったことを運営に知らせてください'); openContact(); return; }
+  if(!r.owner_id){ openRoomContact(); return; }   // オーナーのいない部屋（授業のコミュニティ）は「運営に連絡」（2026-10-15）
   if(!confirm(`「${r.name}」を運営に知らせますか？\n（オーナーには通知されません。運営が内容を確認します）`))return;
   const {error}=await sb.from(T('reports')).insert({reporter_id:myId,target_id:r.owner_id,reason:`コミュニティ「${r.name}」（${rid(r.id)}）について`});
   closeMembers(); toast(error?'送れませんでした。マイページの「困ったとき」から連絡してください':'運営に知らせました。ありがとうございます');
@@ -5014,6 +5219,10 @@ const HELP={
     can:['答えると、みんなの答えが見られます（5人以上が答えると割合が出ます）','同じ答えの人が、その日だけの共通点として「近くの人」に出ます','次の日には、カードの上に昨日の結果が出ます'],
     see:'あなたの答えは、その日だけプロフィールに出ます。答えられるのは1日1回で、あとから変えられません。',
     tip:'まだ答えていない日は、昼休みにお題の通知が届くことがあります。'},
+  classcom:{icon:'📚',title:'授業のコミュニティ',lead:'授業ごとのコミュニティです。その授業を時間割に入れている人なら、だれでも1タップで入れます。',
+    can:['課題・テスト・休講の情報交換に。同じ授業名なら、曜日・時限が違っても1つの部屋です','授業中は、近くの人の画面のいちばん上に「いまの授業のコミュニティ」が出ます','参加者のうち共通点のある人が上に出ます。プロフィールから「👋 いいね」できます','困った投稿・要望は、部屋の「ⓘ」→「📮 運営に連絡」から'],
+    see:'オーナーはいません。運営が見守っていて、ルールに合わない投稿は消したり、退出してもらったりすることがあります。投稿は参加している人だけが読めます。',
+    tip:'時間割に授業を入れるほど、入れる授業のコミュニティが増えます。'},
   ct:{icon:'⏰',title:'ちかくタイム',lead:'週に2〜3回、平日の休み時間のどこかで始まる、10分だけのお題です。いつ始まるかは決まっていません。',
     can:['始まると通知が届きます。2つのうち1つを選ぶだけです','10分のあいだに答えた人どうしで、同じ答えの人がその日だけの共通点として「近くの人」に出ます','終わってから1時間は、みんなの答えの割合が見られます（5人以上が答えた時）'],
     see:'あなたの答えは、その日だけプロフィールに出ます。答えられるのは1回で、あとから変えられません。',
@@ -5058,7 +5267,7 @@ const TIPS={
         {k:'tt',sel:'#nowBar .ntile.tt',t:'🗓 時間割を入れると、同じ授業を取っている人が見つかります'}],
   cross:[{k:'cross',sel:'#s-cross .apphead h1',t:`🚶 開いたまま歩くと、${FES.encounterRangeM}m以内に入った人が記録されます。何度も会う人が分かります`}],
   match:[{k:'talk',sel:'#s-match .seg',t:'💬 おたがいにいいねすると、ここで24時間話せます。届いたいいねもここに出ます'}],
-  friends:[{k:'friends',sel:'#s-friends .apphead h1',t:'👥 友達になると、いる建物・教室が見えます。目の前の人とは「＋ 追加」の4桁のコードで'}],
+  friends:[{k:'classcom',sel:'#s-friends .apphead h1',t:'📚 時間割の授業ごとのコミュニティに、1タップで入れます。🏠 趣味などのコミュニティ・👥 友達も、ここで切りかえ'}],   // 2026-10-15：友達のページは「コミュニティ」になった
   me:[{k:'vis',help:null,sel:'#visSum',t:'🔒 だれに何を見せるかは、ここでまとめて変えられます'}]
 };
 let tipsSeen=(()=>{ try{ return JSON.parse(localStorage.getItem('tama_tips')||'[]'); }catch(e){ return []; } })();
@@ -5405,6 +5614,7 @@ let lastTTShareLoad=0;
 function updateFriendDot(){
   const n=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length, dot=$('#dotFriends');
   if(dot){ dot.style.display=n?'':'none'; dot.textContent=n||''; }
+  updateCmDots();   // 下のタブ「コミュニティ」の点は、授業の新着と友達申請を合わせて出す（2026-10-15）
 }
 
 /* 申請・承認・取り消し */
@@ -5888,7 +6098,7 @@ async function saveTimetable(){
   const row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=rooms;
   const {error}=await sb.from(T('timetable')).upsert(row);
   if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
-  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadCommonCount(true); if(myClassOptions().length)misMark('tt');   // 授業のコミュニティの一覧・共通点のある人の数も新しく
+  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadClassRooms(); loadCommonCount(true); if(myClassOptions().length)misMark('tt');   // 授業のコミュニティの一覧・共通点のある人の数も新しく
   toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました');
   if(Object.keys(slots).length)askPushSoon('tt');
 }
@@ -5997,7 +6207,7 @@ function renderDaily(){
   el.innerHTML=`<div class="dyday" id="dailyYday"></div>`+head+`<div class="dmine">あなたの答え：<b>${esc(mine)}</b></div>
     <div class="ddist" id="dailyDist"></div>
     <div class="dcount">同じ答えの人　近くに <b>${c.near}</b>人 ・ 今日すれ違った人に <b>${c.crossed}</b>人 ・ キャンパスに <b>${c.all}</b>人${(()=>{ const n=allFriendRows().filter(r=>r.status==='accepted').map(r=>friendUser(otherIdOf(r))).filter(u=>u&&sameDaily(u)).length;
-      return n?` ・ <a onclick="event.stopPropagation();go('friends')" style="color:var(--signal);font-weight:700;cursor:pointer">👥 友達に <b>${n}</b>人 ›</a>`:''; })()}</div>
+      return n?` ・ <a onclick="event.stopPropagation();openCm('fr')" style="color:var(--signal);font-weight:700;cursor:pointer">👥 友達に <b>${n}</b>人 ›</a>`:''; })()}</div>
     <div class="dnote">${c.all?'同じ答えの人は「近くの人」に「今日のお題」の共通点つきで出ます':t.free?'まだ同じ答えの人はいません。一致したらレアな出会いです':'まだ同じ答えの人はいません。お昼どきに増えていきます'}</div>`;
   fillDailyStats();
 }
@@ -6854,6 +7064,7 @@ let toastTimer;function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classLi
 // 前に見ていた切り替えを覚えておく（2026-10-03。友達とだけ使っている人も毎回「💬 24時間」から始まっていた）
 let talkTab=(()=>{ try{ const v=localStorage.getItem('tama_talkTab'); return ['fr','dm','comm'].includes(v)?v:'dm'; }catch(e){ return 'dm'; } })();
 function setTalkTab(k){
+  placeCommPane('talk');   // コミュニティのページに移していたら戻す（2026-10-15）
   talkTab=k; try{ localStorage.setItem('tama_talkTab',k); }catch(e){}   // 2026-10-03: 毎回「💬 24時間」に戻っていたので覚える
   $('#segFr').classList.toggle('on',k==='fr'); $('#segDm').classList.toggle('on',k==='dm'); $('#segComm').classList.toggle('on',k==='comm');
   $('#matchList').hidden=k==='comm'; $('#commPane').hidden=k!=='comm';
@@ -6868,7 +7079,7 @@ function go(t){
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
-  if(t==='near')loadRooms();if(t==='friends')loadFriends();
+  if(t==='near')loadRooms();if(t==='friends')setCmTab(cmTab);   // 2026-10-15：友達のページは「コミュニティ」（📚 授業／🏠 コミュニティ／👥 友達）
   if(t==='me'){refreshPushToggle();renderNotifSum();renderWtpRow();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
@@ -6882,6 +7093,7 @@ function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBoot
   loadSurveyStatus(); loadCheckins().then(()=>setTimeout(maybeCheckinPopup,20000));
   loadCt(); setInterval(()=>{ if(!document.hidden)loadCt(); },60000);   // ちかくタイム（2026-10-10）
   setTimeout(()=>loadTamasai(),3000); setInterval(()=>{ if(!document.hidden)loadTamasai(); },120000);
+  loadAdmin(); loadClassRooms(); setInterval(()=>{ if(!document.hidden)loadClassRooms(); },60000);   // 授業のコミュニティ・運営かどうか（2026-10-15）
   loadWtp().then(()=>wtpMaybeAsk('day'));   // ちかくプラスのアンケート（2026-10-14。登録の次の日から、すれ違い・友達がまだの人にも）   // 多摩祭の参加人数（2026-10-11。多摩祭の日と、🎉をまだ持っていない参加者だけ）
   if(pushRoute)setTimeout(()=>openFromPush(pushRoute),600);   // 通知を押して開いた時は、その画面へ（2026-10-10）
   setInterval(()=>{if(!document.hidden)detectPlace();},10000);setInterval(()=>{if(!document.hidden){presenceTick();renderStatusRow();}},60000);}
