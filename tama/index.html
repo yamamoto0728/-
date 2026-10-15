@@ -4511,7 +4511,7 @@ function roomRow(r){
   const k=rid(r.id), s=roomStats[k]||{}, joined=myRoomIds.has(k), un=s.unread||0, ended=roomEnded(r);
   const right=un?`<div class="unread">${un>99?'99+':un}</div>`:`<div class="m" style="font-size:12.5px">${joined?'開く':'見る'} ›</div>`;
   const meta=[`👥 ${s.members||0}${r.capacity?'/'+r.capacity:''}人`,roomLeft(r),s.last?'最終 '+agoText(s.last):''].filter(Boolean).join(' ・ ');
-  const co=FES.tamasai&&FES.tamasai.collab, isCo=co&&co.room&&rid(co.room)===rid(r.id);   // 🤝 ちかくコラボ団体の部屋（tamasai.js の collab.room）
+  const isCo=!!collabConf()&&collabRoomId()===rid(r.id);   // 🤝 ちかくコラボ団体の部屋（tamasai.js の collab.room か roomName）
   const tag=(isCo?' <span class="joined-tag co">🤝 ちかくコラボ</span>':'')+(isRoomOwner(r)?' <span class="joined-tag own">👑 オーナー</span>':joined?' <span class="joined-tag">参加中</span>':'');
   const cond=r.visibility==='common'?`<div class="rcond">🎯 ${esc(condText(r))}の人向け${!joined&&r.fits?'（あなたも当てはまります）':''}</div>`:r.visibility==='invite'?'<div class="rcond">🔑 招待制</div>':'';
   const mt=meetText(r.meet), meet=mt?`<div class="rcond meet">📍 ${esc(mt)}${r.going?` 👍${r.going}人`:''}</div>`:'';
@@ -6822,22 +6822,31 @@ function toggleTsOpen(){ tsOpen=!tsOpen; renderTamasai(); }
    ・collab.room（だれでも入れる部屋の番号）か collab.code（招待コード）を入れた時だけ、コラボのコミュニティへの1行を出す
      （多摩祭のカードの中と、コミュニティのページの一覧のいちばん上。promoUntil の日まで。もう入っている人には出さない） */
 function collabConf(){
-  const c=FES.tamasai&&FES.tamasai.collab; if(!c||!(c.room||c.code))return null;
+  const c=FES.tamasai&&FES.tamasai.collab; if(!c||!(c.room||c.code||c.roomName))return null;
   if(c.promoUntil&&jstDayOf(Date.now())>c.promoUntil)return null;
   return c;
 }
+// コラボのコミュニティの番号。room が無ければ、だれでも入れる部屋の中から名前（roomName）で探す（2026-10-15：番号を調べなくても、作った部屋の名前を書けば出る）
+function collabRoomId(){
+  const c=FES.tamasai&&FES.tamasai.collab; if(!c)return '';
+  if(c.room)return rid(c.room);
+  if(!c.roomName)return '';
+  const k=normAns(c.roomName), r=(rooms||[]).filter(x=>x.visibility!=='invite'&&normAns(x.name||'').includes(k)).sort((a,b)=>(Date.parse(a.created_at)||0)-(Date.parse(b.created_at)||0))[0];
+  return r?rid(r.id):'';
+}
 function collabJoined(){
   const c=collabConf(); if(!c)return false;
-  if(c.room&&myRoomIds.has(rid(c.room)))return true;
+  const id=collabRoomId(); if(id&&myRoomIds.has(id))return true;
   try{ return localStorage.getItem('tama_collabJoined')===String(c.code||c.room); }catch(e){ return false; }
 }
-const collabPromoHTML=cls=>{ const c=collabConf(); if(!c||collabJoined()||!profile)return '';
+// 名前で探す時は、部屋が見つかった時だけ出す（まだ作られていない・閉じられた時は出さない）
+const collabPromoHTML=cls=>{ const c=collabConf(); if(!c||collabJoined()||!profile)return ''; if(!c.room&&!c.code&&!collabRoomId())return '';
   return `<button class="${cls||'collabrow'}" onclick="openCollabRoom()"><span class="ci">🤝</span><span class="ct"><b>ちかくコラボ：${esc(c.name)}のコミュニティ</b><small>${esc([c.desc,c.stage].filter(Boolean).join(' ・ '))}</small></span><span class="go">›</span></button>`; };
 async function openCollabRoom(){
   const c=collabConf(); if(!c)return;
-  if(c.room){   // だれでも入れる部屋：部屋の画面（ルールと「参加する」）を開く
-    if(!rooms.some(r=>rid(r.id)===rid(c.room)))await loadRooms();
-    if(rooms.some(r=>rid(r.id)===rid(c.room)))return openRoom(c.room);
+  if(c.room||c.roomName){   // だれでも入れる部屋：部屋の画面（ルールと「参加する」）を開く
+    if(!collabRoomId()||!rooms.some(r=>rid(r.id)===collabRoomId()))await loadRooms();
+    const id=collabRoomId(); if(id&&rooms.some(r=>rid(r.id)===id))return openRoom(id);
     if(!c.code){ toast('コミュニティが見つかりません（準備中かもしれません）'); return; }
   }
   // 招待コードの部屋：入る前に、どんなコミュニティか見せる
