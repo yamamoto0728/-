@@ -241,17 +241,16 @@ Deno.serve(async (req) => {
     const { data: vs, error } = await supabase.from("tama_visits").select("user_id").in("day", conf.days).eq("on_campus", true);
     if (error) return json({ ok: false, reason: error.message });
     const cand = [...new Set((vs ?? []).map((v) => String(v.user_id)))];
-    // 案内を押した人（fes26sv）と、いつものアンケートにもう答えた人（ちかく協力隊のバッジ・回答の記録 tama_survey_done）には送らない（2026-10-15）
+    // 2026-10-16：案内するのはアプリの中の「多摩祭アンケート」（1分）。もう答えた人（fes_attrs.fes26sv2）には送らない。
+    // いつものアンケート（Googleフォーム）はマイページに常設のまま。答えた人にも、多摩祭アンケートは別なので送る
     const done = new Set<string>();
     for (let i = 0; i < cand.length; i += 200) {
-      const { data } = await supabase.from("tama_profiles").select("id,sv:fes_attrs->fes26sv,badges:fes_attrs->badges").in("id", cand.slice(i, i + 200));
-      for (const r of data ?? []) if (r.sv || (Array.isArray(r.badges) && r.badges.includes("survey"))) done.add(String(r.id));
+      const { data } = await supabase.from("tama_profiles").select("id,sv:fes_attrs->fes26sv2").in("id", cand.slice(i, i + 200));
+      for (const r of data ?? []) if (r.sv) done.add(String(r.id));
     }
-    const { data: answered } = await supabase.from("tama_survey_done").select("participant_no");
-    const answeredNo = new Set((answered ?? []).map((a) => String(a.participant_no)));
-    ids = cand.filter((id) => !done.has(id) && !answeredNo.has(id.slice(0, 8)));
-    title = "📝 アンケートに答えて、特典をもらおう（2分）";
-    text = "多摩祭に来てくれてありがとう。答えると限定アイコン・背景とフレーム・バッジが使えるようになります";
+    ids = cand.filter((id) => !done.has(id));
+    title = "📝 多摩祭アンケート（1分）";
+    text = "多摩祭に来てくれてありがとう。タップだけの1分のアンケートに答えると、限定バッジ「📝 多摩祭の声」とみんなの答えが見られます";
     url = "/tama/?go=tamasai&n=tamasai"; tag = "tama-fsurvey"; pref = "tamasai";
   } else {
     return json({ ok: false, reason: "bad kind" });

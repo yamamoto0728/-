@@ -193,6 +193,19 @@
   .tscard .tsrole{display:block;width:100%;margin-top:8px;border:1px dashed rgba(192,69,106,.45);background:#fff;border-radius:12px;padding:8px 10px;font:inherit;font-size:12px;font-weight:700;color:#a8335a;text-align:left;cursor:pointer}
   .tscard .tssvs{display:block;margin-top:6px;font-size:11.5px;color:#a8335a;font-weight:700;cursor:pointer}
   .rolet{display:inline-block;margin-top:3px;font-size:11px;font-weight:700;color:#a8335a;background:#fff0e4;border-radius:6px;padding:1px 7px}
+  /* 多摩祭アンケート（2026-10-16）：1問ずつ・タップだけ */
+  .fsv .fsvh{display:flex;justify-content:space-between;font-size:12.5px;font-weight:800;color:#a8335a}
+  .fsv .fsvbar{height:6px;border-radius:4px;background:#f6e3e8;margin:6px 0 12px;overflow:hidden}.fsv .fsvbar i{display:block;height:100%;background:linear-gradient(90deg,#f0729a,#ffb35c);transition:width .25s}
+  .fsv .fsvlead{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 10px}
+  .fsv .fsvq{font-family:"Zen Maru Gothic";font-weight:900;font-size:16.5px;line-height:1.5;margin-bottom:12px}.fsv .fsvq small{display:block;font-family:inherit;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:3px}
+  .fsv .fsvopts{display:flex;flex-direction:column;gap:7px}
+  .fsv .fsvopts button{text-align:left;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;font:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+  .fsv .fsvopts button.on{border-color:#c8361f;background:#fff0e4;color:#c8361f}
+  .fsv .fsvnps{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .fsv .fsvnps button{padding:11px 0;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:15px;font-weight:800;color:var(--ink);cursor:pointer}
+  .fsv .fsvnps button.on{border-color:#c8361f;background:#c8361f;color:#fff}
+  .fsv textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:14px}
+  .fsv .fsvnav{display:flex;gap:8px;margin-top:14px}.fsv .fsvnav .btn{flex:1;padding:12px;font-size:14px}
   /* 2026-10-15 案B：多摩祭のカードを短く（人数の行・ステージ1行・くわしく） */
   .tscard .tsrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0 6px}.tscard .tsrow .tsn{margin:0}
   .tscard .tsrow button{flex-shrink:0;padding:6px 10px;border-radius:12px;border:0;background:#c0456a;color:#fff;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer}
@@ -1720,7 +1733,8 @@ const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケー�
   // 多摩祭の限定（2026-10-11）。あとからは手に入らない（FES.tamasai）
   fes26:{icon:'🎪',label:'多摩祭2026',desc:'多摩祭2026の日にキャンパスでちかくを使った人',c:'fes26:1'},
   fes26x:{icon:'🎆',label:'多摩祭ですれ違い',desc:'多摩祭2026で3人とすれ違った人',c:'fes26x:3'},
-  fesgoal:{icon:'🎉',label:'ちかく200人達成',desc:'多摩祭2026に参加して、ちかくのユーザーが200人になった時の記念',c:'fesgoal:1'}};
+  fesgoal:{icon:'🎉',label:'ちかく200人達成',desc:'多摩祭2026に参加して、ちかくのユーザーが200人になった時の記念',c:'fesgoal:1'},
+  fes26sv:{icon:'📝',label:'多摩祭の声',desc:'多摩祭2026のアンケートに答えた人',c:'fes26sv'}};   // 2026-10-16 多摩祭アンケート
 // ごほうびのアイコン（何もしてない人の12個＝EMO と、アンケートの36個＝EMO_SP は別に持つ）
 const LOOK_ICONS=[
   {id:'mis1',name:'はじめてのミッション',c:'mis:1',icons:['🐶','🐰','🐻','🦊']},
@@ -1791,6 +1805,7 @@ function lookHas(c){
   if(!c||c==='free')return true;
   if(c==='survey')return !!surveyDone||(attrsOf(profile).badges||[]).includes('survey');
   if(c==='dev')return isDev(profile);   // ちかくの開発者だけ（2026-10-15）
+  if(c==='fes26sv')return !!attrsOf(profile).fes26sv2;   // 多摩祭アンケートに答えた（2026-10-16）
   if(c==='invited')return !!attrsOf(profile).inv_by;
   if(c==='wtp')return !!wtpMine||!!attrsOf(profile).wtp;   // ちかくプラスのアンケート（2026-10-14）
   const [k,n]=c.split(':'); return lookCount(k)>=+n;
@@ -1799,6 +1814,7 @@ function lookHas(c){
 function lookHow(c){
   if(c==='survey')return 'アンケートに答える';
   if(c==='dev')return 'ちかくの開発者だけ';
+  if(c==='fes26sv')return '多摩祭アンケート（1分）に答える（多摩祭のあと 10/20 まで）';
   if(c==='invited')return '招待コードを入れて始める';
   if(c==='wtp')return 'ちかくプラスのアンケート（3問）に答える';
   const [k,n]=c.split(':'), K=LOOK_KIND[k]||[k,''], left=Math.max(0,+n-lookCount(k));
@@ -6825,7 +6841,8 @@ function openTamasaiSurvey(){
 }
 // 花火の時間（2日目の花火のちかくタイム〜18:45）は、アンケートを小さな1行に（人がいちばん集まる時間なので、出会いを主役にする。19:00 に通知で案内する。2026-10-15 エージェントの体験から）
 const fesFwNow=()=>{ const fw=FES.tamasai.fireworks, now=tamasaiNow(), hm=new Date(now+9*3600000).toISOString().slice(11,16); return !!fw&&jstDayOf(now)===fw.day&&hm>=fw.ct&&hm<'18:45'; };
-const tamasaiSurveyHTML=()=>tamasaiSurveyOn()&&fesFwNow()?'<a class="tssvs" onclick="openTamasaiSurvey()">📝 アンケート（特典あり）は花火のあとでも ›</a>':tamasaiSurveyOn()?`<button class="tssv" onclick="openTamasaiSurvey()">📝 アンケートに答えて特典をもらう ›<small>限定アイコン・背景とフレーム・バッジ</small></button>`:'';
+// 2026-10-16：🎪カードのアンケートは、アプリの中の多摩祭アンケート（fesSvCardHTML）に。いつものアンケート（Googleフォーム）はマイページに常設
+const tamasaiSurveyHTML=()=>fesSvCardHTML();
 // 出店のクーポン
 let couponUsed={}, couponMissing=false;
 const couponBooths=()=>(booths||[]).filter(b=>b.coupon);
@@ -6943,7 +6960,7 @@ function renderTamasai(){
   // 試しのあいだの祭りの質問の答えは、本当の多摩祭になったら消す（試しの答えのまま、本番の共通点にならないように）
   if(tamasaiReal()&&attrsOf(profile).fes26q_test){ const fa={...(profile.fa||{})}; delete fa.fes26q; delete fa.fes26go; delete fa.fes26q_test; profile.fa=fa; saveMyAttrs(); publishMe(); }
   // 祭りが終わった後は、参加した人にアンケートの案内だけ（翌日のリマインド）
-  if(!tamasaiDay()){ el.dataset.h=''; el.innerHTML=(tamasaiSurveyOn()&&(attrsOf(profile).stat||{}).fes26)?`<div class="tsh"><span>🎪 多摩祭2026、来てくれてありがとう</span></div>${tamasaiSurveyHTML()}`:''; return; }
+  if(!tamasaiDay()){ el.dataset.h=''; el.innerHTML=fesSvOn()?`<div class="tsh"><span>🎪 多摩祭2026、来てくれてありがとう</span></div>${tamasaiSurveyHTML()}`:''; return; }
   const T_=FES.tamasai, st=attrsOf(profile).stat||{}, n=tamasaiN, goal=T_.goal;
   // 位置情報を断った人・取れていない人は「参加」に数えられないので、そう伝える（2026-10-15 のレビュー）
   const me=st.fes26?'✅ 参加中 🎪':geoDenied?'📍 位置情報オフ':'キャンパスで開くと参加（🎪バッジ）';
@@ -6964,6 +6981,7 @@ function renderTamasai(){
   // 中身が変わった時だけ描き直す（6秒ごとに作り直すと、選択肢の横スクロールが戻り、押している途中のタップが消えるため。2026-10-15 のレビューで直した）
   const html=head+geoNote+tamasaiSurveyHTML()+prog+fesStatusHTML()+(tsOpen?'':tamasaiStageLine())+collabPromoHTML('collabrow ints')+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML()+more+toggle;
   if(el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; }
+  fesSvMaybeAsk();   // 多摩祭アンケートの時間（1日目18:00〜・2日目18:30〜）に、1日1回まで（2026-10-16）
 }
 let tsOpen=false;
 function toggleTsOpen(){ tsOpen=!tsOpen; renderTamasai(); }
@@ -7896,6 +7914,123 @@ function renderWtpStory(justSent){
 function wtpGo(d,justSent){ const n=$('#wtpStory')._n||1; if(wtpSlide+d>=n){ closeWtpStory(); return; } wtpSlide=Math.max(0,wtpSlide+d); renderWtpStory(justSent); }
 // マイページの行
 function renderWtpRow(){ const el=$('#wtpRowTxt'); if(!el)return; el.textContent=(wtpMine||attrsOf(profile).wtp)?'✅ 回答済み・みんなの答えを見る':'3問・30秒。答えると、みんなの答えが見られます'; }
+
+/* ---------- 多摩祭アンケート（アプリの中・1分。2026-10-16 あおの依頼） ----------
+   ビジコンの発表で使える数を取るため、1問ずつタップで答える（自由記述だけ任意）。答えは tama_fes_survey（supabase/tama_fes_survey.sql）。
+   出すのは1日目 18:00〜その日の終わりと、2日目 18:30 から期間の終わりまで（FES.tamasai.fesSurveyWindows。どちらも通知つき）。制限はかけず、答えた人に特典：
+   限定バッジ「📝 多摩祭の声」と、みんなの答え（5人そろったら）。いつものアンケート（Googleフォーム）はマイページに常設のまま。
+   自動で出すのは1日1回・2回まで（ホームを開いた時。ほかの画面・花火の時間は出さない）。🎪カードと、通知（1日目18:00・2日目18:30・翌日18:00）からも開ける。
+   孤独感をそのまま聞く質問はしない（運営の方針）。Q1 は「知り合うきっかけ」の多さで聞く */
+const FES_SVQ=[
+  {k:'chance',q:'ふだん、授業やサークル以外で、新しい人と知り合うきっかけはどのくらいある？',o:[['often','よくある'],['sometimes','ときどき'],['rarely','あまりない'],['hardly','ほとんどない']]},
+  {k:'change',q:'多摩祭で、ちかくを使って、新しい人と知り合うきっかけは増えた？',o:[['much','とても増えた'],['little','少し増えた'],['same','変わらない'],['unknown','わからない']]},
+  {k:'met',q:'多摩祭で、ちかくをきっかけに新しく出会った人は？（いちばん進んだもの）',o:[['none','まだいない'],['like','いいね・すれ違いまで'],['talk','トークした'],['meet','実際に会って話した'],['friend','友達になった']]},
+  {k:'via',multi:true,q:'きっかけになったものは？（いくつでも）',o:[['common','共通点'],['cross','すれ違い'],['fesq','多摩祭の質問'],['ct','ちかくタイム'],['stage','ステージ（見に行く）'],['room','コミュニティ'],['booth','出店・企画'],['none','とくになし']]},
+  {k:'nps',nps:true,q:'ちかくを友達にすすめたい？',sub:'0＝すすめない　10＝ぜひすすめたい'},
+  {k:'keep',q:'多摩祭のあとも、ちかくを使いたい？',o:[['yes','使いたい'],['maybe','たぶん使う'],['unknown','わからない'],['no','使わない']]},
+  {k:'price',q:'学期（半年）パスがあるとしたら、いくらまでなら払う？',sub:'実際にお金はかかりません',o:[[0,'払わない'],[100,'100円'],[300,'300円'],[500,'500円'],[1000,'1,000円以上']]},
+  {k:'c',text:true,q:'ひとこと（任意）',sub:'よかったこと・こうだったらいいのに、など'}
+];
+let fesSvStep=0, fesSvDraft={via:[]}, fesSvMine=null, fesSvMissing=false, fesSvStats=null;
+const fesSvDone=()=>!!fesSvMine||!!attrsOf(profile).fes26sv2;
+// いま答えられるか（2026-10-16 あおの決定：1日目 18:00〜その日の終わり、2日目 18:30 からずっと＝FES.tamasai.fesSurveyWindows）。
+// 多摩祭の日はだれでも、祭りのあとは祭りに来た人だけ。試す人は、選んだ日の時刻で
+function fesSvOn(){
+  if(!profile||fesSvDone()||fesSvMissing)return false;
+  const now=tamasaiNow(), ws=(FES.tamasai&&FES.tamasai.fesSurveyWindows)||[];
+  if(!ws.some(([a,b])=>now>=Date.parse(a)&&now<Date.parse(b)))return false;
+  return tamasaiDay()||tamasaiTester()||!!(attrsOf(profile).stat||{}).fes26;
+}
+function fesSvMaybeAsk(){
+  if(!fesSvOn()||fesFwNow()||debugMode())return;
+  let s={n:0,d:''}; try{ s=JSON.parse(localStorage.getItem('tama_fesSvAsk')||'{"n":0,"d":""}'); }catch(e){}
+  const d=jstDayOf(Date.now()); if(s.n>=2||s.d===d)return;
+  setTimeout(()=>{
+    if(!fesSvOn()||$('.overlay.show')||$('#wtpStory').classList.contains('show')||!$('#s-near').classList.contains('active')||($('#unlockFx')&&$('#unlockFx').classList.contains('show')))return;
+    try{ localStorage.setItem('tama_fesSvAsk',JSON.stringify({n:(s.n||0)+1,d})); }catch(e){}
+    openFesSurvey(true);
+  },4000);
+}
+function openFesSurvey(auto){
+  if(!profile){ toast('先にプロフィールを登録してね'); return; }
+  if(fesSvDone())return openFesSvResults();
+  if(fesSvMissing){ toast('アンケートは準備中です'); return; }
+  if(auto)fesSvStep=0;
+  renderFesSurvey(); $('#invOverlay').classList.add('show');
+}
+function renderFesSurvey(){
+  const q=FES_SVQ[fesSvStep], n=FES_SVQ.length, d=fesSvDraft, v=d[q.k];
+  const opts=q.nps?`<div class="fsvnps">${Array.from({length:11},(_,i)=>`<button class="${v===i?'on':''}" onclick="fesSvPick(${i})">${i}</button>`).join('')}</div>`
+    :q.text?`<textarea id="fesSvC" rows="3" maxlength="300" placeholder="例：ステージを見に行く人が分かって話しかけやすかった">${esc(d.c||'')}</textarea>`
+    :`<div class="fsvopts">${q.o.map(([k,t],i)=>`<button class="${q.multi?((d.via||[]).includes(k)?'on':''):(v===k?'on':'')}" onclick="fesSvPick(${i})">${esc(t)}</button>`).join('')}</div>`;
+  const last=fesSvStep===n-1;
+  $('#invSheet').innerHTML=`<div class="fsv">
+    <div class="fsvh"><span>📝 多摩祭アンケート</span><span>${fesSvStep+1}/${n}</span></div>
+    <div class="fsvbar"><i style="width:${Math.round((fesSvStep+1)/n*100)}%"></i></div>
+    ${fesSvStep===0?'<p class="fsvlead">タップだけの1分。答えると、限定バッジ「📝 多摩祭の声」と、みんなの答えが見られます。</p>':''}
+    <div class="fsvq">${esc(q.q)}${q.sub?`<small>${esc(q.sub)}</small>`:''}</div>${opts}
+    <div class="fsvnav">${fesSvStep?'<button class="btn btn-ghost" onclick="fesSvMove(-1)">‹ もどる</button>':'<button class="btn btn-ghost" onclick="closeInvite()">あとで</button>'}
+      ${last?'<button class="btn btn-primary" onclick="sendFesSurvey()">送って、みんなの答えを見る</button>':q.multi?`<button class="btn btn-primary" ${(d.via||[]).length?'':'disabled'} onclick="fesSvMove(1)">次へ ›</button>`:''}</div></div>`;
+}
+function fesSvPick(i){
+  const q=FES_SVQ[fesSvStep], d=fesSvDraft;
+  if(q.nps){ d.nps=i; return setTimeout(()=>fesSvMove(1),180); }
+  const k=q.o[i][0];
+  if(q.multi){ let a=(d.via||[]).slice(); if(k==='none')a=a.includes('none')?[]:['none']; else{ a=a.filter(x=>x!=='none'); a=a.includes(k)?a.filter(x=>x!==k):a.concat(k); } d.via=a; return renderFesSurvey(); }
+  d[q.k]=k; renderFesSurvey(); setTimeout(()=>fesSvMove(1),180);   // 1つ選んだら次へ（押したのが見えるよう少し待つ）
+}
+function fesSvMove(dir){ const c=$('#fesSvC'); if(c)fesSvDraft.c=c.value; fesSvStep=Math.max(0,Math.min(FES_SVQ.length-1,fesSvStep+dir)); renderFesSurvey(); }
+async function sendFesSurvey(){
+  const d=fesSvDraft, c=(($('#fesSvC')||{}).value||d.c||'').trim().slice(0,300);
+  if(c&&ngCheck(c)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  if(!sb||!myId||String(myId).startsWith('local-')){ toast('いまは送れません'); return; }
+  const tester=tamasaiTester()||isDev(profile);
+  const row={user_id:myId,chance:d.chance||null,change:d.change||null,met:d.met||null,via:d.via||[],nps:d.nps==null?null:d.nps,keep:d.keep||null,price:d.price==null?null:d.price,comment:c||null,tester,ver:APP_VER};
+  const {error}=await sb.from(T('fes_survey')).insert(row);
+  if(error&&!/duplicate|unique/i.test(error.message)){
+    if(isSchemaErr(error)){ fesSvMissing=true; toast('アンケートは準備中です'); return; }
+    toast('送れませんでした。電波の良い所でもう一度どうぞ'); console.warn('[fes-survey] 送れません',error.message); return;
+  }
+  fesSvMine=row;
+  profile.fa={...(profile.fa||{}),fes26sv2:Date.now(),...(tester?{}:{fes26sv:Date.now()})}; saveMyAttrs();   // バッジの条件・通知を止める印
+  closeInvite(); renderTamasai(); setTimeout(()=>lookSync(),400);
+  openFesSvResults(true);
+}
+// みんなの答え（ちかくプラスのアンケートと同じ、ストーリーのように1枚ずつ）
+let fesSvSlide=0, fesSvTimer=null;
+async function openFesSvResults(justSent){
+  if(sb&&myId&&!String(myId).startsWith('local-')){ const {data,error}=await sb.rpc('tama_fes_survey_stats'); if(!error)fesSvStats=data; }
+  fesSvSlide=0; renderFesSvStory(justSent); $('#wtpStory').classList.add('show');
+}
+function renderFesSvStory(justSent){
+  clearTimeout(fesSvTimer); clearTimeout(wtpTimer);
+  const s=fesSvStats||{}, el=$('#wtpStory'), mine=fesSvMine||{}, slides=[];
+  const bars=(k,obj)=>{ const q=FES_SVQ.find(x=>x.k===k), tot=Object.values(obj||{}).reduce((a,b)=>a+b,0)||1;
+    return q.o.map(([v,t])=>{ const c=(obj||{})[v]||0, me=k==='via'?(mine.via||[]).includes(v):mine[k]===v;
+      return `<div class="wsbar${me?' me':''}"><span class="wl">${esc(t)}${me?' <em>あなた</em>':''}</span><span class="wt"><i style="width:${Math.round(c/tot*100)}%"></i></span><span class="wp">${Math.round(c/tot*100)}%</span></div>`; }).join(''); };
+  if(!s.chance){
+    slides.push(`<div class="wsh">${justSent?'📝 答えてくれてありがとう！':'📝 多摩祭アンケート'}</div><div class="wsbig">${s.total||1}<small>人が回答</small></div><div class="wsd">みんなの答えは、<b>5人そろったら</b>見られます。<br>🎪カードか、通知からいつでも見られます。</div>`);
+  }else{
+    slides.push(`<div class="wsh">ふだん、新しい人と知り合うきっかけは？</div>${bars('chance',s.chance)}<div class="wsn">回答 ${s.total}人</div>`);
+    slides.push(`<div class="wsh">多摩祭で、きっかけは増えた？</div>${bars('change',s.change)}`);
+    slides.push(`<div class="wsh">多摩祭で新しく出会った人</div>${bars('met',s.met)}`);
+    if(s.nps!=null)slides.push(`<div class="wsh">友達にすすめたい度（NPS）</div><div class="wsbig">${s.nps>0?'+':''}${s.nps}</div><div class="wsd">「ぜひすすめたい（9〜10）」の割合から「すすめない（0〜6）」の割合を引いた数です</div>`);
+  }
+  if(justSent)slides.push(`<div class="wsh">🎁 お礼</div><div class="wsbig">📝</div><div class="wsd">バッジ「<b>${BADGES.fes26sv.label}</b>」をプロフィールにつけました。<br>（マイページの「🎨 きせかえ」で選べます）</div>`);
+  const i=Math.min(fesSvSlide,slides.length-1);
+  el.innerHTML=`<div class="wsbars">${slides.map((_,k)=>`<i class="${k<i?'done':k===i?'now':''}"></i>`).join('')}</div><button class="wsx" onclick="closeFesSvStory()">✕</button>
+    <div class="wsbody">${slides[i]}</div><div class="wstap l" onclick="fesSvGo(-1,${!!justSent})"></div><div class="wstap r" onclick="fesSvGo(1,${!!justSent})"></div>`;
+  el._fn=slides.length;
+  fesSvTimer=setTimeout(()=>fesSvGo(1,justSent),6000);
+}
+function fesSvGo(d,justSent){ const n=$('#wtpStory')._fn||1; if(fesSvSlide+d>=n){ closeFesSvStory(); return; } fesSvSlide=Math.max(0,fesSvSlide+d); renderFesSvStory(justSent); }
+function closeFesSvStory(){ clearTimeout(fesSvTimer); $('#wtpStory').classList.remove('show'); }
+// 🎪カードの1行（花火の時間は小さく）
+function fesSvCardHTML(){
+  if(!fesSvOn())return '';
+  return fesFwNow()?'<a class="tssvs" onclick="openFesSurvey()">📝 多摩祭アンケート（1分）は花火のあとでも ›</a>'
+    :'<button class="tssv" onclick="openFesSurvey()">📝 多摩祭アンケート（1分・タップだけ）›<small>答えると限定バッジ「📝 多摩祭の声」とみんなの答え</small></button>';
+}
 
 /* ---------- アンケートの特典（2026-10-05 あおの決定） ----------
    アンケートに答えるまで、自分から送るいいねは1日 FES.likeLimitFree 回まで（返事のいいね・トークの始め直しは数えない。
