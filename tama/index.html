@@ -775,6 +775,8 @@
   .sharerow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff}
   .sharerow .lab{font-size:13px;font-weight:700}.sharerow .lab small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
   .nearsec.cls{color:#9a5a10}
+  .clstg{display:flex;align-items:center;gap:6px;width:calc(100% - 32px);margin:8px 16px 4px;padding:9px 12px;border:1px solid rgba(245,151,47,.45);border-radius:12px;background:#fff8ea;font:inherit;font-size:12.5px;font-weight:700;color:#9a5a10;cursor:pointer;text-align:left}
+  .clstg .cnt{font-weight:500;color:var(--muted)}.clstg .tg{margin-left:auto;font-size:11.5px;flex-shrink:0}
   /* スマホのブラウザで開いた時の「ホーム画面に追加してね」画面 */
   .homegate{position:absolute;inset:0;z-index:99;background:linear-gradient(180deg,#ffffff,#eef6ff);display:none;flex-direction:column;overflow-y:auto;padding:26px 22px 30px}
   .homegate.show{display:flex}
@@ -2908,7 +2910,8 @@ function renderNearby(){
   const clsNow=open.filter(inCls);
   if(clsNow.length){ for(const x of clsNow)open.splice(open.indexOf(x),1); }
   const shown=nearShowAll?open:open.slice(0,NEAR_LIMIT), more=open.length-shown.length;
-  ul.innerHTML=(clsNow.length?`<div class="nearsec cls">📚 いま同じ授業「${esc(myTimetable[cs.k]||'')}」 <span class="cnt">${clsNow.length}人</span></div>`+clsNow.map(nearRow).join(''):'')
+  // 「いま同じ授業」の人は、1行のボタンにたたむ（押すと開く。2026-10-15 あおの指示「じゃまなのでトグルかボタンに」）
+  ul.innerHTML=(clsNow.length?`<button class="clstg" onclick="clsOpen=!clsOpen;renderNearby()">📚 いま同じ授業「${esc(myTimetable[cs.k]||'')}」の人 <span class="cnt">${clsNow.length}人</span><span class="tg">${clsOpen?'とじる ▴':'見る ▾'}</span></button>`+(clsOpen?clsNow.map(nearRow).join(''):''):'')
     +(open.length?`<div class="nearsec"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span>いまキャンパスにいる人 <span class="cnt">${open.length}人</span></div>`+shown.map(nearRow).join('')
         +(more>0?`<button class="btn btn-ghost nearmore" onclick="nearShowAll=true;renderNearby()">もっと見る（あと${more}人）</button>`:'')
       :clsNow.length?'':`<div class="nearsec">${frNow.length?'友達のほかに、いまアプリを開いている人はいません':'いまアプリを開いている人はいません'}</div>`);
@@ -2950,7 +2953,7 @@ function renderSample(){
     ${sampleIdx?`<button class="btn btn-ghost" style="width:100%;padding:11px;margin-top:8px;color:var(--muted)" onclick="sampleIdx--;renderSample()">戻る</button>`:''}</div>`;
 }
 const NEAR_LIMIT=20;   // 一覧に最初に出す人数（共通点の多い順。2026-10-08）
-let nearShowAll=false;
+let nearShowAll=false, clsOpen=false;   // clsOpen：「いま同じ授業」の人を開いているか（最初はたたむ）
 // 地図の場所までスクロールする（友達・出店を「地図で見る」時）
 // 「👀 共通点のある人 ◯人」を押した時：人の一覧までスクロール
 function showNearList(){ const l=$("#ulist"); if(l)l.scrollIntoView({behavior:"smooth",block:"start"}); }
@@ -5647,8 +5650,8 @@ function enterPlace(p){
   myPresence.place=p;
   if(changed){ myPresence.room=''; myPresence.note=''; myPresence.expires_at=null; }   // 前の建物の教室は消す
   savePresence(); renderMyPresence();
-  // 建物に入ったら「いまどこ？」を聞く（同じ建物では1回だけ。ほかの画面を開いている時は邪魔しない）
-  if(changed&&placePromptedFor!==p&&!$$('.overlay.show').length){ placePromptedFor=p; openPlaceEdit(true); }
+  // 2026-10-15 あおの指示：建物に入った時の「🏢 ◯◯に入りました」（いまどこ？を聞く画面）は出さない（じゃまだったため）。
+  // 建物は今まで通り自動で入る。教室・メモを聞くのは、授業の5分後の通知（tama-remind の period）だけにした
 }
 function leavePlace(){
   curPlace=null; placePromptedFor=null;
