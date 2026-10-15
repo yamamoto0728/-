@@ -520,6 +520,7 @@
   .joinhint.show{display:block}
   .urow .d .unread{display:inline-block;min-width:20px;height:20px;line-height:20px;font-size:11px;font-weight:700;background:var(--rose);color:#fff;border-radius:10px;padding:0 6px}
   .joined-tag{color:var(--ok);font-size:11px;font-weight:700}
+  .roomerr{margin:6px;padding:10px 12px;border-radius:12px;background:#fff1f0;border:1px solid rgba(226,87,79,.35);font-size:12.5px;color:#b3261e;line-height:1.6}.roomerr button{margin-left:6px;border:0;background:#e2574f;color:#fff;border-radius:8px;padding:3px 9px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}.roomerr small{display:block;font-size:11px;color:var(--muted);margin-top:2px;word-break:break-all}
   .agegate{margin:18px 0 0;padding:14px 15px;border-radius:14px;background:rgba(226,87,79,.07);border:1px solid rgba(226,87,79,.3);font-size:12px;line-height:1.7;color:var(--ink)}
   .agegate b{color:var(--bad)}
   .agechk{display:flex;align-items:center;gap:9px;margin-top:11px;font-size:13.5px;font-weight:700;cursor:pointer}
@@ -4471,14 +4472,15 @@ async function notifyRoomMembers(room,text){
    ・集まる約束（提案④）：「いつ・どこで」を部屋の一番上に出し、「👍 行く」を押せる
    ・投稿は参加している人だけ読める。自分の投稿は消せる。投稿・部屋を通報できる。部屋ごとに通知をオフにできる。ブロックした人の投稿は出さない
    SQL の実行前（関数が無い時）は roomsV2=false で、前のしくみ（〜Legacy）のまま動く */
-let roomsV2=true, roomForm=null, lastRoomCleanup=0;
+let roomsV2=true, roomForm=null, lastRoomCleanup=0, roomListErr='';   // roomListErr：一覧を読めなかった理由（画面に出す）
 const isMissingFn=e=>!!e&&(e.code==='PGRST202'||/schema cache|does not exist|Could not find the function/i.test(e.message||''));
 async function loadRooms(){ if(!sb)return;
   if(roomsV2){
     try{
       const {data,error}=await sb.rpc('tama_room_list');
-      if(!error){ applyRoomList(data||[]); maybeCleanupRooms(); return; }
-      if(!isMissingFn(error)){ console.warn('[rooms] 一覧を読み込めません',error.message); return; }
+      if(!error){ roomListErr=''; applyRoomList(data||[]); maybeCleanupRooms(); return; }
+      // 2026-10-15 あおの指摘「コミュニティを作れない・参加できない」：前は失敗しても何も出さず、一覧が空のままだった。理由を一覧に出す
+      if(!isMissingFn(error)){ console.warn('[rooms] 一覧を読み込めません',error.code,error.message); roomListErr=String(error.message||error.code||'').slice(0,80); renderRooms(); return; }
       roomsV2=false; console.warn('[rooms] supabase/tama_community.sql を実行すると、オーナー・参加条件・期限が使えます:',error.message);
     }catch(e){ return; }
   }
@@ -4529,7 +4531,7 @@ function renderRooms(){
   if(el){
     $('#commSub').textContent='部屋ごとにオーナーがいて、入れる人と期限が決まっています';
     if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
-    el.innerHTML=collabPromoHTML()+(rooms.length?sec('参加中',joined)+sec('📚 あなたの授業',cls)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
+    el.innerHTML=collabPromoHTML()+(roomListErr?`<div class="roomerr">⚠️ コミュニティの一覧を読み込めませんでした。<button onclick="loadRooms()">もう一度</button><small>${esc(roomListErr)}</small></div>`:'')+(rooms.length?sec('参加中',joined)+sec('📚 あなたの授業',cls)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
       :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`);
   }
   const hr=$('#homeRoomList'), top=joined.concat(cls,forYou,open).slice(0,3);
@@ -4969,7 +4971,11 @@ async function submitRoomForm(){
     closePay(); toast('保存しました'); await loadRooms(); return;
   }
   const {data,error}=await sb.rpc('tama_room_create',args);
-  if(error||!data||data.status!=='ok'){ toast(data&&data.status==='too_many'?'同時にオーナーになれる部屋は3つまでです（終わった部屋は数えません）':'作れませんでした'+(error?'：'+error.message:'')); return; }
+  // 失敗の理由を出す（2026-10-15 あおの指摘「作れない」。前は「作れませんでした」だけで理由が分からなかった）
+  if(error||!data||data.status!=='ok'){
+    const why={too_many:'同時にオーナーになれる部屋は3つまでです（終わった部屋は数えません）',name:'コミュニティ名を入れてね',cond:'「共通点のある人だけ」の時は、条件を1つ以上選んでね'}[data&&data.status];
+    console.warn('[rooms] 作れません',error?error.code+' '+error.message:data);
+    toast(why||'⚠️ 作れませんでした'+(error?'（'+String(error.message).slice(0,60)+'）':data&&data.status?'（'+data.status+'）':'')); return; }
   closePay(); toast('✅ コミュニティを作りました'); await loadRooms(); await openRoom(data.room);
   if(data.code)showRoomCode(data.code);
 }
@@ -5030,8 +5036,8 @@ const ROOM_JOIN_MSG={ok:'✅ 参加しました',full:'定員に達している�
 async function joinRoomV2(code){
   if(!curRoom||!sb)return;
   const {data,error}=await sb.rpc('tama_room_join',{p_room:rid(curRoom.id),p_code:code||null});
-  if(error){ toast('参加できませんでした：'+error.message); return; }
-  toast(ROOM_JOIN_MSG[data]||'参加できませんでした');
+  if(error){ console.warn('[rooms] 参加できません',error.code,error.message); toast('⚠️ 参加できませんでした（'+String(error.message).slice(0,60)+'）'); return; }
+  toast(ROOM_JOIN_MSG[data]||'⚠️ 参加できませんでした'+(data?'（'+data+'）':''));   // 知らない返り値も、何だったかを出す（2026-10-15）
   if(data!=='ok')return;
   myRoomIds.add(rid(curRoom.id)); await loadRooms(); updateRoomJoinUI(); await loadRoomMsgs(); renderRoom(); markRoomRead(curRoom.id,true);
 }
@@ -5128,7 +5134,7 @@ function openRoomCodeJoin(){
 async function joinByRoomCode(){
   const c=($('#roomCodeIn').value||'').trim().toUpperCase(); if(!c||!sb)return;
   const {data,error}=await sb.rpc('tama_room_join_code',{p_code:c});
-  if(error||!data){ toast('参加できませんでした'); return; }
+  if(error||!data){ if(error)console.warn('[rooms] 招待コードで参加できません',error.code,error.message); toast('⚠️ 参加できませんでした'+(error?'（'+String(error.message).slice(0,60)+'）':'')); return; }
   toast(ROOM_JOIN_MSG[data.status]||'参加できませんでした');
   if(data.status!=='ok')return;
   closeMembers(); await loadRooms(); openRoom(data.room);
