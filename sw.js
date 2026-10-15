@@ -15,6 +15,23 @@ async function bumpBadge() {
   } catch (e) {}
 }
 
+
+// 通知センター（2026-10-15 あおの依頼「通知が来ても何の通知だったか忘れるので、マイページで見返せるように」）。
+// 届いた通知を、この端末の Cache Storage に残す（新しい順に60件・14日まで）。アプリのマイページ「🗂 通知センター」が読む（tama/index.html の openNotifCenter）。
+// サーバーには送らない。通知を出すことを優先し、残すのに失敗しても通知はそのまま出す
+const LOG_CACHE = 'chikaku-notifs', LOG_KEY = '/__notifs';
+async function logNotif(title, body, url) {
+  try {
+    const c = await caches.open(LOG_CACHE);
+    const r = await c.match(LOG_KEY);
+    let a = [];
+    try { a = r ? JSON.parse(await r.text()) : []; } catch (e) { a = []; }
+    const now = Date.now();
+    a = [{ t: String(title || '').slice(0, 80), b: String(body || '').slice(0, 200), u: String(url || ''), at: now }]
+      .concat(Array.isArray(a) ? a : []).filter((x) => x && now - (x.at || 0) < 14 * 86400000).slice(0, 60);
+    await c.put(LOG_KEY, new Response(JSON.stringify(a), { headers: { 'Content-Type': 'application/json' } }));
+  } catch (e) {}
+}
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = { title: 'ちかく', body: event.data ? event.data.text() : '' }; }
@@ -30,7 +47,8 @@ self.addEventListener('push', (event) => {
   // iPhone は通知を出さないと通知の許可を取り消すことがあるので、数字の更新が失敗しても通知は必ず出す
   event.waitUntil(Promise.all([
     self.registration.showNotification(title, options),
-    data.badge ? bumpBadge() : Promise.resolve()
+    data.badge ? bumpBadge() : Promise.resolve(),
+    logNotif(title, options.body, options.data.url)
   ]));
 });
 
