@@ -86,6 +86,13 @@ begin
   on conflict (starts_at) do update set push_title = excluded.push_title, push_body = excluded.push_body;
 end $$;
 
+-- 多摩祭の通知（今日のすれ違い・アンケート）を、1日に1回だけ送るための記録（tama-remind が書く。アプリからは読めない・書けない）
+create table if not exists public.tama_fes_sent (
+  key        text primary key,   -- 例：recap:2026-10-17
+  created_at timestamptz not null default now()
+);
+alter table public.tama_fes_sent enable row level security;
+
 -- ---------------------------------------------------------------------------
 -- 4. 多摩祭の通知（pg_cron。時刻は世界標準時＝日本時間から9時間引く）
 -- ---------------------------------------------------------------------------

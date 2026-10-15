@@ -174,6 +174,8 @@ returns text language plpgsql volatile security definer set search_path = public
 begin
   if not public.tama_room_can_mod(p_room) then return 'not_owner'; end if;
   if p_user = auth.uid() then return 'self'; end if;
+  -- オーナーは退出させない（運営でも。オーナーだけが部屋からいなくなり、オーナーのまま残るため。2026-10-15 のレビュー）
+  if exists (select 1 from public.tama_rooms r where r.id::text = p_room and r.owner_id = p_user) then return 'owner'; end if;
   delete from public.tama_room_members where room_id::text = p_room and user_id = p_user;
   delete from public.tama_room_rsvp where room_id = p_room and user_id = p_user;
   if p_ban then insert into public.tama_room_bans (room_id, user_id) values (p_room, p_user) on conflict do nothing; end if;
@@ -190,6 +192,13 @@ begin
   delete from public.tama_room_messages where id::text = p_msg;
   return 'ok';
 end $$;
+
+-- ---------------------------------------------------------------------------
+-- 5b. 部屋を投稿・参加者ごと消す関数（tama_room_purge。tama_community.sql）は、運営が SQL Editor で使うもの。
+--     public・anon からは外してあったが、ログインした人（authenticated）からは外していなかったので、だれでもどの部屋でも消せる可能性があった（2026-10-15 のレビュー）。
+--     アプリからは呼んでいない。期限切れの部屋を消す tama_room_cleanup（cron）はこの関数を中で呼ぶだけなので、影響しない
+-- ---------------------------------------------------------------------------
+revoke execute on function public.tama_room_purge(text) from authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 6. 「運営に連絡」（授業のコミュニティの中から）。通報の表に、相手のいない行として入る（理由が「運営への連絡：…」）

@@ -3125,7 +3125,7 @@ async function addEncounter(u){
   if(Date.now()-bootAt>60000) toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`+(rare.length?`<br>✨ ${esc(rare[0].label)}`:''));
   crossNew++; bumpCrossDot();
   (encLog[u.id]=encLog[u.id]||[]).push({at:Date.now(),place});
-  if(Date.now()-bootAt>60000)wtpMaybeAsk('cross');   // すれ違った直後に「ちかくプラスのアンケート」（2026-10-14。起動直後のまとめての記録では出さない）
+  if(Date.now()-bootAt>60000)wtpMaybeAsk(Object.keys(encMap).length<=1?'cross':'cross2');   // すれ違った直後に「ちかくプラスのアンケート」（2026-10-14。起動直後のまとめての記録では出さない）
   if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from(T('encounters')).upsert(rec);
     if(!encLogMissing){ const {error}=await sb.from(T('encounter_log')).insert({owner_id:myId,other_id:u.id,place}); if(error){ if(/does not exist|schema cache/i.test(error.message))encLogMissing=true; console.warn('[encounter_log] 記録できませんでした',error.message); } }
   }catch(e){} }
@@ -3709,7 +3709,7 @@ async function loadTalkPreviews(){
 function renderFriendTalks(frItems){
   const inc=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length;
   let h=inc?`<div class="mrow" onclick="openCm('fr')"><div class="av" style="background:#e8f7fb">📩</div><div class="info"><div class="nm">友達申請が${inc}件届いています</div><div class="last">「友達」タブで承認できます ›</div></div></div><div class="sep"></div>`:'';
-  if(!frItems.length) return h+`<div class="empty"><div class="big">👥</div><p>まだ友達がいません。<br>24時間トークの中の「👥 友達に誘う」か、<br>目の前の人とは4桁のコードで友達になれます。<br>友達とは期限なしで話せます。</p><button class="btn btn-primary" onclick="go('friends');openFrAdd()">＋ 友達を追加</button></div>`;
+  if(!frItems.length) return h+`<div class="empty"><div class="big">👥</div><p>まだ友達がいません。<br>24時間トークの中の「👥 友達に誘う」か、<br>目の前の人とは4桁のコードで友達になれます。<br>友達とは期限なしで話せます。</p><button class="btn btn-primary" onclick="openCm('fr');openFrAdd()">＋ 友達を追加</button></div>`;
   return h+frItems.map(({id,u,last},i)=>{
     const pt=presenceText(friendPres(id)), o=findUser(id), online=!!o&&!isClosed(o);
     const sub=last?(last.from===myId?'あなた: ':'')+esc(msgPlain(last.text)):'メッセージを送ってみよう';
@@ -4602,11 +4602,11 @@ const MIS_POOL=[
   {k:'tt',icon:'🗓',t:'時間割に授業を1つ入れる',d:'同じ授業の人が「共通点」で見つかります',go:'openTimetable()',ever:()=>myClassOptions().length>0},
   {k:'invite',icon:'📨',t:'友達をちかくに誘う',d:'招待のリンクをコピーして送る（あなたにも特典あり）',go:'openInvite()',ever:()=>(attrsOf(profile).inv_n||0)>0,rep:true},
   {k:'friend',icon:'👥',t:'友達を1人追加する',d:'目の前の人とは「＋ 追加」の4桁のコードで',go:"openCm('fr');openFrAdd()",ever:()=>lookCount('friend')>0},
-  {k:'like',icon:'👋',t:'共通点のある人に いいね',d:'近くの人・すれ違った人の一覧から',go:'showNearList()',ever:()=>liked.size>0,can:()=>!misAlone(),rep:true},
+  {k:'like',icon:'👋',t:'共通点のある人に いいね',d:'近くの人・すれ違った人の一覧から',go:"go('near');setTimeout(showNearList,300)",ever:()=>liked.size>0,can:()=>!misAlone(),rep:true},
   {k:'talk',icon:'🗣',t:'トークで共通点の話をしてみる',d:'トーク・友達に1回送る',go:"go('match')",ever:()=>false,can:()=>Object.values(matches).some(m=>!isExpired(m))||lookCount('friend')>0,rep:true},
-  {k:'post',icon:'💬',t:'コミュニティに1つ書き込む',d:'参加しているコミュニティか、新しく入って',go:"go('match');setTalkTab('comm')",ever:()=>false,rep:true},
+  {k:'post',icon:'💬',t:'コミュニティに1つ書き込む',d:'参加しているコミュニティか、新しく入って',go:"openCm('rooms')",ever:()=>false,rep:true},
   {k:'status',icon:'📍',t:'「いまの自分」に状態を入れる',d:'「ひまです」などを入れると、近くの人に伝わります',go:'openPlaceEdit()',ever:()=>!!attrsOf(profile).status},
-  {k:'daily',icon:'🎲',t:'今日のお題に答える',d:'同じ答えの人が、今日だけの共通点になります',go:"$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'})",ever:()=>(attrsOf(profile).stat||{}).daily>0,can:()=>!dailyAnswer(profile),rep:true}
+  {k:'daily',icon:'🎲',t:'今日のお題に答える',d:'同じ答えの人が、今日だけの共通点になります',go:"go('near');setTimeout(()=>$('#dailyCard').scrollIntoView({behavior:'smooth',block:'center'}),300)",ever:()=>(attrsOf(profile).stat||{}).daily>0,can:()=>!dailyAnswer(profile),rep:true}
 ];
 const jstDow=()=>new Date(Date.now()+9*3600000).getUTCDay();
 const misToday=()=>MIS_DAYS.includes(jstDow());
@@ -4824,7 +4824,7 @@ function renderRoom(){
   const r=curRoom, joined=myRoomIds.has(rid(r.id));
   let h;
   // 📌 お知らせ（運営・オーナーが固定で出すもの。2026-10-15）
-  const notice=r.notice?`<div class="rnotice">📌 <b>${r.owner_id?'オーナーから':'お知らせ'}</b>${r.notice_at?`<span>${esc(agoText(r.notice_at))}</span>`:''}<div>${esc(r.notice)}</div></div>`:'';
+  const notice=r.notice?`<div class="rnotice">📌 <b>お知らせ</b>${r.notice_at?`<span>${esc(agoText(r.notice_at))}</span>`:''}<div>${esc(r.notice)}</div></div>`:'';
   if(!joined){
     // 参加していない人には投稿を見せず、ルール・入れる人・オーナーを見せてから参加してもらう
     h=notice+`<div class="rjoin"><div class="ic">${roomIcon(r)}</div><h3>${esc(r.name)}</h3><div class="tp">${esc(r.topic||'')}</div>
@@ -4912,7 +4912,7 @@ async function openRoomInfo(){
     ${meetText(r.meet)?`<div class="sec"><b>📍 集まる約束</b>${esc(meetText(r.meet))}${r.going?`（👍 ${r.going}人）`:''}</div>`:''}
     ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.some(u=>u._cm&&u._cm.length)?'<div class="rcmhint">🎯 共通点のある人が上に出ます。プロフィールから「👋 いいね」できます</div>':''}${members.map((u,i)=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji||'🙂')}</div><div class="nm" ${u.id===myId?'':`onclick="openRoomMember(${i})" style="cursor:pointer"`}>${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}${u._cm&&u._cm.length?`<small class="rcm">🎯 ${esc(u._cm[0])}${u._cm.length>1?` ほか${u._cm.length-1}`:''}</small>`:''}</div>
       ${u.id!==myId&&u._cm&&u._cm.length&&!owner?`<button onclick="openRoomMember(${i})">👋 いいね</button>`:''}
-      ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button>`:''}${canModRoom(r)&&u.id!==myId?`<button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
+      ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button>`:''}${canModRoom(r)&&u.id!==myId&&u.id!==r.owner_id?`<button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
       :`<div class="sec"><b>👑 オーナー</b>${isOfficialClassRoom(r)?'なし（だれでも入れる授業のコミュニティ。運営が見守っています）':esc(r.owner_name||'なし')}<br><span style="font-size:11.5px;color:var(--muted)">参加者は、参加すると見られます</span></div>`}
     ${joined?`<div class="sharerow" style="margin-bottom:6px"><div class="lab">🔔 この部屋の通知<small>オフにすると、投稿があっても通知しません</small></div><div class="toggle${r.muted?'':' on'}" onclick="toggleRoomMute()"><div class="k"></div></div></div>`:''}
     ${owner?`<button class="rbtn" onclick="closeMembers();createRoom(true)">✏️ 部屋を編集する<small>名前・ルール・入れる人・定員・期限・集まる約束</small></button>
@@ -4929,7 +4929,8 @@ async function openRoomInfo(){
 let roomInfoMembers=[];
 function openRoomMember(i){
   const u=roomInfoMembers[i]; if(!u||u.id===myId)return;
-  closeMembers(); let d=null; if(myPos&&u.lat!=null){ const r=relMeters(myPos,u); d=Math.round(Math.hypot(r.e,r.n)); }
+  // 距離は、いま近くの人の一覧に出ている人（位置を見せていて、開いている人）だけ（2026-10-15 のレビュー：位置を止めた人の最後の場所から距離が出ていた）
+  const near=findUser(u.id); closeMembers(); let d=null; if(near&&myPos&&near.lat!=null){ const r=relMeters(myPos,near); d=Math.round(Math.hypot(r.e,r.n)); }
   openSheet(u,d);
 }
 async function copyText(t){ try{ await navigator.clipboard.writeText(t); toast('コピーしました'); }catch(e){ prompt('コピーしてください',t); } }
@@ -6320,7 +6321,7 @@ const tamasaiOver=()=>jstDayOf(Date.now())>FES.tamasai.days[FES.tamasai.days.len
 function tamasaiCrossN(){ return Object.values(encLog||{}).filter(a=>a.some(x=>FES.tamasai.days.includes(jstDayOf(x.at)))).length; }
 async function loadTamasai(force){
   if(!sb||!myId||String(myId).startsWith('local-')||tamasaiMissing||!profile)return;
-  const st=attrsOf(profile).stat||{}, needGoal=st.fes26&&!badgeKeys(profile).includes('fesgoal');
+  const st=attrsOf(profile).stat||{}, needGoal=st.fes26&&!badgeKeys(profile).includes('fesgoal')&&!(tamasaiOver()&&tamasaiN!=null);   // 祭りのあとは1回読んだら止める（数はもう変わらない）
   if(!tamasaiDay()&&!needGoal)return;
   if(!force&&Date.now()-tamasaiAt<120000)return;   // 2分に1回まで
   tamasaiAt=Date.now();
@@ -6428,9 +6429,9 @@ function tamasaiTodayHTML(){
 function renderTamasaiWel(){ const el=$('#tamasaiWel'); if(el)el.innerHTML=tamasaiDay()?tamasaiTodayHTML():''; }
 function renderTamasai(){
   const el=$('#tamasaiCard'); if(!el)return;
-  if(!profile){ el.innerHTML=''; return; }
+  if(!profile){ el.dataset.h=''; el.innerHTML=''; return; }
   // 祭りが終わった後は、参加した人にアンケートの案内だけ（翌日のリマインド）
-  if(!tamasaiDay()){ el.innerHTML=(tamasaiSurveyOn()&&(attrsOf(profile).stat||{}).fes26)?`<div class="tsh"><span>🎪 多摩祭2026、来てくれてありがとう</span></div>${tamasaiSurveyHTML()}`:''; return; }
+  if(!tamasaiDay()){ el.dataset.h=''; el.innerHTML=(tamasaiSurveyOn()&&(attrsOf(profile).stat||{}).fes26)?`<div class="tsh"><span>🎪 多摩祭2026、来てくれてありがとう</span></div>${tamasaiSurveyHTML()}`:''; return; }
   const T_=FES.tamasai, st=attrsOf(profile).stat||{}, n=tamasaiN, goal=T_.goal;
   const me=st.fes26?'✅ 参加中 🎪':'キャンパスで開くと参加（🎪バッジ）';
   const cross=`🎆 すれ違い ${Math.min(lookCount('fes26x'),T_.crossN)}/${T_.crossN}人`;
@@ -6441,7 +6442,9 @@ function renderTamasai(){
     :n==null||n<T_.showFrom
     ?`<div class="tsn">2日間で <b>${goal}</b>人参加が目標！</div><div class="tsfoot"><span>届いたら、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`
     :`<div class="tsn">参加 <b>${n}</b>人 ／ 目標${goal}人</div><div class="tsbar"><i style="width:${Math.round(n/goal*100)}%"></i></div><div class="tsfoot"><span>あと<b style="color:#c0456a">${goal-n}</b>人で、参加した全員に🎉バッジ ・ ${cross}</span>${invite}</div>`;
-  el.innerHTML=head+tamasaiSurveyHTML()+prog+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML();
+  // 中身が変わった時だけ描き直す（6秒ごとに作り直すと、選択肢の横スクロールが戻り、押している途中のタップが消えるため。2026-10-15 のレビューで直した）
+  const html=head+tamasaiSurveyHTML()+prog+tamasaiQHTML()+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML();
+  if(el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; }
 }
 
 /* ---------- 入力の候補（2026-10-08 あおの依頼） ----------
