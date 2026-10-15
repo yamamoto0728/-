@@ -1,6 +1,9 @@
 {
   "redirects": [
     { "source": "/", "destination": "/tama/", "permanent": false },
-    { "source": "/index.html", "destination": "/tama/", "permanent": false }
+    { "source": "/index.html", "destination": "/tama/", "permanent": false },
+    { "source": "/fes", "destination": "/tama/", "permanent": false },
+    { "source": "/fes/", "destination": "/tama/", "permanent": false },
+    { "source": "/fes/index.html", "destination": "/tama/", "permanent": false }
   ]
 }

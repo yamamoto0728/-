@@ -17,6 +17,11 @@
 //   ・送った記録を tama_push_events に書く。通知を押すとアプリの該当する所が開く（url の go=）
 //   ・昼休みの通知に「いまキャンパスに◯人（共通点のある人◯人）」を入れる（その人に合わせた文のほうが開かれやすいため）
 //
+// 2026-10-14 多摩祭（2026-10-17・18）の分を足した（supabase/tama_tamasai.sql の cron が呼ぶ）:
+//   { "kind": "ct" }                         … 土日でも、予定があれば送る（祭りの昼と夕方のちかくタイム）。土日は「今日は授業が無い人」を除かない
+//   { "kind": "recap", "day": "2026-10-17" } … その日にキャンパスで開いた人に「今日の多摩祭で◯人とすれ違いました」。day が今日の時だけ
+//   { "kind": "fsurvey" }                    … 多摩祭に来た人にアンケートの案内。tama/tamasai.js の surveyUrl が空・期間の外なら送らない
+//
 // Secrets は send-match-push と同じ VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY を使う（プロジェクト共通なので追加設定は不要）。
 
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -48,6 +53,21 @@ async function todaysQuestion(jstMs: number): Promise<{ d: string; q: string } |
   }
 }
 
+// 多摩祭の設定（アプリと同じファイルを本番のURLから読む）。読めなければ null
+const TAMASAI_URL = "https://chikaku-hosei.vercel.app/tama/tamasai.js";
+async function tamasaiConf(): Promise<{ days: string[]; surveyUrl: string; surveyFrom: number; surveyUntil: number; ctTimes: string[] } | null> {
+  try {
+    const res = await fetch(TAMASAI_URL);
+    if (!res.ok) return null;
+    const src = await res.text();
+    const str = (k: string) => (new RegExp(`${k}:'([^']*)'`).exec(src) ?? [])[1] ?? "";
+    const list = (k: string) => [...((new RegExp(`${k}:\\[([^\\]]*)\\]`).exec(src) ?? [])[1] ?? "").matchAll(/'([^']*)'/g)].map((m) => m[1]);
+    return { days: list("days"), surveyUrl: str("surveyUrl"), surveyFrom: Date.parse(str("surveyFrom")) || 0, surveyUntil: Date.parse(str("surveyUntil")) || 0, ctTimes: list("ctTimes") };
+  } catch {
+    return null;
+  }
+}
+
 // アプリの normAns と同じそろえ方（全角半角・大文字小文字・ひらがなカタカナ・空白や記号）
 const normAns = (s: unknown) =>
   String(s ?? "").normalize("NFKC").toLowerCase().replace(/[\s・,.、。!?！？'"「」『』()（）\-ー]/g, "")
@@ -74,13 +94,15 @@ function hasCommon(me: FA, th: FA, myTT: Record<string, string>, thTT: Record<st
 }
 
 Deno.serve(async (req) => {
-  let body: { kind?: string; period?: number } = {};
+  let body: { kind?: string; period?: number; day?: string } = {};
   try { body = await req.json(); } catch { /* 空のまま */ }
 
-  // 日本時間（cron でも平日に絞っているが、念のためここでも確かめる）
+  // 日本時間（cron でも平日に絞っているが、念のためここでも確かめる）。ちかくタイム・多摩祭の通知は土日も送る
   const jstMs = Date.now() + 9 * 3600_000;
   const dow = new Date(jstMs).getUTCDay();
-  if (dow < 1 || dow > 5) return json({ ok: true, skipped: "weekend" });
+  const weekend = dow < 1 || dow > 5;
+  if (weekend && (body.kind === "period" || body.kind === "lunch")) return json({ ok: true, skipped: "weekend" });
+  const todayJst = new Date(jstMs).toISOString().slice(0, 10);
 
   const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
   const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? "";
@@ -156,15 +178,18 @@ Deno.serve(async (req) => {
     // いまの時刻（前後4分）に予定があって、まだ送っていないものを1つ取る。先に sent_at を入れて二重に送らないようにする
     const lo = new Date(Date.now() - 4 * 60000).toISOString(), hi = new Date(Date.now() + 4 * 60000).toISOString();
     const { data: slot, error } = await supabase.from("tama_ct_slots").update({ sent_at: new Date().toISOString() })
-      .gte("starts_at", lo).lte("starts_at", hi).is("sent_at", null).select("id,q,o1,o2").maybeSingle();
+      .gte("starts_at", lo).lte("starts_at", hi).is("sent_at", null).select("*").maybeSingle();
     if (error) return json({ ok: false, reason: error.message });
     if (!slot) return json({ ok: true, skipped: "no slot now" });
-    // 送り先：通知を許可している全員。ただし、時間割を入れていて今日は授業が1つもない人には送らない（キャンパスにいないはずなので）
-    const { data: tts } = await supabase.from("tama_timetable").select("id,slots");
+    // 送り先：通知を許可している全員。ただし平日は、時間割を入れていて今日は授業が1つもない人には送らない（キャンパスにいないはずなので）。
+    // 土日（多摩祭）は授業が無いので、この絞り込みはしない
     const noClassToday = new Set<string>();
-    for (const t of tts ?? []) {
-      const keys = Object.keys(t.slots ?? {});
-      if (keys.length && !keys.some((k) => k.startsWith(`${dow}-`))) noClassToday.add(String(t.id));
+    if (!weekend) {
+      const { data: tts } = await supabase.from("tama_timetable").select("id,slots");
+      for (const t of tts ?? []) {
+        const keys = Object.keys(t.slots ?? {});
+        if (keys.length && !keys.some((k) => k.startsWith(`${dow}-`))) noClassToday.add(String(t.id));
+      }
     }
     const all = new Set<string>();
     const { data: ps } = await supabase.from("push_subscriptions").select("id");
@@ -175,9 +200,51 @@ Deno.serve(async (req) => {
     const { data: prof } = await supabase.from("tama_profiles").select("id");
     const tama = new Set((prof ?? []).map((p) => String(p.id)));
     ids = [...all].filter((id) => tama.has(id) && !noClassToday.has(id));
-    title = "⏰ ちかくタイム（10分間）";
-    text = `「${slot.q}」${slot.o1}？${slot.o2}？ 10分のあいだに答えた人どうしで、同じ答えの人が見つかります`;
+    // 回ごとに文を変えたい時は push_title・push_body（多摩祭の花火の回。2026-10-15）
+    title = slot.push_title || "⏰ ちかくタイム（10分間）";
+    text = slot.push_body || `「${slot.q}」${slot.o1}？${slot.o2}？ 10分のあいだに答えた人どうしで、同じ答えの人が見つかります`;
     url = "/tama/?go=ct&n=ct"; tag = "tama-ct"; pref = "ct";
+  } else if (body.kind === "recap") {
+    // 多摩祭1日目の夜：その日にキャンパスで開いた人に、その日すれ違った人数を（2日目に開く理由。チームの意見）
+    const day = String(body.day ?? "");
+    if (day !== todayJst) return json({ ok: true, skipped: "not the day" });   // cron は毎年動くので、指定の日だけ
+    const conf = await tamasaiConf();
+    const { data: vs, error } = await supabase.from("tama_visits").select("user_id").eq("day", day).eq("on_campus", true);
+    if (error) return json({ ok: false, reason: error.message });
+    ids = [...new Set((vs ?? []).map((v) => String(v.user_id)))];
+    const start = new Date(Date.parse(`${day}T00:00:00+09:00`)).toISOString(), end = new Date(Date.parse(`${day}T00:00:00+09:00`) + 86400000).toISOString();
+    const met = new Map<string, Set<string>>();
+    for (let i = 0; i < ids.length; i += 200) {
+      const { data: logs } = await supabase.from("tama_encounter_log").select("owner_id,other_id").in("owner_id", ids.slice(i, i + 200)).gte("at", start).lt("at", end);
+      for (const l of logs ?? []) { const k = String(l.owner_id); if (!met.has(k)) met.set(k, new Set()); met.get(k)!.add(String(l.other_id)); }
+    }
+    const times = conf?.ctTimes?.length ? `明日も ${conf.ctTimes.join("・")} にちかくタイム。` : "";
+    title = "🎪 今日は多摩祭に来てくれてありがとう";
+    textFor = (id) => {
+      const n = met.get(id)?.size ?? 0;
+      return n ? `今日は ${n}人とすれ違いました。明日も来ると、もう一度すれ違えるかも。${times}` : `${times}アプリを開いたまま歩くと、すれ違った人が記録されます`;
+    };
+    url = "/tama/?go=cross&n=tamasai"; tag = "tama-recap"; pref = "tamasai";
+  } else if (body.kind === "fsurvey") {
+    // 多摩祭のアンケート：URL があって、期間の中の時だけ。多摩祭の日にキャンパスで開いた人のうち、まだアンケートを押していない人へ
+    const conf = await tamasaiConf();
+    const now = Date.now();
+    if (!conf || !conf.surveyUrl || now < conf.surveyFrom || now >= conf.surveyUntil || !conf.days.length) return json({ ok: true, skipped: "no survey" });
+    const { data: vs, error } = await supabase.from("tama_visits").select("user_id").in("day", conf.days).eq("on_campus", true);
+    if (error) return json({ ok: false, reason: error.message });
+    const cand = [...new Set((vs ?? []).map((v) => String(v.user_id)))];
+    // 案内を押した人（fes26sv）と、いつものアンケートにもう答えた人（ちかく協力隊のバッジ・回答の記録 tama_survey_done）には送らない（2026-10-15）
+    const done = new Set<string>();
+    for (let i = 0; i < cand.length; i += 200) {
+      const { data } = await supabase.from("tama_profiles").select("id,sv:fes_attrs->fes26sv,badges:fes_attrs->badges").in("id", cand.slice(i, i + 200));
+      for (const r of data ?? []) if (r.sv || (Array.isArray(r.badges) && r.badges.includes("survey"))) done.add(String(r.id));
+    }
+    const { data: answered } = await supabase.from("tama_survey_done").select("participant_no");
+    const answeredNo = new Set((answered ?? []).map((a) => String(a.participant_no)));
+    ids = cand.filter((id) => !done.has(id) && !answeredNo.has(id.slice(0, 8)));
+    title = "📝 アンケートに答えて、特典をもらおう（2分）";
+    text = "多摩祭に来てくれてありがとう。答えると限定アイコン・背景とフレーム・バッジが使えるようになります";
+    url = "/tama/?go=tamasai&n=tamasai"; tag = "tama-fsurvey"; pref = "tamasai";
   } else {
     return json({ ok: false, reason: "bad kind" });
   }
