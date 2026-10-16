@@ -299,6 +299,7 @@
   .ctcard .ctbtns{display:flex;gap:8px}.ctcard .ctbtns button{flex:1;padding:10px 8px;border-radius:14px;border:1.5px solid #0fb0cd;background:#fff;color:#0a7f96;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
   .ctcard .ctmine{font-size:13.5px}.ctcard .ctmine b{color:#0a7f96}
   .ctcard .ctres{font-size:12.5px;margin-top:5px;line-height:1.7}.ctcard .ctres b{color:var(--signal)}
+  .ctcard .ctsame{display:block;width:100%;margin-top:8px;padding:9px 12px;border:0;border-radius:12px;background:var(--signal);color:#fff;font:inherit;font-size:13px;font-weight:800;text-align:left;cursor:pointer}
   .ctcard .ctnote{font-size:10.5px;color:var(--muted);margin-top:5px}
   .ctcard.after{padding:9px 14px;background:rgba(15,176,205,.07);border-width:1px}.ctcard.after .ctline{font-size:12.5px;line-height:1.55}
   .daily .dh{font-size:11.5px;font-weight:700;color:#b0651a;display:flex;justify-content:space-between}
@@ -1742,7 +1743,8 @@ const BADGES={survey:{icon:'🎖',label:'ちかく協力隊',desc:'アンケー�
   fes26:{icon:'🎪',label:'多摩祭2026',desc:'多摩祭2026の日にキャンパスでちかくを使った人',c:'fes26:1'},
   fes26x:{icon:'🎆',label:'多摩祭ですれ違い',desc:'多摩祭2026で3人とすれ違った人',c:'fes26x:3'},
   fesgoal:{icon:'🎉',label:'ちかく200人達成',desc:'多摩祭2026に参加して、ちかくのユーザーが200人になった時の記念',c:'fesgoal:1'},
-  fes26sv:{icon:'📝',label:'多摩祭の声',desc:'多摩祭2026のアンケートに答えた人',c:'fes26sv'}};   // 2026-10-16 多摩祭アンケート
+  fes26sv:{icon:'📝',label:'多摩祭の声',desc:'多摩祭2026のアンケートに答えた人',c:'fes26sv'},   // 2026-10-16 多摩祭アンケート
+  fes26fw:{icon:'🎇',label:'いっしょに花火を見た',desc:'多摩祭2026の花火の時間（18:00〜18:45）に、だれかとすれ違った人',c:'fes26fw:1'}};   // 2026-10-16 あおの決定   // 2026-10-16 多摩祭アンケート
 // ごほうびのアイコン（何もしてない人の12個＝EMO と、アンケートの36個＝EMO_SP は別に持つ）
 const LOOK_ICONS=[
   {id:'mis1',name:'はじめてのミッション',c:'mis:1',icons:['🐶','🐰','🐻','🦊']},
@@ -1805,6 +1807,7 @@ function lookCount(k){
   if(k==='owner')return Math.max(st.owner||0,(typeof rooms!=='undefined'&&rooms.some(r=>isRoomOwner(r)))?1:0);
   if(k==='fes26')return st.fes26||0;
   if(k==='fes26x')return Math.max(st.fes26x||0,tamasaiCrossN());
+  if(k==='fes26fw')return Math.max(st.fes26fw||0,fwMates().length);
   if(k==='fesgoal')return (st.fes26&&tamasaiN!=null&&tamasaiN>=FES.tamasai.goal)?1:0;
   return 0;
 }
@@ -2774,6 +2777,9 @@ function commonRaw(u){
     const mine=new Set(fesGoToday(profile)); fesGoToday(u).filter(k=>mine.has(k)).forEach(k=>{ const s=fesStageByKey(k); if(s)add('day:stg:'+k,`同じステージを見に行く「${s.n}」`); });
     // 自分が推している出店・企画の人（相手が「出店・出演しています」でそれを選んでいる時）
     const md=dailyAnswer(profile), role=fesRoleOf(u); if(md&&role&&normAns(md)===normAns(role))add('day:role:'+normAns(role),`推している「${role}」の人`);
+    // 2日連続ですれ違った人・花火の時間にすれ違った人（2026-10-16。自分のすれ違いの記録から）
+    if(fesMetAgain(u.id))add('day:again','🔁 2日連続ですれ違い');
+    if((encLog[u.id]||[]).some(x=>fesFwAt(x.at)))add('day:fw','🎇 いっしょに花火を見た');
   }
   return out;
 }
@@ -3359,11 +3365,42 @@ async function addEncounter(u){
   // 登録・起動の直後は、まわりの人がまとめて記録されて通知が続くので、最初の1分は知らせない
   if(Date.now()-bootAt>60000) toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`+(rare.length?`<br>✨ ${esc(rare[0].label)}`:''));
   crossNew++; bumpCrossDot();
+  const again=fesAgainNow(u.id);   // 記録する前に見る（昨日の記録があるか）
   (encLog[u.id]=encLog[u.id]||[]).push({at:Date.now(),place});
+  if(again)fesAgainPop(u);
+  if(fesFwAt(Date.now())){ lookSync(); if(Date.now()-bootAt>60000)toast(`🎇 花火の下で ${esc(u.name)} とすれ違いました。「いっしょに花火を見た」が今日の共通点に`); }
   if(Date.now()-bootAt>60000)wtpMaybeAsk(Object.keys(encMap).length<=1?'cross':'cross2');   // すれ違った直後に「ちかくプラスのアンケート」（2026-10-14。起動直後のまとめての記録では出さない）
   if(sb){ try{ const rec={owner_id:myId,other_id:u.id,count,last_at:new Date().toISOString(),last_place:place}; if(!prev)rec.first_at=new Date().toISOString(); await sb.from(T('encounters')).upsert(rec);
     if(!encLogMissing){ const {error}=await sb.from(T('encounter_log')).insert({owner_id:myId,other_id:u.id,place}); if(error){ if(/does not exist|schema cache/i.test(error.message))encLogMissing=true; console.warn('[encounter_log] 記録できませんでした',error.message); } }
   }catch(e){} }
+}
+/* ---------- 多摩祭の「また会えた」と花火（2026-10-16 あおの決定「通知・ギミックをもっとマッチングに生かす」） ----------
+   ・🔁 2日連続のすれ違い：2日目に、1日目にもすれ違った人とまたすれ違ったら、その場で知らせる（自分は画面、相手には通知。1日に1人1回）。
+     その日の共通点にも「🔁 2日連続ですれ違い」。「また会える」は、ちかくにしかない強み
+   ・🎇 いっしょに花火を見た：花火の日の 18:00〜18:45 にすれ違った人どうし。限定バッジと、その日の共通点
+   どちらも自分のすれ違いの記録（encLog）から見るので、サーバーの変更はいらない */
+const jstHM=ms=>new Date(ms+9*3600000).toISOString().slice(11,16);
+function fesFwAt(ms){ const fw=(FES.tamasai||{}).fireworks; return !!fw&&jstDayOf(ms)===fw.day&&jstHM(ms)>=fw.at&&jstHM(ms)<'18:45'; }
+function fwMates(){ return Object.keys(encLog||{}).filter(id=>!isTest(id)&&(encLog[id]||[]).some(x=>fesFwAt(x.at))); }
+// 2日目に、1日目にもすれ違っている人か（今日もすれ違っているかは問わない）
+function fesMetDay1(id){ const D=(FES.tamasai||{}).days||[]; return D.length>1&&jstDayOf(Date.now())===D[1]&&(encLog[id]||[]).some(x=>jstDayOf(x.at)===D[0]); }
+function fesMetAgain(id){ const D=(FES.tamasai||{}).days||[]; return fesMetDay1(id)&&(encLog[id]||[]).some(x=>jstDayOf(x.at)===D[1]); }
+// いまのすれ違いが「2日連続」の初めての1回か（1日に1人1回まで。端末に覚える）
+function fesAgainNow(id){
+  if(isTest(id)||!fesMetDay1(id)||fesMetAgain(id))return false;
+  const k='tama_again_'+jstDayOf(Date.now())+'_'+id; try{ if(localStorage.getItem(k))return false; localStorage.setItem(k,'1'); }catch(e){}
+  return true;
+}
+function fesAgainPop(u){
+  const c=commonWith(u).filter(x=>!/2日連続/.test(x)).slice(0,2), me=profile?profile.name:'だれか';
+  notifyPush(u.id,`🔁 昨日もすれ違った${me}さんと、今日もすれ違いました`,c.length?`共通点：${c.join('・')}。いま近くにいます`:'いま近くにいます。プロフィールを見てみよう',{kind:'nearby',go:'cross',tag:'again-'+myId});
+  if(Date.now()-bootAt<60000||$$('.overlay.show').length){ toast(`🔁 昨日もすれ違った ${esc(u.name)} と、今日もすれ違いました`+(c.length?`<br>共通点：${esc(c[0])}`:'')); return; }
+  $('#memSheet').innerHTML=`<div class="rinfo" style="text-align:center"><div style="font-size:44px;margin:4px 0 6px">🔁</div><h2 class="pstitle">また会えた！</h2>
+    <p class="psdesc"><b style="color:var(--ink)">${esc(u.name)}</b> さんとは、昨日もすれ違っています。いま近くにいます。</p>
+    ${c.length?`<div class="fchips" style="justify-content:center;margin:0 0 14px">${c.map(x=>`<span class="fchip hit">${esc(x)}</span>`).join('')}</div>`:''}
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="closeMembers();openNear('${jsq(u.id)}')">👋 プロフィールを見る</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
 }
 async function loadEncounters(){
   if(!sb)return; loadEncounterLog().then(renderCross);
@@ -6829,6 +6866,17 @@ async function loadCtStats(force){
 }
 // 同じ答えの人（今日キャンパスにいた人のうち）
 function ctSameCount(){ return others.filter(u=>!isTest(u.id)&&!blocked.has(u.id)&&sameCt(u)).length; }
+// ちかくタイムの結果から、同じ答えの人の一覧へ（2026-10-16 あおの決定「答えた後、その場で同じ答えの人へ行けるように」）
+const ctSameUsers=()=>others.filter(u=>!isTest(u.id)&&!blocked.has(u.id)&&sameCt(u));
+function ctSameBtn(){ const n=ctAnswer(profile)?ctSameUsers().length:0; return n?`<button class="ctsame" onclick="openCtSame()">👀 同じ「${esc(ctAnswer(profile))}」の人 ${n}人を見る ›</button>`:''; }
+function openCtSame(){
+  const L=ctSameUsers(), mine=ctAnswer(profile); if(!L.length){ toast('いまキャンパスに同じ答えの人はいません'); return; }
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">⏰ 同じ「${esc(mine)}」の人</h2><p class="psdesc">ちかくタイム「${esc(ctCur.q)}」で同じ答えの人です。今日だけ共通点に出ます。</p>
+    <div class="cblist">${L.map(u=>{ const c=commonWith(u).filter(x=>!/^ちかくタイム/.test(x)).slice(0,2);
+      return `<div class="cbrow" onclick="closeMembers();openNear('${jsq(String(u.id))}')" style="cursor:pointer"><div class="cbe">${esc(u.emoji||'🙂')}</div><div class="cbt"><b>${esc(u.name)}</b><small>${c.length?'ほかの共通点：'+esc(c.join('・')):'タップでプロフィール'}</small></div></div>`; }).join('')}</div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
 function ctResultText(){
   const s=ctStats; if(!s||s.total==null)return '';
   if(!s.groups)return `答えた人 ${s.total}人（5人になったら割合が出ます）`;
@@ -6844,7 +6892,7 @@ function renderCt(){
   if(ph==='after'){
     el.className='ctcard after';
     const r=ctResultText();
-    el.innerHTML=`<div class="ctline">⏰ さっきのちかくタイム「${esc(ctCur.q)}」${mine?`→ <b>${esc(mine)}</b>`:''}${r?`<br>${r}`:''}${mine?'':'<br><span style="color:var(--muted)">次は通知が来たら答えてみよう</span>'}</div>`;
+    el.innerHTML=`<div class="ctline">⏰ さっきのちかくタイム「${esc(ctCur.q)}」${mine?`→ <b>${esc(mine)}</b>`:''}${r?`<br>${r}`:''}${mine?'':'<br><span style="color:var(--muted)">次は通知が来たら答えてみよう</span>'}</div>${ctSameBtn()}`;
     return;
   }
   el.className='ctcard';
@@ -6855,7 +6903,7 @@ function renderCt(){
   }else{
     const n=ctSameCount(), r=ctResultText();
     el.innerHTML=head+`<div class="ctq" style="margin-bottom:4px">${esc(ctCur.q)}</div><div class="ctmine">あなた：<b>${esc(mine)}</b>　同じ答えの人 キャンパスに <b style="color:var(--signal)">${n}</b>人</div>${r?`<div class="ctres">${r}</div>`:''}
-      <div class="ctnote">同じ答えの人は、今日だけ「ホーム」に共通点つきで出ます</div>`;
+      ${ctSameBtn()}<div class="ctnote">同じ答えの人は、今日だけ「ホーム」に共通点つきで出ます</div>`;
   }
   // 残り時間は1秒ごと。0になったら結果の表示へ
   ctTimer=setInterval(()=>{ const t=$('#ctLeft'); if(ctPhase()!=='live'){ renderCt(); renderNearby(); return; } if(t)t.textContent=left(); },1000);
@@ -7210,7 +7258,8 @@ function toggleFesGo(k){
   profile.fa={...(profile.fa||{}),fes26go:on?cur.filter(x=>x!==k):cur.concat(k).slice(-12)};
   if(tamasaiTester())profile.fa.fes26q_test=1;   // 試しの分は、本当の1日目に消す
   publishMe(); saveMyAttrs(); renderTamasai(); renderNearby();
-  toast(on?'👀 見に行くを外しました':`👀 「${esc(s.n)}」を見に行く。同じステージを見に行く人が、今日だけ共通点に出ます`);
+  toast(on?'👀 見に行くを外しました':`👀 「${esc(s.n)}」を見に行く。始まる10分前に通知します。同じステージを見に行く人が、今日だけ共通点に出ます`);   // 10分前の通知は tama-remind の stage（2026-10-16）
+  if(!on)askPushSoon('daily');
 }
 function tamasaiStageHTML(){
   const ss=FES.tamasai.stages||[], now=tamasaiNow(), d=jstDayOf(now), hm=new Date(now+9*3600000).toISOString().slice(11,16);
@@ -7882,6 +7931,7 @@ function lookSync(quiet){
   // 多摩祭（2026-10-11）：当日にキャンパスで開いた・当日にすれ違った人数を残す（バッジの条件。だれとすれ違ったかは残さない）
   if(tamasaiDay()&&!tamasaiTester()&&visitNow().on&&!st.fes26){ st.fes26=1; ch=true; setTimeout(()=>{ loadTamasai(true); renderTamasai(); },500); }
   { const n=tamasaiCrossN(); if(n>(st.fes26x||0)){ st.fes26x=n; ch=true; } }
+  { const n=fwMates().length; if(n>(st.fes26fw||0)){ st.fes26fw=n; ch=true; } }   // 花火の時間にすれ違った人数（2026-10-16）
   const b=new Set(fa.badges||[]), newB=[];
   Object.entries(BADGES).forEach(([id,x])=>{ if(!b.has(id)&&x.c!=='survey'&&lookHas(x.c)){ b.add(id); newB.push(id); ch=true; } });
   if(ch){ profile.fa={...(profile.fa||{}),stat:st,badges:[...b]}; saveMyAttrs(); if(newB.length){ publishMe(); renderMeHero(); } }
