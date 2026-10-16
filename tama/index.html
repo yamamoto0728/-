@@ -228,6 +228,12 @@
   .collabrow .ci{font-size:20px;flex-shrink:0}.collabrow .ct{flex:1;min-width:0}.collabrow b{display:block;font-size:13px;color:#a8335a}.collabrow small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
   .collabrow .go{color:var(--muted2)}
   .joined-tag.co{color:#a8335a}
+  /* 🤝 ちかくコラボの一覧（2026-10-16） */
+  .cblist{display:flex;flex-direction:column;gap:8px;max-height:58vh;overflow:auto}
+  .cbrow{display:flex;gap:10px;padding:10px 12px;border:1.5px solid rgba(192,69,106,.35);border-radius:14px;background:linear-gradient(135deg,#fff7f9,#fffaf0)}
+  .cbrow .cbe{font-size:24px;flex-shrink:0}.cbrow .cbt{flex:1;min-width:0}.cbrow b{display:block;font-size:14px}.cbrow small{display:block;font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:1px}
+  .cbrow .cbb{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.cbrow .cbb button{border:0;border-radius:10px;padding:6px 10px;background:#c0456a;color:#fff;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+  .shoplist button b em.cbmark{font-style:normal;font-size:10.5px;color:#a8335a;background:#fdebf0;border-radius:6px;padding:1px 6px;margin-left:4px}
   .tscard .tsqh{font-size:13.5px;font-weight:800;line-height:1.5}.tscard .tsqh span,.tscard .tsq.done span{display:block;font-size:10.5px;font-weight:500;color:var(--muted)}
   .tscard .tsqo{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:6px;padding-bottom:2px}.tscard .tsqo::-webkit-scrollbar{height:0}
   .tscard .tsqo button{flex-shrink:0;padding:7px 11px;border-radius:14px;border:1.5px solid #f0729a;background:#fff;color:#c0456a;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
@@ -2892,7 +2898,7 @@ function attrBlock(u){
     ${badgeKeys(u).map(k=>`<div class="frow">${BADGES[k].icon} <b>${BADGES[k].label}</b> <span style="color:var(--muted);font-size:11.5px">${BADGES[k].desc}</span></div>`).join('')}
     ${a.artist?`<div class="frow">🎧 よく聴く <b>${esc(a.artist)}</b>${artistHit?' <span class="same">同じ！</span>':''}</div>`:''}
     ${(a.aruaru||[]).length?`<div class="fh">わかる！あるある</div><div class="fchips">${a.aruaru.map(x=>`<span class="fchip${(me.aruaru||[]).includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>`:''}
-    ${fesRoleOf(u)?`<div class="frow">🏮 <b>${esc(fesRoleOf(u))}</b> で出店・出演中${dailyAnswer(profile)&&normAns(dailyAnswer(profile))===normAns(fesRoleOf(u))?' <span class="same">あなたの推し！</span>':''}</div>`:''}
+    ${fesRoleOf(u)?`<div class="frow">🏮 <b>${esc(fesRoleOf(u))}</b> で出店・出演中${isCollabName(fesRoleOf(u))?" <span class=\"same\">🤝 ちかくコラボ</span>":""}${fesRolePlaceOf(u)?`<br>📍 ${esc(fesRolePlaceOf(u))}`:""}${dailyAnswer(profile)&&normAns(dailyAnswer(profile))===normAns(fesRoleOf(u))?' <span class="same">あなたの推し！</span>':''}</div>`:''}
     ${dailyAnswer(u)?`<div class="frow">${dailyToday().fes?'🏮 多摩祭のおすすめ':'🎲 今日のお題「'+esc(dailyToday().q)+'」'} <b>${esc(dailyAnswer(u))}</b>${sameDaily(u)?' <span class="same">同じ！</span>':''}</div>`:''}
     ${tamasaiDay()?(FES.tamasai.qs||[]).map(q=>{ const x=tamasaiAns(u,q.k); return x?`<div class="frow">${q.icon} ${esc(q.label)} <b>${esc(x)}</b>${x===tamasaiAns(profile,q.k)&&!(q.weak||[]).includes(x)?' <span class="same">同じ！</span>':''}</div>`:''; }).join(''):''}
     ${fesGoToday(u).map(k=>{ const s=fesStageByKey(k); return s?`<div class="frow">👀 見に行く <b>${esc(s.n)}</b>（${s.s}〜）${fesGoToday(profile).includes(k)?' <span class="same">同じ！</span>':''}</div>`:''; }).join('')}
@@ -2965,7 +2971,7 @@ function nearRow({u,d,common,closed}){
   return `<div class="urow${closed?' closed':''}" onclick="openNear('${String(u.id).replace(/[^\w-]/g,'')}')">
     <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
     <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>
-      ${commonLine(common)}${crossBadge(u.id)}${fesRoleOf(u)?`<div class="rolet">🏮 ${esc(fesRoleOf(u))} で出店・出演中</div>`:""}
+      ${commonLine(common)}${crossBadge(u.id)}${fesRoleOf(u)?`<div class="rolet">🏮 ${esc(fesRoleOf(u))} で出店・出演中${fesRolePlaceOf(u)?" ・ 📍 "+esc(fesRolePlaceOf(u)):""}${isCollabName(fesRoleOf(u))?" 🤝":""}</div>`:""}
       <div class="b">${st&&!closed?`<span class="stchip">${esc(st)}</span> `:''}${esc(u.bio||'')}</div></div>
     <div class="d">${closed?`<div class="frago">${agoText(u.updated_at)}まで</div>`:`<div class="m">${d!=null?distText(d,u.id):'—'}</div>`}${relTag(u.id)}</div></div>`;
 }
@@ -4644,7 +4650,7 @@ function renderRooms(){
   if(el){
     $('#commSub').textContent='部屋ごとにオーナーがいて、入れる人と期限が決まっています';
     if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
-    el.innerHTML=collabPromoHTML()+(roomListErr?`<div class="roomerr">⚠️ コミュニティの一覧を読み込めませんでした。<button onclick="loadRooms()">もう一度</button><small>${esc(roomListErr)}</small></div>`:'')+(rooms.length?sec('参加中',joined)+sec('📚 あなたの授業',cls)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
+    el.innerHTML=collabCardLine()+(roomListErr?`<div class="roomerr">⚠️ コミュニティの一覧を読み込めませんでした。<button onclick="loadRooms()">もう一度</button><small>${esc(roomListErr)}</small></div>`:'')+(rooms.length?sec('参加中',joined)+sec('📚 あなたの授業',cls)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
       :`<div class="empty"><div class="big">💬</div><p>まだコミュニティがありません。<br>下の「＋ 新しいコミュニティを作る」で<br>最初の部屋を作りましょう。</p></div>`);
   }
   const hr=$('#homeRoomList'), top=joined.concat(cls,forYou,open).slice(0,3);
@@ -6503,7 +6509,7 @@ function renderShopPick(){
   let last='';
   box.innerHTML=shopPickList.length?shopPickList.map((v,i)=>{ const e=by[v]||{n:v}, head=!q&&!shopKind&&e.t&&e.t!==last?`<div class="shoph">${esc(e.t)}</div>`:''; if(e.t)last=e.t;
     const sub=[e.f,e.g,e.p].filter(Boolean).join(' ・ ');
-    return head+`<button onclick="pickShop(${i})"><b>${e.no&&e.no!=='K'?`<i>${esc(e.no)}</i>`:e.no==='K'?'<i>🚚</i>':''}${esc(v)}</b>${sub?`<small>${esc(sub)}</small>`:''}</button>`; }).join('')
+    return head+`<button onclick="pickShop(${i})"><b>${e.no&&e.no!=='K'?`<i>${esc(e.no)}</i>`:e.no==='K'?'<i>🚚</i>':''}${esc(v)}${isCollabName(v)?' <em class="cbmark">🤝 ちかくコラボ</em>':''}</b>${sub?`<small>${esc(sub)}</small>`:''}</button>`; }).join('')
     :'<div class="shopnone">見つかりません。一覧に無いものは、閉じて入力欄に書いてください</div>';
 }
 function pickShop(i){ const v=shopPickList[i]; if(!v)return; closeMembers(); if(shopPickMode==='role'){ shopPickMode=''; setFesRole(v); return; } answerDaily(v); }
@@ -6980,7 +6986,7 @@ function renderTamasai(){
   const more=tsOpen?`<div class="tsmore"><div class="tsfoot"><span>${done?`多摩祭に参加した全員に🎉バッジ ・ いま ${n}人`:`${n!=null&&n>=T_.showFrom?`あと<b style="color:#c0456a">${goal-n}</b>人で`:'届いたら'}、多摩祭に参加した全員に🎉バッジ`} ・ ${cross}</span></div>${tamasaiStageHTML()}<button class="tsrole" onclick="openFesRolePick()">🏮 ${fesRoleOf(profile)?'出店・出演中：'+esc(fesRoleOf(profile))+'（変える）':'出店・ステージに出る人はこちら（自分の店・ステージを選ぶ）'}</button></div>`:'';
   const toggle=`<button class="tsmorebtn" onclick="toggleTsOpen()">${tsOpen?'とじる ▴':'くわしく ▾'}</button>`;
   // 中身が変わった時だけ描き直す（6秒ごとに作り直すと、選択肢の横スクロールが戻り、押している途中のタップが消えるため。2026-10-15 のレビューで直した）
-  const html=head+geoNote+tamasaiSurveyHTML()+prog+fesStatusHTML()+(tsOpen?'':tamasaiStageLine())+collabPromoHTML('collabrow ints')+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML()+more+toggle;
+  const html=head+geoNote+tamasaiSurveyHTML()+prog+fesStatusHTML()+(tsOpen?'':tamasaiStageLine())+collabCardLine('collabrow ints')+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML()+more+toggle;
   if(el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; }
   fesSvMaybeAsk();   // 多摩祭アンケートの時間（1日目18:00〜・2日目18:30〜）に、1日1回まで（2026-10-16）
 }
@@ -7034,6 +7040,50 @@ async function joinCollabRoom(){
   try{ localStorage.setItem('tama_collabJoined',String(c.code)); }catch(e){}
   closeMembers(); await loadRooms(); openRoom(data.room);
 }
+/* ---------- 🤝 当日決まった「ちかく」コラボの団体・出店（2026-10-16 あおの依頼「当日の商談でコラボになった団体や出店を宣伝する仕組み」） ----------
+   コラボは、出店の表 tama_booths の collab を true にした行（supabase/tama_collab.sql。🅲 が当日 SQL の1行で足せる。アプリの更新はいらない）
+   ＋ tama/tamasai.js の collab（Saenggi。ステージ）。
+   ・🎪カードとコミュニティのページに1行「🤝 ちかくコラボ：◯◯・◯◯ ほか ›」→ 押すと一覧（説明・場所・コミュニティ・地図）
+   ・room_name を入れると、その名前のコミュニティ（だれでも入れる部屋）へのボタンが出る
+   ・出店の一覧（おすすめ・出店出演）と、一覧の「🏮 出店・出演中」に「🤝」の印 */
+function collabList(){
+  const out=[], c=FES.tamasai&&FES.tamasai.collab;
+  if(c&&(!c.promoUntil||jstDayOf(Date.now())<=c.promoUntil))out.push({key:'cfg',name:c.name,desc:c.desc||'',place:c.stage||'',emoji:'⭐',roomName:c.roomName||'',room:c.room||'',code:c.code||''});
+  (booths||[]).filter(b=>b.collab&&!isTest(b.id)).forEach(b=>out.push({key:'b'+b.id,name:b.name,desc:b.description||'',place:b.place||'',emoji:b.emoji||'🏪',roomName:b.room_name||'',lat:b.lat,lng:b.lng,booth:b.id}));
+  return out;
+}
+// 名前がコラボの団体・出店か（「たこせん」と「たこせん（法政弓の会）」のような書き方の違いも見る）
+function isCollabName(n){ const k=normAns(n||''); if(!k)return false; return collabList().some(x=>{ const m=normAns(x.name); return m&&(m===k||m.includes(k)||k.includes(m)); }); }
+// その名前のコミュニティ（だれでも入れる部屋）
+function roomIdByName(name){
+  const k=normAns(name||''); if(!k)return '';
+  const r=(rooms||[]).filter(x=>x.visibility!=='invite'&&normAns(x.name||'').includes(k)).sort((a,b)=>(Date.parse(a.created_at)||0)-(Date.parse(b.created_at)||0))[0];
+  return r?rid(r.id):'';
+}
+function collabCardLine(cls){
+  const L=collabList(); if(!L.length||!profile)return '';
+  // Saenggi だけの時で、もうコミュニティに入っている人には出さない（前と同じ）
+  if(L.length===1&&L[0].key==='cfg'&&collabJoined())return '';
+  const names=L.slice(0,2).map(x=>x.name.replace(/（.*）$/,'')).join('・')+(L.length>2?` ほか${L.length-2}`:'');
+  return `<button class="${cls||'collabrow'}" onclick="openCollabList()"><span class="ci">🤝</span><span class="ct"><b>ちかくコラボ：${esc(names)}</b><small>${L.length>1?`${L.length}つの団体・出店 ・ 押すと一覧`:esc([L[0].desc,L[0].place].filter(Boolean).join(' ・ '))}</small></span><span class="go">›</span></button>`;
+}
+let collabShown=[];
+async function openCollabList(){
+  if(collabList().some(x=>x.roomName)&&!(rooms||[]).length)await loadRooms();
+  const L=collabShown=collabList();
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🤝 ちかくコラボ</h2><p class="psdesc">「ちかく」と一緒に多摩祭を盛り上げている団体・出店です。</p>
+    <div class="cblist">${L.map((x,i)=>{ const rid0=x.room||roomIdByName(x.roomName), joined=rid0&&myRoomIds.has(rid(rid0));
+      return `<div class="cbrow"><div class="cbe">${esc(x.emoji)}</div><div class="cbt"><b>${esc(x.name)}</b>${x.desc?`<small>${esc(x.desc)}</small>`:''}${x.place?`<small>📍 ${esc(x.place)}</small>`:''}
+        <div class="cbb">${rid0||x.code?`<button onclick="openCollabRoomAt(${i})">💬 ${joined?'コミュニティを開く':'コミュニティを見る'}</button>`:''}${x.lat!=null&&x.lng!=null?`<button onclick="closeMembers();go('near');showMapArea()">🗺 地図</button>`:''}</div></div></div>`; }).join('')}</div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function openCollabRoomAt(i){
+  const x=collabShown[i]; if(!x)return;
+  if(x.key==='cfg'){ closeMembers(); return openCollabRoom(); }   // Saenggi は前からの流れ（招待コードにも対応）
+  const id=roomIdByName(x.roomName); if(!id){ toast('コミュニティが見つかりません（準備中かもしれません）'); return; }
+  closeMembers(); openRoom(id);
+}
 /* ---------- 👀 ステージを見に行く・🏮 出店・出演しています（2026-10-15 エージェントの体験から） ----------
    ・見に行く：ステージの行の「👀 見に行く」を押すと、fes_attrs.fes26go に入る。同じステージを見に行く人どうしが、その日だけ共通点になる
      （だれが行くかは出さない。共通点と「見に行くちかくの人 ◯人」の数だけ）。3人のエージェント全員が出した案
@@ -7079,11 +7129,40 @@ function tamasaiStageLine(){
 // 🏮 出店・出演しています（自分の店・ステージを選ぶ。選び直せる・外せる）
 let shopPickMode='';
 function openFesRolePick(){ openShopPick('role'); }
+// 出店・出演の場所（2026-10-16 あおの依頼「どこでやっているかも。いつものいまどこの選択式＋任意で場所の説明」）。
+// 選ぶのは、祭りのエリア（屋台・ステージ）と、いつもの「いまどこ」の建物（campusPlaces）。説明（例：入口を入って右）は任意。
+// fes_attrs.fes26rolep = {b:エリア・建物, n:説明}。一覧とプロフィールに「📍 経済学部棟エリア（入口の右）」と出る
+const FES_AREAS=['センタープラザ','センタープラザステージ','大教室A棟ステージ','経済学部棟エリア（屋台）','総合棟・図書館前（屋台）','社会学部棟 回廊（屋台）','円芝'];
+let fesRoleDraft='';
 function setFesRole(v){
   if(!profile)return;
-  profile.fa={...(profile.fa||{}),fes26role:v||''}; publishMe(); saveMyAttrs(); renderTamasai(); renderNearby();
-  toast(v?`🏮 「${esc(v)}」で出店・出演中、と出ます。推している人に「推している人の店」と出ます`:'出店・出演の表示を外しました');
+  if(!v){ profile.fa={...(profile.fa||{}),fes26role:'',fes26rolep:null}; publishMe(); saveMyAttrs(); renderTamasai(); renderNearby(); toast('出店・出演の表示を外しました'); return; }
+  openFesRolePlace(v);
 }
+function openFesRolePlace(v){
+  fesRoleDraft=v;
+  const shop=SHOPS().find(e=>e.n===v)||{}, prev=attrsOf(profile).fes26rolep||{};
+  const opts=[...FES_AREAS,...campusPlaces().map(x=>x.name).filter(n=>!FES_AREAS.includes(n))];
+  // 前に選んだ場所 → 公式の一覧の場所（「経済学部棟 2F」なら「経済学部棟」）に近いもの、の順で最初から選んでおく
+  const p=String(shop.p||''), guess=prev.b||opts.find(o=>p&&(o===p||o.startsWith(p)||p.startsWith(o.replace(/（.*）$/,''))))||'';
+  const note=prev.b?prev.n||'':(/\dF$/.test(p)?p.replace(/^.*?(\dF)$/,'$1'):'');
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🏮 「${esc(v)}」はどこでやっていますか？</h2>
+    <p class="psdesc">一覧とプロフィールに「🏮 ${esc(v)} で出店・出演中 ・ 📍 場所」と出ます。お客さんが見つけやすくなります。</p>
+    <div class="field"><label>エリア・建物</label><select id="frPlace"><option value="">（選ばない）</option>${opts.map(n=>`<option${n===guess?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
+    <div class="field"><label>場所の説明<span class="opt">任意</span></label><input id="frNote" maxlength="30" placeholder="例：入口を入って右、2階の212教室" value="${esc(note)}"></div>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="saveFesRole()">保存する</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="openShopPick('role')">‹ 店を選び直す</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+function saveFesRole(){
+  const v=fesRoleDraft; if(!profile||!v)return;
+  const b=(($('#frPlace')||{}).value||'').trim(), n=(($('#frNote')||{}).value||'').trim().slice(0,30);
+  if(n&&ngCheck(n)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  profile.fa={...(profile.fa||{}),fes26role:v,fes26rolep:b||n?{b,n}:null}; publishMe(); saveMyAttrs(); closeMembers(); renderTamasai(); renderNearby();
+  toast(`🏮 「${esc(v)}」で出店・出演中、と出ます。推している人に「推している人の店」と出ます`);
+}
+// 出店・出演の場所の文（「経済学部棟エリア（屋台）（入口の右）」）
+function fesRolePlaceOf(u){ if(!fesRoleOf(u))return ''; const p=attrsOf(u).fes26rolep; if(!p)return ''; return [p.b,p.n?`（${p.n}）`:''].join('').slice(0,60); }
 // 祭り用の「いまの状態」（🎪カードから1タップ。1時間で消える。前向きな状態だけ）
 const FES_STATUS=['🍢 食べ歩き中','🎤 ステージ待ち','☕ 休憩中・ゆっくり話せる'];
 function setFesStatus(i){
