@@ -23,6 +23,11 @@
 //   { "kind": "fsurvey" }                    … 多摩祭に来た人にアンケートの案内。tama/tamasai.js の surveyUrl が空・期間の外なら送らない
 //   { "kind": "shop", "day": "2026-10-17", "slot": "1400" } … 出店・出演している人へ「無料で宣伝しませんか」（2026-10-16。supabase/tama_fes_shop.sql）。
 //                                            「出店・出演中」をまだ選んでいない人全員へ。day が今日の時だけ、slot ごとに1回
+// 2026-10-16 あおの決定「通知をもっとマッチングに生かす」で足したもの（supabase/tama_fes_push.sql）:
+//   { "kind": "stage" }                      … 5分ごと。始まる5〜10分前のステージを「👀 見に行く」にした人だけへ、見に行くちかくの人の数つき
+//   { "kind": "likes" }                      … 多摩祭の日の16:00。今日届いたいいねを、まだ返していない人だけへ（件数つき）
+//   { "kind": "morning", "day": "2026-10-18", "prev": "2026-10-17" } … 2日目の朝。1日目に来た人だけへ、昨日すれ違った人数と今日の予定
+//   recap（1日目の夜）は、アンケートの期間ならアンケートの一言も入れる（18:00 のアンケートの通知とまとめて1通に）
 //
 // Secrets は send-match-push と同じ VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY を使う（プロジェクト共通なので追加設定は不要）。
 
@@ -71,6 +76,38 @@ async function tamasaiConf(): Promise<{ days: string[]; surveyUrl: string; surve
   }
 }
 
+// 多摩祭のステージの一覧（tama/tamasai.js の stages。1行に1つ {d:'日付',s:'始まり',e:'終わり',n:'名前',g:'団体',p:'場所'}）。
+// 番号 i はアプリの fesStageKey と同じ（並び順）。見に行く人の fes_attrs.fes26go には `${d}_${s から : を取ったもの}_${i}` が入る
+async function tamasaiStages(): Promise<{ key: string; d: string; s: string; n: string; p: string }[]> {
+  try {
+    const res = await fetch(TAMASAI_URL);
+    if (!res.ok) return [];
+    const src = await res.text();
+    const at = src.search(/^[ \t]*stages:\[/m);
+    if (at < 0) return [];
+    const block = src.slice(at, src.indexOf("\n  ]", at));
+    const out: { key: string; d: string; s: string; n: string; p: string }[] = [];
+    for (const m of block.matchAll(/\{d:'([^']+)',s:'([^']+)',e:'[^']*',n:'([^']*)'(?:,g:'[^']*')?(?:,p:'([^']*)')?/g)) {
+      out.push({ key: `${m[1]}_${m[2].replace(":", "")}_${out.length}`, d: m[1], s: m[2], n: m[3], p: m[4] ?? "" });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+// その日（day）に、それぞれの人が何人とすれ違ったか（同じ人は1人）。1回に返るのは1000行までなので、5人ずつ読む
+// deno-lint-ignore no-explicit-any
+async function metCounts(supabase: any, ids: string[], day: string): Promise<Map<string, number>> {
+  const start = new Date(Date.parse(`${day}T00:00:00+09:00`)).toISOString(), end = new Date(Date.parse(`${day}T00:00:00+09:00`) + 86400000).toISOString();
+  const met = new Map<string, Set<string>>();
+  for (let i = 0; i < ids.length; i += 5) {
+    const { data: logs } = await supabase.from("tama_encounter_log").select("owner_id,other_id").in("owner_id", ids.slice(i, i + 5)).gte("at", start).lt("at", end).limit(1000);
+    for (const l of logs ?? []) { const k = String(l.owner_id); if (!met.has(k)) met.set(k, new Set()); met.get(k)!.add(String(l.other_id)); }
+  }
+  return new Map([...met].map(([k, v]) => [k, v.size]));
+}
+
 // アプリの normAns と同じそろえ方（全角半角・大文字小文字・ひらがなカタカナ・空白や記号）
 const normAns = (s: unknown) =>
   String(s ?? "").normalize("NFKC").toLowerCase().replace(/[\s・,.、。!?！？'"「」『』()（）\-ー]/g, "")
@@ -97,7 +134,7 @@ function hasCommon(me: FA, th: FA, myTT: Record<string, string>, thTT: Record<st
 }
 
 Deno.serve(async (req) => {
-  let body: { kind?: string; period?: number; day?: string; slot?: string } = {};
+  let body: { kind?: string; period?: number; day?: string; slot?: string; prev?: string } = {};
   try { body = await req.json(); } catch { /* 空のまま */ }
 
   // 日本時間（cron でも平日に絞っているが、念のためここでも確かめる）。ちかくタイム・多摩祭の通知は土日も送る
@@ -124,6 +161,8 @@ Deno.serve(async (req) => {
   let ids: string[] = [];
   let title = "", text = "", url = "/tama/", tag = "chikaku-tama-remind", pref = "";
   let textFor: ((id: string) => string) | null = null;
+  let titleFor: ((id: string) => string) | null = null;
+  let onceKey = "";   // 多摩祭の通知を1回だけにする鍵（tama_fes_sent）。空なら確かめない
   if (body.kind === "period") {
     const period = Number(body.period);
     if (!(period >= 1 && period <= 5)) return json({ ok: false, reason: "bad period" });
@@ -221,20 +260,19 @@ Deno.serve(async (req) => {
     const { data: vs, error } = await supabase.from("tama_visits").select("user_id").eq("day", day).eq("on_campus", true);
     if (error) return json({ ok: false, reason: error.message });
     ids = [...new Set((vs ?? []).map((v) => String(v.user_id)))];
-    const start = new Date(Date.parse(`${day}T00:00:00+09:00`)).toISOString(), end = new Date(Date.parse(`${day}T00:00:00+09:00`) + 86400000).toISOString();
-    const met = new Map<string, Set<string>>();
-    // 1回に返るのは1000行までなので、5人ずつ読む（1人が1日に200回以上すれ違うことはまず無い。2026-10-15 のレビューで直した）
-    for (let i = 0; i < ids.length; i += 5) {
-      const { data: logs } = await supabase.from("tama_encounter_log").select("owner_id,other_id").in("owner_id", ids.slice(i, i + 5)).gte("at", start).lt("at", end).limit(1000);
-      for (const l of logs ?? []) { const k = String(l.owner_id); if (!met.has(k)) met.set(k, new Set()); met.get(k)!.add(String(l.other_id)); }
-    }
+    // 1人が1日に200回以上すれ違うことはまず無い（2026-10-15 のレビューで5人ずつ読むようにした。metCounts）
+    const met = await metCounts(supabase, ids, day);
     const times = conf?.ctTimes?.length ? `明日も ${conf.ctTimes.join("・")} にちかくタイム。` : "";
+    // 2026-10-16 あおの決定：1日目の夜は 18:00 のアンケートとこの通知を1通にまとめる（同じ人に30分で2通届いていたため）。
+    // アンケートの期間に入っていれば、アンケートの一言を足し、押した先をアンケートのある🎪カードにする
+    const sv = !!conf && !!conf.surveyUrl && Date.now() >= conf.surveyFrom && Date.now() < conf.surveyUntil;
+    const svText = sv ? "1分のアンケートに答えると限定バッジ📝。" : "";
     title = "🎪 今日は多摩祭に来てくれてありがとう";
     textFor = (id) => {
-      const n = met.get(id)?.size ?? 0;
-      return n ? `今日は ${n}人とすれ違いました。明日も来ると、もう一度すれ違えるかも。${times}` : `${times}アプリを開いたまま歩くと、すれ違った人が記録されます`;
+      const n = met.get(id) ?? 0;
+      return n ? `今日は ${n}人とすれ違いました。${svText}明日も来ると、もう一度すれ違えるかも。${times}` : `${svText}${times}アプリを開いたまま歩くと、すれ違った人が記録されます`;
     };
-    url = "/tama/?go=cross&n=tamasai"; tag = "tama-recap"; pref = "tamasai";
+    url = sv ? "/tama/?go=tamasai&n=tamasai" : "/tama/?go=cross&n=tamasai"; tag = "tama-recap"; pref = "tamasai";
   } else if (body.kind === "fsurvey") {
     // 多摩祭のアンケート：URL があって、期間の中の時だけ。多摩祭の日にキャンパスで開いた人のうち、まだアンケートを押していない人へ
     const conf = await tamasaiConf();
@@ -265,6 +303,85 @@ Deno.serve(async (req) => {
     title = "🏮 出店・出演している方へ";
     text = "「ちかく」で、あなたのお店・ステージを無料で宣伝しませんか？店と場所を選ぶだけで、一覧とプロフィールに「🏮 出店中・📍 場所」が出て、近くの人に見つけてもらえます";
     url = "/tama/?go=role&n=shop"; tag = "tama-shop"; pref = "tamasai";
+  } else if (body.kind === "stage") {
+    // 👀 ステージの10分前（2026-10-16 あおの決定）：「見に行く」を押した人だけに、始まる5〜10分前に1回。見に行くちかくの人の数つき。
+    // cron は多摩祭の日の 11:00〜18:55 に5分ごと。同じステージは1回だけ（tama_fes_sent の stage:鍵）
+    const now = Date.now();
+    const soon = (await tamasaiStages()).filter((s) => {
+      if (s.d !== todayJst) return false;
+      const left = Date.parse(`${s.d}T${s.s}:00+09:00`) - now;
+      return left > 5 * 60000 && left <= 10 * 60000;
+    });
+    if (!soon.length) return json({ ok: true, skipped: "no stage soon" });
+    const fresh: typeof soon = [];
+    for (const s of soon) {
+      const { error: e } = await supabase.from("tama_fes_sent").insert({ key: `stage:${s.key}` });
+      if (!(e && (e.code === "23505" || /duplicate/i.test(e.message)))) fresh.push(s);
+    }
+    if (!fresh.length) return json({ ok: true, skipped: "already sent" });
+    const { data: ps, error } = await supabase.from("tama_profiles").select("id,go:fes_attrs->fes26go").limit(5000);
+    if (error) return json({ ok: false, reason: error.message });
+    const goers = new Map<string, string[]>();   // ステージの鍵 → 見に行く人
+    for (const p of ps ?? []) for (const k of (Array.isArray(p.go) ? p.go : [])) {
+      if (!fresh.some((s) => s.key === k)) continue;
+      if (!goers.has(k)) goers.set(k, []);
+      goers.get(k)!.push(String(p.id));
+    }
+    const stageOf = new Map<string, (typeof fresh)[number]>();   // 人 → そのステージ（同じ時刻に2つ押していたら先のもの）
+    for (const s of fresh) for (const id of goers.get(s.key) ?? []) if (!stageOf.has(id)) stageOf.set(id, s);
+    ids = [...stageOf.keys()];
+    titleFor = (id) => { const s = stageOf.get(id)!; return `👀 まもなく ${s.s}〜「${s.n}」`; };
+    textFor = (id) => {
+      const s = stageOf.get(id)!, n = (goers.get(s.key)?.length ?? 1) - 1;
+      return `${s.p ? s.p + "で始まります。" : ""}${n > 0 ? `見に行くちかくの人があなたのほかに ${n}人。同じステージの人は、今日だけ共通点に出ます` : "同じステージを見に行く人は、今日だけ共通点に出ます"}`;
+    };
+    url = "/tama/?go=tamasai&n=stage"; tag = "tama-stage"; pref = "tamasai";
+  } else if (body.kind === "likes") {
+    // 👋 返事待ちのいいね（2026-10-16 あおの決定：多摩祭の両日 16:00）：今日届いたいいねを、まだ返していない人だけに。件数つき
+    const conf = await tamasaiConf();
+    if (!conf || !conf.days.includes(todayJst)) return json({ ok: true, skipped: "not a festival day" });
+    onceKey = `likes:${todayJst}`;
+    // 1回に返るのは1000行までなので、今日のいいねだけ読み、返したか・ブロックしたかは、届いた人ごとに200人ずつ読む
+    const start = new Date(Date.parse(`${todayJst}T00:00:00+09:00`)).toISOString();
+    const { data: lk, error } = await supabase.from("tama_likes").select("from_id,to_id").gte("created_at", start).limit(1000);
+    if (error) return json({ ok: false, reason: error.message });
+    const pair = (a: unknown, b: unknown) => `${a}>${b}`;
+    const sent = new Set<string>(), blocked = new Set<string>();
+    const tos = [...new Set((lk ?? []).map((r) => String(r.to_id)))];
+    for (let i = 0; i < tos.length; i += 200) {
+      const chunk = tos.slice(i, i + 200);
+      const { data: back } = await supabase.from("tama_likes").select("from_id,to_id").in("from_id", chunk).limit(1000);
+      for (const r of back ?? []) sent.add(pair(r.from_id, r.to_id));
+      const { data: bl } = await supabase.from("tama_blocks").select("blocker_id,blocked_id").in("blocker_id", chunk).limit(1000);
+      for (const r of bl ?? []) blocked.add(pair(r.blocker_id, r.blocked_id));
+    }
+    const pending = new Map<string, number>();
+    for (const r of lk ?? []) {
+      const to = String(r.to_id);
+      if (sent.has(pair(r.to_id, r.from_id)) || blocked.has(pair(r.to_id, r.from_id))) continue;   // もう返した・ブロックした
+      pending.set(to, (pending.get(to) ?? 0) + 1);
+    }
+    ids = [...pending.keys()];
+    title = "👋 いいねが届いています";
+    textFor = (id) => `今日いいねが ${pending.get(id)}件届いています。共通点を見て、いいねを返すとトークが始まります`;
+    url = "/tama/?go=talk&n=like"; tag = "tama-likes"; pref = "like";
+  } else if (body.kind === "morning") {
+    // 🌅 2日目の朝（2026-10-16 あおの決定：18日 11:45）：1日目（prev）にキャンパスで開いた人だけに、昨日すれ違った人数と今日の予定
+    const day = String(body.day ?? ""), prev = String(body.prev ?? "");
+    if (day !== todayJst || !prev) return json({ ok: true, skipped: "not the day" });
+    onceKey = `morning:${todayJst}`;
+    const conf = await tamasaiConf();
+    const { data: vs, error } = await supabase.from("tama_visits").select("user_id").eq("day", prev).eq("on_campus", true);
+    if (error) return json({ ok: false, reason: error.message });
+    ids = [...new Set((vs ?? []).map((v) => String(v.user_id)))];
+    const met = await metCounts(supabase, ids, prev);
+    const plan = [conf?.ctTimes?.length ? `${conf.ctTimes.join("・")} にちかくタイム` : "", "18:00 に花火"].filter(Boolean).join("、");
+    title = "🌅 多摩祭2日目、はじまります";
+    textFor = (id) => {
+      const n = met.get(id) ?? 0;
+      return `${n ? `昨日は ${n}人とすれ違いました。今日もう一度すれ違えるかも。` : ""}今日も ${plan}。アプリを開いたまま回ってみてね`;
+    };
+    url = "/tama/?go=tamasai&n=tamasai"; tag = "tama-morning"; pref = "tamasai";
   } else {
     return json({ ok: false, reason: "bad kind" });
   }
@@ -273,8 +390,9 @@ Deno.serve(async (req) => {
   // 多摩祭の通知（recap・fsurvey）は、その日に1回だけ（公開の鍵で外から何度も呼ばれても、全員に何度も送らないように。2026-10-15 のレビューで直した）。
   // 記録の表（tama_fes_sent。tama_tamasai.sql）が無い時は、そのまま送る
   // 出店者向け（shop）は1日に2回あるので、回ごと（slot）に1回だけ
-  if (body.kind === "recap" || body.kind === "fsurvey" || body.kind === "shop") {
-    const { error: onceErr } = await supabase.from("tama_fes_sent").insert({ key: `${body.kind}:${todayJst}${body.slot ? ":" + body.slot : ""}` });
+  if (body.kind === "recap" || body.kind === "fsurvey" || body.kind === "shop") onceKey = `${body.kind}:${todayJst}${body.slot ? ":" + body.slot : ""}`;
+  if (onceKey) {
+    const { error: onceErr } = await supabase.from("tama_fes_sent").insert({ key: onceKey });
     if (onceErr && (onceErr.code === "23505" || /duplicate/i.test(onceErr.message))) return json({ ok: true, skipped: "already sent today" });
   }
 
@@ -300,7 +418,7 @@ Deno.serve(async (req) => {
   const ok = new Set<string>(), tried = new Set<string>();
   await Promise.all([...subs.entries()].map(async ([endpoint, s]) => {
     tried.add(s.id);
-    const payload = JSON.stringify({ title, body: textFor ? textFor(s.id) : text, url, tag });
+    const payload = JSON.stringify({ title: titleFor ? titleFor(s.id) : title, body: textFor ? textFor(s.id) : text, url, tag });
     try {
       await webpush.sendNotification(s.sub, payload);
       ok.add(s.id);
