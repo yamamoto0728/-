@@ -21,6 +21,8 @@
 //   { "kind": "ct" }                         … 土日でも、予定があれば送る（祭りの昼と夕方のちかくタイム）。土日は「今日は授業が無い人」を除かない
 //   { "kind": "recap", "day": "2026-10-17" } … その日にキャンパスで開いた人に「今日の多摩祭で◯人とすれ違いました」。day が今日の時だけ
 //   { "kind": "fsurvey" }                    … 多摩祭に来た人にアンケートの案内。tama/tamasai.js の surveyUrl が空・期間の外なら送らない
+//   { "kind": "shop", "day": "2026-10-17", "slot": "1400" } … 出店・出演している人へ「無料で宣伝しませんか」（2026-10-16。supabase/tama_fes_shop.sql）。
+//                                            「出店・出演中」をまだ選んでいない人全員へ。day が今日の時だけ、slot ごとに1回
 //
 // Secrets は send-match-push と同じ VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY を使う（プロジェクト共通なので追加設定は不要）。
 
@@ -95,7 +97,7 @@ function hasCommon(me: FA, th: FA, myTT: Record<string, string>, thTT: Record<st
 }
 
 Deno.serve(async (req) => {
-  let body: { kind?: string; period?: number; day?: string } = {};
+  let body: { kind?: string; period?: number; day?: string; slot?: string } = {};
   try { body = await req.json(); } catch { /* 空のまま */ }
 
   // 日本時間（cron でも平日に絞っているが、念のためここでも確かめる）。ちかくタイム・多摩祭の通知は土日も送る
@@ -252,6 +254,17 @@ Deno.serve(async (req) => {
     title = "📝 多摩祭アンケート（1分）";
     text = "多摩祭に来てくれてありがとう。タップだけの1分のアンケートに答えると、限定バッジ「📝 多摩祭の声」とみんなの答えが見られます";
     url = "/tama/?go=tamasai&n=tamasai"; tag = "tama-fsurvey"; pref = "tamasai";
+  } else if (body.kind === "shop") {
+    // 出店・出演している人へ「アプリで無料で宣伝しませんか」（2026-10-16 あおの決定：1日目の 14:00 と 16:30）。
+    // だれが出店者かはアプリから分からないので、「出店・出演中」をまだ選んでいない人全員に、文で呼びかける。day が今日の時だけ
+    const day = String(body.day ?? "");
+    if (day !== todayJst) return json({ ok: true, skipped: "not the day" });
+    const { data: ps, error } = await supabase.from("tama_profiles").select("id,role:fes_attrs->fes26role").limit(5000);
+    if (error) return json({ ok: false, reason: error.message });
+    ids = (ps ?? []).filter((p) => !p.role).map((p) => String(p.id));
+    title = "🏮 出店・出演している方へ";
+    text = "「ちかく」で、あなたのお店・ステージを無料で宣伝しませんか？店と場所を選ぶだけで、一覧とプロフィールに「🏮 出店中・📍 場所」が出て、近くの人に見つけてもらえます";
+    url = "/tama/?go=role&n=shop"; tag = "tama-shop"; pref = "tamasai";
   } else {
     return json({ ok: false, reason: "bad kind" });
   }
@@ -259,8 +272,9 @@ Deno.serve(async (req) => {
 
   // 多摩祭の通知（recap・fsurvey）は、その日に1回だけ（公開の鍵で外から何度も呼ばれても、全員に何度も送らないように。2026-10-15 のレビューで直した）。
   // 記録の表（tama_fes_sent。tama_tamasai.sql）が無い時は、そのまま送る
-  if (body.kind === "recap" || body.kind === "fsurvey") {
-    const { error: onceErr } = await supabase.from("tama_fes_sent").insert({ key: `${body.kind}:${todayJst}` });
+  // 出店者向け（shop）は1日に2回あるので、回ごと（slot）に1回だけ
+  if (body.kind === "recap" || body.kind === "fsurvey" || body.kind === "shop") {
+    const { error: onceErr } = await supabase.from("tama_fes_sent").insert({ key: `${body.kind}:${todayJst}${body.slot ? ":" + body.slot : ""}` });
     if (onceErr && (onceErr.code === "23505" || /duplicate/i.test(onceErr.message))) return json({ ok: true, skipped: "already sent today" });
   }
 
