@@ -6845,7 +6845,8 @@ const fesFwNow=()=>{ const fw=FES.tamasai.fireworks, now=tamasaiNow(), hm=new Da
 const tamasaiSurveyHTML=()=>fesSvCardHTML();
 // 出店のクーポン
 let couponUsed={}, couponMissing=false;
-const couponBooths=()=>(booths||[]).filter(b=>b.coupon);
+// 2026-10-16 あおの決定：クーポンはまだ確実ではないので、出さない（TAMASAI.coupons を true にすると、tama_booths に coupon が入っている出店のクーポンが出る）
+const couponBooths=()=>FES.tamasai&&FES.tamasai.coupons?(booths||[]).filter(b=>b.coupon):[];
 async function loadCouponUses(){
   if(!sb||!myId||String(myId).startsWith('local-')||couponMissing||!couponBooths().length)return;
   const {data,error}=await sb.from(T('coupon_uses')).select('booth_id,amount,created_at').eq('user_id',myId);
