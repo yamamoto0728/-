@@ -2729,7 +2729,7 @@ async function toggleNotifKind(k){
 // 届かない時に確かめること（端末の設定は、アプリからは見えない・変えられないため）
 function pushCheckList(){
   return isIOS()
-    ?'<b>iPhoneの設定を確かめてください</b><br>・設定 → 通知 → 「ちかく多摩キャン」で「通知を許可」「ロック画面」「通知センター」「バナー」をオン<br>・集中モード（おやすみモードなど）がオンになっていないか<br>・設定 → 通知 → 「時刻指定要約」に入っていないか（入っていると、決まった時刻にまとめてしか出ません）'
+    ?'<b>iPhoneの設定を確かめてください</b><br>・設定 → 通知 → 「ちかく」（前に追加した人は「ちかく多摩キャン」）で「通知を許可」「ロック画面」「通知センター」「バナー」をオン<br>・集中モード（おやすみモードなど）がオンになっていないか<br>・設定 → 通知 → 「時刻指定要約」に入っていないか（入っていると、決まった時刻にまとめてしか出ません）'
     :'<b>スマホの設定を確かめてください</b><br>・設定 → アプリ → Chrome（またはちかく）→ 通知 をオン<br>・サイレント・おやすみ時間・省電力モードで止まっていないか';
 }
 async function testPush(){
@@ -5527,10 +5527,10 @@ function gateFlowHTML(kind){
     bar26:`<div class="fscr">${page}<div class="fbar"><span class="furl in">chikaku-hosei…</span><span class="hl">…</span></div></div>`,
     menu26:`<div class="fscr">${page}<div class="fpop"><div>再読み込み</div><div>ブックマーク</div><div class="hl">共有 ⬆︎</div></div></div>`,
     share:`<div class="fscr">${page}<div class="fsheet"><div class="fsrow"><span></span><span></span><span></span><span></span></div><div>コピー</div><div>ブックマークを追加</div><div class="hl">ホーム画面に追加 ⊞</div></div></div>`,
-    add:`<div class="fscr"><div class="fadd"><span>✕</span><b>ホームに追加</b><span class="hl">追加</span></div><div class="faddb">${icon}<div><div class="fnm">ちかく多摩キャン</div><small>chikaku-hosei…</small></div></div>${kind==='ios26'?'<div class="ftg">Webアプリとして開く <span class="on"></span></div>':''}</div>`,
+    add:`<div class="fscr"><div class="fadd"><span>✕</span><b>ホームに追加</b><span class="hl">追加</span></div><div class="faddb">${icon}<div><div class="fnm">${appNameNow()}</div><small>chikaku-hosei…</small></div></div>${kind==='ios26'?'<div class="ftg">Webアプリとして開く <span class="on"></span></div>':''}</div>`,
     adots:`<div class="fscr"><div class="furl a">chikaku-hosei… <span class="hl">⋮</span></div>${page}</div>`,
     amenu:`<div class="fscr">${page}<div class="fpop r"><div>新しいタブ</div><div>ブックマーク</div><div class="hl">ホーム画面に追加</div></div></div>`,
-    ainst:`<div class="fscr">${page}<div class="fdlg"><b>アプリをインストール</b><div class="faddb">${icon}<div class="fnm">ちかく多摩キャン</div></div><div class="fdlgb"><span>キャンセル</span><span class="hl">インストール</span></div></div></div>`,
+    ainst:`<div class="fscr">${page}<div class="fdlg"><b>アプリをインストール</b><div class="faddb">${icon}<div class="fnm">${appNameNow()}</div></div><div class="fdlgb"><span>キャンセル</span><span class="hl">インストール</span></div></div></div>`,
     inapp:`<div class="fscr"><div class="fadd l"><span>✕</span><b>ちかく</b><span class="hl">…</span></div>${page}</div>`,
     inmenu:`<div class="fscr">${page}<div class="fsheet"><div>共有</div><div>リンクをコピー</div><div class="hl">${isIOS()?'Safariで開く':'ブラウザで開く'}</div></div></div>`,
   };
@@ -5545,6 +5545,7 @@ function gateFlowHTML(kind){
 }
 function renderHomeGate(){
   const g=$('#homeGate'); if(!g)return;
+  try{ placeFesIcon(); }catch(e){}   // 追加する前の画面（ログイン前）でも、多摩祭の日のアイコン・名前にしておく（2026-10-17）
   const ios=isIOS(), inApp=isInAppBrowser(), other=!inApp&&isIOSOtherBrowser(), ios26=iosSafariVer()>=26;
   // このブラウザで前に使っていた人（ログイン情報が残っている）には、アプリでは登録し直しになることを伝える
   let usedHere=false; try{ usedHere=Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k)); }catch(e){}
@@ -5571,14 +5572,14 @@ function renderHomeGate(){
         :step(1,`画面の下の <span class="hgicon">⬆︎</span> <b>共有ボタン</b>を押す`,'四角から上向きの矢印が出ているマーク。見当たらない時は、下の <span class="hgicon">…</span> から「共有」','bar'))
       +step(2,`<b>「ホーム画面に追加」</b>を押す`,'見当たらない時は、メニューを下にスクロールするか「さらに表示」を押す','menu')
       +step(3,ios26?`<b>「Webアプリとして開く」はオンのまま</b>、右上の<b>「追加」</b>を押す`:`右上の<b>「追加」</b>を押す`,'','add')
-      +step(4,`ホーム画面にできた ${icon}<b>「ちかく多摩キャン」</b>から開く`,'このブラウザの画面は閉じてOKです');
+      +step(4,`ホーム画面にできた ${icon}<b>「${appNameNow()}」</b>から開く`,'このブラウザの画面は閉じてOKです');
     arrow=`<div class="hgarrow${ios26?' r':''}">⬇︎</div>`;
   }else{
     steps=(deferredInstall?`<button class="btn btn-primary hgbtn" onclick="doGateInstall()">📲 ホーム画面に追加する</button><div class="hgnote" style="margin:-4px 0 12px">うまくいかない時は、下の手順でも追加できます</div>`:'')
       +step(1,`画面右上の <span class="hgicon">⋮</span> を押す`,'','adots')
       +step(2,`<b>「アプリをインストール」</b>または<b>「ホーム画面に追加」</b>を押す`,'','amenu')
       +step(3,`<b>「インストール」</b>（または「追加」）を押す`)
-      +step(4,`ホーム画面にできた ${icon}<b>「ちかく多摩キャン」</b>から開く`,'このブラウザの画面は閉じてOKです');
+      +step(4,`ホーム画面にできた ${icon}<b>「${appNameNow()}」</b>から開く`,'このブラウザの画面は閉じてOKです');
   }
   // 2026-10-08 あおの指示：上のアプリの見本（宣伝）はやめて、ホーム画面に追加するまでの流れを画面の絵で見せる（gateFlowHTML）
   const flow=gateFlowHTML(inApp?'inapp':ios?(ios26?'ios26':'ios'):other?'':'android');
@@ -5607,7 +5608,7 @@ async function doGateInstall(){
 window.addEventListener('appinstalled',()=>{ const g=$('#homeGate'); if(g&&g.classList.contains('show'))
   g.innerHTML=`<div class="hglogo">ちかく</div><div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center">
     <div style="font-size:52px;margin-bottom:14px">✅</div><div class="hgh">ホーム画面に追加しました</div>
-    <div class="hgd">ホーム画面の<b>「ちかく多摩キャン」</b>のアイコンから開いてください。<br>このブラウザの画面は閉じてOKです。</div></div>`; });
+    <div class="hgd">ホーム画面の<b>「${appNameNow()}」</b>のアイコンから開いてください。<br>このブラウザの画面は閉じてOKです。</div></div>`; });
 let deferredInstall=null;   // Android/Chrome の「インストール」を受け取る
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; if(typeof needHomeGate==='function'&&needHomeGate())renderHomeGate(); });
 function openAddHome(){
@@ -7079,12 +7080,17 @@ function placeNowBar(){
 }
 // 多摩祭の日（17・18日。試す人は試しの日も）だけ、ホーム画面に追加した時のアイコンを祭りの絵にする（2026-10-15 あおの依頼）。
 // iPhone は追加した時の apple-touch-icon、Android は manifest の icons を使う。追加したあとのアイコンは、iPhone では変わらない（祭りの日に追加した人は祭りの絵のまま）
-const appIconSrc=()=>typeof tamasaiDay==='function'&&tamasaiDay()?'/icons/tamasai-180.png':'/icons/icon-192.png';
+const appIconSrc=()=>typeof tamasaiDay==='function'&&tamasaiDay()?'/icons/tamasai-180.png?v=2':'/icons/icon-192.png';
+// ホーム画面に追加した時の名前（多摩祭の日は「ちかく」だけ。2026-10-17）。追加のしかたの案内もこの名前で出す
+function appNameNow(){ return fesDayNow()?'ちかく':'ちかく多摩キャン'; }
 function placeFesIcon(){
   const on=tamasaiDay(), a=document.querySelector('link[rel="apple-touch-icon"]'), m=document.querySelector('link[rel="manifest"]');
-  const ic=on?'/icons/tamasai-180.png':'/icons/icon-192.png', mf=on?'/tama/manifest-tamasai.json':'/tama/manifest.json';
+  const ic=on?'/icons/tamasai-180.png?v=2':'/icons/icon-192.png', mf=on?'/tama/manifest-tamasai.json':'/tama/manifest.json';
   if(a&&a.getAttribute('href')!==ic)a.setAttribute('href',ic);
   if(m&&m.getAttribute('href')!==mf)m.setAttribute('href',mf);
+  // ホーム画面に追加した時の名前（iPhone）。多摩祭の日は「ちかく」だけ（2026-10-17 あおの依頼「多摩キャンとかはいらない」）。アイコンも同日、元の「ち」のまま背景を祭りの絵に描き替えた
+  const t=document.querySelector('meta[name="apple-mobile-web-app-title"]'), tn=on?'ちかく':'ちかく多摩キャン';
+  if(t&&t.getAttribute('content')!==tn)t.setAttribute('content',tn);
 }
 // 多摩祭の日は、アプリ全体を「祭り」の見た目に（2026-10-15 あおの依頼。CSS は html.matsuri／html.yoru）。
 // 祭りのサイト・アプリを調べて取り入れたもの：①ちょうちん・青海波・朱と金の色（その日だけの特別感） ②夕方（16:30〜）は夜空の見出しと灯ったちょうちん（キャンドル・花火の時間）
