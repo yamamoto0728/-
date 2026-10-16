@@ -252,6 +252,8 @@
   .clsbar .go{color:var(--amber-deep);font-size:20px;font-weight:700}.clsbar .unread{flex-shrink:0}
   .clsbar.empty{background:#fff;border-style:dashed}.clsbar.empty .cbt b{white-space:normal;font-size:13.5px}
   .cmseg{margin:0 16px 8px}
+  .clsnote span{display:block;font-size:11.5px;margin-top:2px}.clsnote b{display:block;margin-bottom:2px}
+  .clsgo{display:inline-block;padding:6px 14px;border-radius:999px;background:var(--signal);color:#fff;font-size:12.5px;font-weight:800}.clsgo.on{background:var(--surface);color:var(--signal);border:1px solid var(--line)}
   .cmnote{margin:4px 16px 8px;padding:9px 12px;border-radius:12px;background:var(--surface);font-size:12px;line-height:1.65;color:var(--muted)}.cmnote b{color:var(--ink)}
   .urow.clslive{background:rgba(245,151,47,.08)}
   .rnotice{margin:8px 10px 6px;padding:9px 12px;border-radius:12px;background:#fff8ea;border:1.5px solid #f0a030;font-size:13px;line-height:1.6}
@@ -3856,7 +3858,7 @@ function updateTalkDot(){
   const frN=unreadTalks(frIds), dmN=unreadTalks(dmIds);
   const seg=(el,n)=>{ if(!el)return; if(n>0){ el.style.display='block'; el.textContent=n>99?'99+':n; } else el.style.display='none'; };
   seg($('#dotFrTalk'),frN); seg($('#dotDm'),dmN);
-  const n=talkNew+Object.keys(wavesIn).length+frN+dmN, dm=$('#dotMatch');
+  const n=talkNew+newWavesN()+frN+dmN, dm=$('#dotMatch');
   setAppBadgeCount(n);   // ホーム画面のアイコンの数字も同じ数に（2026-10-10）
   if(!dm)return;
   // トークの画面を開いていても、別の切り替えに未読が残っていれば出す
@@ -3883,7 +3885,7 @@ function whenReady(ok,run,fallback,ms=15000){ const t0=Date.now(); const f=()=>{
 function openFromPush(rt){
   if(!rt)return;
   if(!profile){ pushRoute=rt; return; }   // ログインの前なら、起動が終わってから（startLoops）
-  pushRoute=null; logPushOpen(rt.n);
+  pushRoute=null; logPushOpen(rt.n); setTimeout(resyncAppBadge,1500);
   $$('.overlay.show').forEach(o=>o.classList.remove('show'));
   switch(rt.go){
     case 'chat': whenReady(()=>!!matches[rt.u]||isFriend(rt.u),()=>openChat(rt.u),()=>go('match')); break;
@@ -3894,6 +3896,7 @@ function openFromPush(rt){
     case 'daily': go('near'); dailyOpen=true; dailyShown=null; renderDaily(); setTimeout(()=>{ const el=$('#dailyCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300); break;
     case 'ct': go('near'); loadCt(true).then(()=>{ const el=$('#ctCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); }); break;
     case 'cross': go('cross'); break;   // 多摩祭1日目の夜の「今日のすれ違い」（2026-10-14）
+    case 'role': go('near'); setTimeout(()=>{ if(fesRoleOf(profile))toast('🏮 出店・出演中：'+fesRoleOf(profile)+'（🎪カードの「くわしく ▾」から変えられます）'); else openFesRolePick(); },500); break;   // 出店者向けの「無料で宣伝しませんか」（2026-10-16）
     case 'tamasai': go('near'); renderTamasai(); setTimeout(()=>{ const el=$('#tamasaiCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300); break;   // 多摩祭のアンケート
     default: go('near');
   }
@@ -3903,7 +3906,17 @@ pushRoute=routeFromUrl(location.href);
 if(pushRoute)try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){}
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.type==='push-open')openFromPush(routeFromUrl(e.data.url)); });
 // アプリのアイコンの数字（未読のトーク・いいね・友達申請の数）。sw.js は通知が来るたびに1つ増やし、開くとここで本当の数にそろえる
+// 2026-10-16 あおの指摘「通知を見てもアイコンの赤い数が減らない」：
+//   ①アプリを後ろに回している間に sw.js が数を増やしても、appBadgeNow は前の数のまま → 読んで0になっても「同じ数」と見て消していなかった。
+//     前に戻った時・通知から開いた時は、覚えている数を捨てて本当の数で上書きする
+//   ②届いたいいねは、返すか消すまで数え続けていた → 「トーク」の一覧で一度見たいいねは数えない（一覧の「👋 いいねが届いてます」はそのまま）
 let appBadgeNow=-1;
+function resyncAppBadge(){ appBadgeNow=-1; if(profile)updateTalkDot(); }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible')resyncAppBadge(); });
+const waveAt=w=>{ const a=w&&w.at; return typeof a==='number'?a:(Date.parse(a)||0); };
+const wavesSeenAt=()=>{ try{ return +localStorage.getItem('tama_wavesSeen')||0; }catch(e){ return 0; } };
+function newWavesN(){ const s=wavesSeenAt(); return Object.keys(wavesIn).filter(id=>!blocked.has(id)&&waveAt(wavesIn[id])>s).length; }
+function markWavesSeen(){ const m=Math.max(0,...Object.values(wavesIn).map(waveAt)); if(m>wavesSeenAt())try{ localStorage.setItem('tama_wavesSeen',String(m)); }catch(e){} }
 function setAppBadgeCount(n){
   if(n===appBadgeNow||!('setAppBadge' in navigator))return; appBadgeNow=n;
   try{ (n>0?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{}); }catch(e){}
@@ -3967,6 +3980,7 @@ function renderMatches(){
     const last=m.msgs[m.msgs.length-1]; items.push({id,u:m.u,m,last,at:(last&&last.at)||m.matchedAt||0}); });
   items.sort((a,b)=>b.at-a.at);
   const ins=Object.keys(wavesIn).filter(id=>!blocked.has(id)).map(id=>({id,u:anyUser(id),w:wavesIn[id]})).filter(x=>x.u).sort((a,b)=>b.w.at-a.w.at);
+  if(talkTab==='dm'&&ins.length&&!document.hidden&&$('#s-match').classList.contains('active'))markWavesSeen();   // 一覧で見たいいねは、アイコンの数字に数えない
   const dd=$('#dotDm'); if(dd){ dd.style.display=ins.length?'':'none'; dd.textContent=ins.length||''; }
   if(talkTab==='fr')$('#matchCount').textContent=frItems.length?frItems.length+'人':'';
   if(talkTab==='dm')$('#matchCount').textContent=items.length?items.length+'件':'';
@@ -4642,8 +4656,8 @@ function roomRow(r){
 function renderRooms(){
   if(!roomsV2)return renderRoomsLegacy();
   const by=(a,b)=>((roomStats[rid(b.id)]||{}).unread||0)-((roomStats[rid(a.id)]||{}).unread||0)||(Date.parse(b.last_at||b.created_at)||0)-(Date.parse(a.last_at||a.created_at)||0);
-  const ci=classRoomIds(), cls=rooms.filter(r=>!r.joined&&ci.has(rid(r.id))).sort(by);   // 自分の授業と同じ名前のコミュニティ（あれば）
-  const joined=rooms.filter(r=>r.joined&&!roomEnded(r)).sort(by), forYou=rooms.filter(r=>!r.joined&&!ci.has(rid(r.id))&&r.visibility==='common'&&!(r.conditions||[]).some(x=>x.k==='cname')).sort(by),
+  const fes=fesDayNow(), ci=classRoomIds(), cls=fes?[]:rooms.filter(r=>!r.joined&&ci.has(rid(r.id))).sort(by);   // 自分の授業と同じ名前のコミュニティ（あれば。多摩祭の日は出さない）
+  const joined=rooms.filter(r=>r.joined&&!roomEnded(r)&&!(fes&&isOfficialClassRoom(r))).sort(by), forYou=rooms.filter(r=>!r.joined&&!ci.has(rid(r.id))&&r.visibility==='common'&&!(r.conditions||[]).some(x=>x.k==='cname')).sort(by),
         open=rooms.filter(r=>!r.joined&&!ci.has(rid(r.id))&&r.visibility!=='common').sort(by), ended=rooms.filter(r=>r.joined&&roomEnded(r));
   const sec=(t,arr)=>arr.length?`<div class="listhead" style="padding-left:6px">${t} <span class="cnt">${arr.length}</span></div>`+arr.map(roomRow).join(''):'';
   const el=$('#roomList');
@@ -4668,8 +4682,9 @@ function classRoomIds(){ const s=new Set(); myCourseNames().forEach(n=>classRoom
 function newRoom(){
   if(!roomsV2)return createRoomLegacy();
   if(!profile){ toast('先にプロフィールを登録してね'); return; }
+  if(fesDayNow())return createRoom();   // 多摩祭の日は授業のコミュニティを出さない（2026-10-16）。そのまま作る画面へ
   $('#memSheet').innerHTML=`<h2 class="pstitle">＋ コミュニティを作る</h2><p class="psdesc">どんなコミュニティを作りますか？</p>
-    <button class="bigpick" onclick="pickClassRoom()"><span class="bpi">📚</span><span><b>授業のコミュニティ</b><small>あなたの時間割の授業から選ぶ。課題・テスト・休講の情報交換に</small></span><span class="go">›</span></button>
+    <button class="bigpick" onclick="closeMembers();openCm('cls');toast('📚 授業のコミュニティは、時間割の授業ごとに最初からあります。作らなくても1タップで入れます')"><span class="bpi">📚</span><span><b>授業のコミュニティ</b><small>作らなくても、時間割の授業ごとに最初からあります。「📚 授業」で入る</small></span><span class="go">›</span></button>
     <button class="bigpick" onclick="closeMembers();createRoom()"><span class="bpi">💬</span><span><b>そのほか</b><small>趣味・目標・ひとりごはん など</small></span><span class="go">›</span></button>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">やめる</button>`;
   $('#memOverlay').classList.add('show');
@@ -4727,7 +4742,14 @@ function classSlotsText(n){ const D=['','月','火','水','木','金']; return O
 function classBarHTML(startShown){
   if(!profile||tamasaiDay())return '';   // 多摩祭の日は授業が無いので、ホームに授業のコミュニティを出さない（2026-10-15 あおの依頼）
   if(!myClassOptions().length)return startShown?'':`<div class="clsbar empty" onclick="openTimetable()"><span class="cbi">📚</span><span class="cbt"><b>時間割を入れると、授業のコミュニティに入れます</b><small>同じ授業の人と、課題・テスト・休講の情報交換</small></span><span class="go">›</span></div>`;
-  const now=classNow(); if(!now)return '';
+  const now=classNow();
+  // 授業中でない時（2026-10-16 あおの依頼「通常版の授業のコミュニティをもっと分かりやすく」）：
+  // まだどの授業のコミュニティにも入っていない時と、入っている授業に新着がある時だけ、1行で入り口を出す（ふだんはホームを増やさない）
+  if(!now){
+    const cs=myCourseNames(), joined=cs.map(classOf).filter(c=>c&&c.joined), un=joined.reduce((s,c)=>s+(c.unread||0),0);
+    if(!cs.length||classMissing||(joined.length&&!un))return '';
+    return `<div class="clsbar" onclick="openCm('cls')"><span class="cbi">📚</span><span class="cbt"><small>授業のコミュニティ</small><b>${un?`新着 ${un}件`:`あなたの授業 ${cs.length}つに、入れるコミュニティがあります`}</b><em>${un?'課題・テスト・休講の情報をチェック':'同じ授業の人と、課題・テスト・休講の情報交換。1タップで入れます'}</em></span>${un?`<span class="unread">${un>99?'99+':un}</span>`:'<span class="go">›</span>'}</div>`;
+  }
   const c=classOf(now.name)||{}, un=c.unread||0;
   return `<div class="clsbar" onclick="openClassRoom('${jsq(now.name)}')"><span class="cbi">📚</span><span class="cbt"><small>いまの授業（${now.i}限）のコミュニティ</small><b>${esc(now.name)}</b><em>${c.joined?`👥 ${c.members||0}人が参加${un?` ・ 新着 ${un}件`:''}`:`同じ授業の人 ${c.takers||0}人 ・ タップで入る`}</em></span>${un?`<span class="unread">${un>99?'99+':un}</span>`:'<span class="go">›</span>'}</div>`;
 }
@@ -4757,19 +4779,32 @@ function renderClassList(){
   const cls=myCourseNames();
   if(!cls.length){ el.innerHTML=`<div class="empty"><div class="big">📚</div><p>時間割に授業を入れると、<br>その授業を取っている人のコミュニティに入れます。<br><span style="font-size:12px">課題・テスト・休講の情報交換に</span></p><button class="btn btn-primary" style="padding:12px 20px;margin-top:12px" onclick="openTimetable()">🗓 時間割に授業を入れる</button></div>`; return; }
   const now=classNow(), live=n=>!!now&&normAns(now.name)===normAns(n);
-  const rows=cls.slice().sort((a,b)=>live(b)-live(a)).map(n=>{ const c=classOf(n)||{}, un=c.unread||0;
+  // 2026-10-16 あおの依頼「授業のコミュニティをもっと分かりやすく」：入っている授業と、まだ入っていない授業に分け、右に「入る」「開く」のボタンを出す。
+  // 上の説明は「何ができるか・だれが入れるか・作らなくてよい」の3つを短く
+  const row=n=>{ const c=classOf(n)||{}, un=c.unread||0, mem=c.members||0;
     return `<div class="urow${live(n)?' clslive':''}" onclick="openClassRoom('${jsq(n)}')"><div class="av" style="background:linear-gradient(135deg,#ffb066,#ffd166)">📚</div>
-      <div class="info"><div class="n">${esc(n)}${live(n)?' <span class="joined-tag own">いま授業中</span>':''}${c.joined?' <span class="joined-tag">参加中</span>':''}</div>
+      <div class="info"><div class="n">${esc(n)}${live(n)?' <span class="joined-tag own">いま授業中</span>':''}</div>
       <div class="b">🗓 ${esc(classSlotsText(n))}</div>
-      <div class="b" style="color:var(--signal);font-size:11.5px">同じ授業の人 ${c.takers||0}人 ・ 参加 ${c.members||0}人${c.last_at?' ・ 最終 '+agoText(c.last_at):''}</div></div>
-      <div class="d">${un?`<div class="unread">${un>99?'99+':un}</div>`:`<div class="m" style="font-size:12.5px">${c.joined?'開く':'入る'} ›</div>`}</div></div>`; }).join('');
-  el.innerHTML=`<div class="cmnote">📚 授業ごとのコミュニティです。<b>その授業を時間割に入れている人</b>なら、だれでも1タップで入れます。オーナーはいません（運営が見守っています）。</div>`
+      <div class="b" style="color:var(--signal);font-size:11.5px">${c.joined?`👥 ${mem}人が参加${c.last_at?' ・ 最終 '+agoText(c.last_at):''}`:mem?`👥 ${mem}人が参加中 ・ 同じ授業の人 ${c.takers||0}人`:`同じ授業の人 ${c.takers||0}人 ・ まだだれもいません。最初の1人に`}</div></div>
+      <div class="d">${un?`<div class="unread">${un>99?'99+':un}</div>`:`<span class="clsgo${c.joined?' on':''}">${c.joined?'開く':'入る'}</span>`}</div></div>`; };
+  const sorted=cls.slice().sort((a,b)=>live(b)-live(a)), inn=sorted.filter(n=>(classOf(n)||{}).joined), out=sorted.filter(n=>!(classOf(n)||{}).joined);
+  const head=(t,a)=>a.length?`<div class="listhead" style="padding-left:22px">${t} <span class="cnt">${a.length}</span></div><div class="ulist">${a.map(row).join('')}</div>`:'';
+  el.innerHTML=`<div class="cmnote clsnote"><b>📚 授業ごとの、課題・テスト・休講の情報交換の場所です</b>
+      <span>✓ 時間割に入れた授業のコミュニティが、ここに自動で並びます（作らなくてOK）</span>
+      <span>✓ その授業を取っている人だけが、1タップで入れます</span>
+      <span>✓ オーナーはいません。運営が見守っています</span></div>`
     +(classMissing?'<div class="cmnote">⚠️ 授業のコミュニティは準備中です。もう少しお待ちください</div>':'')
-    +`<div class="ulist">${rows}</div><div style="padding:6px 16px 18px"><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="openTimetable()">🗓 時間割に授業を足す・直す</button></div>`;
+    +head('参加中',inn)+head('まだ入っていない授業',out)
+    +`<div style="padding:6px 16px 18px"><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="openTimetable()">🗓 時間割に授業を足す・直す</button></div>`;
 }
+// 多摩祭の日か（tamasaiDay は後ろの const なので、読み込みの途中で呼ばれても落ちないように）
+function fesDayNow(){ try{ return tamasaiDay(); }catch(e){ return false; } }
 // 下のタブ「コミュニティ」の中の切りかえ（📚 授業／🏠 コミュニティ／👥 友達）
 function setCmTab(k){
-  cmTab=k; try{ localStorage.setItem('tama_cmTab',k); }catch(e){}
+  // 多摩祭の日は授業が無いので「📚 授業」の切りかえを出さない（2026-10-16 あおの依頼「多摩祭版では授業コミュニティを消す」）。前に選んでいた人は「🏠 コミュニティ」を開く
+  const fes=fesDayNow(), sc=$('#cmSegCls'); if(sc)sc.style.display=fes?'none':'';
+  if(fes&&k==='cls')k='rooms'; else{ cmTab=k; try{ localStorage.setItem('tama_cmTab',k); }catch(e){} }
+  cmTab=k;
   [['cls','#cmSegCls'],['rooms','#cmSegRooms'],['fr','#cmSegFr']].forEach(([x,s])=>{ const b=$(s); if(b)b.classList.toggle('on',x===k); });
   $('#cmClsPane').hidden=k!=='cls'; $('#cmFrPane').hidden=k!=='fr'; $('#cmRoomsHost').hidden=k!=='rooms';
   const sub=$('#friendSub'); if(sub)sub.hidden=k!=='fr';
@@ -4790,7 +4825,7 @@ function placeCommPane(where){
 function roomBack(){ go(roomFrom==='friends'?'friends':roomFrom==='near'?'near':'comm'); }
 // 下のタブ・切りかえの点（授業の新着・コミュニティの新着・友達申請）
 function updateCmDots(){
-  const cu=classRooms.reduce((s,c)=>s+(c.joined?(c.unread||0):0),0);
+  const cu=fesDayNow()?0:classRooms.reduce((s,c)=>s+(c.joined?(c.unread||0):0),0);   // 多摩祭の日は授業のコミュニティを出さないので数えない
   const officialIds=new Set(classRooms.filter(c=>c.room_id).map(c=>rid(c.room_id)));
   let ru=0; myRoomIds.forEach(k=>{ if(!officialIds.has(k))ru+=(roomStats[k]&&roomStats[k].unread)||0; });
   const fr=profile?allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length:0;
@@ -5375,6 +5410,11 @@ const isIOSOtherBrowser=()=>isIOS()&&/CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(navig
 let gateCount=null;   // { total:登録した人, today:今日使った人 }（tama_public_count）
 function gateCountHTML(){
   if(!gateCount||!(gateCount.total>=10))return '';   // 少ない数をそのまま見せると逆効果なので、10人未満なら出さない
+  // 2026-10-16 あおの指摘「QRから入った時の登録人数と、目標まであと何人の数が合っていない」：
+  // 多摩祭のカードの目標（ちかくのユーザー＝多摩キャン版＋通常版。tama_chikaku_users）と同じ数を出す。読めない時（SQL の実行前）は今まで通り多摩キャン版の数
+  const T_=FES.tamasai||{}, all=gateCount.chikaku, goal=T_.goal, over=(()=>{ try{ return tamasaiOver(); }catch(e){ return false; } })();
+  if(all!=null){ const left=goal&&!over?goal-all:0;
+    return `👥 ちかくのユーザー <b>${all}人</b>${left>0?` ・ 目標${goal}人まで あと<b>${left}人</b>`:''}${gateCount.today>=10?` ・ 今日 <b>${gateCount.today}人</b>が利用`:''}`; }
   return `👥 多摩キャンで <b>${gateCount.total}人</b>が登録${gateCount.today>=10?` ・ 今日 <b>${gateCount.today}人</b>が利用`:''}`;
 }
 async function loadGateCount(){
@@ -5384,6 +5424,8 @@ async function loadGateCount(){
     const c=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
     const {data,error}=await c.rpc('tama_public_count');
     if(error||!data)return;   // supabase/tama_retention.sql の実行前は出さないだけ
+    // 目標と同じ数（ログイン前でも読めるのは supabase/tama_fes_shop.sql の実行後。読めなければ chikaku を付けない）
+    const r=await c.rpc('tama_chikaku_users'); if(!r.error&&r.data!=null)data.chikaku=+r.data||0;
     gateCount=data; const el=$('#hgCount'); if(el)el.innerHTML=gateCountHTML();
   }catch(e){}
 }
@@ -5690,6 +5732,18 @@ const GUIDE=[
   {icon:'🗓',title:'いまの自分・時間割・<br>今日のお題',body:'「ホーム」の上から、いる教室や「ひまです」などの状態、時間割を入れられます。今日のお題に答えると、<b>みんなの答え</b>が見られ、<b>同じ答えの人</b>がその日だけの共通点として見つかります。',note:'「いま、気になっていること（悩み・不安）」は、プロフィール編集で選べます（任意）。最初は<b>同じことを選んだ人にだけ</b>見えます。時間割はあなたにしか見えません。'},
   {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'毎回QRコードを読まなくても、ホーム画面のアイコンから開けるようになります。通知も受け取れます。',note:'追加のしかたは、マイページの「ホーム画面に追加する方法」から見られます。',action:true}
 ];
+// 多摩祭の日の使い方（2026-10-16 あおの依頼「使い方も多摩祭版に」）。17・18日は GUIDE の代わりにこちらを出す（登録直後の1枚のまとめも祭り版）
+function guideFes(){
+  const T_=FES.tamasai||{}, ct=(T_.ctTimes||[]).join('・'), fw=T_.fireworks;
+  return [
+    {icon:'🎪',title:'多摩祭で<br>共通点のある人が見える',body:'多摩祭の会場で「ちかく」を開いている人が、地図と「ホーム」の一覧に出ます。<b>祭りの質問</b>（食べたいもの・見たいステージなど）に答えると、<b>同じ答えの人</b>が今日だけの共通点として見つかります。',note:'恋愛目的のアプリではありません。位置はキャンパスの中にいる間だけ共有します。'},
+    {icon:'🎤',title:'ステージ・出店・<br>いまの状態',body:`🎪のカードに、いま・このあとのステージが出ます。「👀 見に行く」を押すと、<b>同じステージに行く人</b>が共通点に。「🍢 食べ歩き中」などの<b>いまの状態</b>も選べます。`,note:'出店・ステージに出る人は、🎪カードの「くわしく ▾」→「出店・ステージに出る人はこちら」で、自分の店と場所を出せます（無料）。'},
+    {icon:'⏰',title:'ちかくタイムと<br>すれ違い',body:`${ct?`<b>${ct}</b> は10分間の<b>ちかくタイム</b>。`:''}${fw&&fw.ct?`花火の日は <b>${fw.ct}</b> にも（${fw.at} 花火）。`:''}同じお題に同じ答えをした人が見つかります。アプリを開いたまま歩くと、<b>すれ違った人</b>が「すれ違い」に残ります。`,note:`今日${T_.crossN||3}人とすれ違うと、限定バッジ🎆。`},
+    {icon:'👋',title:'いいね → トーク<br>→ 友達',body:'共通点のある人に<b>👋 いいね</b>。おたがいにいいねしたら<b>💬 トーク</b>が始まります。もっと話したい相手とは、トークの「👥 友達に誘う」で<b>友達</b>に。',note:'目の前の人とは「コミュニティ」→「👥 友達」の「＋ 追加」から、4桁のコードですぐ友達になれます。'},
+    {icon:'📱',title:'ホーム画面に<br>追加しておくと便利',body:'ホーム画面のアイコンから開けるようになり、ちかくタイムの<b>通知</b>も届きます。',note:'追加のしかたは、マイページの「ホーム画面に追加する方法」から見られます。',action:true}
+  ];
+}
+const guideList=()=>{ const L=fesDayNow()?guideFes():GUIDE; return isStandalone()?L.filter(g=>!g.action):L; };   // ホーム画面から開いている時は「追加しておくと便利」を出さない
 let guideIdx=0;
 // 'intro'＝登録の直後に自動で出す1枚のまとめ／'full'＝マイページの「使い方を見る」から開く全部（GUIDE）。
 // 2026-10-01 あおの決定で、登録の直後は4枚を出さず、位置の許可が終わってから1枚だけにした（人の一覧を見るまでのタップを減らすため）
@@ -5698,6 +5752,21 @@ function openGuide(){ guideMode='full'; guideIdx=0; renderGuide(); $('#guide').c
 function openIntro(){ guideMode='intro'; renderGuide(); $('#guide').classList.add('show'); }
 function closeGuide(){ $('#guide').classList.remove('show'); markGuideSeen(); setTimeout(autoAskPush,400); }
 function renderGuide(){
+  if(guideMode==='intro'&&fesDayNow()){
+    const ct=(FES.tamasai.ctTimes||[]).join('・');
+    $('#guideBody').innerHTML=`<div class="gicon">🎪</div><h3>多摩祭での使い方</h3>
+      <p style="margin:0 0 10px">会場にいる、<b>共通点がある人</b>が分かる。<br>だから、話しかけやすい。</p>
+      <div class="introl">
+        <div><span>🏮</span><div><b>祭りの質問</b>に答えると、同じ答えの人が今日だけの共通点に。ステージの「👀 見に行く」でも見つかります。</div></div>
+        <div><span>⏰</span><div>${ct?`<b>${ct}</b> は`:''}10分間の<b>ちかくタイム</b>。開いたまま歩くと、<b>すれ違った人</b>も残ります。</div></div>
+        <div><span>👋</span><div>気になる人に<b>いいね</b>。おたがいにいいねでトーク、もっと話したい人とは友達に。</div></div>
+      </div>
+      <div class="note2">恋愛目的のアプリではありません。位置はキャンパスの中にいる間だけ共有します。</div>`;
+    $('#guideDots').innerHTML='';
+    $('#guidePrev').style.visibility='visible'; $('#guidePrev').textContent='くわしく見る';
+    $('#guideNext').textContent='はじめる';
+    return;
+  }
   if(guideMode==='intro'){
     $('#guideBody').innerHTML=`<div class="gicon">🧭</div><h3>ちかくの使い方</h3>
       <p style="margin:0 0 10px">同じキャンパスの、<b>共通点がある人</b>が分かる。<br>だから、会ったときに話しかけやすい。</p>
@@ -5712,17 +5781,17 @@ function renderGuide(){
     $('#guideNext').textContent='はじめる';
     return;
   }
-  const g=GUIDE[guideIdx];
+  const g=guideList()[guideIdx];
   $('#guideBody').innerHTML=`<div class="gicon">${g.icon}</div><h3>${g.title}</h3><p>${g.body}</p>${g.note?`<div class="note2">${g.note}</div>`:''}${g.action?`<button class="btn btn-ghost" style="margin-top:16px;padding:12px 20px;font-size:13.5px" onclick="openAddHome()">追加のしかたを見る</button>`:''}`;
-  $('#guideDots').innerHTML=GUIDE.map((_,i)=>`<i class="${i===guideIdx?'on':''}"></i>`).join('');
+  $('#guideDots').innerHTML=guideList().map((_,i)=>`<i class="${i===guideIdx?'on':''}"></i>`).join('');
   $('#guidePrev').style.visibility=guideIdx===0?'hidden':'visible'; $('#guidePrev').textContent='戻る';
-  $('#guideNext').textContent=guideIdx===GUIDE.length-1?'はじめる':'次へ';
+  $('#guideNext').textContent=guideIdx===guideList().length-1?'はじめる':'次へ';
 }
 function guideMove(d){
   if(guideMode==='intro'){ if(d<0)openGuide(); else closeGuide(); return; }
   const n=guideIdx+d;
   if(n<0)return;
-  if(n>=GUIDE.length){ closeGuide(); return; }
+  if(n>=guideList().length){ closeGuide(); return; }
   guideIdx=n; renderGuide();
 }
 // 初回だけ自動で出す（見たかどうかはプロフィールに保存し、端末をまたいでも重複しないようにする）
@@ -6350,6 +6419,7 @@ async function loadTTShares(){
     const {data:tt}=await sb.from(T('timetable')).select('id,slots,rooms').in('id',[...ttSharedFrom]);   // 見せてもらっている友達の分だけ RLS で返る
     (tt||[]).forEach(r=>{ friendTT[r.id]={slots:r.slots||{},rooms:r.rooms||{}}; });
   }
+  if(ttAllOn())await syncTTAll();   // 「友達全員に見せる」がオンなら、新しい友達の分を足す（2026-10-16）
   renderFriends(); if(curSheetUser&&$('#overlay').classList.contains('show'))refreshSheetFriendBtn(curSheetUser.id);
 }
 // 見せられるのは、授業名か教室のどちらか1つでも入れている人（2026-09-28 あおの希望で教室だけでもよくした）
@@ -6362,9 +6432,48 @@ async function toggleTTShare(id){
   const {error}=await q;
   if(error){ console.warn('[timetable] 見せる設定を保存できません',error.message); toast('保存できませんでした'); return; }
   if(on)ttSharesTo.add(id); else ttSharesTo.delete(id);
+  if(!on&&ttAllOn()){ profile.fa={...(profile.fa||{}),ttAll:false}; saveMyAttrs(); }   // 1人だけ外したら「友達全員」はオフに（ほかの友達にはそのまま見えている）
   const u=friendUser(id); toast(on?'🗓 '+esc(u?u.name:'')+'さんに時間割を見せるようにしました':'時間割を見せるのをやめました');
   if(on&&u)notifyPush(id,'🗓 時間割が見られるようになりました',(profile?profile.name:'友達')+'さんが時間割を見せてくれました',{kind:'friend',go:'friends',tag:'fr-'+myId});
   refreshSheetFriendBtn(id); afterVisChange();
+}
+/* 時間割を「友達全員」に見せるスイッチ（2026-10-16 あおの依頼「時間割を登録するページに、友達に見えるようにするオンオフ」）。
+   オン：いまの友達全員と、これから友達になる人にも見せる（友達を読み込むたびに、まだ見せていない友達の分を足す）。オフ：全員から隠す。
+   覚えておくのは fes_attrs.ttAll。友達ごとの切りかえ（友達のページ）も今まで通り使える。1人だけ外すと ttAll はオフになる */
+const ttAllOn=()=>!!(profile&&(profile.fa||{}).ttAll);
+let ttAllBusy=false;
+async function setTTAll(on){
+  if(ttShareMissing||!sb||!profile||String(myId).startsWith('local-')){ toast('時間割を見せる機能はまだ準備中です'); return; }
+  if(ttAllBusy)return; ttAllBusy=true;
+  try{
+    if(on){
+      profile.fa={...(profile.fa||{}),ttAll:true}; saveMyAttrs();
+      const n=await syncTTAll();
+      toast(hasCourseNames()?`🗓 時間割を友達全員${n?`（${n}人）`:''}に見せるようにしました。これから友達になる人にも見えます`:'🗓 オンにしました。授業名か教室を入れて保存すると、友達に見えます');
+    }else{
+      const {error}=await sb.from(T('timetable_shares')).delete().eq('owner_id',myId);
+      if(error){ console.warn('[timetable] 見せる設定を消せません',error.message); toast('保存できませんでした'); return; }
+      profile.fa={...(profile.fa||{}),ttAll:false}; saveMyAttrs(); ttSharesTo.clear();
+      toast('時間割を、だれにも見せないようにしました');
+    }
+    afterVisChange(); if(ttOpen)renderTimetable();
+  }finally{ ttAllBusy=false; }
+}
+// オンの時、まだ見せていない友達の分を足す（通知は送らない。友達全員に一度に届くとうるさいため）。足した人数を返す
+async function syncTTAll(){
+  if(!ttAllOn()||ttShareMissing||!sb||!hasCourseNames())return 0;
+  const ids=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>id&&!isTest(id)&&!blocked.has(id)&&!ttSharesTo.has(id));
+  if(!ids.length)return 0;
+  const {error}=await sb.from(T('timetable_shares')).upsert(ids.map(id=>({owner_id:myId,friend_id:id})),{onConflict:'owner_id,friend_id',ignoreDuplicates:true});
+  if(error){ console.warn('[timetable] 友達全員に見せられません',error.message); return 0; }
+  ids.forEach(id=>ttSharesTo.add(id)); return ids.length;
+}
+function ttAllRowHTML(){
+  if(ttShareMissing)return '';
+  const on=ttAllOn(), sh=ttSharesTo.size, fr=allFriendRows().filter(r=>r.status==='accepted').length;
+  const sub=on?'いまの友達と、これから友達になる人に、授業名・教室・時限が見えます':sh?`いまは ${sh}人の友達にだけ見せています（友達のページで1人ずつ選べます）`:'オフの間は、あなたにしか見えません';
+  return `<div class="sharerow" style="margin:0 0 12px"><div class="lab">👥 この時間割を友達に見せる<small>${sub}${!fr?'（まだ友達はいません）':''}</small></div>
+    <div class="toggle${on?' on':''}" onclick="setTTAll(${!on})"><div class="k"></div></div></div>`;
 }
 // 友達の時間割を見る（読むだけ）
 function openFriendTT(id){
@@ -6433,7 +6542,7 @@ function renderTimetable(){
   });
   grid+='</div>';
   $('#placeSheet').innerHTML=`<h2 class="pstitle">🗓 時間割</h2>
-    <p class="psdesc">授業のあるコマを押してください。<b>あなたにしか見えません</b>（見せると決めた友達だけは見られます）。友達がいる人には、その日最初の授業の始まりに「いまどこ？」の通知が1回だけ届きます。</p>
+    ${ttAllRowHTML()}<p class="psdesc">授業のあるコマを押してください。${ttAllOn()?"<b>友達に見えます</b>（上のスイッチでオフにできます）。":ttSharesTo.size?"見せると決めた友達だけが見られます。":"<b>あなたにしか見えません</b>。"}友達がいる人には、その日最初の授業の始まりに「いまどこ？」の通知が1回だけ届きます。</p>
     ${grid}
     ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
       <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
@@ -6461,7 +6570,7 @@ async function saveTimetable(){
   const row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=rooms;
   const {error}=await sb.from(T('timetable')).upsert(row);
   if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
-  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadClassRooms(); loadCommonCount(true); if(myClassOptions().length)misMark('tt');   // 授業のコミュニティの一覧・共通点のある人の数も新しく
+  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadClassRooms(); loadCommonCount(true); syncTTAll().then(n=>{ if(n)afterVisChange(); }); if(myClassOptions().length)misMark('tt');   // 授業のコミュニティの一覧・共通点のある人の数も新しく
   toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました');
   if(Object.keys(slots).length)askPushSoon('tt');
 }
