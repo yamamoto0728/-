@@ -1088,6 +1088,8 @@
   .rinfo .mrow2 .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
   .rinfo .mrow2 .nm{flex:1;min-width:0;font-size:13px}
   .rinfo .mrow2 button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:5px 9px;font-family:inherit;font-size:11.5px;color:var(--muted);cursor:pointer}
+  /* 2026-10-16 あおの依頼：ふつうのメンバーは「退出してもらう」ではなく「通報」。退出してもらえるのはオーナーと運営（tama_room_kick も同じ） */
+  .rinfo .mrow2 button.rptbtn{color:#c0392b;border-color:rgba(192,57,43,.3)}
   .rinfo .rbtn{display:block;width:100%;text-align:left;border:0;background:none;padding:11px 2px;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;border-top:1px solid var(--line)}
   .rinfo .rbtn.warn{color:var(--bad)}.rinfo .rbtn small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
   .bigpick{display:flex;align-items:center;gap:14px;width:100%;text-align:left;margin:0 0 12px;padding:18px 16px;border-radius:18px;border:1.5px solid var(--line);background:#fff;font-family:inherit;color:var(--ink);cursor:pointer;box-shadow:0 6px 18px -12px rgba(50,70,150,.4)}
@@ -5288,7 +5290,7 @@ async function openRoomInfo(){
     ${meetText(r.meet)?`<div class="sec"><b>📍 集まる約束</b>${esc(meetText(r.meet))}${r.going?`（👍 ${r.going}人）`:''}</div>`:''}
     ${joined?`<div class="sec"><b>👥 参加者 ${members.length}人</b>${members.some(u=>u._cm&&u._cm.length)?'<div class="rcmhint">🎯 共通点のある人が上に出ます。プロフィールから「👋 いいね」できます</div>':''}${members.map((u,i)=>`<div class="mrow2"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji||'🙂')}</div><div class="nm" ${u.id===myId?'':`onclick="openRoomMember(${i})" style="cursor:pointer"`}>${esc(u.name)}${u.id===r.owner_id?' 👑':''}${u.id===myId?' <span class="joined-tag">あなた</span>':''}${u._cm&&u._cm.length?`<small class="rcm">🎯 ${esc(u._cm[0])}${u._cm.length>1?` ほか${u._cm.length-1}`:''}</small>`:''}</div>
       ${u.id!==myId&&u._cm&&u._cm.length&&!owner?`<button onclick="openRoomMember(${i})">👋 いいね</button>`:''}
-      ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button>`:''}${canModRoom(r)&&u.id!==myId&&u.id!==r.owner_id?`<button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}</div>`).join('')}</div>`
+      ${owner&&u.id!==myId?`<button onclick="transferRoom('${u.id}','${nm(u)}')">👑 譲る</button>`:''}${canModRoom(r)&&u.id!==myId&&u.id!==r.owner_id?`<button onclick="kickRoomMember('${u.id}','${nm(u)}')">退出してもらう</button>`:''}${!canModRoom(r)&&u.id!==myId?`<button class="rptbtn" onclick="closeMembers();reportContext='コミュニティ「${jsq(r.name)}」のメンバー';openReport('${u.id}','${nm(u)}')">🚩 通報</button>`:''}</div>`).join('')}</div>${!canModRoom(r)?'<div class="rcmhint">困ったメンバーは「🚩 通報」で運営に知らせてください。退出してもらえるのは、オーナーと、通報を受けた運営だけです</div>':''}`
       :`<div class="sec"><b>👑 オーナー</b>${isOfficialClassRoom(r)?'なし（だれでも入れる授業のコミュニティ。運営が見守っています）':esc(r.owner_name||'なし')}<br><span style="font-size:11.5px;color:var(--muted)">参加者は、参加すると見られます</span></div>`}
     ${joined?`<div class="sharerow" style="margin-bottom:6px"><div class="lab">🔔 この部屋の通知<small>オフにすると、投稿があっても通知しません</small></div><div class="toggle${r.muted?'':' on'}" onclick="toggleRoomMute()"><div class="k"></div></div></div>`:''}
     ${joined&&canModRoom(r)&&!roomEnded(r)?`<button class="rbtn" onclick="openRoomInvite()">📨 友達を招待する<small>友達・トーク中の人に、トークで招待を送ります</small></button>`:''}
