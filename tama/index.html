@@ -810,6 +810,9 @@
   .visnote b{color:var(--ink)}
   /* 登録のステップ */
   .obsteps{display:flex;gap:6px;justify-content:center;margin:2px 0 14px}
+  /* 多摩祭の日の1ページの登録（2026-10-17） */
+  .obone .oboff,.obone .obstep>.obh,.obone .obstep>.obd{display:none}
+  .obone .obonehead{margin-bottom:6px}.obone .obstep{margin-bottom:4px}
   .obsteps i{width:26px;height:6px;border-radius:4px;background:var(--muted2);opacity:.35}
   .obsteps i.on{opacity:1;background:var(--amber)}
   .obstep[hidden]{display:none}
@@ -2211,12 +2214,42 @@ function buildOnboard(){
   obHeard=heardGuess(); renderObHeard();   // どこで知ったか（2026-10-14）
   $('#obAttrs1').innerHTML=attrFieldsHTML('ob','who'); $('#obAttrs2').innerHTML=attrFieldsHTML('ob','common');
   bindAttrForm('ob',obAttr);
+  if(fesDayNow())setupObOne();   // 多摩祭の日は1ページ（2026-10-17）
   // 入力し直したら赤い枠を消す
   $('#s-onboard').addEventListener('input',e=>{ const f=e.target.closest('.field'); if(f)f.classList.remove('miss'); });
   $('#s-onboard').addEventListener('click',e=>{ const f=e.target.closest('.field'); if(f&&e.target.closest('.chips'))f.classList.remove('miss'); });
   renderObStep();
 }
+/* ---------- 多摩祭の日の登録は1ページ（2026-10-17 あおの依頼「登録がめんどくさいから1ページに」） ----------
+   聞くのは：ニックネーム（必須）・学部（必須）・アイコン（最初から1つ選んである）・よく聴くアーティスト（任意）・
+   多摩祭の質問1問（任意・1タップ）・あるある（任意・よく選ばれそうな8個から）・年齢と利用規約（外せない）・位置情報の説明。
+   学科・学年・落としたくない授業・目標・悩み・出身・自己紹介・招待コード（リンクから来た人は入ったまま）・どこで知ったか・位置の出し方は出さない（あとでマイページから入れられる。位置は祭りの日は約100mぼかす） */
+let obOne=false, obFesQ='';
+const OB_ARU8=['課題は締切ギリギリでエンジンがかかる','寝る前のスマホがやめられない','多摩キャンの坂で毎回息が切れる','推しの話になると止まらない','初対面だとかなり人見知り','方向音痴','朝は本当に起きられない','季節の限定メニューに弱い'];
+function setupObOne(){
+  obOne=true; $('#s-onboard').classList.add('obone');
+  // 出さない欄
+  ['#obDeptWrap','#obCourse','#obGoals','#obWorry','#obHomeBox','#obBio','#obRef','#obHeard','#obVis','#obAruaruBox'].forEach(s=>{ const el=$(s), f=el&&el.closest('.field'); if(f)f.classList.add('oboff'); });
+  // 並べ方：名前・学部 → アイコン → アーティスト・祭りの質問・あるある → 年齢・利用規約 → 位置情報の説明
+  const s1=$('#obStep1'), s2=$('#obStep2'), s3=$('#obStep3');
+  const head=document.createElement('div'); head.className='obonehead'; head.innerHTML='<div class="obh">🎪 1ページで登録</div><div class="obd">名前と学部だけで始められます。ほかは入れるほど、共通点のある人が見つかります。本名は入れないでください。</div>'; s1.prepend(head);
+  const em=document.createElement('div'); em.className='field'; em.innerHTML='<label>アイコン<span class="opt">タップで変える</span></label>'; em.appendChild($('#obEmojis')); $('#obAttrs1').after(em);
+  const q=(FES.tamasai.qs||[])[0];
+  if(q){ const fq=document.createElement('div'); fq.className='field'; fq.innerHTML=`<label>${esc(q.icon)} ${esc(q.q)}<span class="opt">任意・同じ答えの人が今日だけ共通点に</span></label><div class="chips" id="obFesQ"></div>`; $('#obAttrs2').before(fq); }
+  const ar=document.createElement('div'); ar.className='field'; ar.innerHTML=`<label>💬 わかる！あるある<span class="opt">任意・${FA.aruaruPick}つまで</span></label><div class="chips" id="obAru8"></div>`; $('#obAttrs2').after(ar);
+  const age=$('#obAge').closest('.field'), terms=s1.querySelector('.terms'), pv=s3.querySelector('.privacy');
+  if(pv){ pv.before(age); pv.before(terms); }
+  renderObOne();
+}
+function renderObOne(){
+  const q=(FES.tamasai.qs||[])[0], fq=$('#obFesQ');
+  if(q&&fq)fq.innerHTML=q.o.map(o=>`<div class="c${obFesQ===o?' sel':''}" onclick="obFesQ=obFesQ===this.textContent?'':this.textContent;renderObOne()">${esc(o)}</div>`).join('');
+  const a8=$('#obAru8');
+  if(a8)a8.innerHTML=OB_ARU8.map((o,i)=>`<div class="c${obAttr.aruaru.includes(o)?' sel':''}" onclick="obAru8(${i})">${esc(o)}</div>`).join('');
+}
+function obAru8(i){ const o=OB_ARU8[i]; if(obAttr.aruaru.includes(o))obAttr.aruaru=obAttr.aruaru.filter(x=>x!==o); else{ if(obAttr.aruaru.length>=FA.aruaruPick){ toast(`選べるのは${FA.aruaruPick}つまでです`); return; } obAttr.aruaru.push(o); } renderObOne(); }
 function renderObStep(){
+  if(obOne){ [1,2,3].forEach(i=>{ $('#obStep'+i).hidden=false; }); $('#obSteps').style.display='none'; $('#obNext').textContent='位置情報を共有して始める'; $('.ob').scrollTop=0; return; }
   [1,2,3].forEach(i=>{ $('#obStep'+i).hidden=i!==obStep; });
   $$('#obSteps i').forEach((el,i)=>el.classList.toggle('on',i<obStep));
   $('#obNext').textContent=obStep===3?'位置情報を共有して始める':'次へ';
@@ -2235,9 +2268,10 @@ function openUnder18(){
     <button class="btn btn-primary" style="width:100%;padding:13px" onclick="closeInvite()">わかった</button>`;
   $('#invOverlay').classList.add('show');
 }
+const obCheckAll=()=>obCheck('all');   // 多摩祭の1ページ（全部まとめて）
 function obCheck(step){
   const miss=[];
-  if(step===1){
+  if(step===1||step==='all'){
     const name=$('#obName').value.trim(), age=parseInt($('#obAge').value)||0;
     if(!name)miss.push([$('#obName'),'ニックネーム']);
     else if(ngCheck(name))miss.push([$('#obName'),'ニックネームに使えない言葉があります']);
@@ -2246,14 +2280,14 @@ function obCheck(step){
     else if(age<18){ miss.push([$('#obAge'),'18歳以上の方だけ使えます']); setTimeout(openUnder18,80); }   // 赤い枠だけでなく、ていねいに伝える（2026-10-15 のレビュー：学園祭には高校生も来る）
     if(!$('#obTerms').checked)miss.push([$('#obTerms'),'利用規約への同意']);
   }
-  if(step===2){
+  if(step===2||step==='all'){
     // 2026-10-08 ユーザー役のテスト（1年生）：必須が重い・「特にない」が選べない・「今季絶対取りたい科目」が分かりにくい。
     // アーティストと科目は任意、あるあるは1つ以上に（入れるほど共通点が見つかりやすい、と書く）
     if(obAttr.artist.trim()&&ngCheck(obAttr.artist))miss.push([$('#obArtist'),'アーティスト名に使えない言葉があります']);
-    if(obAttr.aruaru.length<1)miss.push([$('#obAruaruBox'),'あるあるを1つ以上']);
+    if(obAttr.aruaru.length<1&&!obOne)miss.push([$('#obAruaruBox'),'あるあるを1つ以上']);   // 多摩祭の1ページでは任意
     if(obAttr.course.trim()&&ngCheck(obAttr.course))miss.push([$('#obCourse'),'授業名に使えない言葉があります']);
   }
-  if(step===3&&ngCheck($('#obBio').value))miss.push([$('#obBio'),'自己紹介に使えない言葉があります']);
+  if((step===3||step==='all')&&ngCheck($('#obBio').value))miss.push([$('#obBio'),'自己紹介に使えない言葉があります']);
   // agegate・terms のチェックボックスは .field の外なので、枠の代わりに親の箱を揺らさず目立たせる
   miss.forEach(([el])=>{ const box=el&&el.closest('.terms,.agegate'); if(box){ box.style.outline='2px solid rgba(226,87,79,.55)'; setTimeout(()=>box.style.outline='',2600); } });
   return markMissing(miss);
@@ -2261,7 +2295,8 @@ function obCheck(step){
 let obCoarse=false;   // 登録の③で選ぶ、近くの人の地図での位置の出し方（false＝そのまま／true＝約100mぼかす）
 function setObCoarse(v){ obCoarse=v; $$("#obVis .c").forEach(c=>c.classList.toggle("sel",(c.dataset.v==="1")===v)); }
 function obMove(d){
-  if(d<0){ if(obStep===1){ $('#s-onboard').classList.remove('active'); $('#s-welcome').classList.add('active'); return; } obStep--; renderObStep(); return; }
+  if(d<0){ if(obStep===1||obOne){ $('#s-onboard').classList.remove('active'); $('#s-welcome').classList.add('active'); return; } obStep--; renderObStep(); return; }
+  if(obOne){ if(!obCheckAll())return; onStart(); return; }   // 多摩祭の1ページ：全部まとめて確かめて始める
   if(!obCheck(obStep))return;
   if(obStep<3){ obStep++; renderObStep(); return; }
   onStart();
@@ -2271,7 +2306,7 @@ async function onStart(){
   const name=$('#obName').value.trim(), age=parseInt($('#obAge').value)||null;
   const bioVal=$('#obBio').value.trim();
   if(ngCheck(bioVal)){ toast('⚠️ 自己紹介に不適切な言葉が含まれています。修正してください。'); return; }
-  profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[],work:'',looking:[],likes:[],interests:[],fa:{...attrToFa(obAttr),status:'',...(obHeard?{heard:obHeard}:{}),...(SRC_NOW?{src:SRC_NOW}:{})}};
+  profile={id:myId,name,age,emoji:selEmoji,bio:bioVal,tags:[],work:'',looking:[],likes:[],interests:[],fa:{...attrToFa(obAttr),status:'',...(obHeard?{heard:obHeard}:{}),...(obOne&&obFesQ&&(FES.tamasai.qs||[])[0]?{fes26q:{[FES.tamasai.qs[0].k]:obFesQ}}:{}),...(SRC_NOW?{src:SRC_NOW}:{})}};
   renderMeHero();
   $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
   // 「位置情報を共有して始める」を押したので共有ON（プロフィールを消した後に登録し直した時、前のOFFが残らないように）
@@ -2449,6 +2484,9 @@ const isClosed=u=>!!u.updated_at&&Date.now()-Date.parse(u.updated_at)>CLOSED_AFT
 // アプリを閉じた人を「さっきまでいた人」として最後の場所に出しておく時間（2026-09-28 にあおが「2時間」に決めた。
 // 以前はその日の終わりまで出していたが、UXテストで「家に帰った後もキャンパスの最後の場所が残るのが不安」と言われた）
 const SHOW_CLOSED_MS=2*3600000;
+// 多摩祭の日だけ、閉じた人も30分は地図と一覧に「さっきまでいた人」として薄く出す（2026-10-17 あおの依頼。ふだんの日は出さない＝2026-10-08 の決定のまま）
+const FES_RECENT_MS=30*60000;
+function fesRecent(u){ return fesDayNow()&&!!u.updated_at&&Date.now()-Date.parse(u.updated_at)<FES_RECENT_MS; }
 const shownSince=(now=Date.now())=>Math.max(jstTodayStart(now).getTime(),now-SHOW_CLOSED_MS);
 async function fetchUsers(){
   const now=Date.now(), today=jstTodayStart(now).getTime();
@@ -3077,16 +3115,18 @@ function renderNearby(){
   // 並び順は共通点のめずらしさ（commonScore）＋すれ違い（crossBoost）→ 距離。めずらしい共通点があって、すれ違った人が上に来る。
   // 2026-10-08 あおの指示：アプリを閉じた人（前の「🕘 さっきまでいた人」）は一覧にも地図にも出さない。
   // 友達も同じ一覧に入る（2026-10-15 まで一番上に横並びの枠があった）。一覧は NEAR_LIMIT 人まで出して、多い時は「もっと見る」
-  const all=others.filter(u=>!isClosed(u)).map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}const cd=commonDetail(u);return {u,d,common:cd,score:commonScore(cd)+crossBoost(u.id,cd)+fesMixBoost(u,cd),closed:false};});
+  // 2026-10-17 あおの依頼「マップに人がいっぱい表示されてると面白い」：多摩祭の日だけ、閉じた人も30分は「さっきまでいた人」として薄く出す（FES_RECENT_MS）
+  const all=others.filter(u=>!isClosed(u)||fesRecent(u)).map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}const cd=commonDetail(u);return {u,d,common:cd,score:commonScore(cd)+crossBoost(u.id,cd)+fesMixBoost(u,cd)-(isClosed(u)?0.5:0),closed:isClosed(u)};});
   const byScore=(x,y)=>(y.score-x.score)||((x.d??1e9)-(y.d??1e9));
   const openAll=all.sort(byScore), frNow=openAll.filter(x=>isFriend(x.u.id)), fesFold=tamasaiDay()&&frNow.length>0, open=fesFold?openAll.filter(x=>!isFriend(x.u.id)):openAll.slice();
   // 多摩祭の日は、一緒に回っている友達を一覧の1行にたたみ、グループの外の人を上に出す（2026-10-15 エージェントの体験から：友達がいつも1位・2位に来ていた）
   // 2026-10-15 あおの指示：ホームの「いまキャンパスにいる友達」の枠はやめた（じゃまだったため）。友達は、ほかの人と同じ一覧に入る（友達の印つき）
-  { const nc=open.filter(x=>x.common.length).length, el=$("#nearJump");
+  { const nc=open.filter(x=>x.common.length&&!x.closed).length, el=$("#nearJump");
     const jh=!open.length?(frNow.length?"":`🕊 いまは近くに人がいません<span>${tamasaiDay()?(tamasaiNextCt()?"次のちかくタイム "+tamasaiNextCt():"多摩祭を楽しんでね"):"昼休みに多いです"}</span>`):nc?`👀 いま近くに、共通点のある人 <b>${nc}人</b><span>見る ↓</span>`:`👀 いまキャンパスにいる人 <b>${open.length}人</b><span>見る ↓</span>`;
     if(el&&el.dataset.h!==jh){ el.dataset.h=jh; el.innerHTML=jh; } }
-  lastOpenCount=openAll.filter(x=>!isTest(x.u.id)).length; visitMaybeUpdate();
-  $('#nearSub').textContent=openAll.length?'いま'+openAll.length+'人'+(frNow.length?`（友達${frNow.length}人）`:''):'まだ誰もいません';
+  const liveN=openAll.filter(x=>!x.closed).length, recentN=openAll.length-liveN;
+  lastOpenCount=openAll.filter(x=>!isTest(x.u.id)&&!x.closed).length; visitMaybeUpdate();
+  $('#nearSub').textContent=openAll.length?'いま'+liveN+'人'+(recentN?`・さっきまで${recentN}人`:'')+(frNow.length?`（友達${frNow.length}人）`:''):'まだ誰もいません';
   lastNearList=openAll; drawMap(lastNearList); const ul=$('#ulist');
   if(fesOutside&&!all.length){
     $('#nearSub').textContent='キャンパスの外では表示しません';
@@ -3336,7 +3376,7 @@ async function checkClosedNearby(){
     const data=others.filter(u=>!isTest(u.id)&&u.updated_at&&isClosed(u)&&now-Date.parse(u.updated_at)<FES.nearbyPushStaleMin*60000);
     const cands=data.filter(u=>!blocked.has(u.id)&&u.lat!=null&&(!FES.campusOnly||inCampus(u.lat,u.lng)))
       .map(u=>{ const r=relMeters(myPos,u); return {u,d:Math.hypot(r.e,r.n),common:commonFor(u,matchOffOf(u)).map(x=>x.label)}; })   // 相手あての通知なので、相手が選んだ項目で
-      .filter(x=>x.d<=FES.nearbyPushRangeM&&x.common.length)
+      .filter(x=>x.d<=(fesDayNow()?150:FES.nearbyPushRangeM)&&x.common.length)   // 多摩祭の日は150m（2026-10-17 あおの依頼）
       .sort((a,b)=>a.d-b.d).slice(0,3);
     if(!cands.length)return;
     const {data:logs,error:le}=await sb.from(T('push_log')).select('recipient_id')
@@ -5506,6 +5546,7 @@ function goOnboard(){
   if($('#obRef')&&!$('#obRef').value)$('#obRef').value=savedRef();   // 招待のリンクから来た人は、招待コードを入力ずみに
   // 多摩祭の日は、学外の人も多いので、地図の位置を最初から「約100mぼかす」にしておく（2026-10-15 のレビュー。登録の③で変えられる）
   if(typeof tamasaiDay==='function'&&tamasaiDay())setObCoarse(true);
+  if(fesDayNow()&&!obOne){ setupObOne(); renderObStep(); }   // 多摩祭の日は1ページ（開いたまま日付が変わった時も）
   $('#s-welcome').classList.remove('active');
   $('#s-onboard').classList.add('active');
 }
@@ -7360,13 +7401,17 @@ function tamasaiStageHTML(){
 // ステージの1行（いまやっているもの、無ければ次のもの）。押すと「くわしく」が開く
 function tamasaiStageLine(){
   const ss=FES.tamasai.stages||[], now=tamasaiNow(), d=jstDayOf(now), hm=new Date(now+9*3600000).toISOString().slice(11,16);
-  // ⭐ ちかくコラボ団体のステージ（collab:true）は、やっている間と、始まる90分前からは、ほかより先にこの1行に出す（2026-10-15 案3）
+  // ⭐ ちかくコラボ団体のステージ（collab:true）は、始まる90分前から「つぎ」に先に出す（2026-10-15 案3）
+  // 2026-10-17 あおの依頼「今やっているステージも分かるように」：前はコラボの「つぎ」を1行だけ出していて、いまやっているステージが隠れていた。
+  // いまやっているステージ（2つの会場で同時のこともあるので2つまで。コラボを先に）を「▶ いま」で出し、その下に「つぎ」を1行
   const mins=t=>(+t.slice(0,2))*60+(+t.slice(3,5)), today=ss.filter(s=>s.d===d);
-  const coLive=today.find(s=>s.collab&&s.s<=hm&&hm<s.e), coSoon=today.find(s=>s.collab&&s.s>hm&&mins(s.s)-mins(hm)<=90);
-  const live=coLive||today.find(s=>s.s<=hm&&hm<s.e), next=today.filter(s=>s.s>hm).sort((a,b)=>a.s<b.s?-1:1)[0], s=coLive||coSoon||live||next, on=!!s&&s.s<=hm&&hm<s.e;
-  if(!s)return '';
-  const k=fesStageKey(s), go=fesGoToday(profile).includes(k);
-  return `<div class="tsst1${s.collab?' collab':''}" onclick="toggleTsOpen()"><span class="tm${on?' on':''}">${on?'▶ いま':'つぎ '+s.s}</span><span class="nm">${s.collab?'⭐ ':''}${esc(s.n)}<small>${s.collab?'🤝 ちかくコラボ ・ ':''}${esc(s.p||'')}${on?' 〜'+s.e:''}</small></span><button class="tsgo sm${go?' on':''}" onclick="event.stopPropagation();toggleFesGo('${k}')">${go?'✅ 行く':'👀 行く'}</button></div>`;
+  const live=today.filter(s=>s.s<=hm&&hm<s.e).sort((a,b)=>(b.collab?1:0)-(a.collab?1:0)).slice(0,2);
+  const coSoon=today.find(s=>s.collab&&s.s>hm&&mins(s.s)-mins(hm)<=90), next=coSoon||today.filter(s=>s.s>hm).sort((a,b)=>a.s<b.s?-1:1)[0];
+  const rows=[...live.map(s=>[s,true]),...(next?[[next,false]]:[])];
+  if(!rows.length)return '';
+  const mine=new Set(fesGoToday(profile));
+  return rows.map(([s,on])=>{ const k=fesStageKey(s), go=mine.has(k);
+    return `<div class="tsst1${s.collab?' collab':''}" onclick="toggleTsOpen()"><span class="tm${on?' on':''}">${on?'▶ いま':'つぎ '+s.s}</span><span class="nm">${s.collab?'⭐ ':''}${esc(s.n)}<small>${s.collab?'🤝 ちかくコラボ ・ ':''}${esc(s.p||'')}${on?' 〜'+s.e:''}</small></span><button class="tsgo sm${go?' on':''}" onclick="event.stopPropagation();toggleFesGo('${k}')">${go?'✅ 行く':'👀 行く'}</button></div>`; }).join('');
 }
 // 🏮 出店・出演しています（自分の店・ステージを選ぶ。選び直せる・外せる）
 let shopPickMode='';
