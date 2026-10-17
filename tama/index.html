@@ -662,6 +662,19 @@
   details.more[open] summary{margin-bottom:10px}
   /* 「いまの自分」1行（近くの人の上） */
   .nowbar{margin:0 16px 10px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  /* 💬 語りたいこと・探している人（2026-10-17） */
+  .wantrow{grid-column:1/-1;display:flex;gap:8px;margin:6px 0 2px}
+  .wantme{flex:1;min-width:0;text-align:left;border:1.5px dashed rgba(200,80,140,.45);background:linear-gradient(135deg,#fff0f7,#fdf3ff);border-radius:14px;padding:9px 12px;font-family:inherit;cursor:pointer;color:var(--ink)}
+  .wantme b{display:block;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wantme small{display:block;font-size:11px;color:var(--muted)}
+  .wantall{flex:none;border:1px solid var(--line);background:#fff;border-radius:14px;padding:6px 10px;font-family:inherit;font-size:11px;color:var(--muted);cursor:pointer;line-height:1.3}.wantall b{color:#c0458a;font-size:15px}
+  .wantt{font-size:12px;color:#b03a7c;font-weight:700;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wantbox{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#fff0f7,#fdf3ff);border:1px solid rgba(200,80,140,.25)}
+  .wantbox>div{flex:1;min-width:0}.wantbox small{display:block;font-size:11px;color:var(--muted)}.wantbox b{display:block;font-size:14.5px;color:var(--ink)}
+  .wantbox button{flex:none;border:0;border-radius:999px;background:#c0458a;color:#fff;font-family:inherit;font-weight:800;font-size:12.5px;padding:8px 12px;cursor:pointer}
+  .wantbox .wantsent{flex:none;font-size:12px;color:var(--muted)}
+  .wantbar{display:flex;align-items:center;gap:8px;margin:6px 12px 0;padding:8px 10px;border-radius:12px;background:#fff0f7;font-size:12px;color:var(--muted)}
+  .wantbar span{flex:1;min-width:0}.wantbar b{color:var(--ink)}.wantbar button{flex:none;border:0;border-radius:999px;background:#c0458a;color:#fff;font-family:inherit;font-weight:800;font-size:12px;padding:6px 10px;cursor:pointer}
+  .wantex{gap:6px;margin-top:2px}
   .nowbar:empty{display:none}
   .ntile{min-width:0;text-align:left;border-radius:18px;padding:12px 13px 11px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:3px;min-height:92px;transition:transform .12s}
   .ntile:active{transform:scale(.97)}
@@ -1374,7 +1387,7 @@
     </section>
     <section class="screen" id="s-chat">
       <div class="chathead"><button class="back" onclick="go(chatReturn)" aria-label="戻る">‹</button><div class="av" id="chatAv" onclick="openChatProfile()"></div><div style="flex:1;min-width:0" onclick="openChatProfile()"><div class="nm" id="chatNm"></div><div class="st" id="chatSt"></div></div><div id="chatFr"></div><button class="membtn" onclick="openChatMenu()" aria-label="その他（通報・ブロック）">⋯</button></div>
-      <div class="msgs" id="msgs"></div><div class="rxpick" id="rxPick"></div>
+      <div class="wantbar" id="chatWant" hidden></div><div class="msgs" id="msgs"></div><div class="rxpick" id="rxPick"></div>
       <div class="topics" id="chatTopics"></div>
       <div class="chatbar"><input id="chatInput" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">↑</button></div>
     </section>
@@ -2953,7 +2966,7 @@ function renderStatusRow(){
     <button class="ntile tt${tt.empty?' empty':''}" onclick="openTimetable()">
       <span class="nh"><span>🗓 時間割${q('tt')}</span><span class="ne">${tt.empty?'入れる ›':'編集 ›'}</span></span>
       <span class="nm">${esc(tt.main)}</span>
-      <span class="ns">${esc(tt.sub)}</span></button>`;
+      <span class="ns">${esc(tt.sub)}</span></button>${wantRowHTML()}`;
 }
 // 「いまの状態」（ひまです・一緒にごはん行ける など）。授業の時限の終わりで消える（2026-09-24。以前は消えず、翌日も「これから帰る」が出ていた）。
 // 消える時刻の無い古い状態は出さない
@@ -2961,6 +2974,66 @@ function statusOf(u){
   const a=attrsOf(u); if(!a.status||!(FA.statuses.includes(a.status)||FES_STATUS.includes(a.status)))return '';   // 祭り用の3つ（FES_STATUS。2026-10-15）も出す
   if(!a.status_until||Date.parse(a.status_until)<=Date.now())return '';
   return a.status;
+}
+/* ---------- 💬 語りたいこと・探している人（2026-10-17 あおの依頼「この人探してます・これについて語り合いたい」） ----------
+   ・自由記述（30文字まで）＋例のボタン。今日だけ（日付が変わると出なくなる）。いつでも使える（例は多摩祭の日は祭り向け）
+   ・近くの人の一覧・プロフィールに「💬 …」。見た人は「💬 それ話したい」で、いいね＋一言「『…』について話したい」（相手が返すとトーク。今までの流れのまま）
+   ・友達・トーク中の相手なら、プロフィールとトークの上に「この話をする」（入力欄に話しかけの文が入る）
+   ・保存は fes_attrs.want = {t:文, d:日付}。サーバーの変更はいらない */
+const WANT_EX_FES=['Saenggiのステージ一緒に見る人','一緒に花火を見る人','屋台のおすすめ教えて','ひとりで回ってます、話そう','K-POP好きと語りたい','同じサークル・部活の人'];
+const WANT_EX=['一緒にお昼食べる人','同じ授業の課題について話したい','サークル探してます','ゼミ選びで悩んでる','アニメ・ゲームの話がしたい','推しについて語りたい'];
+function wantOf(u){ const w=attrsOf(u).want; return w&&w.t&&w.d===jstDayOf(Date.now())?String(w.t):''; }
+function openWantEdit(){
+  if(!profile){ toast('先にプロフィールを登録してね'); return; }
+  const cur=wantOf(profile), ex=fesDayNow()?WANT_EX_FES:WANT_EX;
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">💬 語りたいこと・探している人</h2>
+    <p class="psdesc">近くの人の一覧とプロフィールに出ます。見た人が「💬 それ話したい」と、いいねを送れます。<b style="color:var(--ink)">今日だけ</b>出ます（日付が変わると消えます）。</p>
+    <div class="field"><input id="wantIn" maxlength="30" placeholder="例：Saenggi好きと語りたい" value="${esc(cur)}"></div>
+    <div class="chips wantex">${ex.map((x,i)=>`<span class="c" onclick="$('#wantIn').value=this.textContent">${esc(x)}</span>`).join('')}</div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:12px" onclick="saveWant()">出す</button>
+    ${cur?`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="saveWant(true)">消す</button>`:''}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">やめる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+function saveWant(clear){
+  if(!profile)return;
+  const t=clear?'':((($('#wantIn')||{}).value||'').trim().slice(0,30));
+  if(t&&ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  profile.fa={...(profile.fa||{}),want:t?{t,d:jstDayOf(Date.now())}:null};
+  publishMe(); saveMyAttrs(); closeMembers(); renderWantRows(); renderNearby();
+  toast(t?'💬 出しました。近くの人の一覧とプロフィールに、今日だけ出ます':'語りたいことを消しました');
+  if(t)askPushSoon('daily');   // 「それ話したい」のいいねを通知で受け取れるように
+}
+// 自分の「語りたいこと」の1行（ホーム。多摩祭の日は🎪カードの中、ふだんは「いまの自分」の下）と、みんなの数
+function wantRowHTML(){
+  if(!profile)return '';
+  const w=wantOf(profile), n=others.filter(u=>!isTest(u.id)&&!blocked.has(u.id)&&wantOf(u)).length;
+  return `<div class="wantrow"><button class="wantme" onclick="openWantEdit()">${w?`<b>💬 ${esc(w)}</b><small>語りたいこと（変える）</small>`:'<b>💬 語りたいこと・探している人を出す</b><small>例：一緒に花火を見る人、◯◯好きと語りたい</small>'}</button>${n?`<button class="wantall" onclick="openWantList()">みんなの<br><b>${n}</b>件 ›</button>`:''}</div>`;
+}
+function renderWantRows(){ renderStatusRow(); renderTamasai(); }
+// みんなの「語りたいこと」（今日出している近くの人。共通点の多い順）
+function openWantList(){
+  const L=others.filter(u=>!isTest(u.id)&&!blocked.has(u.id)&&wantOf(u)).map(u=>({u,c:commonWith(u)})).sort((a,b)=>b.c.length-a.c.length);
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">💬 みんなの語りたいこと</h2><p class="psdesc">今日、近くの人が出している「語りたいこと・探している人」です。タップでプロフィール。「💬 それ話したい」でいいねを送れます。</p>
+    <div class="cblist">${L.length?L.map(({u,c})=>`<div class="cbrow" style="cursor:pointer" onclick="closeMembers();openNear('${jsq(String(u.id))}')"><div class="cbe">${esc(u.emoji||'🙂')}</div><div class="cbt"><b>💬 ${esc(wantOf(u))}</b><small>${esc(u.name)}${c.length?' ・ 共通点：'+esc(c.slice(0,2).join('・')):''}</small></div></div>`).join(''):'<div class="cmnote">まだだれも出していません</div>'}</div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+// プロフィールの「💬 語りたいこと」の箱と、その人へのボタン
+function wantBoxHTML(u){
+  const w=wantOf(u); if(!w||u.id===myId)return '';
+  const id=u.id, fr=isFriend(id), m=matches[id], talking=fr||(!!m&&!isExpired(m));
+  const btn=talking?`<button onclick="closeSheet();wantTalk('${jsq(String(id))}')">💬 トークでこの話をする</button>`
+    :liked.has(id)&&!(m&&isExpired(m))?'<span class="wantsent">👋 いいね済み</span>'
+    :`<button onclick="wantLike()">💬 それ話したい</button>`;
+  return `<div class="wantbox"><div><small>語りたいこと・探している人</small><b>${esc(w)}</b></div>${btn}</div>`;
+}
+// 「それ話したい」：いつものいいねに一言を付けて送る（相手が返すとトーク。一言はトークの最初に残る）
+function wantLike(){ const u=curSheetUser; if(!u)return; const w=wantOf(u); if(liked.has(u.id)&&!(matches[u.id]&&isExpired(matches[u.id])))return; sendWave(u,w?`💬「${w}」について話したい`:''); }
+// 友達・トーク中の相手：トークを開いて、話しかけの文を入れておく（送るのは本人）
+function wantTalk(id){
+  const u=anyUser(id)||friendUser(id)||(chatOf(id)||{}).u, w=u?wantOf(u):''; openChat(id,isFriend(id)?'friends':'match');
+  setTimeout(()=>{ const i=$('#chatInput'); if(i&&w&&!i.value){ i.value=`「${w}」の話、しませんか？`; i.focus(); } },350);
 }
 // 学部・学年（一覧で名前の横に出す。年齢は出さない）
 const facLine=u=>{ const a=attrsOf(u); return [a.faculty&&a.faculty.replace(/学部$/,''),a.grade].filter(Boolean).join(' '); };
@@ -2981,7 +3054,7 @@ function nearRow({u,d,common,closed}){
   return `<div class="urow${closed?' closed':''}" onclick="openNear('${String(u.id).replace(/[^\w-]/g,'')}')">
     <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
     <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>
-      ${commonLine(common)}${crossBadge(u.id)}${fesRoleOf(u)?`<div class="rolet">🏮 ${esc(fesRoleOf(u))} で出店・出演中${fesRolePlaceOf(u)?" ・ 📍 "+esc(fesRolePlaceOf(u)):""}${isCollabName(fesRoleOf(u))?" 🤝":""}</div>`:""}
+      ${commonLine(common)}${crossBadge(u.id)}${fesRoleOf(u)?`<div class="rolet">🏮 ${esc(fesRoleOf(u))} で出店・出演中${fesRolePlaceOf(u)?" ・ 📍 "+esc(fesRolePlaceOf(u)):""}${isCollabName(fesRoleOf(u))?" 🤝":""}</div>`:""}${wantOf(u)?`<div class="wantt">💬 ${esc(wantOf(u))}</div>`:""}
       <div class="b">${st&&!closed?`<span class="stchip">${esc(st)}</span> `:''}${esc(u.bio||'')}</div></div>
     <div class="d">${closed?`<div class="frago">${agoText(u.updated_at)}まで</div>`:`<div class="m">${d!=null?distText(d,u.id):'—'}</div>`}${relTag(u.id)}</div></div>`;
 }
@@ -3537,7 +3610,7 @@ async function sendWave(u,text){
     toast(restarting?'💬 トークを始め直しました（24時間）':'💬 おたがいにいいね！トークが始まりました（24時間）');
     openChat(uid,'match');
   }else{
-    notifyPush(uid,'👋 '+me+'さんからいいね',likeCommonText(tu,true)||'「トーク」から見てみよう。いいねを返すとトークが始まります',{kind:'like',go:'talk',tag:'like-'+myId,badge:true});
+    notifyPush(uid,'👋 '+me+'さんからいいね',(/^💬「/.test(text||'')?text+'。':'')+(likeCommonText(tu,true)||'')||'「トーク」から見てみよう。いいねを返すとトークが始まります',{kind:'like',go:'talk',tag:'like-'+myId,badge:true});
     toast(gated?`👋 いいねしました。今日はあと${likesLeft()}回（アンケートに答えると無制限）`:'👋 いいねしました。相手がいいねを返すとトークが始まります');
   }
 }
@@ -3746,7 +3819,7 @@ function openSheet(u,d){
   $('#sheet').innerHTML=`<div class="cover" style="background:${coverBg(u)}"><button class="close" onclick="closeSheet()">✕</button>
     <div class="initial${frCls(u)}">${esc(u.emoji)}</div><div class="idn"><h2>${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''} <span>${esc(facLine(u))}</span></h2>${dist}</div></div>
     <div class="body">${reply&&!fr?`<div class="wavein"><div class="wh">👋 ${esc(u.name)} さんからいいねが届いています</div>${esc(reply.text||'いいねを返すと、トークが始まります')}</div>`:''}
-      ${metLine(id)}${attrBlock(u)}<div class="bio">${esc(u.bio||'')}</div></div>
+      ${wantBoxHTML(u)}${metLine(id)}${attrBlock(u)}<div class="bio">${esc(u.bio||'')}</div></div>
     ${fr?friendBtnHTML(u):''}
     ${fr?'':ended?endedHTML(u):ladderHTML(id)}
     <div class="actions">${main}</div>
@@ -4346,6 +4419,9 @@ function renderChatHead(){
   // 名前の下：友達なら「いまの自分」、そうでなければトークの残り時間
   const pt=isFriend(id)?presenceText(friendPres(id)):'';
   $('#chatSt').textContent=isFriend(id)?(pt?'📍 '+pt:'👥 友達'):isTest(id)?'🧪 テスト用の人':m.matchedAt?'⏳ トークは残り'+leftText(matchLeftMs(m)):'';
+  // 相手の「語りたいこと」（2026-10-17）。押すと入力欄に話しかけの文
+  { const cw=$('#chatWant'), pu=anyUser(id)||friendUser(id)||m.u, w=pu?wantOf(pu):'';
+    if(cw){ cw.hidden=!w; cw.innerHTML=w?`<span>💬 ${esc(m.u.name||'')}さんの語りたいこと：<b>${esc(w)}</b></span><button onclick="wantTalk('${jsq(String(id))}')">この話をする</button>`:''; } }
   if(r&&r.status==='accepted') el.innerHTML='';
   else if(r&&r.to_id===myId) el.innerHTML=`<button class="frinv" onclick="acceptFriend(${r.id},'${id}','${nm}')">👥 承認する</button>`;
   else if(r) el.innerHTML=`<button class="frinv" disabled>👥 申請中</button>`;
@@ -7151,7 +7227,7 @@ function renderTamasai(){
   const more=tsOpen?`<div class="tsmore"><div class="tsfoot"><span>${done?`多摩祭に参加した全員に🎉バッジ ・ いま ${n}人`:`${n!=null&&n>=T_.showFrom?`あと<b style="color:#c0456a">${goal-n}</b>人で`:'届いたら'}、多摩祭に参加した全員に🎉バッジ`} ・ ${cross}</span></div>${tamasaiStageHTML()}<button class="tsrole" onclick="openFesRolePick()">🏮 ${fesRoleOf(profile)?'出店・出演中：'+esc(fesRoleOf(profile))+'（変える）':'出店・ステージに出る人はこちら（自分の店・ステージを選ぶ）'}</button></div>`:'';
   const toggle=`<button class="tsmorebtn" onclick="toggleTsOpen()">${tsOpen?'とじる ▴':'くわしく ▾'}</button>`;
   // 中身が変わった時だけ描き直す（6秒ごとに作り直すと、選択肢の横スクロールが戻り、押している途中のタップが消えるため。2026-10-15 のレビューで直した）
-  const html=head+geoNote+tamasaiSurveyHTML()+prog+fesStatusHTML()+(tsOpen?'':tamasaiStageLine())+collabCardLine('collabrow ints')+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML()+more+toggle;
+  const html=head+geoNote+tamasaiSurveyHTML()+prog+fesStatusHTML()+wantRowHTML()+(tsOpen?'':tamasaiStageLine())+collabCardLine('collabrow ints')+couponRowHTML()+tamasaiTomorrowHTML()+tamasaiFireworksHTML()+more+toggle;
   if(el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; }
   fesSvMaybeAsk();   // 多摩祭アンケートの時間（1日目18:00〜・2日目18:30〜）に、1日1回まで（2026-10-16）
 }
