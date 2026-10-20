@@ -23,6 +23,7 @@
 //   { "kind": "fsurvey" }                    … 多摩祭に来た人にアンケートの案内。tama/tamasai.js の surveyUrl が空・期間の外なら送らない
 //   { "kind": "shop", "day": "2026-10-17", "slot": "1400" } … 出店・出演している人へ「無料で宣伝しませんか」（2026-10-16。supabase/tama_fes_shop.sql）。
 //                                            「出店・出演中」をまだ選んでいない人全員へ。day が今日の時だけ、slot ごとに1回
+// 2026-10-20 あおの決定：ちかくタイムは毎週 月・水・木の13:00 に固定（supabase/tama_ct_fixed.sql）。その日は lunch（12:55 のお題）を送らず、ct の通知に一言まとめる
 // 2026-10-16 あおの決定「通知をもっとマッチングに生かす」で足したもの（supabase/tama_fes_push.sql）:
 //   { "kind": "stage" }                      … 5分ごと。始まる5〜10分前のステージを「👀 見に行く」にした人だけへ、見に行くちかくの人の数つき
 //   { "kind": "likes" }                      … 多摩祭の日の16:00。今日届いたいいねを、まだ返していない人だけへ（件数つき）
@@ -188,6 +189,11 @@ Deno.serve(async (req) => {
     text = "「いまどこ？」に教室を入れると、友達に表示されます";
     url = "/tama/?go=where&n=class"; tag = "tama-class"; pref = "class";
   } else if (body.kind === "lunch") {
+    // ちかくタイムのある日（月・水・木の13:00。supabase/tama_ct_fixed.sql）は、12:55 のこの通知を送らない。
+    // 13:00 のちかくタイムの通知に「今日のお題も」と一言入れて、昼の通知を1通にする（2026-10-20 あおの決定）
+    const dayStart = new Date(Date.parse(`${todayJst}T00:00:00+09:00`)).toISOString(), dayEnd = new Date(Date.parse(`${todayJst}T00:00:00+09:00`) + 86400000).toISOString();
+    const { data: ctToday } = await supabase.from("tama_ct_slots").select("id").gte("starts_at", dayStart).lt("starts_at", dayEnd).limit(1);
+    if (ctToday && ctToday.length) return json({ ok: true, skipped: "chikaku time today" });
     const today = await todaysQuestion(jstMs);
     const todayStr = today?.d ?? new Date(jstMs - (jstMs % 86400000)).toISOString().slice(0, 10);
     const { data, error } = await supabase.from("tama_profiles").select("id,fa:fes_attrs,sharing,updated_at,lat");
@@ -251,6 +257,7 @@ Deno.serve(async (req) => {
     // 回ごとに文を変えたい時は push_title・push_body（多摩祭の花火の回。2026-10-15）
     title = slot.push_title || "⏰ ちかくタイム（10分間）";
     text = slot.push_body || `「${slot.q}」${slot.o1}？${slot.o2}？ 10分のあいだに答えた人どうしで、同じ答えの人が見つかります`;
+    if (!weekend && !slot.push_body) text += "（今日のお題も出ています）";   // 平日は 12:55 のお題の通知をまとめたので（2026-10-20）
     url = "/tama/?go=ct&n=ct"; tag = "tama-ct"; pref = "ct";
   } else if (body.kind === "recap") {
     // 多摩祭1日目の夜：その日にキャンパスで開いた人に、その日すれ違った人数を（2日目に開く理由。チームの意見）
