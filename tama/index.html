@@ -302,6 +302,7 @@
   .ctcard .ctsame{display:block;width:100%;margin-top:8px;padding:9px 12px;border:0;border-radius:12px;background:var(--signal);color:#fff;font:inherit;font-size:13px;font-weight:800;text-align:left;cursor:pointer}
   .ctcard .ctnote{font-size:10.5px;color:var(--muted);margin-top:5px}
   .ctcard.after{padding:9px 14px;background:rgba(15,176,205,.07);border-width:1px}.ctcard.after .ctline{font-size:12.5px;line-height:1.55}
+  .ctcard.pre{padding:9px 14px;background:rgba(15,176,205,.07);border-width:1px;border-style:dashed}.ctcard.pre .ctline{font-size:12.5px;line-height:1.55}
   .daily .dh{font-size:11.5px;font-weight:700;color:#b0651a;display:flex;justify-content:space-between}
   .daily .dq{font-size:15.5px;font-weight:900;margin:4px 0 10px;line-height:1.5}
   .daily .chips{gap:6px}.daily .chips .c{font-size:13px;padding:8px 13px}
@@ -4908,6 +4909,65 @@ function classBarHTML(startShown){
   const c=classOf(now.name)||{}, un=c.unread||0;
   return `<div class="clsbar" onclick="openClassRoom('${jsq(now.name)}')"><span class="cbi">📚</span><span class="cbt"><small>いまの授業（${now.i}限）のコミュニティ</small><b>${esc(now.name)}</b><em>${c.joined?`👥 ${c.members||0}人が参加${un?` ・ 新着 ${un}件`:''}`:`同じ授業の人 ${c.takers||0}人 ・ タップで入る`}</em></span>${un?`<span class="unread">${un>99?'99+':un}</span>`:'<span class="go">›</span>'}</div>`;
 }
+/* ---------- 📨 授業のコミュニティから誘う（2026-10-20 あおの決定「平日の人を増やす：授業のコミュニティから誘う」） ----------
+   ・授業のコミュニティの「ⓘ」と「📚 授業」の一覧の下から、授業のLINEなどに貼るリンクを作る（?cls=授業名&s=曜日-時限&ref=自分の招待コード）
+   ・リンクから来た人は、登録（または起動）のあとに「『◯◯』のコミュニティに招待されています」→「時間割に入れて入る」の1タップで、
+     時間割にその授業（同じ曜日・時限）が入り、そのまま授業のコミュニティに入る。招待コードはいつもの招待と同じに数える
+   ・iPhone は Safari とホーム画面のアプリで保存場所が分かれるので、ホーム画面のアプリで開き直すと招待が消えることがある（その時は「📚 授業」から入れる） */
+const CLS_INV=(()=>{ try{ const p=new URL(location.href).searchParams, n=(p.get('cls')||'').trim().slice(0,48), s=(p.get('s')||'').trim();
+  if(n){ localStorage.setItem('tama_clsInv',JSON.stringify({n,s:/^[1-5]-[1-5]$/.test(s)?s:'',at:Date.now()})); } }catch(e){} return true; })();
+function classInviteUrl(name){
+  const u=new URL(OFFICIAL_URL), slot=Object.keys(myTimetable||{}).find(k=>normAns(myTimetable[k])===normAns(name));
+  u.searchParams.set('cls',name); if(slot)u.searchParams.set('s',slot); if(inviteInfo&&inviteInfo.code)u.searchParams.set('ref',inviteInfo.code);
+  return externalUrl(u.toString());
+}
+function openClassInvitePick(){
+  const cs=myCourseNames(); if(!cs.length){ toast('時間割に授業を入れると、授業の人を誘えます'); openTimetable(); return; }
+  if(cs.length===1)return openClassInvite(cs[0]);
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">📨 どの授業の人を誘いますか？</h2><div class="cblist">${cs.map(n=>`<div class="cbrow" style="cursor:pointer" onclick="openClassInvite('${jsq(n)}')"><div class="cbe">📚</div><div class="cbt"><b>${esc(n)}</b><small>${esc(classSlotsText(n))}</small></div></div>`).join('')}</div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">やめる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+function openClassInvite(name){
+  if(!inviteInfo&&!inviteMissing)loadInvite();   // 招待コードを付けるため（読めなくてもリンクは使える）
+  const url=classInviteUrl(name), text=`「${name}」の授業のコミュニティ、ちかくで入れます📚 課題・テスト・休講の情報交換に。リンクを押すだけで入れます👇`;
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">📨 「${esc(name)}」の人を誘う</h2>
+    <p class="psdesc">授業のLINEグループなどに貼ってください。押した人は、登録のあと1タップで、この授業のコミュニティに入れます（時間割にもこの授業が入ります）。招待した人数にも数えられます。</p>
+    <div class="cmnote" style="margin:0 0 12px;word-break:break-all">${esc(text)}<br>${esc(url)}</div>
+    <a class="btn btn-primary" style="display:block;text-align:center;width:100%;padding:13px;text-decoration:none;background:#06c755" href="https://line.me/R/share?text=${encodeURIComponent(text+'\n'+url)}" target="_blank" rel="noopener">LINEで送る</a>
+    ${navigator.share?`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px" onclick="navigator.share({text:'${jsq(text)}',url:'${jsq(url)}'}).catch(()=>{})">ほかのアプリで送る</button>`:''}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px" onclick="copyText('${jsq(text+'\n'+url)}')">文とリンクをコピー</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+// 招待のリンクから来た人に（起動の2.5秒後。登録した直後も startLoops から呼ばれる）。7日より前の招待は使わない
+let clsInvShown=false;
+function maybeClassInvite(){
+  if(clsInvShown||!profile||fesDayNow())return;
+  let v=null; try{ v=JSON.parse(localStorage.getItem('tama_clsInv')||'null'); }catch(e){}
+  if(!v||!v.n||Date.now()-(v.at||0)>7*86400000){ try{ localStorage.removeItem('tama_clsInv'); }catch(e){} return; }
+  if($$('.overlay.show').length){ setTimeout(maybeClassInvite,5000); return; }   // ほかの画面（使い方など）が閉じてから
+  clsInvShown=true;
+  const has=myCourseNames().some(n=>normAns(n)===normAns(v.n)), D=['','月','火','水','木','金'], sl=v.s?D[+v.s.split('-')[0]]+v.s.split('-')[1]+'限':'';
+  $('#memSheet').innerHTML=`<div class="rinfo" style="text-align:center"><div style="font-size:44px;margin:4px 0 6px">📚</div><h2 class="pstitle">「${esc(v.n)}」の授業のコミュニティに招待されています</h2>
+    <p class="psdesc">同じ授業の人と、課題・テスト・休講の情報交換ができます。${has?'':sl?`時間割の<b style="color:var(--ink)">${esc(sl)}</b>にこの授業が入ります。`:''}</p>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="acceptClassInvite()">${has?'コミュニティに入る':'時間割に入れて入る'}</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers();try{localStorage.removeItem('tama_clsInv')}catch(e){}">あとで（「📚 授業」からも入れます）</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function acceptClassInvite(){
+  let v=null; try{ v=JSON.parse(localStorage.getItem('tama_clsInv')||'null'); localStorage.removeItem('tama_clsInv'); }catch(e){}
+  closeMembers(); if(!v||!v.n)return;
+  if(!myCourseNames().some(n=>normAns(n)===normAns(v.n))){
+    // その曜日・時限が空いていれば、時間割に入れる（別の授業が入っていたら、上書きせずに時間割を開いてもらう）
+    if(!v.s||(myTimetable[v.s]&&normAns(myTimetable[v.s])!==normAns(v.n))||!sb||timetableMissing){ toast(`🗓 時間割に「${esc(v.n)}」を入れると、コミュニティに入れます`); openTimetable(); return; }
+    const slots={...myTimetable,[v.s]:v.n}, row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=myRooms;
+    const {error}=await sb.from(T('timetable')).upsert(row);
+    if(error){ toast('時間割に入れられませんでした'); return; }
+    myTimetable=slots; renderMyPresence(); loadSamePeers(); loadCommonCount(true);
+  }
+  await loadClassRooms(); openClassRoom(v.n);
+}
 async function openClassRoom(name){
   if(!profile){ toast('先にプロフィールを登録してね'); return; }
   if(classMissing){ toast('授業のコミュニティは準備中です'); return; }
@@ -4950,7 +5010,7 @@ function renderClassList(){
       <span>✓ オーナーはいません。運営が見守っています</span></div>`
     +(classMissing?'<div class="cmnote">⚠️ 授業のコミュニティは準備中です。もう少しお待ちください</div>':'')
     +head('参加中',inn)+head('まだ入っていない授業',out)
-    +`<div style="padding:6px 16px 18px"><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="openTimetable()">🗓 時間割に授業を足す・直す</button></div>`;
+    +`<div style="padding:6px 16px 18px"><button class="btn btn-primary" style="width:100%;padding:12px;font-size:13.5px;margin-bottom:8px" onclick="openClassInvitePick()">📨 授業の人をちかくに誘う<small style="display:block;font-size:11px;font-weight:500;opacity:.9">授業のLINEなどに貼るリンク。押すだけで同じ授業のコミュニティに入れます</small></button><button class="btn btn-ghost" style="width:100%;padding:12px;font-size:13.5px" onclick="openTimetable()">🗓 時間割に授業を足す・直す</button></div>`;
 }
 // 多摩祭の日か（tamasaiDay は後ろの const なので、読み込みの途中で呼ばれても落ちないように）
 function fesDayNow(){ try{ return tamasaiDay(); }catch(e){ return false; } }
@@ -5415,6 +5475,7 @@ async function openRoomInfo(){
     ${canModRoom(r)?`<button class="rbtn" onclick="openRoomNoticeEdit()">📌 お知らせを${r.notice?'変える・消す':'出す'}<small>部屋のいちばん上に固定で出ます（休講・テストの案内など）</small></button>`:''}
     ${canModRoom(r)&&!owner?`<button class="rbtn" onclick="openRoomTextEdit()">✏️ 部屋の説明を変える<small>${isAdmin?'運営として変えます':'ひとこと・ルール'}</small></button>`:''}
     ${joined&&!owner?`<button class="rbtn" onclick="closeMembers();leaveRoomV2()">🚪 退出する</button>`:''}
+    ${joined&&isOfficialClassRoom(r)?`<button class="rbtn" onclick="closeMembers();openClassInvite('${jsq(r.name||'')}')">📨 この授業の人を誘う<small>授業のLINEなどに貼るリンク。押すだけでこのコミュニティに入れます</small></button>`:''}
     ${owner?'':isOfficialClassRoom(r)?`<button class="rbtn" onclick="openRoomContact()">📮 運営に連絡<small>困った投稿・要望など。運営だけが読みます</small></button>`
       :`<button class="rbtn warn" onclick="reportRoom()">⚠ このコミュニティを運営に知らせる<small>ルール違反・危ない部屋など</small></button>`}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
@@ -5784,7 +5845,7 @@ const HELP={
     can:['課題・テスト・休講の情報交換に。同じ授業名なら、曜日・時限が違っても1つの部屋です','授業中は、ホームのいちばん上に「いまの授業のコミュニティ」が出ます','参加者のうち共通点のある人が上に出ます。プロフィールから「👋 いいね」できます','困った投稿・要望は、部屋の「ⓘ」→「📮 運営に連絡」から'],
     see:'オーナーはいません。運営が見守っていて、ルールに合わない投稿は消したり、退出してもらったりすることがあります。投稿は参加している人だけが読めます。',
     tip:'時間割に授業を入れるほど、入れる授業のコミュニティが増えます。'},
-  ct:{icon:'⏰',title:'ちかくタイム',lead:'週に2〜3回、平日の休み時間のどこかで始まる、10分だけのお題です。いつ始まるかは決まっていません。',
+  ct:{icon:'⏰',title:'ちかくタイム',lead:'毎週 月・水・木の13:00（昼休み）に始まる、10分だけのお題です。学食でみんなで開くと、同じ答えの人がその場で見つかります。',
     can:['始まると通知が届きます。2つのうち1つを選ぶだけです','10分のあいだに答えた人どうしで、同じ答えの人がその日だけの共通点として「ホーム」に出ます','終わってから1時間は、みんなの答えの割合が見られます（5人以上が答えた時）'],
     see:'あなたの答えは、その日だけプロフィールに出ます。答えられるのは1回で、あとから変えられません。',
     tip:'通知がいらない時は、マイページの「通知の種類」でちかくタイムだけオフにできます。'},
@@ -6971,6 +7032,14 @@ async function loadCt(force){
   }catch(e){}
 }
 // live＝答えられる10分、after＝終わってから1時間（結果を出す）、day＝その日のうち（共通点だけ残す）
+// ちかくタイムは毎週 月・水・木の13:00（2026-10-20 あおの決定。supabase/tama_ct_fixed.sql）。決まった時刻なので、その日の朝から予告を出す
+const CT_FIXED={days:[1,3,4],at:'13:00',label:'月・水・木 13:00'};
+function ctPreHTML(){
+  if(fesDayNow())return '';
+  const now=Date.now(), j=new Date(now+9*3600000), dow=j.getUTCDay(), hm=j.toISOString().slice(11,16);
+  if(!CT_FIXED.days.includes(dow)||hm>=CT_FIXED.at||(ctCur&&jstDayOf(Date.parse(ctCur.starts_at))===jstDayOf(now)))return '';
+  return `<div class="ctline">⏰ 今日 <b>${CT_FIXED.at}</b> からちかくタイム（10分）。昼休みに学食で開くと、同じ答えの人がその場で見つかります</div>`;
+}
 function ctPhase(now=Date.now()){
   if(!ctCur)return null;
   const t=now-Date.parse(ctCur.starts_at);
@@ -7008,7 +7077,7 @@ function renderCt(){
   clearInterval(ctTimer); ctTimer=null;
   // 多摩祭の日は、終わってからの結果は20分だけ（ホームを短くするため。2026-10-15 案C）
   const fesHide=ph==='after'&&tamasaiDay()&&Date.now()-Date.parse(ctCur.starts_at)>(CT_MIN+20)*60000;
-  if(!profile||!ph||ph==='day'||fesHide){ el.innerHTML=''; el.className='ctcard'; return; }
+  if(!profile||!ph||ph==='day'||fesHide){ const pre=profile&&!fesHide?ctPreHTML():''; el.innerHTML=pre; el.className=pre?'ctcard pre':'ctcard'; return; }
   if(ph==='after'){
     el.className='ctcard after';
     const r=ctResultText();
@@ -8140,7 +8209,8 @@ function go(t){
   if(t==='near')loadRooms();if(t==='friends')setCmTab(cmTab);   // 2026-10-15：友達のページは「コミュニティ」（📚 授業／🏠 コミュニティ／👥 友達）
   if(t==='me'){refreshPushToggle();renderNotifSum();renderWtpRow();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
-function startLoops(){loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
+function startLoops(){setTimeout(maybeClassInvite,2500);   // 授業のコミュニティの招待のリンクから来た人（2026-10-20）
+loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   setTimeout(checkClosedNearby,15000);setInterval(()=>{if(!document.hidden)checkClosedNearby();},60000);
   loadInvite();   // 招待コード・招待した人数（2026-10-09）
   setTimeout(()=>lookSync(),9000); setInterval(()=>{ if(!document.hidden)lookSync(); },60000);   // きせかえ（すれ違い・友達・バッジ）
