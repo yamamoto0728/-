@@ -1260,6 +1260,88 @@
   html.appv button,html.appv .urow,html.appv .c,html.appv .cbrow,html.appv .ntile{transition:transform .12s ease,opacity .12s ease}
   html.appv button:active,html.appv .urow:active,html.appv .c:active,html.appv .cbrow:active{transform:scale(.96);opacity:.85}
   @media (prefers-reduced-motion:reduce){ html.appv .screen.active,#appvSplash img{animation:none} }
+  /* ---------- 📱 アプリver：デザインの決まり（2026-10-24。tama/DESIGN-app.md と同じ。UI研究の報告書の改善案4〜8） ----------
+     色はアクセント1色（押せるもの・選択中だけ）、文字はシステムフォント、一覧はカードではなく端までの行と区切り線、角丸は 8／12／16 と丸（アバター・つまみ・主ボタン）だけ */
+  .nav .appv-only{display:none}
+  .appvtop,.appvsheet{display:none}
+  html.appv{
+    --night:#ffffff;--night2:#ffffff;--surface:#ffffff;--surface2:#f2f2f6;--glass:rgba(255,255,255,.92);
+    --line:rgba(60,60,67,.16);--ink:#111418;--muted:#6b6e76;--muted2:#a3a6ad;
+    --signal:#0a8ea6;--amber:#0a8ea6;--amber-deep:#087a8f;--rose:#ff3b30;--ok:#34c759;
+    --tint:#0a8ea6;--sep:rgba(60,60,67,.16);--fill:#eeeef1}
+  @media (prefers-color-scheme: dark){ html.appv:not([data-theme="light"]){
+    --night:#000;--night2:#000;--surface:#1c1c1e;--surface2:#1c1c1e;--glass:rgba(28,28,30,.9);
+    --line:rgba(84,84,88,.55);--ink:#f2f2f7;--muted:#9a9aa1;--muted2:#6c6c72;
+    --signal:#4cc8de;--amber:#4cc8de;--amber-deep:#3ab3c8;--tint:#4cc8de;--sep:rgba(84,84,88,.55);--fill:#2c2c2e } }
+  html.appv body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;background:var(--night);letter-spacing:.02em}
+  html.appv .phone{background:var(--night)}
+  html.appv .statusbar{display:none}
+  html.appv .nav .appv-only{display:flex}
+  html.appv .nav button[data-t="cross"],html.appv .nav button[data-t="friends"],html.appv .nav button[data-t="me"]{display:none}
+  html.appv #segComm{display:none}
+  /* ホーム：地図を画面いっぱいに、ほかはシートへ */
+  html.appv #s-near>.apphead{display:none}
+  html.appv #s-near #mapWrap{position:absolute;inset:0;margin:0;height:auto;border-radius:0;border:0;z-index:0}
+  html.appv #s-near #mapWrap .maplbl,html.appv #s-near #mapWrap #nearest,html.appv #s-near #mapWrap .mapzoom,html.appv #s-near #mapWrap #mapFullBtn,html.appv #s-near #mapWrap .mapme{display:none}
+  html.appv #fesBar,html.appv #nearJump,html.appv #nowBar,html.appv #startCard,html.appv #classBar,html.appv #tamasaiCard,html.appv #locbar,html.appv #s-near .commbox,html.appv .wantrow{display:none!important}
+  html.appv .appvtop{display:flex;position:absolute;top:10px;left:12px;right:12px;z-index:500;align-items:center;gap:8px;pointer-events:none}
+  html.appv .appvtop>*{pointer-events:auto}
+  html.appv .atbtn{width:44px;height:44px;border-radius:50%;border:0;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 4px rgba(0,0,0,.14);display:grid;place-items:center;color:var(--ink);font-size:22px;cursor:pointer;flex:none}
+  html.appv .atbtn svg{width:21px;height:21px}
+  html.appv .atbtn.on{background:var(--tint);color:#fff}
+  html.appv .atpill{flex:1;min-width:0;height:36px;padding:0 14px;border-radius:18px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 4px rgba(0,0,0,.12);display:flex;align-items:center;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.appv .atpill .dot{width:8px;height:8px;border-radius:50%;background:var(--muted2);margin-right:8px;flex:none}
+  html.appv .atpill .dot.in{background:var(--ok)}
+  html.appv .appvsheet{display:flex;flex-direction:column;position:absolute;left:0;right:0;bottom:0;z-index:600;height:var(--ash-h,52%);background:var(--night);border-radius:16px 16px 0 0;box-shadow:0 -1px 0 var(--sep),0 -6px 24px rgba(0,0,0,.08);transition:height .25s cubic-bezier(.25,.8,.3,1)}
+  html.appv .appvsheet.drag{transition:none}
+  html.appv .ash-grab{flex:none;padding:7px 16px 6px;cursor:grab;touch-action:none}
+  html.appv .ash-grab i{display:block;width:36px;height:5px;border-radius:3px;background:var(--muted2);opacity:.6;margin:0 auto 8px}
+  html.appv .ash-title{font-size:20px;font-weight:700;letter-spacing:0}
+  html.appv .ash-title small{font-size:13px;font-weight:500;color:var(--muted);margin-left:8px}
+  html.appv .ash-body{flex:1;min-height:0;display:flex;flex-direction:column}
+  html.appv .ash-body>.scroll{padding-bottom:16px}
+  /* いまの状態（1タップ） */
+  html.appv .astat{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 12px;scrollbar-width:none}
+  html.appv .astat::-webkit-scrollbar{display:none}
+  html.appv .astat button{flex:none;height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--sep);background:var(--night);color:var(--ink);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+  html.appv .astat button.on{background:var(--tint);border-color:var(--tint);color:#fff}
+  /* 切りかえ（友達／すれ違い／近く） */
+  html.appv .aseg{display:flex;margin:4px 16px 4px;padding:2px;border-radius:9px;background:var(--fill)}
+  html.appv .aseg button{flex:1;height:32px;border:0;border-radius:7px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+  html.appv .aseg button.on{background:var(--night);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  html.appv .apane[hidden]{display:none}
+  /* 一覧は端までの行と区切り線（カードにしない） */
+  html.appv .ulist{padding:0;gap:0}
+  html.appv .urow{background:transparent;border:0;border-radius:0;box-shadow:none;margin:0;padding:12px 16px;border-bottom:1px solid var(--sep)}
+  html.appv .urow:last-child{border-bottom:0}
+  html.appv .urow .av{box-shadow:none}
+  html.appv .ctcard,html.appv .daily{background:var(--surface2);border:0;border-radius:12px;box-shadow:none;margin:4px 16px 10px}
+  html.appv .listhead{padding:16px 16px 6px;font-size:13px;color:var(--muted);font-weight:600}
+  /* 時間割タブ */
+  html.appv .att{padding:4px 16px 24px;display:flex;flex-direction:column;gap:20px}
+  html.appv .att h3{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 6px}
+  html.appv .attday{display:flex;flex-direction:column}
+  html.appv .attrow{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--sep)}
+  html.appv .attrow:last-child{border-bottom:0}
+  html.appv .attrow .p{width:44px;flex:none;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.3}
+  html.appv .attrow .p b{display:block;font-size:17px;color:var(--ink)}
+  html.appv .attrow .n{flex:1;min-width:0;font-size:16px;font-weight:600}
+  html.appv .attrow .n small{display:block;font-size:13px;font-weight:400;color:var(--muted)}
+  html.appv .attrow.now .p b{color:var(--tint)}
+  html.appv .attgrid{display:grid;grid-template-columns:28px repeat(5,1fr);gap:4px;font-size:11px}
+  html.appv .attgrid .h{text-align:center;color:var(--muted);font-weight:600;padding:2px 0}
+  html.appv .attgrid .pp{color:var(--muted);text-align:center;padding-top:8px;font-variant-numeric:tabular-nums}
+  html.appv .attgrid .c{min-height:52px;border-radius:8px;background:var(--fill);padding:5px;font-size:11px;line-height:1.3;overflow:hidden;color:var(--ink)}
+  html.appv .attgrid .c.f{background:color-mix(in srgb,var(--tint) 16%,transparent)}
+  html.appv .attgrid .c.today{outline:1.5px solid var(--tint)}
+  html.appv .attempty{padding:40px 8px;text-align:center;color:var(--muted);font-size:15px;line-height:1.7}
+  /* 2026-10-24 見直し：シートの中の「AIっぽい印」を外す（報告書の改善案6） */
+  html.appv .daily,html.appv .ctcard{background:var(--surface2)!important;border:0!important;box-shadow:none!important;border-radius:12px}
+  html.appv .daily .dh,html.appv .daily.q .dqh,html.appv .daily .dh *{color:var(--muted)}
+  html.appv #ashBody .qhelp{display:none}
+  html.appv .attgrid .c{background:transparent;border:1px solid var(--sep)}
+  html.appv .attgrid .c.f{background:color-mix(in srgb,var(--tint) 14%,transparent);border-color:transparent}
+  html.appv .attgrid .c.today{outline:0;border:1.5px solid var(--tint)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -1370,6 +1452,9 @@
       </div>
     </section>
     <section class="screen" id="s-near">
+      <!-- 📱 アプリverのホーム（2026-10-24）：地図を画面いっぱいに出し、隅にプロフィール・隠れる・自分の位置のボタン、下にシート。中身は appvLayout が移す -->
+      <div class="appvtop" id="appvTop" hidden></div>
+      <div class="appvsheet" id="appvSheet" hidden><div class="ash-grab" id="ashGrab"><i></i><div class="ash-title" id="ashTitle"></div></div><div class="ash-body" id="ashBody"></div></div>
       <div class="apphead"><h1>ホーム<button class="qhelp" onclick="openHelp('near')" aria-label="ホームの説明">?</button></h1><span class="sub" id="nearSub">&mdash;</span></div>
       <!-- 見出しより下は画面ごとスクロールする（地図の下の一覧だけがスクロールすると、スマホでは残りが狭くて動かしづらかったため） -->
       <div class="scroll">
@@ -1443,6 +1528,11 @@
         <div id="myPresence"></div>
       </div>
     </section>
+    <!-- 📱 アプリverの「時間割」タブ（2026-10-24。renderAppvTT） -->
+    <section class="screen" id="s-tt">
+      <div class="apphead"><h1>時間割</h1><button class="headbtn" onclick="openTimetable()">編集</button></div>
+      <div class="scroll" id="appvTT"></div>
+    </section>
     <section class="screen" id="s-me">
       <div class="scroll">
         <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
@@ -1495,6 +1585,7 @@
     <button data-t="cross" onclick="go('cross')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6c0 2-1 3-1 5s1 3 3 3M16 4c0 2 1 3 1 5s-1 3-3 4"/><circle cx="7" cy="19" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg>すれ違い<span class="ndot" id="dotCross" style="display:none"></span></button>
     <button data-t="match" onclick="go('match')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/></svg>トーク<span class="ndot" id="dotMatch" style="display:none"></span></button>
     <button data-t="friends" onclick="go('friends')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.2 4.5 2.1 4.5 4.9"/></svg>コミュニティ<span class="ndot" id="dotFriends" style="display:none"></span></button>
+    <button class="appv-only" data-t="tt" onclick="go('tt')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 5v15M8 3v4M16 3v4"/></svg>時間割</button>
     <button data-t="me" onclick="go('me')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>マイページ</button>
   </nav>
   <div id="configNotice" style="position:absolute;inset:0;z-index:90;background:linear-gradient(180deg,#ffffff,#f4f7fe);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px">
@@ -1846,7 +1937,7 @@ function applyAppv(){
   const on=appVer(), root=document.documentElement;
   root.classList.toggle('appv',on);
   try{ if(on)localStorage.setItem('tama_appv','1'); else localStorage.removeItem('tama_appv'); }catch(e){}   // 次に開いた時、最初の描画からアプリverにする
-  renderAppvRow();
+  renderAppvRow(); appvLayout(on);   // ホームを地図＋シートに（2026-10-24）
 }
 setTimeout(()=>document.documentElement.classList.remove('appv-boot'),1200);   // 起動画面は一瞬だけ
 function setAppvOff(off){ try{ if(off)localStorage.setItem('tama_appv_off','1'); else localStorage.removeItem('tama_appv_off'); }catch(e){} applyAppv(); toast(off?'多摩キャンverで見ています':'📱 アプリverで見ています'); }
@@ -1871,6 +1962,139 @@ function appvBind(){
   },{passive:true});
 }
 appvBind();
+/* ---------- 📱 アプリverのホーム（2026-10-24 あおの依頼「調べたところを適用しながら画面UIを良くする。ホームの作りかえまで」） ----------
+   UI研究の報告書（D:\ちかく\reports\ちかく アプリ UI 研究.md）の改善案8・9・3より：
+   ・ホームは学内マップを画面いっぱいに。左上にプロフィール、右上に隠れる・自分の位置、真ん中に「いまどこ扱いか」の1行
+   ・下にシート（低い／半分／全画面の3段。つまみをドラッグかタップ）。中は いまの状態（1タップ）→ ちかくタイム・今日のお題 → 友達／すれ違い／近く の切りかえ
+   ・下のタブは「ちかく／トーク／時間割」の3つ（すれ違い・コミュニティ・マイページのタブは出さない。マイページは左上から）
+   ・今の部品（地図・一覧・カード）をそのまま移すだけなので、多摩キャンverに戻すと元の場所に戻る（appvLayout(false)） */
+let appvMarks=null, appvPane='', appvDetent='mid';
+function appvLayout(on){
+  const near=$('#s-near'), map=$('#mapWrap'), sc=near&&(near.querySelector(':scope>.scroll')||$('#ashBody>.scroll')), fb=$('#friendBox'), cl=$('#crossList'), ul=$('#ulist');
+  if(!near||!map||!sc||!fb||!cl||!ul)return;
+  if(!appvMarks){ const mk=el=>{ const c=document.createComment('appv'); el.parentNode.insertBefore(c,el); return c; }; appvMarks={map:mk(map),sc:mk(sc),fb:mk(fb),cl:mk(cl),ul:mk(ul)}; }
+  const navNear=document.querySelector('.nav button[data-t="near"]'), lab=navNear&&[...navNear.childNodes].reverse().find(x=>x.nodeType===3&&x.textContent.trim());
+  if(on){
+    if(map.parentNode!==near)near.insertBefore(map,$('#appvTop'));
+    if(sc.parentNode!==$('#ashBody'))$('#ashBody').appendChild(sc);
+    let st=$('#appvStat'); if(!st){ st=document.createElement('div'); st.id='appvStat'; st.className='astat'; }
+    if(st.parentNode!==sc)sc.insertBefore(st,sc.firstChild);
+    let seg=$('#appvSeg'); if(!seg){ seg=document.createElement('div'); seg.id='appvSeg'; seg.className='aseg';
+      seg.innerHTML=[['fr','友達'],['cross','すれ違い'],['near','近く']].map(([k,t])=>'<button data-p="'+k+'" onclick="setAppvPane(\''+k+'\')">'+t+'</button>').join(''); }
+    const dc=$('#dailyCard'); if(seg.previousElementSibling!==dc)dc.after(seg);
+    const pane=(k,el)=>{ let p=$('#appvPane-'+k); if(!p){ p=document.createElement('div'); p.id='appvPane-'+k; p.className='apane'; } if(el.parentNode!==p)p.appendChild(el); return p; };
+    let prev=seg; [['fr',fb],['cross',cl],['near',ul]].forEach(([k,el])=>{ const p=pane(k,el); if(p.previousElementSibling!==prev)prev.after(p); prev=p; });
+    if(lab)lab.textContent='ちかく';
+    $('#appvTop').hidden=false; $('#appvSheet').hidden=false;
+    if(!appvPane)appvPane=allFriendRows().some(r=>r.status==='accepted')?'fr':'near';
+    appvBindSheet(); setAppvPane(appvPane,true); setAppvDetent(appvDetent); renderAppvChrome(); appvWatch(); setTimeout(appvFitMap,350);
+  }else{
+    if(appvMarks.map.nextSibling!==map)appvMarks.map.after(map);
+    if(appvMarks.sc.nextSibling!==sc)appvMarks.sc.after(sc);
+    [['fb',fb],['cl',cl],['ul',ul]].forEach(([k,el])=>{ if(appvMarks[k].nextSibling!==el)appvMarks[k].after(el); });
+    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
+    if(lab)lab.textContent='ホーム';
+    $('#appvTop').hidden=true; $('#appvSheet').hidden=true;
+  }
+  if(typeof fesMap!=='undefined'&&fesMap)setTimeout(()=>{ try{ fesMap.invalidateSize(); }catch(e){} },80);
+}
+function setAppvPane(k,quiet){
+  appvPane=k;
+  $$('#appvSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===k));
+  ['fr','cross','near'].forEach(x=>{ const p=$('#appvPane-'+x); if(p)p.hidden=x!==k; });
+  if(!quiet&&appvDetent==='low')setAppvDetent('mid');
+  if(k==='fr')renderFriends(); if(k==='cross')renderCross();
+}
+// シートの高さ：low（見出しだけ）・mid（半分）・full（全画面）
+const ASH_H={low:'128px',mid:'52%',full:'calc(100% - 64px)'};
+function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'); if(s)s.style.setProperty('--ash-h',ASH_H[d]); }
+function appvBindSheet(){
+  const g=$('#ashGrab'), s=$('#appvSheet'); if(!g||!s||g.dataset.b)return; g.dataset.b='1';
+  let y0=null,h0=0,moved=false;
+  g.addEventListener('pointerdown',e=>{ y0=e.clientY; h0=s.getBoundingClientRect().height; moved=false; s.classList.add('drag'); try{ g.setPointerCapture(e.pointerId); }catch(_){} });
+  g.addEventListener('pointermove',e=>{ if(y0==null)return; const dy=e.clientY-y0; if(Math.abs(dy)>4)moved=true; s.style.setProperty('--ash-h',Math.max(96,h0-dy)+'px'); });
+  g.addEventListener('pointerup',()=>{ if(y0==null)return; s.classList.remove('drag'); const H=s.parentNode.getBoundingClientRect().height, h=s.getBoundingClientRect().height; y0=null;
+    if(!moved){ setAppvDetent(appvDetent==='full'?'mid':'full'); return; }   // タップは 半分⇔全画面
+    const r=h/H; setAppvDetent(r<.33?'low':r<.72?'mid':'full'); if(navigator.vibrate)try{ navigator.vibrate(6); }catch(_){} });
+}
+// 隠れる（1時間／今日はずっと）。位置の共有を止めるだけなので、友達や近くの人の画面では「学内にいない」と同じ見た目になり、隠れていることは相手に分からない
+const ghostInfo=()=>{ try{ const g=JSON.parse(localStorage.getItem('tama_ghost')||'null'); return g&&g.until>Date.now()?g:null; }catch(e){ return null; } };
+function openGhost(){
+  const g=ghostInfo(), left=g?Math.max(1,Math.round((g.until-Date.now())/60000)):0;
+  $('#memSheet').innerHTML='<div class="rinfo"><h2 class="pstitle">'+(g?'隠れています':'少しのあいだ隠れる')+'</h2>'
+    +'<p class="psdesc">'+(g?'あと'+left+'分で戻ります。':'隠れている間は、友達にも近くの人にも出ず、すれ違いも記録しません。友達の画面では、学内にいない時と同じに見えます。')+'</p>'
+    +(g?'<button class="btn btn-primary" style="width:100%;padding:13px" onclick="endGhost()">いま戻る</button>'
+       :'<button class="btn btn-primary" style="width:100%;padding:13px" onclick="startGhost(60)">1時間</button><button class="btn btn-ghost" style="width:100%;padding:13px;margin-top:8px" onclick="startGhost(0)">今日はずっと</button>')
+    +'<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>';
+  $('#memOverlay').classList.add('show');
+}
+async function startGhost(min){
+  const until=min?Date.now()+min*60000:jstTodayStart(Date.now()+86400000).getTime();
+  const prev=nearVisKey()==='off'?'on':nearVisKey();
+  try{ localStorage.setItem('tama_ghost',JSON.stringify({until,prev})); }catch(e){}
+  closeMembers(); if(nearVisKey()!=='off')await setNearVis('off'); renderAppvChrome();
+}
+async function endGhost(){
+  let g=null; try{ g=JSON.parse(localStorage.getItem('tama_ghost')||'null'); localStorage.removeItem('tama_ghost'); }catch(e){}
+  closeMembers(); if(nearVisKey()==='off')await setNearVis((g&&g.prev)||'on'); renderAppvChrome();
+}
+setInterval(()=>{ let g=null; try{ g=JSON.parse(localStorage.getItem('tama_ghost')||'null'); }catch(e){} if(g&&g.until<=Date.now()&&profile)endGhost(); },30000);   // 時間が来たら自動で戻る
+// 地図の上の隅と1行・シートの見出し・いまの状態
+function renderAppvChrome(){
+  if(!document.documentElement.classList.contains('appv')||!profile)return;
+  const g=ghostInfo(), top=$('#appvTop'); if(!top)return;
+  const icMe='<span style="font-size:24px;line-height:1">'+esc(profile.emoji||'🙂')+'</span>';
+  const icGhost='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 9.8 7-.4 1.2-1.4 2.8-2.9 4.2M6.2 6.3C4.2 7.7 2.7 9.7 2.2 12c.8 2.5 4.8 7 9.8 7 1.6 0 3-.4 4.3-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  const icLoc='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3 3 10.5l7.5 2.9L13.4 21z"/></svg>';
+  const left=g?Math.max(1,Math.round((g.until-Date.now())/60000)):0;
+  const where=g?'隠れています ・ あと'+left+'分':!sharing?'位置を出していません':fesOutside?'学外なので、位置は使っていません':curPlace?curPlace+'のあたり':'学内にいます';
+  const live=!g&&sharing&&!fesOutside;
+  const html='<button class="atbtn" onclick="go(\'me\')" aria-label="マイページ">'+icMe+'</button><div class="atpill"><span class="dot'+(live?' in':'')+'"></span>'+esc(where)+'</div>'
+    +'<button class="atbtn'+(g?' on':'')+'" onclick="openGhost()" aria-label="隠れる">'+icGhost+'</button><button class="atbtn" onclick="centerOnMe()" aria-label="自分の位置">'+icLoc+'</button>';
+  if(top.dataset.h!==html){ top.dataset.h=html; top.innerHTML=html; }
+  const n=typeof lastOpenCount==='number'?lastOpenCount:0;
+  const t='近く<small>'+(fesOutside?'学外にいます':'いま学内に'+n+'人')+'</small>', ti=$('#ashTitle'); if(ti&&ti.innerHTML!==t)ti.innerHTML=t;
+  const cur=statusOf(profile), st=$('#appvStat');
+  if(st){ const sh=FA.statuses.map((s,i)=>'<button class="'+(cur===s?'on':'')+'" onclick="setAppvStatus('+i+')">'+esc(s)+'</button>').join(''); if(st.dataset.h!==sh){ st.dataset.h=sh; st.innerHTML=sh; } }
+}
+function setAppvStatus(i){
+  if(!profile)return;
+  const s=FA.statuses[i], off=statusOf(profile)===s;
+  profile.fa={...(profile.fa||{}),status:off?'':s,status_until:off?null:new Date(roomExpiryAt()).toISOString()};   // 授業の時限の終わりで消える（要件定義書 v0.1）
+  publishMe(); saveMyAttrs(); renderNearby(); renderCross(); renderAppvChrome();
+  if(navigator.vibrate)try{ navigator.vibrate(6); }catch(e){}
+}
+setInterval(()=>{ if(!document.hidden)renderAppvChrome(); },5000);
+// 時間割タブ：今日の授業（いまの時限を強調）と、1週間の表（見るだけ。直すのは右上の「編集」）
+// シートの中の見出し・印の先頭の絵文字を外す（報告書の改善案6「絵文字アイコンを使わない」。中身の部品は多摩キャンverと共通なので、アプリverの時だけ表示の時に外す）
+const APPV_EMO=/^\s*(?:\p{Extended_Pictographic}|️|‍|\p{Emoji_Modifier})+\s*/u;
+function appvStripEmoji(root){
+  if(!document.documentElement.classList.contains('appv')||!root)return;
+  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago').forEach(el=>{
+    const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT); const t=w.nextNode(); if(t&&APPV_EMO.test(t.nodeValue))t.nodeValue=t.nodeValue.replace(APPV_EMO,'');
+  });
+}
+let appvObs=null;
+function appvWatch(){ const b=$('#ashBody'); if(!b||appvObs)return; appvObs=new MutationObserver(()=>appvStripEmoji(b)); appvObs.observe(b,{childList:true,subtree:true}); appvStripEmoji(b); }
+// 地図は、シートに隠れない上の部分にキャンパスが収まるように合わせる
+function appvFitMap(){
+  if(typeof fesMap==='undefined'||!fesMap||typeof fesCampusBounds==='undefined'||!fesCampusBounds)return;
+  const s=$('#appvSheet'), h=s?s.getBoundingClientRect().height:0;
+  try{ fesMap.invalidateSize(); fesMap.fitBounds(fesCampusBounds,{paddingTopLeft:[16,72],paddingBottomRight:[16,h+12]}); }catch(e){}
+}
+function renderAppvTT(){
+  const el=$('#appvTT'); if(!el)return;
+  const slots=myTimetable||{}, rooms=myRooms||{}, keys=Object.keys(slots);
+  if(!keys.length){ el.innerHTML='<div class="attempty">時間割を入れると、同じ授業の人が分かり、<br>友達といっしょに空いているコマも出ます。<br><br><button class="btn btn-primary" style="padding:12px 22px" onclick="openTimetable()">時間割を入れる</button></div>'; return; }
+  const ms=Date.now(), dow=new Date(ms+9*3600000).getUTCDay(), cs=ttCurrentSlot();
+  const today=FES.periods.map((p,i)=>({i:i+1,p,k:dow+'-'+(i+1)})).filter(x=>dow>=1&&dow<=5&&x.k in slots);
+  const dayH=today.length?today.map(x=>'<div class="attrow'+(cs&&cs.k===x.k&&cs.inClass?' now':'')+'"><div class="p"><b>'+x.i+'</b>'+x.p[0]+'</div><div class="n">'+esc(slots[x.k]||'（授業名なし）')+(rooms[x.k]?'<small>'+esc(rooms[x.k])+'</small>':'')+'</div></div>').join('')
+    :'<div class="attrow"><div class="n" style="font-weight:400;color:var(--muted)">'+(dow>=1&&dow<=5?'今日は授業がありません':'今日は休みです')+'</div></div>';
+  let grid='<div class="attgrid"><div></div>'+TT_DAYS.map(d=>'<div class="h">'+d+'</div>').join('');
+  FES.periods.forEach((p,i)=>{ grid+='<div class="pp">'+(i+1)+'</div>'; for(let d=1;d<=5;d++){ const k=d+'-'+(i+1), has=k in slots; grid+='<div class="c'+(has?' f':'')+(d===dow&&has?' today':'')+'">'+(has?esc(slots[k]||''):'')+'</div>'; } });
+  grid+='</div>';
+  el.innerHTML='<div class="att"><div><h3>今日</h3><div class="attday">'+dayH+'</div></div><div><h3>1週間</h3>'+grid+'</div></div>';
+}
 const DEV_ICON='ち';   // アイコンの値（画面ではロゴの画像 /icons/icon-192.png。古い版のアプリでは「ち」の字で出る）
 const isDev=u=>!!u&&DEVS.includes(String(u.id||(u===profile?myId:'')||'').slice(0,8));
 GRADS[DEV_ICON]=['#e8962e','#1fb3c9'];   // ロゴと同じ色（画像が出ない所の「ち」の字の背景）
@@ -6856,7 +7080,7 @@ async function saveTimetable(){
   const row={id:myId,slots,updated_at:new Date().toISOString()}; if(!roomsColMissing)row.rooms=rooms;
   const {error}=await sb.from(T('timetable')).upsert(row);
   if(error){ console.warn('[timetable] 保存できません:',error.message); toast('保存できませんでした'); return; }
-  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadClassRooms(); loadCommonCount(true); syncTTAll().then(n=>{ if(n)afterVisChange(); }); if(myClassOptions().length)misMark('tt');   // 授業のコミュニティの一覧・共通点のある人の数も新しく
+  myTimetable=slots; if(!roomsColMissing)myRooms=rooms; if($("#s-tt").classList.contains("active"))renderAppvTT(); closePlaceEdit(); renderMyPresence(); loadSamePeers(); renderRooms(); loadClassRooms(); loadCommonCount(true); syncTTAll().then(n=>{ if(n)afterVisChange(); }); if(myClassOptions().length)misMark('tt');   // 授業のコミュニティの一覧・共通点のある人の数も新しく
   toast(Object.keys(slots).length?'🗓 時間割を保存しました':'時間割を空にしました');
   if(Object.keys(slots).length)askPushSoon('tt');
 }
@@ -8274,6 +8498,8 @@ function go(t){
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
+  if(t==='tt')renderAppvTT();   // 📱 アプリverの時間割タブ（2026-10-24）
+  if(t==='near'&&document.documentElement.classList.contains('appv'))renderAppvChrome();
   if(t==='near')loadRooms();if(t==='friends')setCmTab(cmTab);   // 2026-10-15：友達のページは「コミュニティ」（📚 授業／🏠 コミュニティ／👥 友達）
   if(t==='me'){renderAppvRow();refreshPushToggle();renderNotifSum();renderWtpRow();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
