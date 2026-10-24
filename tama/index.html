@@ -2046,7 +2046,7 @@ const DEVS=['7e4dda65','cacc25fd','b5cac0fa','5267fbf2','1dc61a09','56ed5ec3'];
    ・これからの指示は「多摩キャンver」か「アプリver」のどちらか。アプリverだけの変更は、html.appv の CSS か appVer() の分岐に入れる
    ・位置情報（閉じている間のすれ違い）はブラウザのままなので変わらない。見た目と操作だけ
    ・対象の人はマイページの「📱 アプリverで見る」で、多摩キャンverと見比べられる（tama_appv_off） */
-const APPV={testers:['7e4dda65']};
+const APPV={testers:['7e4dda65','cacc25fd','b5cac0fa','5267fbf2','1dc61a09','56ed5ec3']};   // 2026-10-24 あおの依頼：多摩祭を試していた6人（あおを含む）
 function appVer(){ const n=typeof fesNo==='function'?fesNo():''; let off=false; try{ off=localStorage.getItem('tama_appv_off')==='1'; }catch(e){} return !!n&&APPV.testers.includes(n)&&!off; }
 const appvTester=()=>{ const n=typeof fesNo==='function'?fesNo():''; return !!n&&APPV.testers.includes(n); };
 function applyAppv(){
