@@ -1392,6 +1392,7 @@
   html.appv .atbtn.atlab.on{background:var(--ink);color:var(--night)}   /* 隠れている時は黒の札（自分の状態なのでアクセント色にしない） */
   html.appv .appvloc{display:grid;position:absolute;right:16px;bottom:calc(var(--ash-h,52%) + 12px);z-index:500;transition:bottom .25s cubic-bezier(.25,.8,.3,1)}
   html.appv .appvloc svg{width:20px;height:20px;color:var(--tint)}
+  html.appv #s-near[data-detent="full"] .appvloc{opacity:0;pointer-events:none}   /* シートを一番上まで上げた時は、右上の「隠れる」と重なるので消す */
   /* ピン：友達はしずく形（建物を指す）、自分は自分の色の輪、ほかの人は小さく */
   html.appv .pmk{position:relative;border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.12),0 3px 8px rgba(0,0,0,.14);font-size:13px}
   html.appv .pmk.fr,html.appv .pmk.me{font-size:22px;border-width:3px}
@@ -2125,7 +2126,7 @@ function setAppvPane(k,quiet){
 }
 // シートの高さ：low（見出しだけ）・mid（半分）・full（全画面）
 const ASH_H={low:'118px',mid:'52%',full:'calc(100% - 64px)'};
-function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'), n=$('#s-near'); if(s)s.style.removeProperty('--ash-h'); if(n)n.style.setProperty('--ash-h',ASH_H[d]); }
+function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'), n=$('#s-near'); if(s)s.style.removeProperty('--ash-h'); if(n){ n.style.setProperty('--ash-h',ASH_H[d]); n.dataset.detent=d; } }
 function appvBindSheet(){
   const g=$('#ashGrab'), s=$('#appvSheet'); if(!g||!s||g.dataset.b)return; g.dataset.b='1';
   let y0=null,h0=0,moved=false;
@@ -4019,6 +4020,16 @@ function renderCross(){
     ?`<div class="nearsec" style="padding-left:6px;margin-top:8px">前の日にすれ違った人 <span class="cnt">${past.length}人</span></div>`+past.slice(0,50).map(row).join('')
     :`<button class="btn btn-ghost nearmore" onclick="openCrossPast()">🕘 前の日にすれ違った人を見る（${past.length}人）</button>`;
   if(!arr.length){ ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>今日はまだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`+pastH; return; }
+  // 📱 アプリver（2026-10-24 要件 A4「共通点がある人と2回以上の人だけ前に、残りは数だけ」）：
+  // 共通点のある人・これまで2回以上すれ違った人だけを並べ、ほかの人は「ほかに◯人」の1行にまとめる（押すと全員を出す）
+  if(appvOn()&&!crossShowAll){
+    const key=arr.filter(u=>u.count>=2||commonWith(u).length), rest=arr.length-key.length;
+    const restH=rest?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">${key.length?'ほかに':''}${rest}人とすれ違いました（すべて見る）</button>`:'';
+    ul.innerHTML=key.length
+      ?`<div class="nearsec" style="padding-left:6px">共通点のある人・また会えた人 <span class="cnt">${key.length}人</span></div>`+key.slice(0,CROSS_LIMIT).map(row).join('')+restH+pastH
+      :`<div class="empty"><p>今日は${arr.length}人とすれ違いました。<br>共通点のある人や、2回目にすれ違った人がいると、ここに出ます。</p></div>`+restH+pastH;
+    return;
+  }
   const shown=crossShowAll?arr:arr.slice(0,CROSS_LIMIT), more=arr.length-shown.length;
   ul.innerHTML=`<div class="nearsec" style="padding-left:6px">今日すれ違った人 <span class="cnt">${arr.length}人</span></div>`+shown.map(row).join('')
     +(more>0?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">もっと見る（あと${more}人）</button>`:'')+pastH;
