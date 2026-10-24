@@ -1375,7 +1375,7 @@
     --signal:#08809a;--amber:#08809a;--amber-deep:#066c82;
     --me:#f47b20;
     --float:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.10);
-    --map-out:#e9e6df;--map-ground:#f7f3ea;--map-edge:#a99a78;--map-green:#dcebcb;--map-field:#cfe5bd;--map-water:#c4e0f0;
+    --map-out:#ffffff;--map-ground:#f7f3ea;--map-edge:#a99a78;--map-green:#dcebcb;--map-field:#cfe5bd;--map-water:#c4e0f0;
     --map-road:#ffffff;--map-road-case:#e3dccb;--map-bld:#ffffff;--map-bld-line:#d9d0bd;--map-bld-shadow:#b9ae95;--map-label:#4a4436}
   @media (prefers-color-scheme: dark){ html.appv:not([data-theme="light"]){
     --tint:#4cc8de;--on-tint:#00222a;--me:#ff9a4d;
@@ -2053,6 +2053,7 @@ function applyAppv(){
   const on=appVer(), root=document.documentElement;
   root.classList.toggle('appv',on);
   try{ if(on)localStorage.setItem('tama_appv','1'); else localStorage.removeItem('tama_appv'); }catch(e){}   // 次に開いた時、最初の描画からアプリverにする
+  const was=root.dataset.appvMap; if(was!==String(on)){ root.dataset.appvMap=String(on); recolorMap(); }   // 地図の色もアプリverに合わせる
   renderAppvRow(); appvLayout(on);   // ホームを地図＋シートに（2026-10-24）
 }
 setTimeout(()=>document.documentElement.classList.remove('appv-boot'),1200);   // 起動画面は一瞬だけ
@@ -3658,11 +3659,11 @@ function initMap(){
   fesMap.attributionControl.setPrefix(false);
   // 地図はイラストだけ（航空写真はどれが何の建物か分かりにくいため）。
   // campus-geo.js が読めなかった時だけ、代わりに国土地理院の航空写真を映す（画像はズーム18まで）
-  if(window.CAMPUS_GEO){ buildIllust().addTo(fesMap); }
+  if(window.CAMPUS_GEO){ fesIllust=buildIllust().addTo(fesMap); }
   else{ fesMap.setMaxZoom(18); L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',{maxZoom:18,attribution:GSI_ATTR}).addTo(fesMap); }
   // キャンパスの外を白く覆って、キャンパスだけが見えるようにする（世界全体の四角にキャンパスの形の穴をあける）
-  L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{stroke:false,fillColor:mapC('--map-out','#f4f7fe'),fillOpacity:.95,interactive:false}).addTo(fesMap);
-  L.polygon(CAMPUS,{color:mapC('--map-edge','#0fb0cd'),weight:appvOn()?2:2.5,fill:false,interactive:false}).addTo(fesMap);
+  fesOutMask=L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{stroke:false,fillColor:mapC('--map-out','#f4f7fe'),fillOpacity:.95,interactive:false}).addTo(fesMap);
+  fesEdge=L.polygon(CAMPUS,{color:mapC('--map-edge','#0fb0cd'),weight:appvOn()?2:2.5,fill:false,interactive:false}).addTo(fesMap);
   fesMap.fitBounds(bounds,{padding:[6,6]});
   fesMap.setMinZoom(fesMap.getZoom());   // キャンパス全体より引いて見られないようにする
   // 建物名は人のアイコンより下に描く（名前でアイコンが隠れないように）
@@ -3706,6 +3707,16 @@ function inRing(lat,lng,ring){
 }
 // キャンパスのイラスト地図を描く。どこまで拡大してもくっきり見えるよう、画像ではなく図形で描く
 let illustRoads=[];
+// 地図を描いたあとにアプリverが切りかわった時（ログインの後で対象と分かった時など）に、地図の色を塗り直す（2026-10-24）
+let fesIllust=null, fesOutMask=null, fesEdge=null;
+function recolorMap(){
+  if(typeof fesMap==='undefined'||!fesMap)return;
+  try{
+    if(fesOutMask)fesOutMask.setStyle({fillColor:mapC('--map-out','#f4f7fe')});
+    if(fesEdge)fesEdge.setStyle({color:mapC('--map-edge','#0fb0cd'),weight:appvOn()?2:2.5});
+    if(fesIllust&&window.CAMPUS_GEO){ fesMap.removeLayer(fesIllust); fesMap.off('zoomend',styleIllustRoads); fesIllust=buildIllust().addTo(fesMap); }
+  }catch(e){}
+}
 // 地図の色（アプリverは CSS の --map-* から読む。それ以外は今までの色）
 function mapC(k,fb){ if(!appvOn())return fb; const v=getComputedStyle(document.documentElement).getPropertyValue(k).trim(); return v||fb; }
 function buildIllust(){
