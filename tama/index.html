@@ -1466,6 +1466,7 @@
 <script src="/tama/daily-qs.js"></script>
 <script src="/tama/courses-shakai.js"></script>
 <script src="/tama/artists.js"></script>
+<script src="/tama/rooms-tama.js"></script>
 <script src="/tama/tamasai.js"></script>
 </head>
 <body>
@@ -6965,7 +6966,7 @@ function openPlaceEdit(auto){
       <div class="field"><label>いまの状態（1つ・${until}ごろに消えます）</label><div class="chips" id="psStatus"></div></div></div>`;
   const friends=`<div class="pssec"><div class="psh">👥 友達だけに見える</div>
       <div class="field"><label>建物</label><select id="psPlace"><option value="">（建物の外）</option>${opts.map(n=>`<option${n===p.place?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
-      <div class="field"><label>教室・場所（任意）</label>${roomCand}<input id="psRoom" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
+      <div class="field"><label>教室・場所（任意）</label>${roomCand}<input id="psRoom" data-sugg="room" maxlength="16" placeholder="例：401、2階ラウンジ" value="${act?esc(p.room||''):''}"></div>
       <div class="field"><label>いまのメモ<span class="opt">任意・友達にだけ見えます</span></label><input id="psNote" maxlength="20" placeholder="例：授業中、図書館で課題" value="${act?esc(p.note||''):''}">
         <div class="chips psquick">${['授業中','休憩中','ごはん中','課題中'].map(s=>`<span class="c" onclick="putInInput($('#psNote'),'${s}')">${s}</span>`).join('')}</div>
         <div class="hint">教室・メモは <b>${until}ごろ</b>か、建物を出ると消えます</div></div>
@@ -7245,7 +7246,7 @@ function renderTimetable(){
     ${grid}
     ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
       <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
-      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input data-sugg="course" maxlength="48" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>${ttFixHTML(k)}`).join('')}</div>`:''}
+      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input data-sugg="course" maxlength="48" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" data-sugg="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>${ttFixHTML(k)}`).join('')}</div>`:''}
     <div class="edbar"><button class="btn btn-ghost" onclick="closeTimetable()">閉じる</button><button class="btn btn-primary" onclick="saveTimetable()">保存する</button></div>`;
 }
 // 授業名を入れたコマを押した時は、名前ごと消えてしまうので確かめる
@@ -8074,6 +8075,14 @@ function artistList(q){
   return ARTISTS.concat(extra).map(e=>({v:e[0],s:nameScore(n,e)})).filter(o=>o.s>=MATCH_MIN)
     .sort((a,b)=>b.s-a.s||cnt(b.v)-cnt(a.v)).slice(0,8).map(o=>o.v);
 }
+// 教室（tama/rooms-tama.js。2026-10-24 あおの依頼「時間割の教室名も予測変換的な機能を。例）社会A301、B301」）。1件は [名前, 号館・略した呼び方…]、入るのは名前。
+// 教室は似た番号が多いので、近さではなく「打った文字で始まる・含む・順番どおりに入っている」ものだけを、近い順に出す（1文字から。「301」→ 社会A301・B301・福祉301…）
+const ROOMS=typeof CAMPUS_ROOMS!=='undefined'?CAMPUS_ROOMS:[];
+function roomList(q){
+  const n=normAns(q); if(!n)return [];
+  return ROOMS.map((e,i)=>({v:e[0],i,s:(s=>s>=1?s:e.some(k=>isSubseq([...n],[...normAns(k)]))?0.5:0)(nameScore(n,e))}))
+    .filter(o=>o.s>=0.5).sort((a,b)=>b.s-a.s||a.i-b.i).slice(0,8).map(o=>o.v);
+}
 // その名前を入れている人数（書き方のゆれはまとめる）
 function suggCount(kind,v){ return (suggestNN[kind]||{})[normAns(v)]||0; }
 // 候補の並び：打った文字で始まる → 打った文字を含む → 略した書き方（文字が順番どおりに入っている）。それぞれの中は多い順（関数の返した順）。
@@ -8081,6 +8090,7 @@ function suggCount(kind,v){ return (suggestNN[kind]||{})[normAns(v)]||0; }
 // 略した書き方は2文字以上打った時だけ（1文字だと何にでも当たるため）。同じものはもう入っているので出さない
 function suggList(kind,q){
   if(kind==='course'&&normAns(q)){ const off=officialList(q); if(off.length)return off; }   // 正式名称が見つかれば、それだけ出す
+  if(kind==='room')return roomList(q);   // 教室（法政 多摩キャンパスの教室の一覧から）
   if(kind==='shop')return shopList(q);   // 多摩祭のおすすめの出店（FES.tamasai.shops から、打った文字に近い順）
   if(kind==='artist'){ const a=artistList(q); if(a)return a; }   // 2文字からは、主要なアーティストとみんなが入れた名前を近い順に
   const all=suggestData[kind]||[], n=normAns(q);
@@ -8093,7 +8103,7 @@ function showSugg(inp){
   const list=suggList(inp.dataset.sugg,inp.value); if(!list.length)return;
   const box=document.createElement('div'); box.className='sugg';
   const off=inp.dataset.sugg==='course'&&list.length&&list.every(isOfficial);
-  box.innerHTML=`<span class="sh">${off?'📘 正式な授業名（押すと入ります。同じ授業の人と名前がそろいます）':inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>{ const n=suggCount(inp.dataset.sugg,v); return `<button type="button"${off?' class="off"':''}>${esc(v)}${n?`<small>${n}人</small>`:''}</button>`; }).join('');
+  box.innerHTML=`<span class="sh">${off?'📘 正式な授業名（押すと入ります。同じ授業の人と名前がそろいます）':inp.dataset.sugg==='room'?'🏫 教室の候補（押すと入ります）':inp.value.trim()?'💡 候補（押すと入ります）':'💡 みんなが入れているもの（押すと入ります）'}</span>`+list.map(v=>{ const n=suggCount(inp.dataset.sugg,v); return `<button type="button"${off?' class="off"':''}>${esc(v)}${n?`<small>${n}人</small>`:''}</button>`; }).join('');
   box.querySelectorAll('button').forEach((b,i)=>{
     b.addEventListener('pointerdown',e=>e.preventDefault());   // 押した時に入力欄からフォーカスが外れて、候補が先に消えないように
     b.addEventListener('click',()=>{ inp.value=list[i]; inp.dispatchEvent(new Event('input',{bubbles:true})); hideSugg(); inp.blur(); });
