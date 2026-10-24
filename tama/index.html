@@ -2053,7 +2053,7 @@ function applyAppv(){
   const on=appVer(), root=document.documentElement;
   root.classList.toggle('appv',on);
   try{ if(on)localStorage.setItem('tama_appv','1'); else localStorage.removeItem('tama_appv'); }catch(e){}   // 次に開いた時、最初の描画からアプリverにする
-  const was=root.dataset.appvMap; if(was!==String(on)){ root.dataset.appvMap=String(on); recolorMap(); }   // 地図の色もアプリverに合わせる
+  const was=root.dataset.appvMap; if(was!==String(on)){ root.dataset.appvMap=String(on); recolorMap(); if(profile){ loadLocShares(); savePresence(); } }   // 地図の色・居場所の見せ方（選んだ友達だけ）もアプリverに合わせる   // 地図の色もアプリverに合わせる
   renderAppvRow(); appvLayout(on);   // ホームを地図＋シートに（2026-10-24）
 }
 setTimeout(()=>document.documentElement.classList.remove('appv-boot'),1200);   // 起動画面は一瞬だけ
@@ -2085,7 +2085,7 @@ appvBind();
    ・下にシート（低い／半分／全画面の3段。つまみをドラッグかタップ）。中は いまの状態（1タップ）→ ちかくタイム・今日のお題 → 友達／すれ違い／近く の切りかえ
    ・下のタブは「ちかく／トーク／時間割」の3つ（すれ違い・コミュニティ・マイページのタブは出さない。マイページは左上から）
    ・今の部品（地図・一覧・カード）をそのまま移すだけなので、多摩キャンverに戻すと元の場所に戻る（appvLayout(false)） */
-let appvMarks=null, appvPane='', appvDetent='mid';
+let appvMarks=null, appvPane='', appvDetent='low';   // 開いた時はシートを低くして、地図を大きく（2026-10-24 あお「開いたらすぐマップ」）
 function appvLayout(on){
   const near=$('#s-near'), map=$('#mapWrap'), sc=near&&(near.querySelector(':scope>.scroll')||$('#ashBody>.scroll')), fb=$('#friendBox'), cl=$('#crossList'), ul=$('#ulist');
   if(!near||!map||!sc||!fb||!cl||!ul)return;
@@ -2123,7 +2123,7 @@ function setAppvPane(k,quiet){
   if(k==='fr')renderFriends(); if(k==='cross')renderCross();
 }
 // シートの高さ：low（見出しだけ）・mid（半分）・full（全画面）
-const ASH_H={low:'128px',mid:'52%',full:'calc(100% - 64px)'};
+const ASH_H={low:'118px',mid:'52%',full:'calc(100% - 64px)'};
 function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'), n=$('#s-near'); if(s)s.style.removeProperty('--ash-h'); if(n)n.style.setProperty('--ash-h',ASH_H[d]); }
 function appvBindSheet(){
   const g=$('#ashGrab'), s=$('#appvSheet'); if(!g||!s||g.dataset.b)return; g.dataset.b='1';
@@ -2364,7 +2364,7 @@ async function tryResumeSession(){
     try{ localStorage.setItem('tama_pushReady','1'); }catch(e){}
     setTimeout(autoAskPush,1500);
     // 属性を追加する前に登録した人は必須項目が空で、誰とも共通点が出ないので入力してもらう
-    if(attrMissing(attrStateFrom(profile.fa))) setTimeout(()=>{ toast('多摩キャン版のプロフィール項目が増えました。入力をお願いします'); openEdit(); },900);
+    if(attrMissing(attrStateFrom(profile.fa))) setTimeout(()=>{ if(appvOn())return; toast('多摩キャン版のプロフィール項目が増えました。入力をお願いします'); openEdit(); },900);
     maybeShowGuide(data.guide_seen===true);
     visitOpen();
     return true;
@@ -2515,7 +2515,9 @@ const PUSH_WHY={
   fes:['ちかくタイムを<br>通知で知らせます','多摩祭の日は、12:30・15:30（18日は花火の前の17:45も）に10分だけのお題をお知らせします。いいね・メッセージも届きます。'],
 };
 function setPushWhy(k){ if(typeof tamasaiDay==='function'&&tamasaiDay()&&['open','daily','tt','near'].includes(k))k='fes'; const [h,p]=PUSH_WHY[k]||PUSH_WHY.wave; const H=$('#pushGateH'), P=$('#pushGateP'); if(H)H.innerHTML=h; if(P)P.textContent=p; }
-function askPushSoon(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} setTimeout(autoAskPush,1200); }
+// 📱 アプリverは、開いた時に通知の許可を聞かない（2026-10-24 あおの依頼「開いたらすぐマップが出るように」）。いいねを送った後など、意味が分かる場面（askPushSoon）からだけ聞く
+let pushAskCtx=false;
+function askPushSoon(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} pushAskCtx=true; setTimeout(autoAskPush,1200); }
 // ボタンを押した直後に聞く（押した直後なので、iPhoneでもそのまま端末の許可画面を出せる）
 function askPushNow(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} pushGateSkipped=false; openPushGate(); requestPushPermission(); }
 // まだ許可も拒否もしていない（＝聞いてよい）か
@@ -2528,6 +2530,8 @@ function emptyPushHTML(){
   return '';
 }
 async function autoAskPush(){
+  if(appvOn()&&!pushAskCtx) return;   // 📱 アプリverは開いた時には聞かない
+  pushAskCtx=false;
   // iPhoneでSafariのタブのまま開いている場合は Notification 自体が無いので、ここで止まる（ホーム画面への追加案内は別にある）
   if(!pushSupported()) return;
   if(isIOS()&&!isStandalone()) return;
@@ -4092,6 +4096,11 @@ async function sendWave(u,text){
     // 相手が先にいいねしていた → おたがいにいいねになり、トークが始まる
     const opener=[{from:uid,text:data.reason||(theirs&&theirs.text)||'',at:Date.parse(data.created_at)||now-1},{from:myId,text,at:now}].filter(x=>x.text);
     await createMatch(uid,false,now,data.reason,opener);
+    // 📱 アプリverは「いいね → 友達」の2段（2026-10-24 要件 A1）。友達になれたら、24時間トークではなく友達のトークを開く
+    if(appvOn()&&!restarting){ let fs=null; try{ ({data:fs}=await sb.rpc('tama_friend_from_like',{p_other:uid})); }catch(e){}
+      if(fs==='ok'){ await loadFriends();
+        notifyPush(uid,'👥 '+me+'さんと友達になりました','おたがいにいいねしました。トークで話しかけてみよう',{kind:'friend',go:'chat',u:myId,tag:'fr-'+myId});
+        toast('👥 '+esc(tu.name||'')+'さんと友達になりました。居場所を見せるかは、プロフィールで選べます'); openChat(uid,'friends'); return; } }
     notifyPush(uid,restarting?'💬 '+me+'さんが、もう一度話したいようです':'💬 '+me+'さんがいいねを返しました',restarting?'トークがまた24時間ひらきました':'トークが始まりました（24時間）。最初の一言を送ってみよう',{kind:'like',go:'chat',u:myId,tag:'like-'+myId,badge:true});
     toast(restarting?'💬 トークを始め直しました（24時間）':'💬 おたがいにいいね！トークが始まりました（24時間）');
     openChat(uid,'match');
@@ -6605,12 +6614,35 @@ async function restoreMyPresence(){
   finally{ myPresenceLoaded=true; renderMyPresence(); }
 }
 // force：共有を止めた時に「建物の外」を書く1回だけ。共有をOFFにしている間はそれ以外に何も送らない
+/* ---------- 📱 居場所を見せる相手を友達ごとに選ぶ（2026-10-24 要件定義書 v0.1 の A2・A3。supabase/tama_appv_friends.sql） ----------
+   アプリverの人は、友達になっただけでは居場所（建物・教室・ひとこと・地図の位置）が見えない。友達のプロフィールの「居場所を見せる」をオンにした相手にだけ見える。
+   会って3分間のコードで友達になった2人は、サーバーがおたがいに「見せる」をオンにする。多摩キャンverの人は今まで通り友達全員に見える */
+let presShareModeMissing=false, locSharesTo=new Set(), locShareMissing=false;
+async function loadLocShares(){
+  if(!sb||!myId||String(myId).startsWith('local-')||locShareMissing)return;
+  const {data,error}=await sb.from(T('loc_shares')).select('owner_id,friend_id').eq('owner_id',myId);
+  if(error){ if(isSchemaErr(error))locShareMissing=true; return; }
+  locSharesTo=new Set((data||[]).map(r=>r.friend_id));
+}
+async function toggleLocShare(id){
+  if(locShareMissing||!sb){ toast('この機能はまだ準備中です'); return; }
+  const on=!locSharesTo.has(id);
+  const q=on?sb.from(T('loc_shares')).insert({owner_id:myId,friend_id:id}):sb.from(T('loc_shares')).delete().eq('owner_id',myId).eq('friend_id',id);
+  const {error}=await q;
+  if(error){ console.warn('[loc] 見せる設定を保存できません',error.message); toast('保存できませんでした'); return; }
+  if(on)locSharesTo.add(id); else locSharesTo.delete(id);
+  const u=friendUser(id); toast(on?esc(u?u.name:'')+'さんに、学内での居場所を見せます':esc(u?u.name:'')+'さんには、居場所を見せません');
+  refreshSheetFriendBtn(id);
+}
 async function savePresence(force){
   if(!sb||!myId||String(myId).startsWith('local-')||friendTablesMissing)return;
   if(!sharing&&!force)return;
   lastPresenceSave=Date.now();
-  const {error}=await sb.from(T('presence')).upsert({id:myId,place:myPresence.place,room:myPresence.room||null,note:myPresence.note||null,
-    visibility:myPresence.visibility,expires_at:myPresence.expires_at,updated_at:new Date().toISOString()});
+  const row={id:myId,place:myPresence.place,room:myPresence.room||null,note:myPresence.note||null,
+    visibility:myPresence.visibility,expires_at:myPresence.expires_at,updated_at:new Date().toISOString()};
+  if(!presShareModeMissing)row.share_mode=appvOn()?'chosen':'all';   // 📱 アプリverは選んだ友達だけに見せる（2026-10-24 要件 A2。supabase/tama_appv_friends.sql）
+  let {error}=await sb.from(T('presence')).upsert(row);
+  if(error&&/share_mode/.test(error.message)){ presShareModeMissing=true; delete row.share_mode; ({error}=await sb.from(T('presence')).upsert(row)); }
   if(error)console.warn('[friends] tama_presence に保存できません。supabase/tama_friends.sql を実行してください:',error.message);
 }
 
@@ -6638,7 +6670,7 @@ async function loadFriends(){
   renderFriends(); renderNearby(); updateFriendDot();
   if(curSheetUser&&$('#overlay').classList.contains('show'))refreshSheetFriendBtn(curSheetUser.id);
   // 時間割を見せ合う設定は、友達が分かってから読む（友達でない人の分は使わない）。通信を抑えるため2分に1回まで
-  if(Date.now()-lastTTShareLoad>120000){ lastTTShareLoad=Date.now(); loadTTShares(); }
+  if(Date.now()-lastTTShareLoad>120000){ lastTTShareLoad=Date.now(); loadTTShares(); if(appvOn())loadLocShares(); }
   checkFriendCommons('poll');
 }
 
@@ -6691,6 +6723,7 @@ function checkFriendCommons(source){
   showFrNudge();
 }
 function showFrNudge(){
+  if(appvOn())return;   // 📱 アプリverは友達の共通点の知らせを画面に出さない（開いたらすぐマップ）
   if(frNudgeCur||!frNudgeQ.length||document.hidden)return;
   const f=frNudgeCur=frNudgeQ.shift(), el=$('#frNudge'), day=f.c.key.startsWith('day:');
   const text=day?`🎲 友達の<b>${esc(f.u.name)}</b>さんも、今日のお題で「<b>${esc(dailyAnswer(f.u))}</b>」！`
@@ -6878,6 +6911,8 @@ function friendBtnHTML(u){
       +`<button class="btn btn-primary frbtn" onclick="closeSheet();openChat('${u.id}','friends')">💬 メッセージ</button>`
       +(friendOnMap(u.id)?`<button class="btn btn-ghost frbtn" onclick="showFriendOnMap('${u.id}')">🗺 地図で見る</button>`:'')
       +(friendTT[u.id]?`<button class="btn btn-ghost frbtn" onclick="openFriendTT('${u.id}')">🗓 ${esc(u.name)}さんの時間割を見る</button>`:'')
+      +(appvOn()&&!locShareMissing&&!isTest(u.id)?`<div class="sharerow"><div class="lab">学内での居場所を見せる<small>${locSharesTo.has(u.id)?'いる建物・教室・ひとことが、この友達に見えます':'オフの間は、この友達にも居場所は見えません'}</small></div>
+        <div class="toggle${locSharesTo.has(u.id)?' on':''}" onclick="toggleLocShare('${u.id}')"><div class="k"></div></div></div>`:'')
       +(ttShareMissing||isTest(u.id)?'':`<div class="sharerow"><div class="lab">🗓 自分の時間割を見せる<small>${hasCourseNames()?'授業名・教室・時限が、この友達にだけ見えます':'時間割に授業名か教室を入れると見せられます'}</small></div>
         <div class="toggle${ttSharesTo.has(u.id)?' on':''}" onclick="toggleTTShare('${u.id}')"><div class="k"></div></div></div>`)
       +`<button class="frquit" onclick="removeFriendRow(${r.id},true)">友達をやめる</button>`;
@@ -6964,7 +6999,7 @@ function savePlaceEdit(){
 // LINEのQRのように、マッチと関係なく友達になれる。自分の4桁のコードを出し、相手が入れるとその場で友達（承認なし）。
 // QRにしなかったのは、iPhoneのホーム画面アプリは標準カメラでQRを読むとSafariの方で開き、別人扱いになるため（あおの判断で4桁のコード）。
 // 4桁は1万通りしかないので、総当たりで知らない人と友達にならないよう、
-//  ・コードは表示してから5分で使えなくなる ・入力は1人10分に10回まで（サーバー側の関数で数える）
+//  ・コードは表示してから3分で使えなくなる（2026-10-24 要件 A3 で5分→3分。コードで友達になった2人は、おたがいに居場所を見せる） ・入力は1人10分に10回まで（サーバー側の関数で数える）
 // 発行と追加は supabase/tama_friend_code.sql の関数だけが行い、コードの表はアプリから直接読めない
 let myFrCode=null, frCodeTimer=null, frCodeFriendsBefore=null;
 // 友達タブ右上の「＋ 追加」。見せる側と入れる側を分ける（1つの枠に混ざっていて、どちらか分かりにくかった）
@@ -6972,7 +7007,7 @@ function openFrAdd(mode){
   const vis=`<div class="visnote">友達になると、あなたのいる<b>建物・教室</b>が相手に見えます（いまの設定：<b>${esc(VIS_LABEL[myPresence.visibility])}</b>。マイページの「🔒 見せる範囲」で変えられます）。<br><b>目の前にいる人とだけ</b>交換してください。</div>`;
   const back=`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:14px;color:var(--muted)" onclick="${mode?'openFrAdd()':'closeFrAdd()'}">${mode?'戻る':'閉じる'}</button>`;
   let h;
-  if(mode==='show') h=`<h2 class="pstitle">🔢 自分のコード</h2><p class="psdesc">相手にこの4桁を入れてもらうと、すぐ友達になります（承認は要りません）。コードは5分で使えなくなります。</p><div class="fradd"><div id="frCodeBox"></div></div>${vis}${back}`;
+  if(mode==='show') h=`<h2 class="pstitle">🔢 自分のコード</h2><p class="psdesc">相手にこの4桁を入れてもらうと、すぐ友達になります（承認は要りません）。コードは3分で使えなくなります。</p><div class="fradd"><div id="frCodeBox"></div></div>${vis}${back}`;
   else if(mode==='enter') h=`<h2 class="pstitle">⌨️ 相手のコードを入れる</h2><p class="psdesc">相手の画面に出ている4桁の数字を入れてください。すぐ友達になります。</p>
     <div class="fradd"><div class="frrow2"><input id="frCodeIn" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4桁のコード" oninput="this.value=this.value.replace(/\\D/g,'')" onkeydown="if(event.key==='Enter')addFriendByCode()"><button class="btn btn-primary" onclick="addFriendByCode()">追加</button></div></div>${vis}${back}`;
   else h=`<h2 class="pstitle">👥 友達を追加</h2><p class="psdesc">目の前にいる人とは、4桁のコードでその場で友達になれます。</p>
@@ -7031,9 +7066,9 @@ async function addFriendByCode(){
   inp.value=''; closeFrAdd();
   if(frCodeFriendsBefore)frCodeFriendsBefore.add(row.friend_id);   // 自分のコードを出していても「友達になりました」を二重に出さない
   askPushSoon();
-  await loadFriends();
+  await loadFriends(); if(appvOn())await loadLocShares();   // コードで友達になった2人は、おたがいに居場所を見せる（2026-10-24 要件 A3）
   const u=friendUser(row.friend_id);
-  toast('🎉 '+esc(u?u.name:'')+'さんと友達になりました');
+  toast('🎉 '+esc(u?u.name:'')+'さんと友達になりました'+(appvOn()&&!locShareMissing?'。おたがいに学内での居場所が見えます':''));
   notifyPush(row.friend_id,'👥 友達になりました',(profile?profile.name:'だれか')+'さんとコードで友達になりました',{kind:'friend',go:'chat',u:myId,tag:'fr-'+myId});
 }
 
@@ -8127,6 +8162,7 @@ function firstUseDay(){ try{ return +localStorage.getItem('tama_regDay')||0; }ca
 // 近くの人の画面にいない時は、閉じるのを待つ（10秒おきに6回まで）
 function maybeCheckinPopup(tries=0){
   clearTimeout(ckPopTimer);
+  if(appvOn())return;   // 📱 アプリverは「ひとこと」の質問を自動で出さない（開いたらすぐマップ。アンケートは初版で外す機能）
   if(!checkinDue())return;
   if(document.hidden||$('.overlay.show')||$('#pushGate').classList.contains('show')||$('#guide').classList.contains('show')||!$('#s-near').classList.contains('active')){
     if(tries<6)ckPopTimer=setTimeout(()=>maybeCheckinPopup(tries+1),10000); return; }
@@ -8732,6 +8768,7 @@ function wtpAskOk(reason){
   return true;
 }
 function wtpMaybeAsk(reason){
+  if(appvOn())return;   // 📱 アプリverは「ちかくプラス」のアンケートを出さない（初版で外す機能）
   if(!wtpAskOk(reason))return;
   setTimeout(()=>{
     if(!wtpAskOk(reason)||$('.overlay.show')||$('#wtpStory').classList.contains('show')||$('#s-chat').classList.contains('active')||$('#s-room').classList.contains('active'))return;
