@@ -2113,7 +2113,7 @@ function appvLayout(on){
     if(lab)lab.textContent='ホーム';
     $('#appvTop').hidden=true; $('#appvSheet').hidden=true;
   }
-  if(typeof fesMap!=='undefined'&&fesMap)setTimeout(()=>{ try{ fesMap.invalidateSize(); }catch(e){} },80);
+  if(typeof fesMap!=='undefined'&&fesMap)setTimeout(()=>{ try{ fesMap.invalidateSize(); appvMapBounds(on); }catch(e){} },80);
 }
 function setAppvPane(k,quiet){
   appvPane=k;
@@ -2209,6 +2209,24 @@ function appvStripEmoji(root){
 }
 let appvObs=null;
 function appvWatch(){ const b=$('#ashBody'); if(!b||appvObs)return; appvObs=new MutationObserver(()=>appvStripEmoji(b)); appvObs.observe(b,{childList:true,subtree:true}); appvStripEmoji(b); }
+// 📱 アプリverの地図の動かせる範囲（2026-10-24 あお「地図を動かすと中心に戻る」→「ゆるめる」）。
+// 前はキャンパスより12%広いだけの枠に当たると、ばねのように戻っていた。アプリverは画面いっぱいの地図の下半分をシートが覆うので、
+// シートに隠れた端も上に持ち上げられるようにする。もう1段だけ引いても見られる
+let fesBaseMinZoom=null;
+// 試した結果：引いて見ている時はキャンパスが画面よりずっと小さく、「キャンパスの何倍」の枠では上下が固定されたままだった。
+// そこでアプリverは枠をなくし、キャンパスが画面から完全に消えた時だけ、そっとキャンパスに戻す（迷子にならない）
+let appvMapGuard=false;
+function appvMapBack(){ if(!appvOn()||!fesMap||!fesCampusBounds)return; try{ if(!fesMap.getBounds().intersects(fesCampusBounds))fesMap.panTo(fesCampusBounds.getCenter(),{animate:true,duration:.35}); }catch(e){} }
+function appvMapBounds(on){
+  if(typeof fesMap==='undefined'||!fesMap||!fesCampusBounds)return;
+  try{
+    fesMap.options.maxBoundsViscosity=on?0:1;
+    fesMap.setMaxBounds(on?null:fesCampusBounds.pad(0.12));
+    if(fesBaseMinZoom!=null)fesMap.setMinZoom(on?Math.max(0,fesBaseMinZoom-1):fesBaseMinZoom);
+    if(on&&!appvMapGuard){ appvMapGuard=true; fesMap.on('moveend',appvMapBack); }
+    if(!on&&appvMapGuard){ appvMapGuard=false; fesMap.off('moveend',appvMapBack); }
+  }catch(e){}
+}
 // 地図は、シートに隠れない上の部分にキャンパスが収まるように合わせる
 function appvFitMap(){
   if(typeof fesMap==='undefined'||!fesMap||typeof fesCampusBounds==='undefined'||!fesCampusBounds)return;
@@ -3670,6 +3688,7 @@ function initMap(){
   fesEdge=L.polygon(CAMPUS,{color:mapC('--map-edge','#0fb0cd'),weight:appvOn()?2:2.5,fill:false,interactive:false}).addTo(fesMap);
   fesMap.fitBounds(bounds,{padding:[6,6]});
   fesMap.setMinZoom(fesMap.getZoom());   // キャンパス全体より引いて見られないようにする
+  fesBaseMinZoom=fesMap.getMinZoom(); if(appvOn())appvMapBounds(true);   // 📱 アプリverは動かせる範囲をゆるめる
   // 建物名は人のアイコンより下に描く（名前でアイコンが隠れないように）
   fesMap.createPane('labels'); fesMap.getPane('labels').style.zIndex=450; fesMap.getPane('labels').style.pointerEvents='none';
   fesLabelMarkers=CAMPUS_LABELS.map(([n,lat,lng,tier])=>{
