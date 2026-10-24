@@ -1342,6 +1342,122 @@
   html.appv .attgrid .c{background:transparent;border:1px solid var(--sep)}
   html.appv .attgrid .c.f{background:color-mix(in srgb,var(--tint) 14%,transparent);border-color:transparent}
   html.appv .attgrid .c.today{outline:0;border:1.5px solid var(--tint)}
+  /* 2026-10-24 見直し：一番見たい「友達・すれ違い・近くの人」をシートの一番上に。ちかくタイムは始まっている間だけその上、それ以外とお題は下 */
+  html.appv #ashBody>.scroll{display:flex;flex-direction:column}
+  :where(html.appv #ashBody>.scroll>*){order:9;flex-shrink:0}   /* 優先度を下げて、下の順番の指定が効くように（UXレビューの指摘）。行を縮ませない */
+  html.appv #appvStat{order:0}
+  html.appv #ctCard.ctcard:not(.after):not(.pre){order:1}
+  html.appv #appvSeg{order:2}
+  html.appv .apane{order:3}
+  html.appv #ctCard.after,html.appv #ctCard.pre{order:4;margin-top:14px}
+  html.appv #dailyCard{order:5}
+  html.appv .astat{padding:0 16px 10px}
+  html.appv .astbtn{display:flex;align-items:center;gap:10px;width:100%;height:44px;padding:0 14px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);font:inherit;font-size:15px;cursor:pointer;text-align:left}
+  html.appv .astbtn span{color:var(--muted);font-size:13px;flex:none}
+  html.appv .astbtn b{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.appv .astbtn i{font-style:normal;color:var(--muted2);font-size:18px}
+  html.appv .astbtn.on b{color:var(--tint)}
+  html.appv .aslist{display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--fill)}
+  html.appv .aslist button{display:flex;justify-content:space-between;align-items:center;height:48px;padding:0 16px;border:0;border-bottom:1px solid var(--sep);background:transparent;color:var(--ink);font:inherit;font-size:16px;text-align:left;cursor:pointer}
+  html.appv .aslist button:last-child{border-bottom:0}
+  html.appv .aslist button.on{color:var(--tint);font-weight:600}
+  html.appv .aslist i{font-style:normal;font-size:13px}
+  html.appv .atpill .who{color:var(--muted);font-weight:500;margin-right:6px}
+  html.appv .atbtn.atlab{width:auto;padding:0 12px 0 10px;border-radius:22px;gap:4px;display:flex;font-size:13px;font-weight:600}
+  html.appv .appvnote{position:absolute;top:62px;left:12px;right:12px;z-index:500;padding:10px 14px;border-radius:12px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 4px rgba(0,0,0,.12);font-size:13px;line-height:1.5;color:var(--ink)}
+  html.appv .appvnote[hidden]{display:none}
+  html.appv .overlay{z-index:900}   /* 地図の上のシート（600）・隅のボタン（500）より上に、ほかの画面（プロフィール・状態・隠れる など）を出す */
+  html.appv .toast{z-index:950}
+  /* ---------- 📱 アプリver 2026-10-24 ビジュアルの見直し（エージェント3人の意見。research_notes\アプリver画面\review_*.md） ----------
+     性格は「ちかい・ほがらか・そっと」。色や飾りを足すのではなく、地図・アバター・数字という中身をきれいに大きく見せる */
+  html.appv{
+    --tint:#08809a;--on-tint:#fff;--tint-soft:color-mix(in srgb,var(--tint) 12%,transparent);
+    --signal:#08809a;--amber:#08809a;--amber-deep:#066c82;
+    --me:#f47b20;
+    --float:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.10);
+    --map-out:#e9e6df;--map-ground:#f7f3ea;--map-edge:#a99a78;--map-green:#dcebcb;--map-field:#cfe5bd;--map-water:#c4e0f0;
+    --map-road:#ffffff;--map-road-case:#e3dccb;--map-bld:#ffffff;--map-bld-line:#d9d0bd;--map-bld-shadow:#b9ae95;--map-label:#4a4436}
+  @media (prefers-color-scheme: dark){ html.appv:not([data-theme="light"]){
+    --tint:#4cc8de;--on-tint:#00222a;--me:#ff9a4d;
+    --float:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.5);
+    --map-out:#0c0d0e;--map-ground:#1d1c1a;--map-edge:#6f6858;--map-green:#22301e;--map-field:#2a3a24;--map-water:#1a3140;
+    --map-road:#3a3833;--map-road-case:#282723;--map-bld:#33312d;--map-bld-line:#45423c;--map-bld-shadow:#000000;--map-label:#d5cfc0 } }
+  /* 下のタブ：選択の色をアクセントに、背景は色の名前で（ダークで白くならないように） */
+  html.appv .nav{background:var(--glass);border-top:.5px solid var(--sep)}
+  html.appv .nav button.active{color:var(--tint)}
+  /* 地図の上のもの：影を2段に。左上の自分のアバターに自分の色の輪 */
+  html.appv .leaflet-container{background:var(--map-out)}
+  html.appv .atbtn,html.appv .atpill{box-shadow:var(--float)}
+  html.appv .appvtop .atbtn:first-child{box-shadow:0 0 0 2.5px var(--me),var(--float)}
+  html.appv .atbtn.atlab.on{background:var(--ink);color:var(--night)}   /* 隠れている時は黒の札（自分の状態なのでアクセント色にしない） */
+  html.appv .appvloc{display:grid;position:absolute;right:16px;bottom:calc(var(--ash-h,52%) + 12px);z-index:500;transition:bottom .25s cubic-bezier(.25,.8,.3,1)}
+  html.appv .appvloc svg{width:20px;height:20px;color:var(--tint)}
+  /* ピン：友達はしずく形（建物を指す）、自分は自分の色の輪、ほかの人は小さく */
+  html.appv .pmk{position:relative;border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.12),0 3px 8px rgba(0,0,0,.14);font-size:13px}
+  html.appv .pmk.fr,html.appv .pmk.me{font-size:22px;border-width:3px}
+  html.appv .pmk.fr::after{content:"";position:absolute;left:50%;bottom:-7px;width:10px;height:10px;margin-left:-5px;background:#fff;transform:rotate(45deg);border-radius:0 0 3px 0;z-index:-1}
+  html.appv .pmk.me{border-radius:50%;box-shadow:0 0 0 3px var(--me),0 3px 8px rgba(0,0,0,.18)}
+  html.appv .pmk.closed{opacity:.5;filter:grayscale(1);box-shadow:none}
+  html.appv .pmk.closed::after{display:none}
+  /* 建物名：枠を外して、縁取りした文字だけ（Apple のマップと同じ） */
+  html.appv .blbl,html.appv .blbl.food,html.appv .blbl.field{background:none;border:0;box-shadow:none;padding:0;color:var(--map-label);font-size:11px;font-weight:600;letter-spacing:.02em;
+    text-shadow:0 0 2px var(--map-ground),0 0 2px var(--map-ground),0 0 4px var(--map-ground)}
+  html.appv .blbl.key{font-weight:700;color:var(--ink)}
+  /* シートの見出し：人数を大きく */
+  html.appv .ash-title{font-feature-settings:"palt"}
+  html.appv .ash-title b{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0;margin:0 3px}
+  html.appv .ash-title .ash-sub{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:2px;font-feature-settings:normal}
+  /* シートの中のまとまりは「今日のお題」の箱1つだけ。状態とちかくタイムは箱なしの行 */
+  html.appv .astat{padding:0}
+  html.appv .astbtn{background:transparent;padding:0 16px;border-radius:0;border-top:1px solid var(--sep);border-bottom:1px solid var(--sep);height:48px}
+  html.appv #ctCard.ctcard:not(.after):not(.pre){margin:0;padding:10px 16px}
+  html.appv #ctCard.after,html.appv #ctCard.pre{background:transparent!important;margin:8px 0 0;padding:4px 16px 8px;font-size:13px;color:var(--muted)}
+  html.appv #ctCard.after .ctline,html.appv #ctCard.pre .ctline{font-size:13px;color:var(--muted)}
+  html.appv #ctCard b{color:var(--ink);font-variant-numeric:tabular-nums}
+  html.appv .daily .chips .c{background:var(--night);border:1px solid var(--sep);font-size:15px;padding:8px 14px}
+  html.appv .daily .chips .c.sel,html.appv .daily .chips .c.on{background:var(--tint);border-color:var(--tint);color:var(--on-tint)}
+  html.appv .aseg{margin:12px 16px 4px}
+  html.appv .aseg button{height:36px}
+  html.appv .aseg button.on{box-shadow:0 1px 2px rgba(0,0,0,.10)}
+  /* 一覧の行：区切り線は文字の頭から。右の印は灰色、押せることは右端の › で */
+  html.appv .urow{padding:12px 32px 12px 16px;border-bottom:0;position:relative}
+  html.appv .urow::after{content:"";position:absolute;left:76px;right:0;bottom:0;height:1px;background:var(--sep)}
+  html.appv .urow:last-child::after{display:none}
+  html.appv .urow::before{content:"›";position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:20px}
+  html.appv .urow .av{width:48px;height:48px;font-size:24px}
+  html.appv .urow .info .n{font-size:16px;font-weight:600}
+  html.appv .urow .info .n span{font-size:13px;font-weight:400}
+  html.appv .urow .info .b{font-size:13px}
+  html.appv .urow .d .m{font-family:inherit;font-size:13px;font-weight:400;font-variant-numeric:tabular-nums;color:var(--muted)}
+  html.appv .urow .d .lk{font-size:13px;color:var(--muted)}
+  html.appv .common,html.appv .common.rare,html.appv .urow .crossb,html.appv .urow .crossb.rep,html.appv .stchip{display:inline-block;margin:4px 6px 0 0;padding:2px 8px;border:0;border-radius:8px;background:var(--fill);color:var(--ink);font-size:13px;font-weight:500}
+  /* 画面の見出しはシステムフォントの 28px・700 */
+  html.appv .apphead h1{font-family:inherit;font-size:28px;font-weight:700;letter-spacing:.01em;font-feature-settings:"palt"}
+  html.appv #s-tt .headbtn{background:none;border:0;color:var(--tint);font-size:17px;font-weight:600;padding:8px 4px;box-shadow:none}
+  /* 時間割：箱の畑をやめて細い線の格子。今日の曜日は丸、いまの時限のマスだけ枠 */
+  html.appv .attgrid{gap:0;border-top:1px solid var(--sep);border-left:1px solid var(--sep)}
+  html.appv .attgrid>div:nth-child(-n+6){border:0}
+  html.appv .attgrid .h{padding:6px 0;display:grid;place-items:center}
+  html.appv .attgrid .h.today{justify-self:center;width:26px;height:26px;border-radius:50%;background:var(--tint);color:var(--on-tint);padding:0;margin:3px 0}
+  html.appv .attgrid .pp{border-right:1px solid var(--sep);border-bottom:1px solid var(--sep);padding-top:6px}
+  html.appv .attgrid .c{position:relative;isolation:isolate;min-height:56px;border:0;border-right:1px solid var(--sep);border-bottom:1px solid var(--sep);border-radius:0;background:transparent;padding:6px 5px;font-size:12px;font-weight:600}
+  html.appv .attgrid .c.f{background:transparent}
+  html.appv .attgrid .c.f::before{content:"";position:absolute;inset:3px;border-radius:8px;background:var(--tint-soft);z-index:-1}
+  html.appv .attgrid .c.now::before{box-shadow:inset 0 0 0 1.5px var(--tint)}
+  html.appv .attrow .p b{font-size:20px}
+  /* 人のプロフィールの頭：アバターの淡い単色の上に、黒い文字 */
+  html.appv #sheet .cover .idn h2,html.appv #sheet .cover .idn h2 span{color:var(--ink);text-shadow:none}
+  html.appv #sheet .cover .dist{background:transparent;color:var(--muted);padding:0;box-shadow:none}
+  html.appv #sheet .cover .initial{box-shadow:0 0 0 4px #fff,var(--float)}
+  html.appv #sheet .cover::before{display:none}   /* 暗くするグラデーションをやめる（アバターの淡い単色だけ） */
+  html.appv #sheet .cover .idn h2{font-family:inherit;font-size:28px;font-weight:700}
+  html.appv #sheet .cover .idn .dist b{color:var(--ink);font-family:inherit;font-weight:600}
+  html.appv #sheet .cover .close{background:rgba(0,0,0,.28)}
+  html.appv .attgrid .c.f{border-color:var(--sep)}   /* 授業のマスでも区切り線を切らない */
+  /* 起動画面：白（ダークは黒）の上に「ち」だけ */
+  html.appv.appv-boot #appvSplash{background:#fff}
+  @media (prefers-color-scheme: dark){ html.appv.appv-boot:not([data-theme="light"]) #appvSplash{background:#000} }
+  #appvSplash img{animation-timing-function:cubic-bezier(.25,.8,.3,1)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -1980,7 +2096,7 @@ function appvLayout(on){
     let st=$('#appvStat'); if(!st){ st=document.createElement('div'); st.id='appvStat'; st.className='astat'; }
     if(st.parentNode!==sc)sc.insertBefore(st,sc.firstChild);
     let seg=$('#appvSeg'); if(!seg){ seg=document.createElement('div'); seg.id='appvSeg'; seg.className='aseg';
-      seg.innerHTML=[['fr','友達'],['cross','すれ違い'],['near','近く']].map(([k,t])=>'<button data-p="'+k+'" onclick="setAppvPane(\''+k+'\')">'+t+'</button>').join(''); }
+      seg.innerHTML=[['fr','友達'],['cross','すれ違い'],['near','近くの人']].map(([k,t])=>'<button data-p="'+k+'" onclick="setAppvPane(\''+k+'\')">'+t+'</button>').join(''); }
     const dc=$('#dailyCard'); if(seg.previousElementSibling!==dc)dc.after(seg);
     const pane=(k,el)=>{ let p=$('#appvPane-'+k); if(!p){ p=document.createElement('div'); p.id='appvPane-'+k; p.className='apane'; } if(el.parentNode!==p)p.appendChild(el); return p; };
     let prev=seg; [['fr',fb],['cross',cl],['near',ul]].forEach(([k,el])=>{ const p=pane(k,el); if(p.previousElementSibling!==prev)prev.after(p); prev=p; });
@@ -1992,7 +2108,7 @@ function appvLayout(on){
     if(appvMarks.map.nextSibling!==map)appvMarks.map.after(map);
     if(appvMarks.sc.nextSibling!==sc)appvMarks.sc.after(sc);
     [['fb',fb],['cl',cl],['ul',ul]].forEach(([k,el])=>{ if(appvMarks[k].nextSibling!==el)appvMarks[k].after(el); });
-    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
+    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
     if(lab)lab.textContent='ホーム';
     $('#appvTop').hidden=true; $('#appvSheet').hidden=true;
   }
@@ -2007,7 +2123,7 @@ function setAppvPane(k,quiet){
 }
 // シートの高さ：low（見出しだけ）・mid（半分）・full（全画面）
 const ASH_H={low:'128px',mid:'52%',full:'calc(100% - 64px)'};
-function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'); if(s)s.style.setProperty('--ash-h',ASH_H[d]); }
+function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'), n=$('#s-near'); if(s)s.style.removeProperty('--ash-h'); if(n)n.style.setProperty('--ash-h',ASH_H[d]); }
 function appvBindSheet(){
   const g=$('#ashGrab'), s=$('#appvSheet'); if(!g||!s||g.dataset.b)return; g.dataset.b='1';
   let y0=null,h0=0,moved=false;
@@ -2047,15 +2163,31 @@ function renderAppvChrome(){
   const icGhost='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 9.8 7-.4 1.2-1.4 2.8-2.9 4.2M6.2 6.3C4.2 7.7 2.7 9.7 2.2 12c.8 2.5 4.8 7 9.8 7 1.6 0 3-.4 4.3-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
   const icLoc='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3 3 10.5l7.5 2.9L13.4 21z"/></svg>';
   const left=g?Math.max(1,Math.round((g.until-Date.now())/60000)):0;
-  const where=g?'隠れています ・ あと'+left+'分':!sharing?'位置を出していません':fesOutside?'学外なので、位置は使っていません':curPlace?curPlace+'のあたり':'学内にいます';
+  // 2026-10-24 見直し（あお「ほんとに使いやすいのかな」）：上の1行は「自分の」扱いだと分かるよう「あなた：」を付ける。隠れるは絵だけでは伝わらないので文字も
+  const where=g?'隠れています（あと'+left+'分）':!sharing?'位置を出していません':fesOutside?'学外なので、位置は使っていません':curPlace?curPlace+'のあたり':'学内にいます';
   const live=!g&&sharing&&!fesOutside;
-  const html='<button class="atbtn" onclick="go(\'me\')" aria-label="マイページ">'+icMe+'</button><div class="atpill"><span class="dot'+(live?' in':'')+'"></span>'+esc(where)+'</div>'
-    +'<button class="atbtn'+(g?' on':'')+'" onclick="openGhost()" aria-label="隠れる">'+icGhost+'</button><button class="atbtn" onclick="centerOnMe()" aria-label="自分の位置">'+icLoc+'</button>';
+  const html='<button class="atbtn" onclick="go(\'me\')" aria-label="マイページ">'+icMe+'</button><div class="atpill"><span class="dot'+(live?' in':'')+'"></span><span class="who">あなた</span>'+esc(where)+'</div>'
+    +'<button class="atbtn atlab'+(g?' on':'')+'" onclick="openGhost()">'+icGhost+'<span>'+(g?'隠れ中':'隠れる')+'</span></button>';
+  let loc=$('#appvLoc'); if(!loc){ loc=document.createElement('button'); loc.id='appvLoc'; loc.className='atbtn appvloc'; loc.setAttribute('aria-label','自分の位置'); loc.onclick=centerOnMe; loc.innerHTML=icLoc; top.after(loc); }
   if(top.dataset.h!==html){ top.dataset.h=html; top.innerHTML=html; }
   const n=typeof lastOpenCount==='number'?lastOpenCount:0;
-  const t='近く<small>'+(fesOutside?'学外にいます':'いま学内に'+n+'人')+'</small>', ti=$('#ashTitle'); if(ti&&ti.innerHTML!==t)ti.innerHTML=t;
+  // 見出しは1つだけ（前は「近く」が見出しと切りかえで重なっていた）
+  const t=fesOutside?'学外にいます':'いま学内に<b>'+n+'</b>人'+(n?'':'<span class="ash-sub">キャンパスを歩くと、すれ違った人がここに残ります</span>'), ti=$('#ashTitle'); if(ti&&ti.innerHTML!==t)ti.innerHTML=t;
+  // 人が少ない時は、地図が「誰もいない」に見えないよう、地図の上に次にすることを1行
+  let note=$('#appvNote'); if(!note){ note=document.createElement('div'); note.id='appvNote'; note.className='appvnote'; top.after(note); }
+  const nt='';   // 2026-10-24 ビジュアルの提案：地図の上のお知らせはやめて、シートの見出しの下に1文
+  note.hidden=!nt; if(note.textContent!==nt)note.textContent=nt;
+  // いまの状態は1つのボタンに（だれに見えるか・いつ消えるかは押した先で説明する）
   const cur=statusOf(profile), st=$('#appvStat');
-  if(st){ const sh=FA.statuses.map((s,i)=>'<button class="'+(cur===s?'on':'')+'" onclick="setAppvStatus('+i+')">'+esc(s)+'</button>').join(''); if(st.dataset.h!==sh){ st.dataset.h=sh; st.innerHTML=sh; } }
+  if(st){ const sh='<button class="astbtn'+(cur?' on':'')+'" onclick="openAppvStatus()"><span>いまの状態</span><b>'+esc(cur||'選んでいません')+'</b><i>›</i></button>'; if(st.dataset.h!==sh){ st.dataset.h=sh; st.innerHTML=sh; } }
+}
+function openAppvStatus(){
+  const cur=statusOf(profile);
+  $('#memSheet').innerHTML='<div class="rinfo"><h2 class="pstitle">いまの状態</h2><p class="psdesc">友達と近くの人のリストに、あなたの名前の横に出ます。授業の時限が終わると消えます。</p>'
+    +'<div class="aslist">'+FA.statuses.map((s,i)=>'<button class="'+(cur===s?'on':'')+'" onclick="setAppvStatus('+i+');closeMembers()">'+esc(s)+(cur===s?'<i>選択中</i>':'')+'</button>').join('')+'</div>'
+    +(cur?'<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px" onclick="setAppvStatus('+FA.statuses.indexOf(cur)+');closeMembers()">状態を消す</button>':'')
+    +'<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>';
+  $('#memOverlay').classList.add('show');
 }
 function setAppvStatus(i){
   if(!profile)return;
@@ -2070,7 +2202,7 @@ setInterval(()=>{ if(!document.hidden)renderAppvChrome(); },5000);
 const APPV_EMO=/^\s*(?:\p{Extended_Pictographic}|️|‍|\p{Emoji_Modifier})+\s*/u;
 function appvStripEmoji(root){
   if(!document.documentElement.classList.contains('appv')||!root)return;
-  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago').forEach(el=>{
+  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago,.lk,.mtime,.frbtn').forEach(el=>{
     const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT); const t=w.nextNode(); if(t&&APPV_EMO.test(t.nodeValue))t.nodeValue=t.nodeValue.replace(APPV_EMO,'');
   });
 }
@@ -2090,10 +2222,15 @@ function renderAppvTT(){
   const today=FES.periods.map((p,i)=>({i:i+1,p,k:dow+'-'+(i+1)})).filter(x=>dow>=1&&dow<=5&&x.k in slots);
   const dayH=today.length?today.map(x=>'<div class="attrow'+(cs&&cs.k===x.k&&cs.inClass?' now':'')+'"><div class="p"><b>'+x.i+'</b>'+x.p[0]+'</div><div class="n">'+esc(slots[x.k]||'（授業名なし）')+(rooms[x.k]?'<small>'+esc(rooms[x.k])+'</small>':'')+'</div></div>').join('')
     :'<div class="attrow"><div class="n" style="font-weight:400;color:var(--muted)">'+(dow>=1&&dow<=5?'今日は授業がありません':'今日は休みです')+'</div></div>';
-  let grid='<div class="attgrid"><div></div>'+TT_DAYS.map(d=>'<div class="h">'+d+'</div>').join('');
-  FES.periods.forEach((p,i)=>{ grid+='<div class="pp">'+(i+1)+'</div>'; for(let d=1;d<=5;d++){ const k=d+'-'+(i+1), has=k in slots; grid+='<div class="c'+(has?' f':'')+(d===dow&&has?' today':'')+'">'+(has?esc(slots[k]||''):'')+'</div>'; } });
+  let grid='<div class="attgrid"><div></div>'+TT_DAYS.map((d,i)=>'<div class="h'+(i+1===dow?' today':'')+'">'+d+'</div>').join('');
+  FES.periods.forEach((p,i)=>{ grid+='<div class="pp">'+(i+1)+'</div>'; for(let d=1;d<=5;d++){ const k=d+'-'+(i+1), has=k in slots, now=!!cs&&cs.k===k&&cs.inClass; grid+='<div class="c'+(has?' f':'')+(now?' now':'')+'">'+(has?esc(slots[k]||''):'')+'</div>'; } });
   grid+='</div>';
-  el.innerHTML='<div class="att"><div><h3>今日</h3><div class="attday">'+dayH+'</div></div><div><h3>1週間</h3>'+grid+'</div></div>';
+  // 明日（テスターの意見「明日の2限を見るのに曜日を数える必要がある」）。金曜・土曜は月曜の分
+  const nd=dow>=5||dow<1?1:dow+1, ndName=dow>=5||dow<1?'月曜':'明日';
+  const tom=FES.periods.map((p,i)=>({i:i+1,p,k:nd+'-'+(i+1)})).filter(x=>x.k in slots);
+  const tomH=tom.length?tom.map(x=>'<div class="attrow"><div class="p"><b>'+x.i+'</b>'+x.p[0]+'</div><div class="n">'+esc(slots[x.k]||'（授業名なし）')+(rooms[x.k]?'<small>'+esc(rooms[x.k])+'</small>':'')+'</div></div>').join('')
+    :'<div class="attrow"><div class="n" style="font-weight:400;color:var(--muted)">授業はありません</div></div>';
+  el.innerHTML='<div class="att"><div><h3>今日</h3><div class="attday">'+dayH+'</div></div><div><h3>'+ndName+'</h3><div class="attday">'+tomH+'</div></div><div><h3>1週間</h3>'+grid+'</div></div>';
 }
 const DEV_ICON='ち';   // アイコンの値（画面ではロゴの画像 /icons/icon-192.png。古い版のアプリでは「ち」の字で出る）
 const isDev=u=>!!u&&DEVS.includes(String(u.id||(u===profile?myId:'')||'').slice(0,8));
@@ -2179,8 +2316,10 @@ const lookOpen=u=>(attrsOf(u).badges||[]).includes('survey')||isDev(u);
 const frCls=u=>{ const ic=u&&u.emoji===DEV_ICON&&isDev(u)?' ic-chi':''; if(!lookOpen(u))return ic; const f=(attrsOf(u).look||{}).fr;
   return ic+(f&&f!=='none'&&LOOK_FR[f]&&(LOOK_FR[f].c!=='dev'||isDev(u))?' fr-'+f:''); };
 const coverBg=u=>{ const b=lookOpen(u)&&LOOK_BG[(attrsOf(u).look||{}).bg]; return b&&b.g&&(b.c!=='dev'||isDev(u))?lookBgCss(b):gr(u.emoji); };
-const gradOf=e=>GRADS[e]||['#8b9dff','#63d6e8'];
-const gr=e=>`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
+// 📱 アプリverか（html.appv が付いているか）。2026-10-24 ビジュアルの提案：アバターは2色のグラデーションをやめて、1色目を白と混ぜた淡い単色に
+function appvOn(){ return document.documentElement.classList.contains('appv'); }
+const gradOf=e=>GRADS[e]||(appvOn()?['#9fd3dc','#9fd3dc']:['#8b9dff','#63d6e8']);
+const gr=e=>appvOn()?`color-mix(in srgb,${gradOf(e)[0]} 42%,#fff)`:`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
 function uuid(){return (crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(36).slice(2));}
 
 /* ---------- backend (Supabase) ---------- */
@@ -3379,7 +3518,7 @@ function relTag(id){
 /* ---------- render nearby ---------- */
 let lastNearList=[];
 // 距離の出し方（2026-10-08 ユーザー役のテスト：知らない人の「いまここから 60m」が怖い）。友達はそのまま、それ以外は大まかに
-function distText(d,id){ if(isFriend(id)||isTest(id))return Math.round(d)+"m"; return d<30?"すぐ近く":d<100?"100m以内":d<300?"300m以内":"キャンパス内"; }
+function distText(d,id){ if((isFriend(id)||isTest(id))&&!appvOn())return Math.round(d)+"m"; return d<30?"すぐ近く":d<100?"100m以内":d<300?"300m以内":"キャンパス内"; }
 function nearRow({u,d,common,closed}){
   const st=statusOf(u);
   return `<div class="urow${closed?' closed':''}" onclick="openNear('${String(u.id).replace(/[^\w-]/g,'')}')">
@@ -3522,8 +3661,8 @@ function initMap(){
   if(window.CAMPUS_GEO){ buildIllust().addTo(fesMap); }
   else{ fesMap.setMaxZoom(18); L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',{maxZoom:18,attribution:GSI_ATTR}).addTo(fesMap); }
   // キャンパスの外を白く覆って、キャンパスだけが見えるようにする（世界全体の四角にキャンパスの形の穴をあける）
-  L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{stroke:false,fillColor:'#f4f7fe',fillOpacity:.95,interactive:false}).addTo(fesMap);
-  L.polygon(CAMPUS,{color:'#0fb0cd',weight:2.5,fill:false,interactive:false}).addTo(fesMap);
+  L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{stroke:false,fillColor:mapC('--map-out','#f4f7fe'),fillOpacity:.95,interactive:false}).addTo(fesMap);
+  L.polygon(CAMPUS,{color:mapC('--map-edge','#0fb0cd'),weight:appvOn()?2:2.5,fill:false,interactive:false}).addTo(fesMap);
   fesMap.fitBounds(bounds,{padding:[6,6]});
   fesMap.setMinZoom(fesMap.getZoom());   // キャンパス全体より引いて見られないようにする
   // 建物名は人のアイコンより下に描く（名前でアイコンが隠れないように）
@@ -3531,7 +3670,7 @@ function initMap(){
   fesLabelMarkers=CAMPUS_LABELS.map(([n,lat,lng,tier])=>{
     const food=/食堂/.test(n), cls=(food?' food':/場$/.test(n)?' field':'')+(tier===1?' key':'');
     const m=L.marker([lat,lng],{pane:'labels',interactive:false,keyboard:false,
-      icon:L.divIcon({className:'blbl-wrap',iconSize:null,html:`<span class="blbl${cls}">${food?'🍛 ':''}${n}</span>`})});
+      icon:L.divIcon({className:'blbl-wrap',iconSize:null,html:`<span class="blbl${cls}">${food&&!appvOn()?'🍛 ':''}${n}</span>`})});
     // 名前の幅の目安（文字数。英数字は細いので0.62文字分、絵文字は1.4文字分）
     // 食堂は学食のQRから来た人の目印になるので、いちばん優先して名前を出す
     m._tier=food?0:tier; m._len=[...n].reduce((s,c)=>s+(c.charCodeAt(0)<128?.62:1),0)+(food?1.4:0);
@@ -3567,8 +3706,10 @@ function inRing(lat,lng,ring){
 }
 // キャンパスのイラスト地図を描く。どこまで拡大してもくっきり見えるよう、画像ではなく図形で描く
 let illustRoads=[];
+// 地図の色（アプリverは CSS の --map-* から読む。それ以外は今までの色）
+function mapC(k,fb){ if(!appvOn())return fb; const v=getComputedStyle(document.documentElement).getPropertyValue(k).trim(); return v||fb; }
 function buildIllust(){
-  const G=window.CAMPUS_GEO;
+  const G=window.CAMPUS_GEO, A=appvOn();
   fesMap.createPane('illust'); fesMap.getPane('illust').style.zIndex=250;   // 地図画像（200）と覆い（400）の間
   const renderer=L.canvas({pane:'illust',padding:0.5});
   const group=L.layerGroup();
@@ -3576,21 +3717,22 @@ function buildIllust(){
   const base={renderer,pane:'illust',interactive:false};
   const polys=(arr,o)=>(arr||[]).forEach(p=>L.polygon(p,{...base,...o}).addTo(group));
   const lines=(arr,o)=>(arr||[]).map(p=>L.polyline(p,{...base,lineCap:'round',lineJoin:'round',...o}).addTo(group));
-  L.polygon(CAMPUS,{...base,stroke:false,fillColor:'#f2eee4',fillOpacity:1}).addTo(group);             // 地面
-  polys(G.g,{color:'#bcdcab',weight:1,fillColor:'#d4ebc5',fillOpacity:1});                           // 緑地
-  polys(G.p,{color:'#ffffff',weight:2,fillColor:'#a9da9d',fillOpacity:1});                           // グラウンド・コート
-  polys(G.w,{color:'#80bde6',weight:1,fillColor:'#a8d5f2',fillOpacity:1});                           // 池
+  L.polygon(CAMPUS,{...base,stroke:false,fillColor:mapC('--map-ground','#f2eee4'),fillOpacity:1}).addTo(group);             // 地面
+  polys(G.g,{color:A?mapC('--map-green','#d4ebc5'):'#bcdcab',weight:A?0:1,fillColor:mapC('--map-green','#d4ebc5'),fillOpacity:1});   // 緑地
+  polys(G.p,{color:A?mapC('--map-road','#ffffff'):'#ffffff',weight:2,fillColor:mapC('--map-field','#a9da9d'),fillOpacity:1});   // グラウンド・コート
+  polys(G.w,{color:A?mapC('--map-water','#a8d5f2'):'#80bde6',weight:1,fillColor:mapC('--map-water','#a8d5f2'),fillOpacity:1});   // 池
   polys(G.k,{color:'#c9cfdc',weight:1,dashArray:'3 3',fillColor:'#e5e8ef',fillOpacity:1});           // 駐車場
   // 道は「ふち（濃い色・太い）」の上に「白い線」を重ねて、ベージュの地面の上でも道筋が分かるようにする
-  const footCase=lines(G.f,{color:'#d8d0bd',weight:4});                                             // 歩道のふち
-  const casing=lines(G.r,{color:'#bfc7d8',weight:7});                                               // 車道のふち
-  const foot=lines(G.f,{color:'#ffffff',weight:2});                                                 // 歩道・階段
-  const road=lines(G.r,{color:'#ffffff',weight:5});                                                 // 車道
+  const footCase=lines(G.f,{color:mapC('--map-road-case','#d8d0bd'),weight:4});                                             // 歩道のふち
+  const casing=lines(G.r,{color:mapC('--map-road-case','#bfc7d8'),weight:7});                                               // 車道のふち
+  const foot=lines(G.f,{color:mapC('--map-road','#ffffff'),weight:2});                                                 // 歩道・階段
+  const road=lines(G.r,{color:mapC('--map-road','#ffffff'),weight:5});                                                 // 車道
   // 建物：少し右下にずらした影を敷いて立体的に見せる。名前のある建物は青、食堂はオレンジで目立たせる
   const SH=0.000012;   // 約1.3m
-  (G.b||[]).forEach(ring=>L.polygon(ring.map(([a,b])=>[a-SH,b+SH]),{...base,stroke:false,fillColor:'#8e97b0',fillOpacity:.35}).addTo(group));
+  (G.b||[]).forEach(ring=>L.polygon(ring.map(([a,b])=>[a-SH,b+SH]),{...base,stroke:false,fillColor:mapC('--map-bld-shadow','#8e97b0'),fillOpacity:.35}).addTo(group));
   (G.b||[]).forEach(ring=>{
     const lb=CAMPUS_LABELS.find(([n,lat,lng])=>inRing(lat,lng,ring)), food=!!lb&&/食堂/.test(lb[0]);
+    if(A){ L.polygon(ring,{...base,color:mapC('--map-bld-line','#d9d0bd'),weight:1,fillColor:mapC('--map-bld','#ffffff'),fillOpacity:1}).addTo(group); return; }   // アプリverは名前・食堂で色を変えない（色の意味を「自分」と「押せる」に絞る）
     L.polygon(ring,{...base,color:food?'#e0883a':lb?'#6d7db0':'#a0a8bf',weight:food?1.8:1.2,
       fillColor:food?'#ffd8a8':lb?'#dce5ff':'#eef0f6',fillOpacity:1}).addTo(group);
   });
@@ -3619,10 +3761,10 @@ function toggleMapFull(){
   if(fesMap)setTimeout(()=>{ fesMap.invalidateSize(); if(on&&myPos&&inCampus(myPos.lat,myPos.lng))fesMap.setView([myPos.lat,myPos.lng],Math.max(fesMap.getZoom(),17)); layoutLabels(); },60);
 }
 // closed：アプリを閉じた人（最後にいた位置に薄く出す）
-function mapIcon(emoji,me,closed){
-  const s=me?30:28;
-  return L.divIcon({className:'',iconSize:[s,s],iconAnchor:[s/2,s/2],
-    html:`<div class="pmk${me?' me':''}${closed?' closed':''}" style="background:${me?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${esc(emoji)}</div>`});
+function mapIcon(emoji,me,closed,fr){
+  const A=appvOn(), s=A?(me||fr?40:24):(me?30:28), tail=A&&fr&&!me;
+  return L.divIcon({className:'',iconSize:[s,s],iconAnchor:tail?[s/2,s+6]:[s/2,s/2],
+    html:`<div class="pmk${me?' me':''}${tail?' fr':''}${closed?' closed':''}" style="background:${me&&!A?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${esc(emoji)}</div>`});
 }
 function centerOnMe(){
   if(!fesMap)return;
@@ -3636,7 +3778,7 @@ function drawMap(list){
     fesLayer.clearLayers();
     // 地図はキャンパスだけを映すので、キャンパスの外にいる人（自分も）のアイコンは出さない
     list.forEach(({u,d})=>{ if(u.lat==null||!inCampus(u.lat,u.lng))return;
-      L.marker([u.lat,u.lng],{icon:mapIcon(u.emoji,false,isClosed(u))}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
+      L.marker([u.lat,u.lng],{icon:mapIcon(u.emoji,false,isClosed(u),isFriend(u.id))}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
     if(myPos&&inCampus(myPos.lat,myPos.lng)){
       const ll=[myPos.lat,myPos.lng], icon=mapIcon(profile?profile.emoji:'📍',true);
       if(!fesMe){
@@ -4144,7 +4286,7 @@ function openSheet(u,d){
   else if(talking) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="closeSheet();openChat('${id}','match')">💬 トークを開く</button>`;
   else if(reply) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">👋 いいねを返す（トーク開始）</button>`;
   else if(ended) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">💬 もう一度話す</button>`;
-  else if(liked.has(id)) main=`<button class="btn btn-wait" style="flex:1" disabled>👋 いいね済み（相手のいいね待ち）</button>`;
+  else if(liked.has(id)) main=`<button class="btn btn-wait" style="flex:1" disabled>${appvOn()?"いいね済み・返事待ち":"👋 いいね済み（相手のいいね待ち）"}</button>`;
   // アンケートに答えるまでは、自分から送れる残りの回数を出す（0回なら押すと特典の案内）
   else if(surveyGateOn()&&!isTest(id)){ const n=likesLeft();
     main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button>${n>0?`<button class="btn btn-wave" onclick="openWave()">👋 いいね<small style="display:block;font-size:11px;font-weight:500;opacity:.85">今日あと${n}回</small></button>`:`<button class="btn btn-wave" style="opacity:.75" onclick="closeSheet();openSurveyGate('like')">👋 いいね（今日の分は終わり）</button>`}`; }
@@ -6194,6 +6336,7 @@ function tipBlocked(){
     ||$('#homeGate').classList.contains('show')||$('#fesClosed').classList.contains('show')||!!$('.overlay.show')||!!$('.map-wrap.full')||$('#matchpop').classList.contains('show');
 }
 function maybeTip(){
+  if(document.documentElement.classList.contains('appv')){ if(tipCur)hideTip(); return; }   // 📱 アプリverでは説明の吹き出しを出さない（2026-10-24 テスターの意見「吹き出しが中身を隠す」。並びも違うので指す場所がずれる）
   if(tipCur){ if(curScreen()!==tipCur.scr||tipBlocked())hideTip(); else placeTip(); return; }
   if(tipBlocked())return;
   const scr=curScreen(), t=(TIPS[scr]||[]).find(x=>{ if(tipsSeen.includes(x.k))return false; const el=$(x.sel); return el&&el.offsetParent&&el.textContent.trim(); });
