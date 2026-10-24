@@ -1431,6 +1431,28 @@
   html.appv .urow .info .b{font-size:13px}
   html.appv .urow .d .m{font-family:inherit;font-size:13px;font-weight:400;font-variant-numeric:tabular-nums;color:var(--muted)}
   html.appv .urow .d .lk{font-size:13px;color:var(--muted)}
+  /* すれ違いの設定（2026-10-24）：一覧の一番上の1行と、設定の画面 */
+  html.appv .xsetrow{display:flex;align-items:center;gap:8px;width:100%;padding:12px 16px;border:0;border-bottom:1px solid var(--sep);background:transparent;font-family:inherit;font-size:15px;color:var(--ink);text-align:left;cursor:pointer}
+  html.appv .xsetrow span{color:var(--muted)}
+  html.appv .xsetrow b{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .xsetrow i{font-style:normal;color:var(--muted2);font-size:20px}
+  html.appv .xmodes{display:flex;flex-direction:column;border:1px solid var(--sep);border-radius:12px;overflow:hidden}
+  html.appv .xmode{display:block;width:100%;padding:12px 40px 12px 16px;border:0;border-bottom:1px solid var(--sep);background:transparent;font-family:inherit;text-align:left;color:var(--ink);position:relative;cursor:pointer}
+  html.appv .xmode:last-child{border-bottom:0}
+  html.appv .xmode b{display:block;font-size:16px;font-weight:600}
+  html.appv .xmode small{display:block;margin-top:2px;font-size:13px;color:var(--muted);line-height:1.5}
+  html.appv .xmode.on::after{content:"";position:absolute;right:16px;top:50%;width:12px;height:6px;margin-top:-5px;border-left:2px solid var(--tint);border-bottom:2px solid var(--tint);transform:rotate(-45deg)}
+  html.appv .xsec{margin:24px 0 8px;font-size:16px;font-weight:600;color:var(--ink)}
+  html.appv .xsec small{display:block;margin-top:2px;font-size:13px;font-weight:400;color:var(--muted)}
+  html.appv .xstar .c{font-size:15px;padding:8px 14px}
+  html.appv .xstar .c.on{background:var(--tint);border-color:var(--tint);color:var(--on-tint)}
+  html.appv .xlink{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:24px;padding:12px 0;border:0;border-top:1px solid var(--sep);border-bottom:1px solid var(--sep);background:transparent;font-family:inherit;font-size:16px;color:var(--ink);cursor:pointer}
+  html.appv .xlink span{color:var(--muted2);font-size:20px}
+  html.appv .urow .xhit{color:var(--tint);font-weight:600}
+  html.appv .urow .xseek{color:var(--ink)}
+  html.appv .xseekbox{margin:0 0 12px;padding:12px 16px;border-radius:12px;background:var(--fill)}
+  html.appv .xseekbox small{display:block;font-size:13px;color:var(--muted)}
+  html.appv .xseekbox b{display:block;margin-top:2px;font-size:16px;font-weight:600;color:var(--ink)}
   html.appv .common,html.appv .common.rare,html.appv .urow .crossb,html.appv .urow .crossb.rep,html.appv .stchip{display:inline-block;margin:4px 6px 0 0;padding:2px 8px;border:0;border-radius:8px;background:var(--fill);color:var(--ink);font-size:13px;font-weight:500}
   /* 画面の見出しはシステムフォントの 28px・700 */
   html.appv .apphead h1{font-family:inherit;font-size:28px;font-weight:700;letter-spacing:.01em;font-feature-settings:"palt"}
@@ -3573,7 +3595,7 @@ function renderNearby(){
   // 2026-10-08 あおの指示：アプリを閉じた人（前の「🕘 さっきまでいた人」）は一覧にも地図にも出さない。
   // 友達も同じ一覧に入る（2026-10-15 まで一番上に横並びの枠があった）。一覧は NEAR_LIMIT 人まで出して、多い時は「もっと見る」
   // 2026-10-17 あおの依頼「マップに人がいっぱい表示されてると面白い」：多摩祭の日だけ、閉じた人も30分は「さっきまでいた人」として薄く出す（FES_RECENT_MS）
-  const all=others.filter(u=>!isClosed(u)||fesRecent(u)).map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}const cd=commonDetail(u);return {u,d,common:cd,score:commonScore(cd)+crossBoost(u.id,cd)+fesMixBoost(u,cd)-(isClosed(u)?0.5:0),closed:isClosed(u)};});
+  const all=others.filter(u=>(!isClosed(u)||fesRecent(u))&&crossVisible(u)).map(u=>{let d=null;if(myPos&&u.lat!=null){const r=relMeters(myPos,u);d=Math.hypot(r.e,r.n);}const cd=commonDetail(u);return {u,d,common:cd,score:commonScore(cd)+crossBoost(u.id,cd)+fesMixBoost(u,cd)-(isClosed(u)?0.5:0),closed:isClosed(u)};});
   const byScore=(x,y)=>(y.score-x.score)||((x.d??1e9)-(y.d??1e9));
   const openAll=all.sort(byScore), frNow=openAll.filter(x=>isFriend(x.u.id)), fesFold=tamasaiDay()&&frNow.length>0, open=fesFold?openAll.filter(x=>!isFriend(x.u.id)):openAll.slice();
   // 多摩祭の日は、一緒に回っている友達を一覧の1行にたたみ、グループの外の人を上に出す（2026-10-15 エージェントの体験から：友達がいつも1位・2位に来ていた）
@@ -3928,7 +3950,7 @@ function recordEncounters(){
   if(myPos.acc>FES.maxAccuracyM)return;
   for(const u of others){
     // アプリを閉じた人は、最後にいた位置のままなので数えない（もうそこにはいない）
-    if(isTest(u.id)||u.lat==null||isClosed(u))continue;
+    if(isTest(u.id)||u.lat==null||isClosed(u)||!crossAllowed(u))continue;   // すれ違いの設定（お互いさま）
     const r=relMeters(myPos,u); const d=Math.hypot(r.e,r.n);
     if(d<=FES.encounterRangeM){ if(!insideSet.has(u.id)){ insideSet.add(u.id); addEncounter(u); } }
     else insideSet.delete(u.id);
@@ -3950,7 +3972,7 @@ async function addEncounter(u){
   const rare=commonDetail(u).filter(x=>isRare(x.key));
   // 登録・起動の直後は、まわりの人がまとめて記録されて通知が続くので、最初の1分は知らせない
   if(Date.now()-bootAt>60000) toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`+(rare.length?`<br>✨ ${esc(rare[0].label)}`:''));
-  crossNew++; bumpCrossDot();
+  crossNew++; bumpCrossDot(); crossStarNotify(u);
   const again=fesAgainNow(u.id);   // 記録する前に見る（昨日の記録があるか）
   (encLog[u.id]=encLog[u.id]||[]).push({at:Date.now(),place});
   if(again)fesAgainPop(u);
@@ -3998,7 +4020,7 @@ async function loadEncounters(){
   renderCross();
 }
 // すれ違った人は全員出す（2026-09-24 から。以前は共通点のある人だけ）。新しい順
-function crossShown(){ return Object.values(encMap).filter(u=>!blocked.has(u.id)); }
+function crossShown(){ return Object.values(encMap).filter(u=>!blocked.has(u.id)&&crossAllowed(u)); }   // すれ違いの設定で、いまは出さない人も外す
 // 2026-10-08 あおの指示：一覧は「今日」すれ違った人だけ（日付が変わると消える）。前の日の人も、回数・曜日と時間帯は
 // プロフィール・会う前の1枚の「これまで◯回すれ違っています」に残る。多い時は CROSS_LIMIT 人まで出して「もっと見る」
 const CROSS_LIMIT=30;
@@ -4013,25 +4035,28 @@ function renderCross(){
   const when=t=>new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
   const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'>
     <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
-    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${commonLine(commonDetail(u))}<div class="b crosswhen">🕘 ${(u.last_at||0)>=today?hhmm(u.last_at||0):when(u.last_at||0)}${(u.last_at||0)>=today?'・'+esc(u.last_place||''):''}${u.first_at&&u.count>=2?`　（これまで${u.count}回）`:''}</div></div>
+    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${appvOn()&&crossStarHit(u)?`<div class="b xhit">★ 探している「${esc(crossStarOf(profile).label)}」</div>`:''}${commonLine(commonDetail(u))}${appvOn()&&seekOf(u)?`<div class="b xseek">探している：${esc(seekOf(u))}</div>`:''}<div class="b crosswhen">🕘 ${(u.last_at||0)>=today?hhmm(u.last_at||0):when(u.last_at||0)}${(u.last_at||0)>=today?'・'+esc(u.last_place||''):''}${u.first_at&&u.count>=2?`　（これまで${u.count}回）`:''}</div></div>
     <div class="d"><div class="m${u.count>=2?' rep':''}">${u.count}回</div>${relTag(u.id)}</div></div>`;
   // 前の日にすれ違った人（2026-10-09：「本来は有料の予定」の聞き取りの対象。初めて開く時に1回だけ聞く openCrossPast）
   const pastH=!past.length?'':crossShowPast
     ?`<div class="nearsec" style="padding-left:6px;margin-top:8px">前の日にすれ違った人 <span class="cnt">${past.length}人</span></div>`+past.slice(0,50).map(row).join('')
     :`<button class="btn btn-ghost nearmore" onclick="openCrossPast()">🕘 前の日にすれ違った人を見る（${past.length}人）</button>`;
-  if(!arr.length){ ul.innerHTML=`<div class="empty"><div class="big">🚶</div><p>今日はまだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`+pastH; return; }
+  // 📱 アプリver：一番上に「すれ違いの設定」の1行（openCrossPrefs）。「使わない」の時は一覧の代わりに説明だけ
+  const xsetH=appvOn()&&profile?`<button class="xsetrow" onclick="openCrossPrefs()"><span>すれ違い</span><b>${CROSS_MODES[crossModeOf(profile)]}${crossStarOf(profile)?' ・ ★ '+esc(crossStarOf(profile).label):''}</b><i>›</i></button>`:'';
+  if(xsetH&&crossModeOf(profile)==='off'){ ul.innerHTML=xsetH+`<div class="empty"><p>すれ違いを使わない設定です。<br>知らない人とは、お互いに記録も表示もしません。</p></div>`; return; }
+  if(!arr.length){ ul.innerHTML=xsetH+`<div class="empty"><div class="big">🚶</div><p>今日はまだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`+pastH; return; }
   // 📱 アプリver（2026-10-24 要件 A4「共通点がある人と2回以上の人だけ前に、残りは数だけ」）：
   // 共通点のある人・これまで2回以上すれ違った人だけを並べ、ほかの人は「ほかに◯人」の1行にまとめる（押すと全員を出す）
   if(appvOn()&&!crossShowAll){
-    const key=arr.filter(u=>u.count>=2||commonWith(u).length), rest=arr.length-key.length;
+    const key=arr.filter(u=>u.count>=2||commonWith(u).length).sort((a,b)=>crossStarHit(b)-crossStarHit(a)), rest=arr.length-key.length;
     const restH=rest?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">${key.length?'ほかに':''}${rest}人とすれ違いました（すべて見る）</button>`:'';
-    ul.innerHTML=key.length
+    ul.innerHTML=xsetH+(key.length
       ?`<div class="nearsec" style="padding-left:6px">共通点のある人・また会えた人 <span class="cnt">${key.length}人</span></div>`+key.slice(0,CROSS_LIMIT).map(row).join('')+restH+pastH
-      :`<div class="empty"><p>今日は${arr.length}人とすれ違いました。<br>共通点のある人や、2回目にすれ違った人がいると、ここに出ます。</p></div>`+restH+pastH;
+      :`<div class="empty"><p>今日は${arr.length}人とすれ違いました。<br>共通点のある人や、2回目にすれ違った人がいると、ここに出ます。</p></div>`+restH+pastH);
     return;
   }
   const shown=crossShowAll?arr:arr.slice(0,CROSS_LIMIT), more=arr.length-shown.length;
-  ul.innerHTML=`<div class="nearsec" style="padding-left:6px">今日すれ違った人 <span class="cnt">${arr.length}人</span></div>`+shown.map(row).join('')
+  ul.innerHTML=xsetH+`<div class="nearsec" style="padding-left:6px">今日すれ違った人 <span class="cnt">${arr.length}人</span></div>`+shown.map(row).join('')
     +(more>0?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">もっと見る（あと${more}人）</button>`:'')+pastH;
 }
 let crossShowPast=false;
@@ -4039,6 +4064,74 @@ function openCrossPast(){
   const show=()=>{ crossShowPast=true; renderCross(); };
   if(paywallNeed('cross_past'))return paywallAsk('cross_past',show);
   show();
+}
+/* ---------- 📱 すれ違いの設定（2026-10-24 あおの決定。アプリverで選べる） ----------
+   いろんな人がいる（使わない・共通点のある人とだけ・特定の人を探したい）ので、1つの画面で選べるようにした。
+   ・3段：すべての人（最初）／共通点がある人だけ／使わない。プロフィールの fes_attrs.cross に 'common'・'off' を入れる（すべては入れない）
+   ・お互いさま：自分を出さない人は、相手も見えない。だれかが「使わない」なら、2人の間ではすれ違いを記録せず、近くの人・地図にも出さない。
+     どちらかが「共通点がある人だけ」なら、共通点のある2人の間だけ（共通点はそれぞれが選んだ項目で見る）。友達は近くの人・地図には出る（すれ違いの記録はしない）
+   ・★探している共通点：自分の入れたもの（アーティスト・授業・あるある）から1つ。合う人とすれ違うと一番上に出て、1日1回知らせる（fes_attrs.cross_star = {key,label}）
+   ・探していること：自由に書ける1行（fes_attrs.seek）。共通点には使わず、プロフィールとすれ違いの一覧に出すだけ
+   ⚠️ いまは相手の端末が設定を読んで守る。アプリで閉じている間のすれ違いをサーバーで判定する時は、サーバーでも同じ決まりにする */
+var CROSS_MODES={all:'すべての人',common:'共通点がある人だけ',off:'使わない'};
+function crossModeOf(u){ const m=attrsOf(u).cross; return m==='off'||m==='common'?m:'all'; }
+// この人とのすれ違いを記録してよいか（お互いさま）
+function crossAllowed(u){
+  if(!profile)return true;
+  const me=crossModeOf(profile), th=crossModeOf(u);
+  if(me==='off'||th==='off')return false;
+  if(me==='common'&&!commonDetail(u).length)return false;
+  if(th==='common'&&!commonFor(u,matchOffOf(u)).length)return false;
+  return true;
+}
+// 近くの人・地図に出してよいか（友達は、すれ違いの設定に関係なく出る）
+function crossVisible(u){ return isFriend(u.id)||crossAllowed(u); }
+function crossStarOf(u){ const s=attrsOf(u).cross_star; return s&&s.key?s:null; }
+function crossStarHit(u){ const s=crossStarOf(profile); return !!s&&commonRaw(u).some(c=>c.key===s.key); }
+function seekOf(u){ return String(attrsOf(u).seek||'').trim(); }
+// ★を付けられるもの：自分が入れたアーティスト・落としたくない授業・時間割の授業・あるある
+function crossStarOpts(){
+  const a=attrsOf(profile), out=[];
+  if(a.artist)out.push({key:'art:'+normAns(a.artist),label:a.artist});
+  if(a.course)out.push({key:'crs:'+normCourse(a.course),label:a.course});
+  slotKeys(myTimetable||{}).forEach(s=>{ const c=(myTimetable[s]||'').trim(); if(c)out.push({key:'cls:'+s+':'+normAns(c),label:slotLabel(s)+' '+c}); });
+  (a.aruaru||[]).forEach(x=>out.push({key:'aru:'+x,label:x}));
+  return out;
+}
+// ★が合う人とすれ違った時に、1日1回だけ知らせる
+function crossStarNotify(u){
+  if(!crossStarHit(u)||Date.now()-bootAt<60000)return;
+  const k='tama_star_'+jstDayOf(Date.now())+'_'+u.id; try{ if(localStorage.getItem(k))return; localStorage.setItem(k,'1'); }catch(e){}
+  toast(`★ 探している「${esc(crossStarOf(profile).label)}」が合う ${esc(u.name)} とすれ違いました`);
+}
+function openCrossPrefs(){ if(!profile){ toast('先にプロフィールを登録してね'); return; } renderCrossPrefs(); $('#memOverlay').classList.add('show'); }
+function renderCrossPrefs(){
+  const m=crossModeOf(profile), star=crossStarOf(profile), opts=crossStarOpts();
+  const sub={all:'すれ違った人が一覧に出て、相手の一覧にもあなたが出ます',common:'共通点のない人とは、お互いに記録も表示もしません',off:'知らない人とはお互いに記録も表示もしません。友達・トーク・時間割はそのまま使えます'};
+  $('#memSheet').innerHTML=`<h2 class="pstitle">すれ違い</h2>
+    <div class="xmodes">${Object.keys(CROSS_MODES).map(k=>`<button class="xmode${k===m?' on':''}" onclick="setCrossMode('${k}')"><b>${CROSS_MODES[k]}</b><small>${sub[k]}</small></button>`).join('')}</div>
+    <p class="psdesc" style="margin-top:8px">自分を出さない人には、相手も見えません（お互いさま）。</p>
+    <div class="xsec">探している共通点<small>1つだけ。合う人とすれ違うと一番上に出て、知らせます</small></div>
+    ${opts.length?`<div class="chips xstar">${opts.map((o,i)=>`<span class="c${star&&star.key===o.key?' on':''}" onclick="setCrossStar(${i})">${star&&star.key===o.key?'★ ':''}${esc(o.label)}</span>`).join('')}</div>`
+      :`<p class="psdesc">アーティスト・授業・時間割を入れると、ここから選べます。</p>`}
+    <div class="xsec">探していること<small>自由に書けます。共通点には使わず、プロフィールに出ます</small></div>
+    <div class="drow"><input id="seekIn" maxlength="40" placeholder="例：ヨルシカのライブに一緒に行ける人" value="${esc(seekOf(profile)).replace(/"/g,'&quot;')}"><button class="btn btn-primary" onclick="saveSeek()">保存</button></div>
+    <button class="xlink" onclick="closeMembers();openMatchPrefs()">共通点に使う項目<span>›</span></button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px" onclick="closeMembers()">閉じる</button>`;
+}
+async function setCrossMode(k){
+  profile.fa=profile.fa||{}; if(k==='all')delete profile.fa.cross; else profile.fa.cross=k;
+  renderCrossPrefs(); renderNearby(); renderCross(); await saveMyAttrs();
+}
+async function setCrossStar(i){
+  const o=crossStarOpts()[i]; if(!o)return; const cur=crossStarOf(profile);
+  profile.fa=profile.fa||{}; if(cur&&cur.key===o.key)delete profile.fa.cross_star; else profile.fa.cross_star={key:o.key,label:o.label};
+  renderCrossPrefs(); renderCross(); await saveMyAttrs();
+}
+async function saveSeek(){
+  const v=$('#seekIn').value.trim(); if(ngCheck(v)){ toast('使えない言葉が入っています'); return; }
+  profile.fa=profile.fa||{}; if(v)profile.fa.seek=v; else delete profile.fa.seek;
+  renderCross(); await saveMyAttrs(); toast(v?'保存しました':'消しました');
 }
 function confettiBurst(){
   const cv=$('#confetti'); if(!cv)return; cv.width=cv.clientWidth; cv.height=cv.clientHeight;
@@ -4345,7 +4438,7 @@ function openSheet(u,d){
   $('#sheet').innerHTML=`<div class="cover" style="background:${coverBg(u)}"><button class="close" onclick="closeSheet()">✕</button>
     <div class="initial${frCls(u)}">${esc(u.emoji)}</div><div class="idn"><h2>${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''} <span>${esc(facLine(u))}</span></h2>${dist}</div></div>
     <div class="body">${reply&&!fr?`<div class="wavein"><div class="wh">👋 ${esc(u.name)} さんからいいねが届いています</div>${esc(reply.text||'いいねを返すと、トークが始まります')}</div>`:''}
-      ${wantBoxHTML(u)}${metLine(id)}${attrBlock(u)}<div class="bio">${esc(u.bio||'')}</div></div>
+      ${appvOn()&&seekOf(u)?`<div class="xseekbox"><small>探していること</small><b>${esc(seekOf(u))}</b></div>`:''}${wantBoxHTML(u)}${metLine(id)}${attrBlock(u)}<div class="bio">${esc(u.bio||'')}</div></div>
     ${fr?friendBtnHTML(u):''}
     ${fr?'':ended?endedHTML(u):ladderHTML(id)}
     <div class="actions">${main}</div>
