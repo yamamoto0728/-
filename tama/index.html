@@ -1584,6 +1584,33 @@
   html.appv .mside .mt{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
   html.appv #matchList .mrow .nm{display:flex;align-items:baseline;gap:6px}
   html.appv #matchList .mrow .nm .gr{margin-left:auto!important}
+  /* ---------- 2026-10-29 ブレストの反映 ---------- */
+  html.appv .astat{flex-direction:column;gap:0;overflow:visible}
+  html.appv .astat .astbtn+.astbtn{border-top:0}
+  html.appv .athx{margin:4px 0 14px}
+  html.appv .athx small{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  html.appv .athx div{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  html.appv .athx button{height:36px;padding:0 14px;border:1px solid var(--sep);border-radius:18px;background:var(--night);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+  html.appv .athx.sent{font-size:13px;color:var(--muted)}
+  html.appv .anextslot{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 12px;padding:12px 16px;border:0;border-radius:12px;background:var(--tint-soft);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .anextslot small{font-size:13px;color:var(--muted)}
+  html.appv .anextslot b{flex:1;font-size:15px}
+  html.appv .anextslot i{font-style:normal;color:var(--tint);font-weight:600;font-size:14px}
+  html.appv .anextslot.muted{display:block;background:var(--fill);font-size:13px;color:var(--muted);cursor:default}
+  html.appv .amemo{margin:0 0 12px}
+  html.appv .amemo small{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  html.appv .amemo textarea{width:100%;min-height:56px;padding:10px 12px;border:1px solid var(--sep);border-radius:8px;background:var(--night);color:var(--ink);font:inherit;font-size:14px;resize:vertical}
+  html.appv #appvWeek{order:0}
+  html.appv #appvWeek[hidden]{display:none}
+  html.appv .aweek{margin:4px 16px 12px;padding:12px 16px;border-radius:12px;background:var(--tint-soft);font-size:14px;line-height:1.6}
+  html.appv .aweekh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  html.appv .aweekh button{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;cursor:pointer}
+  html.appv .aweek p{margin:0}
+  html.appv .aweek .sub{font-size:12px;color:var(--muted);margin-top:4px}
+  html.appv .attmap{flex:none;height:32px;padding:0 12px;border:1px solid var(--sep);border-radius:16px;background:var(--night);color:var(--tint);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  html.appv .ainvp .c{font-size:14px;padding:8px 12px}
+  html.appv .ainvp .c.on{background:var(--tint);border-color:var(--tint);color:var(--on-tint)}
+  html.appv .ainvf button i{color:var(--tint)}
   html.appv .urow .xdaily{font-size:13px;color:var(--muted)}
   html.appv .urow .xdaily b{color:var(--ink);font-weight:600}
   html.appv .blbl.appv-hl{color:var(--tint);font-weight:700}
@@ -2179,6 +2206,7 @@ const DEVS=['7e4dda65','cacc25fd','b5cac0fa','5267fbf2','1dc61a09','56ed5ec3'];
    ・位置情報（閉じている間のすれ違い）はブラウザのままなので変わらない。見た目と操作だけ
    ・対象の人はマイページの「📱 アプリverで見る」で、多摩キャンverと見比べられる（tama_appv_off） */
 const APPV={testers:['7e4dda65','cacc25fd','b5cac0fa','5267fbf2','1dc61a09','56ed5ec3']};   // 2026-10-24 あおの依頼：多摩祭を試していた6人（あおを含む）
+const APPV_EXTRA_STATUS=['バス待ち'];   // アプリverだけで選べる状態（見る側は全員の画面で出す。2026-10-29 ブレストの「帰りのバス」）
 function appVer(){ const n=typeof fesNo==='function'?fesNo():''; let off=false; try{ off=localStorage.getItem('tama_appv_off')==='1'; }catch(e){} return !!n&&APPV.testers.includes(n)&&!off; }
 const appvTester=()=>{ const n=typeof fesNo==='function'?fesNo():''; return !!n&&APPV.testers.includes(n); };
 function applyAppv(){
@@ -2242,7 +2270,7 @@ function appvLayout(on){
     if(appvMarks.map.nextSibling!==map)appvMarks.map.after(map);
     if(appvMarks.sc.nextSibling!==sc)appvMarks.sc.after(sc);
     [['fb',fb],['cl',cl],['ul',ul]].forEach(([k,el])=>{ if(appvMarks[k].nextSibling!==el)appvMarks[k].after(el); });
-    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote','#appvNotes'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
+    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote','#appvNotes','#appvWeek'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
     appvMarkBuilding(''); if(appvCtPins&&fesMap){ fesMap.removeLayer(appvCtPins); appvCtPins=null; } if(appvTrailLayer&&fesMap){ fesMap.removeLayer(appvTrailLayer); appvTrailLayer=null; appvTrailKey=''; }
     if(lab)lab.textContent='ホーム';
     $('#appvTop').hidden=true; $('#appvSheet').hidden=true;
@@ -2316,7 +2344,7 @@ function renderAppvChrome(){
   const t=fesOutside?'学外にいます<span class="ash-sub">学外なので、いまは位置を使っていません</span>'
     :n?'近くに人がいます'
     :(nx&&noFr?(nx.now?'いまの授業：':'次の授業：')+esc(nx.label)+'<span class="ash-sub">いまは静かです。'+esc(appvQuietLine())+'</span>':'いまは静かです<span class="ash-sub">'+esc(appvQuietLine())+'</span>'), ti=$('#ashTitle'); if(ti&&ti.innerHTML!==t)ti.innerHTML=t;
-  appvMarkBuilding(!n&&nx&&noFr?nx.building:''); appvDrawCtPins(); appvDrawTrail();
+  appvMarkBuilding(appvHlTemp&&Date.now()<appvHlTemp.until?appvHlTemp.name:!n&&nx&&noFr?nx.building:''); appvDrawCtPins(); appvDrawTrail();
   // 人が少ない時は、地図が「誰もいない」に見えないよう、地図の上に次にすることを1行
   let note=$('#appvNote'); if(!note){ note=document.createElement('div'); note.id='appvNote'; note.className='appvnote'; top.after(note); }
   const nt='';   // 2026-10-24 ビジュアルの提案：地図の上のお知らせはやめて、シートの見出しの下に1文
@@ -2329,10 +2357,18 @@ function renderAppvChrome(){
     nt2.hidden=!nh; if(nt2.dataset.h!==nh){ nt2.dataset.h=nh; nt2.innerHTML=nh; } }
   // いまの状態は1つのボタンに（だれに見えるか・いつ消えるかは押した先で説明する）
   const cur=statusOf(profile), st=$('#appvStat');
-  if(st){ const sh='<button class="astbtn'+(cur?' on':'')+'" onclick="openAppvStatus()"><span>いまの状態</span><b>'+esc(cur||'選んでいません')+'</b><i>›</i></button>'; if(st.dataset.h!==sh){ st.dataset.h=sh; st.innerHTML=sh; } }
+  if(st){ const sh='<button class="astbtn'+(cur?' on':'')+'" onclick="openAppvStatus()"><span>いまの状態</span><b>'+esc(cur||'選んでいません')+'</b><i>›</i></button>'
+      +'<button class="astbtn" onclick="openAppvInvite()"><span>友達を</span><b>いまからさそう</b><i>›</i></button>';   // ブレスト：空きコマの軽いさそい
+    if(st.dataset.h!==sh){ st.dataset.h=sh; st.innerHTML=sh; } }
+  // ブレスト：週のふりかえり（金曜の夕方〜日曜・自分だけ）
+  let wk=$('#appvWeek'); if(!wk&&sc2){ wk=document.createElement('div'); wk.id='appvWeek'; sc2.insertBefore(wk,sc2.firstChild); }
+  if(wk){ const wh=appvWeekHTML(); wk.hidden=!wh; if(wk.dataset.h!==wh){ wk.dataset.h=wh; wk.innerHTML=wh; } }
 }
 // C7 状態に「話しかけてOK」などの意味をはっきり持たせる（人は相手に好かれている度合いを低く見積もりがち）
-const APPV_STATUS_MEAN={'ひまです':'声をかけられたらうれしい、の合図','一緒にごはん行ける':'ごはんに誘われたらうれしい、の合図'};
+const APPV_STATUS_MEAN={'ひまです':'声をかけられたらうれしい、の合図','一緒にごはん行ける':'ごはんに誘われたらうれしい、の合図','バス待ち':'帰りのバスを待っている、の合図。行き先の駅は出ません'};
+// ブレスト（2026-10-28）の「帰りのバス」：多摩キャンは改善要望の1位がバス（51.7%）。4限のあとは15分ほど並ぶので、待ち時間を会える時間に。
+// 行き先の駅名を出すかはチームで決めること（駅は学外）なので、いまは「バス待ち」だけ。状態はアプリverの人だけが選べ、見るのは全員の画面で出る
+const APPV_STATUSES=[...FA.statuses,'バス待ち'];
 // C8 いまこの状態が見える人（友達と、いま近くにいる人）。人数ではなく顔で
 function appvStatusSeers(){
   const fr=allFriendRows().filter(r=>r.status==='accepted').map(r=>friendUser(otherIdOf(r))).filter(Boolean);
@@ -2343,15 +2379,16 @@ function openAppvStatus(){
   const cur=statusOf(profile), seers=appvStatusSeers();
   $('#memSheet').innerHTML='<div class="rinfo"><h2 class="pstitle">いまの状態</h2><p class="psdesc">友達と近くの人のリストで、あなたの名前の横に出ます。授業の時限が終わると消えます。</p>'
     +(seers.length?'<div class="aseers"><small>いま見える人</small><div>'+seers.map(u=>'<span class="av" style="background:'+gr(u.emoji)+'">'+esc(u.emoji||'🙂')+'</span>').join('')+'</div></div>':'')
-    +'<div class="aslist">'+FA.statuses.map((s,i)=>'<button class="'+(cur===s?'on':'')+'" onclick="setAppvStatus('+i+');closeMembers()"><span>'+esc(s)+(APPV_STATUS_MEAN[s]?'<small>'+APPV_STATUS_MEAN[s]+'</small>':'')+'</span>'+(cur===s?'<i>選択中</i>':'')+'</button>').join('')+'</div>'
-    +(cur?'<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px" onclick="setAppvStatus('+FA.statuses.indexOf(cur)+');closeMembers()">状態を消す</button>':'')
+    +'<div class="aslist">'+APPV_STATUSES.map((s,i)=>'<button class="'+(cur===s?'on':'')+'" onclick="setAppvStatus('+i+');closeMembers()"><span>'+esc(s)+(APPV_STATUS_MEAN[s]?'<small>'+APPV_STATUS_MEAN[s]+'</small>':'')+'</span>'+(cur===s?'<i>選択中</i>':'')+'</button>').join('')+'</div>'
+    +(cur?'<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px" onclick="setAppvStatus('+APPV_STATUSES.indexOf(cur)+');closeMembers()">状態を消す</button>':'')
     +'<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>';
   $('#memOverlay').classList.add('show');
 }
 function setAppvStatus(i){
   if(!profile)return;
-  const s=FA.statuses[i], off=statusOf(profile)===s;
-  profile.fa={...(profile.fa||{}),status:off?'':s,status_until:off?null:new Date(roomExpiryAt()).toISOString()};   // 授業の時限の終わりで消える（要件定義書 v0.1）
+  const s=APPV_STATUSES[i], off=statusOf(profile)===s;
+  const until=s==='バス待ち'?Math.min(roomExpiryAt(),Date.now()+40*60000):roomExpiryAt();   // バス待ちは40分で消える（乗ったあとに残らないように）
+  profile.fa={...(profile.fa||{}),status:off?'':s,status_until:off?null:new Date(until).toISOString()};   // 授業の時限の終わりで消える（要件定義書 v0.1）
   publishMe(); saveMyAttrs(); renderNearby(); renderCross(); renderAppvChrome();
   if(navigator.vibrate)try{ navigator.vibrate(6); }catch(e){}
 }
@@ -2499,15 +2536,152 @@ function appvMet(id){
   $('#memSheet').innerHTML=`<div class="rinfo ameet"><div class="pair"><span class="av" style="background:${gr(profile&&profile.emoji)}">${esc(profile?profile.emoji:'🙂')}</span><span class="av" style="background:${gr(u.emoji)}">${esc(u.emoji||'🙂')}</span></div>
     <h2 class="pstitle">${esc(u.name||'')}さんと${place?esc(place)+'のあたりで':''}会えました</h2>
     <p class="psdesc">おたがいに、学内での居場所を見せる相手になりました。見せるのをやめたい時は、友達のプロフィールでいつでも切りかえられます。</p>
+    ${appvThanksHTML(id)}${appvNextMeetHTML(id)}
     <button class="btn btn-primary" style="width:100%;padding:13px" onclick="closeMembers();openChat('${jsq(String(id))}','friends')">メッセージを送る</button>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
 }
+/* ---------- 📱 アプリver：ブレストの反映（2026-10-29 あおの依頼「ブレストの内容も良くできそうなものは反映」。J:\ちかく\ブレスト\ちかく_ブレスト_続けたくなる機能と差別化_2026-10-28.pdf） ----------
+   チームで決めること（駅名・ちかくスポット・記録を学期で消す）と、サーバーの作り直しが要るもの（班コード・4学部比較）は入れていない */
+// 友達の「今日は何限まで」（時間割を見せてくれている友達だけ。帰る前に会える？を言いやすく）
+function appvLastPeriod(slots){ const {dow}=appvJ(); if(dow<1||dow>5)return 0; let last=0; FES.periods.forEach((p,i)=>{ if((dow+'-'+(i+1)) in slots)last=i+1; }); return last; }
+// 友達にトークで1通送る（今あるトークの仕組みをそのまま使う。開いていないトークは作ってから）
+async function appvSendTo(id,text){
+  if(!friendChats[id]&&!matches[id]){ friendChats[id]={u:friendUser(id),msgs:[],matchedAt:null}; await loadChat(id); }
+  await sendChatText(id,text);
+}
+// 「会えてよかった」（会った後・返事の欄なし。1人に1日1回まで）。感謝を受け取った側は、送った側の予想よりずっと喜ぶ（Kumar & Epley 2018）
+const APPV_THANKS=['会えてよかった','話せて楽しかった','また学内で'];
+const appvThxKey=id=>'tama_thx_'+appvJ().day+'_'+id;
+function appvThanksHTML(id){
+  let sent=false; try{ sent=!!localStorage.getItem(appvThxKey(id)); }catch(e){}
+  if(sent)return '<div class="athx sent">送りました。返事は気にしなくて大丈夫です</div>';
+  return '<div class="athx"><small>ひとこと送る（返事の欄はありません）</small><div>'+APPV_THANKS.map((t,i)=>`<button onclick="appvThanks('${jsq(String(id))}',${i},this)">${t}</button>`).join('')+'</div></div>';
+}
+async function appvThanks(id,i,btn){
+  try{ if(localStorage.getItem(appvThxKey(id)))return; localStorage.setItem(appvThxKey(id),'1'); }catch(e){}
+  const box=btn&&btn.closest('.athx'); if(box)box.outerHTML='<div class="athx sent">送りました。返事は気にしなくて大丈夫です</div>';
+  await appvSendTo(id,APPV_THANKS[i]);
+}
+// 次に会えるコマ：自分と友達の両方が空いている、いちばん近い平日のコマ（友達が時間割を見せてくれている時だけ）
+function appvBothFree(id){
+  const tt=friendTT[id]; if(!tt||!Object.keys(myTimetable||{}).length)return null;
+  const fs=tt.slots||{}, {dow,min}=appvJ(), days=['日','月','火','水','木','金','土'];
+  for(let k=0;k<7;k++){
+    const d=(dow+k)%7; if(d<1||d>5)continue;
+    for(let i=0;i<FES.periods.length;i++){
+      if(k===0&&min>=appvHM(FES.periods[i][1]))continue;
+      const key=d+'-'+(i+1); if(key in myTimetable||key in fs)continue;
+      return {label:(k===0?'今日の':k===1?'明日の':days[d]+'曜')+(i+1)+'限',p:i+1};
+    }
+  }
+  return null;
+}
+function appvNextMeetHTML(id){
+  const f=appvBothFree(id);
+  if(!f)return friendTT[id]?'':'<div class="anextslot muted">時間割を見せ合うと、いっしょに空いているコマがここに出ます</div>';
+  return `<button class="anextslot" onclick="appvMeetDraft('${jsq(String(id))}','${f.label}')"><small>次にいっしょに空いているコマ</small><b>${f.label}</b><i>誘う ›</i></button>`;
+}
+function appvMeetDraft(id,label){
+  closeMembers(); closeSheet(); openChat(id,'friends');
+  setTimeout(()=>{ const i=$('#chatInput'); if(i&&!i.value){ i.value=label+'、空いてたら学食どう？'; i.focus(); } },350);   // 送るのは本人
+}
+// いまからさそう：空いている友達・ひまな友達に「いまから○○に行きます」を1通。返事・来た人・来なかった人は、送った側に何も出さない
+const APPV_INV_MAX=3;
+function appvInvLeft(){ try{ const x=JSON.parse(localStorage.getItem('tama_inv_day')||'null'); return x&&x.d===appvJ().day?APPV_INV_MAX-x.n:APPV_INV_MAX; }catch(e){ return APPV_INV_MAX; } }
+function appvInvCandidates(){
+  return allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>!blocked.has(id)&&!isTest(id)).map(id=>{ const u=friendUser(id)||{}, st=statusOf(u), ft=friendTT[id]?nextFree(friendTT[id].slots||{}):null;
+    return {id,u,why:st==='ひまです'||st==='一緒にごはん行ける'?st:ft&&ft.now?'いま空きコマ':'',pick:st==='ひまです'||st==='一緒にごはん行ける'||!!(ft&&ft.now)}; }).filter(x=>x.u.name);
+}
+let appvInvPlace='', appvInvSel=new Set();
+function openAppvInvite(){
+  const L_=appvInvCandidates();
+  if(!L_.length){ $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">いまからさそう</h2><p class="psdesc">友達になると、空いている友達に「いまから学食」などを送れます。会った人とは、3分だけ使えるコードで友達になれます。</p><button class="btn btn-primary" style="width:100%;padding:13px" onclick="closeMembers();openFrAdd('show')">自分のコードを見せる</button><button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`; $('#memOverlay').classList.add('show'); return; }
+  const places=[...new Set([curPlace&&!isPrivatePlace(curPlace)?curPlace:'','食堂A棟','食堂B棟','図書館・研究棟','EGG DOME'].filter(Boolean))];
+  if(!places.includes(appvInvPlace))appvInvPlace=places[0];
+  appvInvSel=new Set(L_.filter(x=>x.pick).map(x=>x.id));
+  const left=appvInvLeft();
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">いまからさそう</h2><p class="psdesc">選んだ友達に「いまから○○に行きます。来られたらどうぞ」を送ります。返事がなくても、あなたには何も出ません。</p>
+    <div class="xsec" style="margin-top:8px">どこに行く？</div><div class="chips ainvp">${places.map(p=>`<span class="c${p===appvInvPlace?' on':''}" onclick="appvInvPlace='${jsq(p)}';$$('.ainvp .c').forEach(x=>x.classList.toggle('on',x.textContent===appvInvPlace))">${esc(p)}</span>`).join('')}</div>
+    <div class="xsec">だれに送る？<small>ひまな友達・いま空きコマの友達を先に選んであります</small></div>
+    <div class="aslist ainvf">${L_.map(x=>`<button class="${appvInvSel.has(x.id)?'on':''}" onclick="appvInvToggle('${jsq(String(x.id))}',this)"><span>${esc(x.u.emoji||'🙂')} ${esc(x.u.name)}${x.why?`<small>${esc(x.why)}</small>`:''}</span><i>${appvInvSel.has(x.id)?'送る':''}</i></button>`).join('')}</div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:14px" onclick="appvInvSend()"${left>0?'':' disabled'}>${left>0?'送る':'今日はもう送れません（1日'+APPV_INV_MAX+'回まで）'}</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+function appvInvToggle(id,btn){ if(appvInvSel.has(id))appvInvSel.delete(id); else appvInvSel.add(id); btn.classList.toggle('on',appvInvSel.has(id)); const i=btn.querySelector('i'); if(i)i.textContent=appvInvSel.has(id)?'送る':''; }
+async function appvInvSend(){
+  if(!appvInvSel.size){ toast('送る友達を選んでください'); return; }
+  if(appvInvLeft()<=0)return;
+  try{ const x=JSON.parse(localStorage.getItem('tama_inv_day')||'null'), n=x&&x.d===appvJ().day?x.n+1:1; localStorage.setItem('tama_inv_day',JSON.stringify({d:appvJ().day,n})); }catch(e){}
+  const text=`いまから${appvInvPlace}に行きます。来られたらどうぞ（返事はいりません）`, ids=[...appvInvSel];
+  closeMembers(); toast('送りました');
+  for(const id of ids){ try{ await appvSendTo(id,text); }catch(e){} }
+}
+// 週のふりかえり（金曜の4限のあと〜日曜・自分だけ）。今週3分コードで会えた人がいる週だけ出す。閉じたらその週は出さない
+const appvWeekKey=()=>{ const {day,dow}=appvJ(); const d=new Date(day+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()-((dow+6)%7)); return d.toISOString().slice(0,10); };
+function appvWeekHTML(){
+  const {dow,min}=appvJ(); if(!(dow===0||dow===6||(dow===5&&min>=appvHM('15:20'))))return '';
+  let closed=''; try{ closed=localStorage.getItem('tama_week_closed')||''; }catch(e){} if(closed===appvWeekKey())return '';
+  const from=Date.parse(appvWeekKey()+'T00:00:00+09:00'), met=appvMetList().filter(x=>x.at>=from);
+  if(!met.length)return '';
+  return `<div class="aweek"><div class="aweekh"><b>今週のふりかえり</b><button onclick="try{localStorage.setItem('tama_week_closed',appvWeekKey())}catch(e){};renderAppvChrome()">閉じる</button></div>
+    <p>今週会えた人：${met.map(x=>`<b>${esc(x.name)}</b>${x.place?'（'+esc(x.place)+'のあたり）':''}`).join('・')}</p><p class="sub">来週のちかくタイムは ${CT_FIXED.label}。あなたにだけ見えています</p></div>`;
+}
+// 自分だけのメモ（友達のプロフィール。この端末にだけ保存し、どこにも送らない）
+const appvMemoKey=id=>'tama_memo_'+id;
+function appvMemoHTML(id){
+  let v=''; try{ v=localStorage.getItem(appvMemoKey(id))||''; }catch(e){}
+  return `<div class="amemo"><small>自分だけのメモ（相手には見えません。この端末にだけ残ります）</small><textarea maxlength="200" placeholder="例：読みは みずはら／サークルの話をした" oninput="try{localStorage.setItem('${appvMemoKey(jsq(String(id)))}',this.value)}catch(e){}">${esc(v)}</textarea></div>`;
+}
+// 時間割の授業から、教室の建物を地図で見る（「この教室どこ？」。建物まで。階・入口のデータはまだない）
+let appvHlTemp=null;
+function appvShowBuilding(name){
+  const l=CAMPUS_LABELS.find(x=>x[0]===name); if(!l)return;
+  go('near'); setAppvDetent('low'); appvHlTemp={name,until:Date.now()+20000};
+  setTimeout(()=>{ if(fesMap){ fesMap.setView([l[1],l[2]],18); setTimeout(()=>appvMarkBuilding(name),400); } },200);
+}
+// お題の案を送る（お題をみんなで作る。案はチームが見て選ぶ。採用されたら本人にだけ1回知らせる。supabase/tama_daily_ideas.sql）
+let appvIdeaMissing=false;
+function openAppvIdea(){
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">お題の案を送る</h2><p class="psdesc">今日のお題・ちかくタイムに使えそうな質問を送ってください。チームが選んで使います。名前はほかの人には出ません。</p>
+    <input id="ideaQ" maxlength="40" placeholder="質問（例：学食の推しメニューは？）" style="width:100%;padding:12px;border:1px solid var(--sep);border-radius:8px;font:inherit;background:var(--night);color:var(--ink)">
+    <input id="ideaO" maxlength="60" placeholder="選ぶ答え（任意。「・」で区切る 例：麺・ご飯・パン）" style="width:100%;padding:12px;margin-top:8px;border:1px solid var(--sep);border-radius:8px;font:inherit;background:var(--night);color:var(--ink)">
+    <p class="psdesc" style="margin-top:8px">ほかの人を選ばせる質問（「この中で一番○○なのは？」）や、恋愛・家族・見た目の質問は使いません。</p>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="appvIdeaSend()">送る</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function appvIdeaSend(){
+  const q=($('#ideaQ').value||'').trim(), o=($('#ideaO').value||'').split(/[・,、]/).map(s=>s.trim()).filter(Boolean).slice(0,4);
+  if(q.length<4){ toast('質問を入れてください'); return; }
+  if(ngCheck(q)||o.some(ngCheck)){ toast('使えない言葉が含まれています'); return; }
+  if(!sb||appvIdeaMissing){ toast('いまは送れません（準備中）'); return; }
+  const {error}=await sb.from(T('daily_ideas')).insert({user_id:myId,q,opts:o.length>=2?o:null});
+  if(error){ if(isSchemaErr(error))appvIdeaMissing=true; toast('いまは送れません（準備中）'); console.warn('[idea]',error.message); return; }
+  closeMembers(); toast('送りました。ありがとうございます');
+}
+// 採用された案があれば、本人にだけ1回知らせる（採用の回数は出さない）
+async function appvIdeaCheck(){
+  if(!appvOn()||!sb||!myId||appvIdeaMissing)return;
+  const {data,error}=await sb.from(T('daily_ideas')).select('id,q,adopted_at').eq('user_id',myId).not('adopted_at','is',null);
+  if(error){ if(isSchemaErr(error))appvIdeaMissing=true; return; }
+  let seen=[]; try{ seen=JSON.parse(localStorage.getItem('tama_idea_seen')||'[]'); }catch(e){}
+  const n=(data||[]).filter(x=>x.adopted_at&&!seen.includes(x.id));
+  if(!n.length)return;
+  try{ localStorage.setItem('tama_idea_seen',JSON.stringify(seen.concat(n.map(x=>x.id)))); }catch(e){}
+  toast(`あなたの案「${esc(n[0].q)}」が、お題に使われることになりました`);
+}
 function renderAppvMet(){
   const row=$('#appvRow'); if(!row)return; let el=$('#appvMetBox');
-  if(!appvOn()){ if(el)el.remove(); return; }
+  if(!appvOn()){ if(el)el.remove(); const ex0=$('#appvMeExtra'); if(ex0)ex0.remove(); return; }
   if(!el){ el=document.createElement('div'); el.id='appvMetBox'; el.className='ametbox'; row.before(el); }
   const L_=appvMetList().slice().reverse();
+  appvIdeaCheck();
+  // ブレスト：お題をみんなで作る／相談先への静かな入口（だれにでも同じ場所に同じように置く。使い方から推測して出すことはしない）
+  let ex=$('#appvMeExtra'); if(!ex){ ex=document.createElement('div'); ex.id='appvMeExtra'; ex.className='ametbox'; el.after(ex); }
+  ex.innerHTML='<button class="xlink" style="margin-top:0" onclick="openAppvIdea()">お題の案を送る<span>›</span></button>'
+    +'<p style="margin-top:12px">話を聞いてくれる場所：多摩学生相談室（総合棟2F・月〜金 9:30〜16:30・無料・予約制）</p>';
   el.innerHTML=`<h3>今学期 会えた人</h3>`+(L_.length?L_.map(x=>`<div class="amet"><span class="av" style="background:${gr(x.emoji)}">${esc(x.emoji||'🙂')}</span><b>${esc(x.name)}</b><small>${new Date(x.at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'})}${x.place?'・'+esc(x.place)+'のあたり':''}</small></div>`).join('')
     :'<p>会って3分のコードで友達になると、ここに残ります。あなたにだけ見えます</p>');
 }
@@ -2517,7 +2691,8 @@ function renderAppvTT(){
   if(!keys.length){ el.innerHTML='<div class="attempty">時間割を入れると、同じ授業の人が分かり、<br>友達といっしょに空いているコマも出ます。<br><br><button class="btn btn-primary" style="padding:12px 22px" onclick="openTimetable()">時間割を入れる</button></div>'; return; }
   const ms=Date.now(), dow=new Date(ms+9*3600000).getUTCDay(), cs=ttCurrentSlot();
   const today=FES.periods.map((p,i)=>({i:i+1,p,k:dow+'-'+(i+1)})).filter(x=>dow>=1&&dow<=5&&x.k in slots);
-  const dayH=today.length?today.map(x=>'<div class="attrow'+(cs&&cs.k===x.k&&cs.inClass?' now':'')+'"><div class="p"><b>'+x.i+'</b>'+x.p[0]+'</div><div class="n">'+esc(slots[x.k]||'（授業名なし）')+(rooms[x.k]?'<small>'+esc(rooms[x.k])+'</small>':'')+'</div></div>').join('')
+  const mapBtn=k=>{ const b=appvRoomBuilding(rooms[k]||''); return b?`<button class="attmap" onclick="appvShowBuilding('${jsq(b)}')">地図</button>`:''; };   // ブレスト：この教室どこ？（建物まで）
+  const dayH=today.length?today.map(x=>'<div class="attrow'+(cs&&cs.k===x.k&&cs.inClass?' now':'')+'"><div class="p"><b>'+x.i+'</b>'+x.p[0]+'</div><div class="n">'+esc(slots[x.k]||'（授業名なし）')+(rooms[x.k]?'<small>'+esc(rooms[x.k])+'</small>':'')+'</div>'+mapBtn(x.k)+'</div>').join('')
     :'<div class="attrow"><div class="n" style="font-weight:400;color:var(--muted)">'+(dow>=1&&dow<=5?'今日は授業がありません':'今日は休みです')+'</div></div>';
   let grid='<div class="attgrid"><div></div>'+TT_DAYS.map((d,i)=>'<div class="h'+(i+1===dow?' today':'')+'">'+d+'</div>').join('');
   FES.periods.forEach((p,i)=>{ grid+='<div class="pp">'+(i+1)+'</div>'; for(let d=1;d<=5;d++){ const k=d+'-'+(i+1), has=k in slots, now=!!cs&&cs.k===k&&cs.inClass; grid+='<div class="c'+(has?' f':'')+(now?' now':'')+'">'+(has?esc(slots[k]||''):'')+'</div>'; } });
@@ -3747,7 +3922,7 @@ function renderStatusRow(){
 // 「いまの状態」（ひまです・一緒にごはん行ける など）。授業の時限の終わりで消える（2026-09-24。以前は消えず、翌日も「これから帰る」が出ていた）。
 // 消える時刻の無い古い状態は出さない
 function statusOf(u){
-  const a=attrsOf(u); if(!a.status||!(FA.statuses.includes(a.status)||FES_STATUS.includes(a.status)))return '';   // 祭り用の3つ（FES_STATUS。2026-10-15）も出す
+  const a=attrsOf(u); if(!a.status||!(FA.statuses.includes(a.status)||FES_STATUS.includes(a.status)||APPV_EXTRA_STATUS.includes(a.status)))return '';   // 祭り用の3つ（FES_STATUS。2026-10-15）・アプリverの「バス待ち」（2026-10-29）も出す
   if(!a.status_until||Date.parse(a.status_until)<=Date.now())return '';
   return a.status;
 }
@@ -7323,7 +7498,7 @@ function renderFriends(){
   h+=`<div class="listhead">👥 友達はいまどこ？</div><div class="ulist">`;
   h+=friends.length?friends.map(({id,u,p})=>{ const t=presenceText(p), map=friendOnMap(id);
       return `<div class="urow" onclick="openFriend('${id}')"><div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
-        <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}${sameDaily(u)?`<span class="stchip same">🎲 お題が同じ</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}</div>`:''}${freeText(id)?`<div class="mtime frfreeline">${esc(freeText(id))}</div>`:''}</div>
+        <div class="info"><div class="n">${esc(u.name)}${statusOf(u)?`<span class="stchip">💬 ${esc(statusOf(u))}</span>`:''}${sameDaily(u)?`<span class="stchip same">🎲 お題が同じ</span>`:''}</div><div class="b">${t?'📍 '+esc(t):esc(presenceWhy(p))}</div>${t&&p.updated_at?`<div class="mtime">${agoText(p.updated_at)}</div>`:''}${friendTT[id]?`<div class="mtime" style="color:#9a5a10">🗓 ${esc(ttTodayText(friendTT[id]).main)}${appvOn()&&appvLastPeriod(friendTT[id].slots||{})?'・今日は'+appvLastPeriod(friendTT[id].slots||{})+'限まで':''}</div>`:''}${freeText(id)?`<div class="mtime frfreeline">${esc(freeText(id))}</div>`:''}</div>
         <div class="d">${map?`<button class="frmapbtn" onclick="event.stopPropagation();showFriendOnMap('${id}')">🗺 地図</button>`:''}</div></div>`; }).join('')
     :`<div class="empty" style="padding:22px 20px"><div class="big">👥</div><p>まだ友達がいません。<br>目の前にいる人とは、4桁のコードで<br>すぐ友達になれます。</p>
        <button class="btn btn-primary" onclick="openFrAdd('show')">自分のコードを見せる</button><br><button class="btn btn-ghost" style="margin-top:8px" onclick="openFrAdd('enter')">相手のコードを入れる</button></div>`;
@@ -7349,7 +7524,7 @@ function friendBtnHTML(u){
       +(friendOnMap(u.id)?`<button class="btn btn-ghost frbtn" onclick="showFriendOnMap('${u.id}')">🗺 地図で見る</button>`:'')
       +(friendTT[u.id]?`<button class="btn btn-ghost frbtn" onclick="openFriendTT('${u.id}')">🗓 ${esc(u.name)}さんの時間割を見る</button>`:'')
       +(appvOn()&&!locShareMissing&&!isTest(u.id)?`<div class="sharerow"><div class="lab">学内での居場所を見せる<small>${locSharesTo.has(u.id)?'いる建物・教室・ひとことが、この友達に見えます':'オフの間は、この友達にも居場所は見えません'}。切りかえても相手に知らせは届きません。オフの時は、相手からは学内にいない時と同じに見えます</small></div>
-        <div class="toggle${locSharesTo.has(u.id)?' on':''}" onclick="toggleLocShare('${u.id}')"><div class="k"></div></div></div>${mutualShareHTML(u.id)}`:'')
+        <div class="toggle${locSharesTo.has(u.id)?' on':''}" onclick="toggleLocShare('${u.id}')"><div class="k"></div></div></div>${mutualShareHTML(u.id)}${appvNextMeetHTML(u.id)}${appvMemoHTML(u.id)}`:'')
       +(ttShareMissing||isTest(u.id)?'':`<div class="sharerow"><div class="lab">🗓 自分の時間割を見せる<small>${hasCourseNames()?'授業名・教室・時限が、この友達にだけ見えます':'時間割に授業名か教室を入れると見せられます'}</small></div>
         <div class="toggle${ttSharesTo.has(u.id)?' on':''}" onclick="toggleTTShare('${u.id}')"><div class="k"></div></div></div>`)
       +`<button class="frquit" onclick="removeFriendRow(${r.id},true)">友達をやめる</button>`;
