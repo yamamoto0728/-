@@ -1584,6 +1584,70 @@
   html.appv .mside .mt{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
   html.appv #matchList .mrow .nm{display:flex;align-items:baseline;gap:6px}
   html.appv #matchList .mrow .nm .gr{margin-left:auto!important}
+  /* ---------- 2026-10-29 トークのページの作り直し（あお「もっと見やすく一新」） ----------
+     一覧は LINE と同じ1本（切りかえなし）。チャットは、吹き出しを大きく・自分はアクセント色・相手は薄い面。日付は小さな札、入力欄は丸く */
+  html.appv #s-match .seg,html.appv #s-match #matchCount,html.appv #s-match .apphead .qhelp{display:none}
+  html.appv #s-match .apphead{padding:14px 16px 4px}
+  html.appv #matchList{padding:0 0 24px}
+  html.appv .tkin,html.appv .tkrow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 16px;border:0;background:transparent;font:inherit;color:var(--ink);text-align:left;cursor:pointer;position:relative}
+  html.appv .tkin{background:var(--fill);border-radius:12px;width:calc(100% - 32px);margin:8px 16px 4px;padding:12px 14px}
+  html.appv .tkin .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+  html.appv .tkin b{font-size:15px;font-weight:600}
+  html.appv .tkin small{font-size:12px;color:var(--muted)}
+  html.appv .tkin>i{font-style:normal;color:var(--muted2);font-size:20px}
+  html.appv .tkstk{display:flex;flex:none}
+  html.appv .tkstk .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:16px;border:2px solid var(--fill);margin-left:-10px}
+  html.appv .tkstk .av:first-child{margin-left:0}
+  html.appv .tkrow::after{content:"";position:absolute;left:80px;right:0;bottom:0;height:1px;background:var(--sep)}
+  html.appv .tkrow:last-child::after{display:none}
+  html.appv .tkrow:active{background:var(--fill)}
+  html.appv .tkrow>.av{position:relative;flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:26px}
+  html.appv .tkrow>.av .on{position:absolute;right:1px;bottom:1px;width:12px;height:12px;border-radius:50%;background:var(--ok);border:2px solid var(--night)}
+  html.appv .tkrow .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  html.appv .tkrow .l1{display:flex;align-items:baseline;gap:6px;min-width:0}
+  html.appv .tkrow .l1 b{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.appv .tkrow .l1 em{font-style:normal;font-size:12px;color:var(--tint);white-space:nowrap}
+  html.appv .tkrow .l1 .tm{margin-left:auto;flex:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  html.appv .tkrow .l2{display:flex;align-items:center;gap:8px;min-width:0}
+  html.appv .tkrow .last{flex:1;min-width:0;font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.appv .tkrow .last.un{color:var(--ink);font-weight:600}
+  html.appv .tkrow .l3{font-size:11px;color:var(--muted2)}
+  html.appv .tkrow .unbadge{position:static;flex:none;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--rose);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+  html.appv .tkrow .unbadge.dot{min-width:10px;width:10px;height:10px;padding:0}
+  /* チャット */
+  html.appv #s-chat{background:var(--night)}
+  html.appv .chathead{gap:10px;padding:8px 12px;border-bottom:1px solid var(--sep);background:var(--night)}
+  html.appv .chathead .back{font-size:30px;line-height:1;color:var(--tint);padding:0 6px 4px}
+  html.appv .chathead .av{width:36px;height:36px;font-size:18px}
+  html.appv .chathead .nm{font-size:16px;font-weight:600}
+  html.appv .chathead .st{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.appv .chathead .frinv{border:0;background:var(--tint-soft);color:var(--tint);border-radius:16px;padding:7px 12px;font-size:13px;font-weight:600}
+  html.appv .membtn{width:36px;height:36px;border:0;background:transparent;color:var(--muted);font-size:20px}
+  .tkback{display:none}
+  html.appv .tkback{display:block;margin:0 0 4px;padding:8px 16px;border:0;background:none;color:var(--tint);font:inherit;font-size:16px;font-weight:600;cursor:pointer}
+  html.appv .tkback[hidden]{display:none}
+  html.appv .tkcomm .unbadge.dot{width:10px;height:10px;border-radius:50%;background:var(--rose);flex:none}
+  .wantbar[hidden]{display:none}   /* 前は hidden でも display:flex で空の帯が出ていた（多摩キャンverも） */
+  html.appv .wantbar{margin:8px 12px 0;padding:10px 12px;border-radius:12px;background:var(--fill);font-size:13px}
+  html.appv .wantbar button{background:var(--tint);color:var(--on-tint);font-weight:600}
+  html.appv .msgs{padding:12px 12px 16px;gap:6px;background:var(--night)}
+  html.appv .msgs .day{font-size:11px;color:var(--muted);background:var(--fill);padding:3px 10px;margin:10px 0 6px}
+  html.appv .bub{max-width:78%;padding:9px 13px;border-radius:20px;font-size:15.5px;line-height:1.55;animation:none;word-break:break-word}
+  html.appv .bub.them{background:var(--fill);color:var(--ink);border-bottom-left-radius:6px}
+  html.appv .bub.me{background:var(--tint);color:var(--on-tint);border-bottom-right-radius:6px;font-weight:400}
+  html.appv .bub .tm{font-size:10.5px;opacity:.65;margin-top:2px}
+  html.appv .bub.wave{border:0;outline:1px dashed var(--sep);outline-offset:2px}
+  html.appv .bub .rx{background:var(--night);border-color:var(--sep)}
+  html.appv .bub .rx.mine{border-color:var(--tint);background:var(--tint-soft)}
+  html.appv .ttlbar,html.appv .ttlbar.warn{align-self:stretch;text-align:center;margin:0 4px 8px;padding:8px 12px;border:0;border-radius:12px;background:var(--fill);color:var(--muted);font-size:12px;font-weight:500}
+  html.appv .ttlbar.over{background:var(--fill);color:var(--muted)}
+  html.appv .topics{background:var(--night);border-top:1px solid var(--sep);padding:8px 12px 0}
+  html.appv .topics .tc,html.appv .topics .tc.rare{background:var(--fill);border:0;border-radius:16px;font-size:13.5px;color:var(--ink)}
+  html.appv .topics .tshow{color:var(--tint)}
+  html.appv .chatbar{gap:8px;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--sep);background:var(--night);align-items:center}
+  html.appv .chatbar input{height:40px;padding:0 16px;border:0;border-radius:20px;background:var(--fill);font-size:16px}
+  html.appv .chatbar input:focus{border:0;box-shadow:0 0 0 2px var(--tint-soft)}
+  html.appv .chatbar .send{width:40px;height:40px;background:var(--tint);color:var(--on-tint);font-size:20px;font-weight:700}
   /* ---------- 2026-10-29 ブレストの反映 ---------- */
   html.appv .astat{flex-direction:column;gap:0;overflow:visible}
   html.appv .astat .astbtn+.astbtn{border-top:0}
@@ -2398,13 +2462,14 @@ setInterval(()=>{ if(!document.hidden)renderAppvChrome(); },5000);
 const APPV_EMO=/^\s*(?:\p{Extended_Pictographic}|️|‍|\p{Emoji_Modifier})+\s*/u;
 function appvStripEmoji(root){
   if(!document.documentElement.classList.contains('appv')||!root)return;
-  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago,.lk,.mtime,.frbtn,.nearsec,.clstg,.dline,.crosswhen,.wavehead,.ctsame,.dnote,.dcount,.stchip,.cth>span:first-child,.rolet,.frmapbtn,.nearmore,#friendBox .urow .b').forEach(el=>{   // ユーザーが書いた文（トークの最後の一言・語りたいこと）は対象にしない
+  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago,.lk,.mtime,.frbtn,.nearsec,.clstg,.dline,.crosswhen,.wavehead,.ctsame,.dnote,.dcount,.stchip,.cth>span:first-child,.rolet,.frmapbtn,.nearmore,#friendBox .urow .b,.th>*,.tshow').forEach(el=>{   // ユーザーが書いた文（トークの最後の一言・語りたいこと）は対象にしない
     const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT); const t=w.nextNode(); if(t&&APPV_EMO.test(t.nodeValue))t.nodeValue=t.nodeValue.replace(APPV_EMO,'');
   });
 }
 let appvObs=null;
 function appvWatch(){ const b=$('#ashBody'); if(!b||appvObs)return; appvObs=new MutationObserver(()=>appvStripEmoji(b)); appvObs.observe(b,{childList:true,subtree:true}); appvStripEmoji(b);
   const ml=$('#matchList'); if(ml){ new MutationObserver(()=>appvStripEmoji(ml)).observe(ml,{childList:true,subtree:true}); appvStripEmoji(ml); }   // トークの一覧も（E6）
+  const tp=$('#chatTopics'); if(tp){ new MutationObserver(()=>appvStripEmoji(tp)).observe(tp,{childList:true,subtree:true}); }   // チャットの話題カードの見出し
 }
 // 📱 アプリverの地図の動かせる範囲（2026-10-24 あお「地図を動かすと中心に戻る」→「ゆるめる」）。
 // 前はキャンパスより12%広いだけの枠に当たると、ばねのように戻っていた。アプリverは画面いっぱいの地図の下半分をシートが覆うので、
@@ -5167,6 +5232,7 @@ function renderFriendTalks(frItems){
 }
 // トークの一覧。2026-09-28 から「👥 友達」（期限なし）と「💬 24時間」（話しかけから始まったトーク）を別の切り替えに分けた
 function renderMatches(){
+  if(appvOn())return renderAppvTalks();   // 📱 アプリverは1本の一覧（2026-10-29 あおの依頼「トークのページをもっと見やすく一新」）
   const lastOf=id=>{ const c=chatOf(id); return (c&&c.msgs[c.msgs.length-1])||talkPreview[chatKey(id)]||null; };
   // 友達（マッチから友達になった人も含む）
   const frItems=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>!blocked.has(id)&&(friendUser(id)||matches[id]))
@@ -5220,6 +5286,58 @@ function renderMatches(){
   updateTalkDot();   // 新しいメッセージを読み込んだ時に、未読のバッジも一緒に直す
 }
 
+/* ---------- 📱 アプリverのトーク一覧（2026-10-29 あおの依頼「トークのページをもっと見やすく一新」） ----------
+   ・「友達／すれ違い」の切りかえをやめて、LINE と同じ1本の一覧（新しい順）。友達も、おたがいにいいねした人も同じ行の形
+   ・1行目：アイコン・名前・いまの状態・時刻　2行目：最後の一言・未読の数　（24時間トークは3行目に「今日 21:30 まで」。数え下げない）
+   ・届いたいいねは一番上の1行にまとめる（押すと一覧。返さなくても相手には分からない）。送った申請・終わったトークは出さない */
+const appvTalkEnd=m=>{ if(!m||!m.matchedAt)return ''; const e=m.matchedAt+MATCH_TTL; return (jstDayOf(e)===jstDayOf(Date.now())?'今日 ':'明日 ')+hhmm(e)+' まで'; };
+function renderAppvTalks(){
+  const list=$('#matchList'); if(!list)return;
+  const lastOf=id=>{ const c=chatOf(id); return (c&&c.msgs[c.msgs.length-1])||talkPreview[chatKey(id)]||null; };
+  const rows=[];
+  allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>!blocked.has(id)&&(friendUser(id)||matches[id]))
+    .forEach(id=>{ const last=lastOf(id); rows.push({id,u:friendUser(id)||matches[id].u,last,at:(last&&last.at)||0,fr:true}); });
+  Object.keys(matches).forEach(id=>{ const m=matches[id]; if(isFriend(id)||isExpired(m)||blocked.has(id))return;
+    const last=m.msgs[m.msgs.length-1]; rows.push({id,u:m.u,m,last,at:(last&&last.at)||m.matchedAt||0}); });
+  rows.sort((a,b)=>b.at-a.at);
+  const ins=Object.keys(wavesIn).filter(id=>!blocked.has(id)).map(id=>({id,u:anyUser(id),w:wavesIn[id]})).filter(x=>x.u).sort((a,b)=>b.w.at-a.w.at);
+  if(ins.length&&!document.hidden&&$('#s-match').classList.contains('active'))markWavesSeen();   // 一覧で見たいいねは、アイコンの数字に数えない
+  const inc=allFriendRows().filter(r=>r.status==='pending'&&r.to_id===myId).length;
+  const stack=L=>`<span class="tkstk">${L.slice(0,3).map(u=>`<span class="av" style="background:${gr(u.emoji)}">${esc(u.emoji||'🙂')}</span>`).join('')}</span>`;
+  let h='';
+  if(ins.length)h+=`<button class="tkin" onclick="openAppvLikes()">${stack(ins.map(x=>x.u))}<span class="tx"><b>いいねが届いています</b><small>返さなくても、相手には分かりません</small></span><i>›</i></button>`;
+  if(inc)h+=`<button class="tkin" onclick="go('near');setAppvPane('fr');setAppvDetent('full')"><span class="tx"><b>友達申請が届いています</b><small>「ちかく」の友達から承認できます</small></span><i>›</i></button>`;
+  // コミュニティ（要件定義書では「保留」。アプリverでも入れるように、一覧の1行から開く。2026-10-29 あお「トークのタブにコミュニティなくね？」）
+  const commNew=(()=>{ const d=$('#dotComm'); return !!d&&d.style.display!=='none'; })();
+  h+=`<button class="tkin tkcomm" onclick="appvOpenComm(true)"><span class="tx"><b>コミュニティ</b><small>授業や集まりのトーク${commNew?'・新しいメッセージがあります':''}</small></span>${commNew?'<span class="unbadge dot"></span>':''}<i>›</i></button>`;
+  if(!rows.length){ list.innerHTML=h+appvEmpty('友達になると、ここでトークできます。会った人とは、3分だけ使えるコードを見せ合うと、その場で友達になれます',['自分のコードを見せる',"openFrAdd('show')"]); updateTalkDot(); return; }
+  h+=rows.map(({id,u,m,last,fr})=>{
+    const st=fr?statusOf(friendUser(id)||u):'', un=hasUnread(id), o=findUser(id), online=!!o&&!isClosed(o);
+    const sub=last?(last.from===myId?'あなた：':'')+esc(msgPlain(last.text)):m?'トークが始まりました。最初の一言を送ってみよう':'メッセージを送ってみよう';
+    const tm=last&&last.at?esc(dayLabel(last.at)==='今日'?hhmm(last.at):dayLabel(last.at)):'';
+    const end=!fr&&m&&!isTest(id)?appvTalkEnd(m):'';
+    return `<button class="tkrow" onclick="openChat('${jsq(String(id))}','match')"><span class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}${online?'<i class="on"></i>':''}</span>
+      <span class="tx"><span class="l1"><b>${esc(u.name)}</b>${st?`<em>${esc(st)}</em>`:''}<span class="tm">${tm}</span></span>
+      <span class="l2"><span class="last${un?' un':''}">${sub}</span>${unreadBadge(id)}</span>${end?`<span class="l3">${end}・友達になると期限なし</span>`:''}</span></button>`;
+  }).join('');
+  list.innerHTML=h; updateTalkDot();
+}
+// コミュニティを開く／一覧に戻る（トークの画面の中で切りかえる。上に「‹ トーク」）
+let appvComm=false;
+function appvOpenComm(on){
+  appvComm=on; $('#matchList').hidden=on; $('#commPane').hidden=!on;
+  let b=$('#appvCommBack');
+  if(on){ if(!b){ b=document.createElement('button'); b.id='appvCommBack'; b.className='tkback'; b.textContent='‹ トーク一覧'; b.onclick=()=>appvOpenComm(false); $('#commPane').prepend(b); } b.hidden=false; renderRooms(); loadRooms(); }
+  else{ if(b)b.hidden=true; renderMatches(); }
+  updateTalkDot();
+}
+function openAppvLikes(){
+  const ins=Object.keys(wavesIn).filter(id=>!blocked.has(id)).map(id=>({id,u:anyUser(id),w:wavesIn[id]})).filter(x=>x.u).sort((a,b)=>b.w.at-a.w.at);
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">いいねが届いています</h2><p class="psdesc">プロフィールを見て、いいねを返すとトークが始まります。返さなくても、相手には何も届きません。</p>
+    <div class="cblist">${ins.map(({id,u,w})=>`<div class="cbrow" onclick="closeMembers();openUserSheet('${jsq(String(id))}')" style="cursor:pointer"><div class="cbe">${esc(u.emoji||'🙂')}</div><div class="cbt"><b>${esc(u.name)}</b><small>${esc(w.text||likeCommonText(u)||'いいねが届きました')}・${agoText(w.at)}</small></div></div>`).join('')}</div>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:10px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
 /* ---------- 話題カード（マッチした後の「で、なに？」を防ぐ） ---------- */
 // チャットを開くと、2人の共通点から最初の一言を3つ出し、押すだけで送れるようにする（2026-09-24）。
 // 人は相手が自分と話したがっている度合いを低く見積もり、最初の一言で止まりがち（Epley & Schroeder, 2014）なので、
@@ -5505,14 +5623,16 @@ function renderChatHead(){
   const r=friendRowWith(id), nm=jsq(m.u.name);
   // 名前の下：友達なら「いまの自分」、そうでなければトークの残り時間
   const pt=isFriend(id)?presenceText(friendPres(id)):'';
-  $('#chatSt').textContent=isFriend(id)?(pt?'📍 '+pt:'👥 友達'):isTest(id)?'🧪 テスト用の人':m.matchedAt?'⏳ トークは残り'+leftText(matchLeftMs(m)):'';
+  $('#chatSt').textContent=appvOn()?(isFriend(id)?(pt||'友達'):isTest(id)?'テスト用の人':m.matchedAt?'トークは'+appvTalkEnd(m):'')   // 📱 数え下げない・絵文字なし
+    :isFriend(id)?(pt?'📍 '+pt:'👥 友達'):isTest(id)?'🧪 テスト用の人':m.matchedAt?'⏳ トークは残り'+leftText(matchLeftMs(m)):'';
   // 相手の「語りたいこと」（2026-10-17）。押すと入力欄に話しかけの文
   { const cw=$('#chatWant'), pu=anyUser(id)||friendUser(id)||m.u, w=pu?wantOf(pu):'';
-    if(cw){ cw.hidden=!w; cw.innerHTML=w?`<span>💬 ${esc(m.u.name||'')}さんの語りたいこと：<b>${esc(w)}</b></span><button onclick="wantTalk('${jsq(String(id))}')">この話をする</button>`:''; } }
+    if(cw){ cw.hidden=!w; cw.innerHTML=w?`<span>${appvOn()?'':'💬 '}${esc(m.u.name||'')}さんの語りたいこと：<b>${esc(w)}</b></span><button onclick="wantTalk('${jsq(String(id))}')">この話をする</button>`:''; } }
+  const fi=appvOn()?'':'👥 ';
   if(r&&r.status==='accepted') el.innerHTML='';
-  else if(r&&r.to_id===myId) el.innerHTML=`<button class="frinv" onclick="acceptFriend(${r.id},'${id}','${nm}')">👥 承認する</button>`;
-  else if(r) el.innerHTML=`<button class="frinv" disabled>👥 申請中</button>`;
-  else el.innerHTML=`<button class="frinv" onclick="requestFriend('${id}','${nm}')">👥 友達に誘う</button>`;
+  else if(r&&r.to_id===myId) el.innerHTML=`<button class="frinv" onclick="acceptFriend(${r.id},'${id}','${nm}')">${fi}承認する</button>`;
+  else if(r) el.innerHTML=`<button class="frinv" disabled>${fi}申請中</button>`;
+  else el.innerHTML=`<button class="frinv" onclick="requestFriend('${id}','${nm}')">${fi}友達に誘う</button>`;
 }
 /* ---------- トークのリアクション（2026-10-15 しゅうすけさんの依頼） ----------
    1対1のトーク（マッチ・友達）の吹き出しを押すと、👍❤️😂😮😢🙏 から1つ付けられる。同じものをもう一度押すと外す。1人1つまで（付け直すと置きかわる）。
@@ -5567,6 +5687,8 @@ function renderChat(){const m=chatOf(chatPeer);if(!m)return;const box=$('#msgs')
   let banner='';
   const invite=`<span class="frhint">もっと話したいなら <button onclick="requestFriend('${chatPeer}','${jsq(m.u.name)}')">👥 友達に誘う</button>（友達とは期限なしで話せます）</span>`;
   if(isFriend(chatPeer)) banner='';
+  else if(appvOn()&&m.matchedAt&&!isTest(chatPeer))   // 📱 数え下げない。いつまで話せるかを時刻で、次の一歩を1文で
+    banner=expired?'<div class="ttlbar over">このトークは終わりました</div>':`<div class="ttlbar">このトークは${appvTalkEnd(m)}。続けたい時は、右上の「友達に誘う」から</div>`;
   else if(m.matchedAt&&!isTest(chatPeer)){
     if(expired) banner='<div class="ttlbar over">⌛ このトークは24時間が過ぎて終わりました</div>';
     else banner='<div class="ttlbar'+(ms<3600000?' warn':'')+'">⏳ あと <b>'+leftText(ms)+'</b> でトークが終わります'+(ms<3*3600000&&!friendRowWith(chatPeer)?invite:'')+'</div>';
@@ -5578,7 +5700,7 @@ function renderChat(){const m=chatOf(chatPeer);if(!m)return;const box=$('#msgs')
   const body=all.map(x=>{ let sep=''; if(x.at){ const dl=dayLabel(x.at); if(dl!==lastDay){ lastDay=dl; sep=`<div class="day">${dl}</div>`; } }
     const d=!x.wave&&duoParse(x.text); if(d)return sep+duoBubble(x,d,duo,m);
     const rid=!x.wave&&x.id&&reactOn()&&!expired?x.id:'';   // リアクションを付けられる吹き出しだけ、押すと選ぶ所が出る
-    return sep+`<div class="bub ${x.from===myId?'me':'them'}${x.wave?' wave':''}${rid?' rxable':''}"${rid?` onclick="openReact('${rid}',this)"`:''}>${x.wave?'<span class="wl">👋 最初の一言</span>':''}${esc(msgPlain(x.text))}${x.wave?'':roomInvBtn(x.text)}${x.at?`<span class="tm">${hhmm(x.at)}</span>`:''}${reactChipsHTML(m,x.id)}</div>`; }).join('');
+    return sep+`<div class="bub ${x.from===myId?'me':'them'}${x.wave?' wave':''}${rid?' rxable':''}"${rid?` onclick="openReact('${rid}',this)"`:''}>${x.wave?`<span class="wl">${appvOn()?'':'👋 '}最初の一言</span>`:''}${esc(msgPlain(x.text))}${x.wave?'':roomInvBtn(x.text)}${x.at?`<span class="tm">${hhmm(x.at)}</span>`:''}${reactChipsHTML(m,x.id)}</div>`; }).join('');
   const html=banner+body;
   // 2.5秒ごとに描き直すので、中身が変わった時だけ差し替える（読んでいる途中で一番下に戻されないように）
   if(box.dataset.h!==html){ const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60||box.dataset.peer!==String(chatPeer); box.dataset.h=html; box.dataset.peer=chatPeer; box.innerHTML=html; if(atBottom)box.scrollTop=box.scrollHeight; }
@@ -9321,6 +9443,7 @@ function unlockItem(x){
   return null;
 }
 function showUnlockFx(fresh){
+  if(appvOn())return;   // 📱 アプリverは きせかえ を初版から外している（要件定義書）。紙吹雪も使わない（UI改善ファイル）
   const items=fresh.map(unlockItem).filter(Boolean).sort((a,b)=>(b.dev?1:0)-(a.dev?1:0)); if(!items.length)return;   // 開発者のプレゼントを先に
   const dev=items.some(x=>x.dev), first=items.find(x=>x.dev)||items[0];
   let el=$('#unlockFx'); if(!el){ el=document.createElement('div'); el.id='unlockFx'; el.className='ufx'; (document.querySelector('.phone')||document.body).appendChild(el); }
@@ -9352,6 +9475,7 @@ let toastTimer;function toast(msg){const t=$('#toast');if(appvOn())msg=appvToast
 let talkTab=(()=>{ try{ const v=localStorage.getItem('tama_talkTab'); return ['fr','dm','comm'].includes(v)?v:'dm'; }catch(e){ return 'dm'; } })();
 function setTalkTab(k){
   placeCommPane('talk');   // コミュニティのページに移していたら戻す（2026-10-15）
+  if(appvOn()){ appvOpenComm(k==='comm'); if(k!=='comm')loadTalkPreviews(); return; }   // 📱 アプリverは切りかえなし（友達もすれ違いも1本の一覧。コミュニティは一覧の1行から）
   talkTab=k; try{ localStorage.setItem('tama_talkTab',k); }catch(e){}   // 2026-10-03: 毎回「💬 24時間」に戻っていたので覚える
   $('#segFr').classList.toggle('on',k==='fr'); $('#segDm').classList.toggle('on',k==='dm'); $('#segComm').classList.toggle('on',k==='comm');
   $('#matchList').hidden=k==='comm'; $('#commPane').hidden=k!=='comm';
@@ -9360,7 +9484,7 @@ function setTalkTab(k){
 }
 function go(t){
   // コミュニティの一覧は「トーク」の中にある（部屋から戻る時などに go('comm') が呼ばれる）
-  if(t==='comm'){ t='match'; setTalkTab('comm'); } else if(t==='match') setTalkTab(talkTab);
+  if(t==='comm'){ t='match'; setTalkTab('comm'); } else if(t==='match') setTalkTab(appvOn()?(appvComm?'comm':'list'):talkTab);   // 📱 アプリverは、コミュニティを開いていた時だけコミュニティに戻る
   $$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
   if(t==='near'&&fesMap)setTimeout(()=>fesMap.invalidateSize(),60);   // 非表示の間にサイズが変わっても地図が崩れないように
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
