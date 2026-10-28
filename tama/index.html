@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="ちかく多摩キャン">
 <!-- 📱 アプリver（2026-10-23 あおの依頼「アプリ化を検討しながら、UI・操作性を見たい」）。前に開いた時にアプリverだった端末は、
      最初の描画から html.appv にして起動画面を出す（ユーザーIDはログインの後でないと分からないため、端末に覚えておく。本当に対象かはログインの後に確かめ直す） -->
-<script>try{ if(localStorage.getItem('tama_appv')==='1')document.documentElement.classList.add('appv','appv-boot'); }catch(e){}</script>
+<script>try{ if(localStorage.getItem('tama_appv')==='1'||/ChikakuApp/.test(navigator.userAgent))document.documentElement.classList.add('appv','appv-boot'); }catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -2271,8 +2271,12 @@ const DEVS=['7e4dda65','cacc25fd','b5cac0fa','5267fbf2','1dc61a09','56ed5ec3'];
    ・対象の人はマイページの「📱 アプリverで見る」で、多摩キャンverと見比べられる（tama_appv_off） */
 const APPV={testers:['7e4dda65','cacc25fd','b5cac0fa','5267fbf2','1dc61a09','56ed5ec3']};   // 2026-10-24 あおの依頼：多摩祭を試していた6人（あおを含む）
 const APPV_EXTRA_STATUS=['バス待ち'];   // アプリverだけで選べる状態（見る側は全員の画面で出す。2026-10-29 ブレストの「帰りのバス」）
-function appVer(){ const n=typeof fesNo==='function'?fesNo():''; let off=false; try{ off=localStorage.getItem('tama_appv_off')==='1'; }catch(e){} return !!n&&APPV.testers.includes(n)&&!off; }
-const appvTester=()=>{ const n=typeof fesNo==='function'?fesNo():''; return !!n&&APPV.testers.includes(n); };
+// 📱 ちかく本体を包んだアプリ（Capacitor。J:\chikaku-app）の中で開いているか（2026-10-29 あお「明日の試作を今の版に」）。
+// アプリは本番の /tama/ を開き、User-Agent の最後に「ChikakuApp」を付けている。アプリの中では、だれでもアプリverになる
+// （アプリの中は Safari・ホーム画面とは保存場所が別なので、新しいアカウントになり、試す6人のIDでは見分けられないため）
+const isNativeApp=()=>/ChikakuApp/.test(navigator.userAgent);
+function appVer(){ const n=typeof fesNo==='function'?fesNo():''; let off=false; try{ off=localStorage.getItem('tama_appv_off')==='1'; }catch(e){} return (isNativeApp()||(!!n&&APPV.testers.includes(n)))&&!off; }
+const appvTester=()=>{ const n=typeof fesNo==='function'?fesNo():''; return isNativeApp()||(!!n&&APPV.testers.includes(n)); };
 function applyAppv(){
   const on=appVer(), root=document.documentElement;
   root.classList.toggle('appv',on);
@@ -2921,7 +2925,7 @@ function urlBase64ToUint8Array(base64String){
   return arr;
 }
 const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+const isStandalone=()=>isNativeApp() || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;   // アプリの中は「ホーム画面に追加」の案内を出さない
 let swReg=null;
 async function registerSW(){
   if(!('serviceWorker' in navigator)) return null;
