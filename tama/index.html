@@ -1680,6 +1680,137 @@
   html.appv .blbl.appv-hl{color:var(--tint);font-weight:700}
   /* A9 居場所の見せ合いの状態 */
   html.appv .mutual{margin:-4px 0 8px;font-size:13px;color:var(--muted)}
+  /* ---------- 📱 アプリver 2026-11-01 自分パネル・プロフィール・設定と、見た目の土台（あお「もっと大きな斬新な改善が必要」） ----------
+     文字の大きさは4段（見出し22／本文16／補足14／小さい字12）。補足の灰色は読める濃さに（前の --muted2 は白地で約2.5:1）。
+     箱は「一覧のまとまり（面の色・角丸12）」と「主ボタン（丸）」の2種類だけ。ラベルに絵文字は付けない */
+  html.appv{--fs1:22px;--fs2:16px;--fs3:14px;--fs4:12px;--muted2:color-mix(in srgb,var(--ink) 50%,var(--night))}
+  .appvx{display:none!important}
+  html.appv .appvx{display:block!important}
+  html.appv .aphead.appvx{display:flex!important}
+  .aphead{display:flex;align-items:center;gap:4px;min-height:52px;padding:6px 8px 2px;flex:none}
+  .aphead h1{flex:1;margin:0;font-size:var(--fs2);font-weight:700;text-align:center}
+  .aphead .aback{width:44px;height:44px;flex:none;border:0;background:none;color:var(--tint);font-size:32px;line-height:1;cursor:pointer}
+  .aphead .headbtn{flex:none;min-width:44px;padding:8px 10px;border:0;background:none;box-shadow:none;color:var(--tint);font:inherit;font-size:var(--fs2);font-weight:600;cursor:pointer}
+  #s-set .aphead::after{content:'';width:44px;flex:none}   /* 見出しを真ん中に */
+  /* プロフィール：人から見える形のカードと、自分だけの記録だけ。ほかは設定へ */
+  html.appv #s-me .me-hero,html.appv #s-me #surveyBox,html.appv #s-me #meMission,html.appv #s-me .listhead,html.appv #s-me #ttCard,
+  html.appv #s-me .setting,html.appv #s-me>.scroll>.btn-ghost{display:none!important}
+  html.appv #s-me #meEditBtn{margin:0 16px!important;height:48px;padding:0!important;border-radius:24px;font-size:var(--fs2)!important;font-weight:600}
+  html.appv .amecard{margin:8px 16px 16px;padding:20px 16px 8px;border-radius:12px;background:var(--fill)}
+  html.appv .amecard .top{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+  html.appv .amecard .av{width:72px;height:72px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:36px}
+  html.appv .amecard h2{margin:0;font-size:var(--fs1);font-weight:700;line-height:1.3}
+  html.appv .amecard .fac{margin-top:2px;font-size:var(--fs3);color:var(--muted)}
+  html.appv .amecard .bio{margin:0 0 12px;font-size:var(--fs2);line-height:1.6;white-space:pre-wrap}
+  html.appv .amecard dl{margin:0}
+  html.appv .amecard dt{font-size:var(--fs4);color:var(--muted);margin-top:10px}
+  html.appv .amecard dd{margin:2px 0 0;font-size:var(--fs2);line-height:1.5}
+  html.appv .amecard .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  html.appv .amecard .chips span{padding:4px 10px;border-radius:14px;background:var(--night);font-size:var(--fs3)}
+  html.appv .amecard .miss{margin:12px -16px 0;padding:10px 16px;border-top:1px solid var(--sep);font-size:var(--fs3);color:var(--muted)}
+  html.appv .amecard .miss button{border:0;background:none;padding:0;color:var(--tint);font:inherit;font-weight:600;cursor:pointer}
+  html.appv #appvMeSub .alink{font-size:var(--fs3)}
+  html.appv #appvMeRec .ametbox{margin:20px 0 24px}
+  html.appv #appvMeRec .ametbox h3{font-size:var(--fs3)}
+  /* 設定：iPhone の設定アプリと同じ、まとまりごとの一覧 */
+  html.appv #appvSet{padding:0 0 32px}
+  html.appv .asetg{margin:20px 16px 0}
+  html.appv .asetg>h3{margin:0 0 6px 16px;font-size:var(--fs4);font-weight:600;color:var(--muted)}
+  html.appv .aset{border-radius:12px;background:var(--fill);overflow:hidden}
+  html.appv .aset .setting{margin:0;padding:0;border:0;border-radius:0;background:none}
+  html.appv .aset .setrow,html.appv .aset .sharerow{min-height:52px;padding:10px 16px;border:0;border-radius:0;background:none;font-size:var(--fs2);color:var(--ink)}   /* 区切り線は行の上に（隠れている行があっても線が余らない） */
+  html.appv .aset .setrow .lab,html.appv .aset .sharerow .lab{font-size:var(--fs2);font-weight:500}
+  html.appv .aset .setrow .lab small,html.appv .aset .sharerow .lab small{font-size:var(--fs4);line-height:1.5;color:var(--muted);font-weight:400}
+  html.appv .aset .setrow .go{color:var(--muted2)}
+  html.appv .aset .setrow .dot{width:8px;height:8px;border-radius:50%;background:var(--rose);margin-left:auto;margin-right:8px}
+  html.appv .asetfoot{margin:16px 32px 0;font-size:var(--fs4);line-height:1.6;color:var(--muted)}
+  html.appv #appvSet .note{padding:16px 32px 8px;font-size:var(--fs4);color:var(--muted);text-align:left}
+  html.appv #appvSet .note b{color:var(--muted)}
+  html.appv #appvSet .stopbtn{display:block;width:calc(100% - 32px);height:48px;margin:16px 16px 0!important;padding:0;border:0;border-radius:12px;background:var(--fill);color:var(--rose);font:inherit;font-size:var(--fs2);font-weight:500}
+  html.appv #appvSet div:has(>#fesNo){margin:20px 0 0!important;font-size:var(--fs4)!important}
+  html.appv .aset [hidden]{display:none!important}
+  html.appv .aset>*+* .setrow,html.appv .aset>*+*.setrow,html.appv .aset>*+* .sharerow{border-top:1px solid var(--sep)}
+  /* 自分パネル（左上のアイコンを押した時） */
+  html.appv .ame{padding:4px 0 0}
+  html.appv .ame .hd{display:flex;align-items:center;gap:12px;width:100%;padding:4px 0 16px;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .ame .hd .av{width:52px;height:52px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:26px}
+  html.appv .ame .hd b{display:block;font-size:18px;font-weight:700}
+  html.appv .ame .hd small{display:block;font-size:var(--fs3);color:var(--muted)}
+  html.appv .ame .hd i{margin-left:auto;font-style:normal;font-size:var(--fs3);color:var(--tint);font-weight:600;white-space:nowrap}
+  html.appv .ame h3{margin:4px 0 8px;font-size:var(--fs4);font-weight:600;color:var(--muted)}
+  html.appv .ame .chipsel{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  html.appv .ame .chipsel button{height:40px;padding:0 16px;border:1px solid var(--sep);border-radius:20px;background:var(--night);color:var(--ink);font:inherit;font-size:var(--fs3);font-weight:500;cursor:pointer}
+  html.appv .ame .chipsel button.on{background:var(--tint);border-color:var(--tint);color:var(--on-tint)}
+  html.appv .ame .mean{min-height:20px;margin:0 0 16px;font-size:var(--fs4);color:var(--muted)}
+  html.appv .ame .aset{margin-bottom:12px}
+  html.appv .ame .arow{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 16px;border:0;border-bottom:1px solid var(--sep);background:none;color:var(--ink);font:inherit;font-size:var(--fs2);text-align:left;cursor:pointer}
+  html.appv .ame .arow:last-child{border-bottom:0}
+  html.appv .ame .arow:active{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+  html.appv .ame .arow span{flex:1;min-width:0}
+  html.appv .ame .arow small{display:block;font-size:var(--fs4);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.appv .ame .arow i{font-style:normal;color:var(--muted2);font-size:20px}
+  html.appv .ame .arow em{font-style:normal;color:var(--tint);font-weight:600;font-size:var(--fs3);white-space:nowrap}
+  html.appv .ame .arow.ghost{cursor:default}
+  html.appv .ame .arow.ghost .gb{display:flex;gap:6px}
+  html.appv .ame .arow.ghost .gb button{height:34px;padding:0 12px;border:0;border-radius:17px;background:var(--night);color:var(--tint);font:inherit;font-size:var(--fs3);font-weight:600;cursor:pointer}
+  /* スイッチ：オフが濃い紺色で、白地だとオンに見えていた。オフは薄い灰色、オンはアクセント1色（グラデーションなし） */
+  html.appv .toggle{background:color-mix(in srgb,var(--ink) 18%,var(--night))}
+  html.appv .toggle.on{background:var(--tint)}
+  @media (prefers-color-scheme: dark){ html.appv:not([data-theme="light"]) .toggle:not(.on){background:color-mix(in srgb,var(--ink) 36%,var(--night))} }
+  /* ③ 前からある部品の、小さすぎる字・薄すぎる字（シート・地図の上の1行・一覧） */
+  html.appv .ash-title{font-size:var(--fs1)}
+  html.appv .ash-title .ash-sub{font-size:var(--fs3)}
+  html.appv .anotehint{font-size:var(--fs4);color:var(--muted)}
+  html.appv .anote .nm,html.appv .anote .bub{font-size:var(--fs4)}
+  html.appv .atw{font-size:14px}
+  html.appv .ats{font-size:var(--fs4)}
+  html.appv .astbtn{font-size:var(--fs2)}
+  html.appv .astbtn span{font-size:var(--fs3)}
+  html.appv .setrow .lab small,html.appv .aslist button span small{font-size:var(--fs4)}
+  html.appv .blbl,html.appv .blbl.food,html.appv .blbl.field{font-size:12px}
+  html.appv .blbl.key{font-size:13px}
+  /* ---------- 📱 アプリver 2026-11-01 フォントと雰囲気（あお「AI感がでかすぎる。インスタ・BeReal・setlog・YouTube に合わせて」） ----------
+     ・主流のSNSは、画面の文字にスマホの標準フォント（iPhone は SF＋ヒラギノ、Android は Roboto＋Noto）を使い、独自の字体はロゴだけ。
+       ちかくは見出し・ボタン・数字の約45か所に Zen 丸ゴシック・Zen 角ゴシック・JetBrains Mono が残っていた（AIが「おしゃれに」で選びがちな組み合わせ）
+     ・字の間を空けない（標準のまま）。AIの画面は字間を広げがち
+     ・色は白黒が基本（BeReal・setlog・Threads と同じ）。前の青緑 #08809a は Tailwind の cyan とほぼ同じで、AIの初期値に見えた。
+       色を付けるのは「自分」のオレンジと、地図の学内だけ
+     ・すりガラスをやめて、白い面に薄い影（Google マップと同じ） */
+  html.appv,html.appv *{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN",Roboto,"Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif!important;letter-spacing:0!important}
+  html.appv .frcode .num,html.appv .ctcard .ctleft{letter-spacing:.08em!important}   /* 向かい合って読む3分コードの数字だけは少し空ける */
+  html.appv:root{--tint:var(--ink);--on-tint:var(--night);--tint-soft:color-mix(in srgb,var(--ink) 6%,var(--night));--signal:var(--ink);--amber:var(--ink);--amber-deep:var(--ink)}
+  html.appv .atbtn,html.appv .atpill{background:var(--night);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  html.appv .atbtn.on{background:var(--ink);color:var(--night)}
+  html.appv .btn-primary,html.appv .abtn{font-weight:600}
+  html.appv .alink{font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+  /* 色を直接書いていた部品（多摩キャンverの青緑）を、アプリverでは白黒に */
+  html.appv .ctcard .cth,html.appv .ctcard .ctmine b,html.appv .urow .d .lk,html.appv .wavein .wh,html.appv .wavehead,html.appv .lstep.on b,html.appv .nearjump b{color:var(--ink)}
+  html.appv .ctcard .ctleft{background:var(--ink);color:var(--night)}
+  html.appv .ctcard .ctbtns button{border:1px solid var(--sep);border-radius:22px;background:var(--night);color:var(--ink);font-weight:600}
+  html.appv .ctcard .ctsame{background:var(--ink);color:var(--night);font-weight:600}
+  html.appv .stchip,html.appv .urow .crossb.rep,html.appv .btn-wait,html.appv .sugg button{color:var(--ink);background:var(--fill);border-color:transparent}
+  html.appv .pvhint,html.appv .wavein,html.appv .frsug,html.appv .notlove{background:var(--fill);border-color:transparent;color:var(--ink)}
+  html.appv .frmapbtn{border-color:var(--sep);color:var(--ink)}
+  html.appv .tipfocus{box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 35%,transparent)!important}
+  /* 人のプロフィール：紫などのグラデーションの帯・✨・色付きの枠・絵文字の行頭・青緑のグラデーションのボタンが重なって、いちばんAIっぽかった。
+     インスタのプロフィールと同じく、白い面の左にアイコン・右に名前。ボタンは黒1色。「同じ！」だけは黒い札で目立たせる（ちかくの印） */
+  html.appv #sheet .cover{display:grid;grid-template-columns:84px 1fr;gap:16px;align-items:center;height:auto;padding:56px 20px 8px;background:var(--night)!important}
+  html.appv #sheet .cover::after{display:none}
+  html.appv #sheet .cover .initial{position:static;width:84px;height:84px;font-size:42px;background:var(--fill);border:0;box-shadow:none!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+  html.appv #sheet .cover .close{position:absolute;top:12px;left:12px;background:var(--fill);color:var(--ink);backdrop-filter:none}
+  html.appv #sheet .cover .idn h2{font-size:var(--fs1)}
+  html.appv #sheet .cover .idn h2 span{display:block;font-size:var(--fs3);font-weight:400;color:var(--muted);margin-top:2px}
+  html.appv #sheet .body{background:var(--night)}
+  html.appv .metline,html.appv .metline.rep{background:var(--fill);border:0;border-radius:12px;font-size:var(--fs3)}
+  html.appv .metline b,html.appv .metline.rep b{color:var(--ink)}
+  html.appv .fesattr{background:transparent;padding:4px 0}
+  html.appv .fesattr .frow{font-size:15px;margin-bottom:8px}
+  html.appv .same{background:var(--ink);color:var(--night);font-weight:600;border-radius:6px;padding:1px 6px}
+  html.appv #sheet .ladder{display:none}   /* いいね→トーク→友達の3枚の説明は、下の1行（anext）で足りる */
+  html.appv #sheet .ladnote{background:transparent;color:var(--muted)}
+  html.appv .btn-wave{background:var(--ink);color:var(--night);font-weight:600}
+  html.appv #sheet .actions .btn{height:48px;padding:0 16px;border-radius:24px;font-size:var(--fs2)}
+  html.appv .reportbtn{color:var(--muted)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -1873,11 +2004,15 @@
       <div class="scroll" id="appvTT"></div>
     </section>
     <section class="screen" id="s-me">
+      <!-- 📱 アプリverは、マイページを「プロフィール」（人から見える形）にして、設定は #s-set へ（2026-11-01。appvMeLayout） -->
+      <div class="aphead appvx"><button class="aback" onclick="go('near')" aria-label="戻る">‹</button><h1>プロフィール</h1><button class="headbtn" onclick="go('set')">設定</button></div>
       <div class="scroll">
         <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
         <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="mebdg" id="meBadges"></div><div class="h" id="meFac"></div><div class="h" id="meLoc">📍 &mdash;</div><div id="meWorry"></div></div>
+        <div class="appvx" id="appvMeCard"></div>
         <!-- アンケートの欄（答えると特典。中身は renderSurveyBox）。2026-10-09 あおの指示「見やすく」で、マイページの一番下からここ（プロフィールを編集のすぐ下）へ -->
         <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
+        <div class="appvx" id="appvMeSub"><button class="alink" onclick="openPreview('near')">友達・近くの人からの見え方</button><div id="appvMeRec"></div></div>
         <div id="surveyBox"></div>
         <!-- 多摩祭の日だけ、ホームの「いまの自分・時間割」（#nowBar）をここへ移す（2026-10-15 しゅうすけさんの依頼。placeNowBar） -->
         <div id="meNowWrap" hidden><div class="listhead" style="margin-top:10px">📍 いまの自分・時間割</div><div id="meNowSlot"></div></div>
@@ -1917,6 +2052,12 @@
         <div class="note">「ホーム」には、今日多摩キャンパスでこのアプリを使った人の位置とプロフィールが見えます。知らない人と会うときは公共の場所で。<br>このアプリは<b>18歳以上</b>の方のみご利用いただけます。<br>困った相手はプロフィールから<b>通報・ブロック</b>できます。<br>本アプリは、法政大学 社会学部 糸久正人ゼミが研究活動として運営している<b>非公式</b>のサービスです。<br>この<b>多摩キャン版</b>は、通常版の「ちかく」とは登録情報・トークが分かれています。</div>
         <button class="btn stopbtn" style="margin:6px 16px 28px" onclick="leaveAll()">プロフィールを消して共有をやめる</button>
       </div>
+    </section>
+    <!-- 📱 アプリverの「設定」（2026-11-01 あお「アイコンを押したときのマイページがごちゃごちゃしすぎ」）。
+         マイページにあった設定・案内を、まとまりごとの一覧に。行の中身は appvMeLayout が移す・作る -->
+    <section class="screen" id="s-set">
+      <div class="aphead"><button class="aback" onclick="go('me')" aria-label="戻る">‹</button><h1>設定</h1></div>
+      <div class="scroll" id="appvSet"></div>
     </section>
   </div>
   <nav class="nav" id="nav" style="display:none">
@@ -2283,6 +2424,7 @@ function applyAppv(){
   try{ if(on)localStorage.setItem('tama_appv','1'); else localStorage.removeItem('tama_appv'); }catch(e){}   // 次に開いた時、最初の描画からアプリverにする
   const was=root.dataset.appvMap; if(was!==String(on)){ root.dataset.appvMap=String(on); recolorMap(); if(profile){ loadLocShares(); savePresence(); } }   // 地図の色・居場所の見せ方（選んだ友達だけ）もアプリverに合わせる   // 地図の色もアプリverに合わせる
   renderAppvRow(); appvLayout(on);   // ホームを地図＋シートに（2026-10-24）
+  appvMeLayout(on);   // マイページ → プロフィール＋設定（2026-11-01）
 }
 setTimeout(()=>document.documentElement.classList.remove('appv-boot'),1200);   // 起動画面は一瞬だけ
 function setAppvOff(off){ try{ if(off)localStorage.setItem('tama_appv_off','1'); else localStorage.removeItem('tama_appv_off'); }catch(e){} applyAppv(); toast(off?'多摩キャンverで見ています':'📱 アプリverで見ています'); }
@@ -2290,7 +2432,7 @@ function renderAppvRow(){
   const el=$('#appvRow'); if(!el)return;
   if(!appvTester()){ el.hidden=true; el.innerHTML=''; return; }
   const on=appVer(); el.hidden=false;
-  el.innerHTML=`<div class="sharerow"><div class="lab">📱 アプリverで見る<small>試す人だけ。オフにすると多摩キャンverの見た目に戻ります</small></div><div class="toggle${on?' on':''}" onclick="setAppvOff(${on})"><div class="k"></div></div></div>`;
+  el.innerHTML=`<div class="sharerow"><div class="lab">アプリverで見る<small>試す人だけ。オフにすると多摩キャンverの見た目に戻ります</small></div><div class="toggle${on?' on':''}" onclick="setAppvOff(${on})"><div class="k"></div></div></div>`;
   renderAppvMet();   // 📱 D6 今学期 会えた人（自分だけ）
 }
 // 押した時の小さな振動（対応する端末だけ。iPhone の Safari は振動に対応していない）と、シートを下にスワイプして閉じる
@@ -2392,7 +2534,6 @@ function renderAppvChrome(){
   if(!document.documentElement.classList.contains('appv')||!profile)return;
   const g=ghostInfo(), top=$('#appvTop'); if(!top)return;
   const icMe='<span style="font-size:24px;line-height:1">'+esc(profile.emoji||'🙂')+'</span>';
-  const icGhost='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 9.8 7-.4 1.2-1.4 2.8-2.9 4.2M6.2 6.3C4.2 7.7 2.7 9.7 2.2 12c.8 2.5 4.8 7 9.8 7 1.6 0 3-.4 4.3-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
   const icLoc='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3 3 10.5l7.5 2.9L13.4 21z"/></svg>';
   const left=g?Math.max(1,Math.round((g.until-Date.now())/60000)):0;
   // 2026-10-24 見直し（あお「ほんとに使いやすいのかな」）：上の1行は「自分の」扱いだと分かるよう「あなた：」を付ける。隠れるは絵だけでは伝わらないので文字も
@@ -2400,8 +2541,8 @@ function renderAppvChrome(){
   const live=!g&&sharing&&!fesOutside;
   // A4 自分の居場所が「誰に見えているか」を続ける（Instagram マップで「みんなに見えている」と思い込む人が多かった）。人数は本人にしか見えない
   const sn=appvSeers().length, seen=sn?'友達'+sn+'人に見えています':'誰にも見えていません';
-  const html='<button class="atbtn" onclick="go(\'me\')" aria-label="マイページ">'+icMe+'</button><button class="atpill" onclick="openAppvSeers()"><span class="dot'+(live?' in':'')+'"></span><span class="atl"><span class="atw"><span class="who">あなた</span>'+esc(where)+'</span><span class="ats">'+seen+'</span></span></button>'
-    +'<button class="atbtn atlab'+(g?' on':'')+'" onclick="openGhost()">'+icGhost+'<span>'+(g?'隠れ中':'隠れる')+'</span></button>';
+  // 2026-11-01：左上のアイコンは自分パネル（openAppvMe）。右上の「隠れる」はパネルの中へ（上の段はアイコンと1行だけにして、地図を広く）
+  const html='<button class="atbtn'+(g?' on':'')+'" onclick="openAppvMe()" aria-label="自分のこと・設定">'+icMe+'</button><button class="atpill" onclick="openAppvSeers()"><span class="dot'+(live?' in':'')+'"></span><span class="atl"><span class="atw"><span class="who">あなた</span>'+esc(where)+'</span><span class="ats">'+seen+'</span></span></button>';
   let loc=$('#appvLoc'); if(!loc){ loc=document.createElement('button'); loc.id='appvLoc'; loc.className='atbtn appvloc'; loc.setAttribute('aria-label','自分の位置'); loc.onclick=centerOnMe; loc.innerHTML=icLoc; top.after(loc); }
   if(top.dataset.h!==html){ top.dataset.h=html; top.innerHTML=html; }
   const n=typeof lastOpenCount==='number'?lastOpenCount:0;
@@ -2466,7 +2607,8 @@ setInterval(()=>{ if(!document.hidden)renderAppvChrome(); },5000);
 const APPV_EMO=/^\s*(?:\p{Extended_Pictographic}|️|‍|\p{Emoji_Modifier})+\s*/u;
 function appvStripEmoji(root){
   if(!document.documentElement.classList.contains('appv')||!root)return;
-  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago,.lk,.mtime,.frbtn,.nearsec,.clstg,.dline,.crosswhen,.wavehead,.ctsame,.dnote,.dcount,.stchip,.cth>span:first-child,.rolet,.frmapbtn,.nearmore,#friendBox .urow .b,.th>*,.tshow').forEach(el=>{   // ユーザーが書いた文（トークの最後の一言・語りたいこと）は対象にしない
+  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago,.lk,.mtime,.frbtn,.nearsec,.clstg,.dline,.crosswhen,.wavehead,.ctsame,.dnote,.dcount,.stchip,.cth>span:first-child,.rolet,.frmapbtn,.nearmore,#friendBox .urow .b,.th>*,.tshow,'
+    +'.metline,.fesattr .frow,.wavein .wh,.btn-wave,.btn-wait,.dist,.reportbtn,.rsn').forEach(el=>{   // 2026-11-01 人のプロフィール・通報の画面も   // ユーザーが書いた文（トークの最後の一言・語りたいこと）は対象にしない
     const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT); const t=w.nextNode(); if(t&&APPV_EMO.test(t.nodeValue))t.nodeValue=t.nodeValue.replace(APPV_EMO,'');
   });
 }
@@ -2474,6 +2616,7 @@ let appvObs=null;
 function appvWatch(){ const b=$('#ashBody'); if(!b||appvObs)return; appvObs=new MutationObserver(()=>appvStripEmoji(b)); appvObs.observe(b,{childList:true,subtree:true}); appvStripEmoji(b);
   const ml=$('#matchList'); if(ml){ new MutationObserver(()=>appvStripEmoji(ml)).observe(ml,{childList:true,subtree:true}); appvStripEmoji(ml); }   // トークの一覧も（E6）
   const tp=$('#chatTopics'); if(tp){ new MutationObserver(()=>appvStripEmoji(tp)).observe(tp,{childList:true,subtree:true}); }   // チャットの話題カードの見出し
+  ['#sheet','#reportSheet'].forEach(s=>{ const el=$(s); if(el)new MutationObserver(()=>appvStripEmoji(el)).observe(el,{childList:true}); });   // 人のプロフィール・通報（2026-11-01）
 }
 // 📱 アプリverの地図の動かせる範囲（2026-10-24 あお「地図を動かすと中心に戻る」→「ゆるめる」）。
 // 前はキャンパスより12%広いだけの枠に当たると、ばねのように戻っていた。アプリverは画面いっぱいの地図の下半分をシートが覆うので、
@@ -2742,17 +2885,93 @@ async function appvIdeaCheck(){
   toast(`あなたの案「${esc(n[0].q)}」が、お題に使われることになりました`);
 }
 function renderAppvMet(){
-  const row=$('#appvRow'); if(!row)return; let el=$('#appvMetBox');
-  if(!appvOn()){ if(el)el.remove(); const ex0=$('#appvMeExtra'); if(ex0)ex0.remove(); return; }
-  if(!el){ el=document.createElement('div'); el.id='appvMetBox'; el.className='ametbox'; row.before(el); }
+  const rec=$('#appvMeRec'); if(!rec)return; let el=$('#appvMetBox');
+  if(!appvOn()){ if(el)el.remove(); return; }
+  // 2026-11-01：プロフィールの「自分だけの記録」に置く。お題の案を送る・相談室は、設定の「ちかくについて」へ移した（appvMeLayout）
+  if(!el){ el=document.createElement('div'); el.id='appvMetBox'; el.className='ametbox'; }
+  if(el.parentNode!==rec)rec.appendChild(el);
   const L_=appvMetList().slice().reverse();
   appvIdeaCheck();
-  // ブレスト：お題をみんなで作る／相談先への静かな入口（だれにでも同じ場所に同じように置く。使い方から推測して出すことはしない）
-  let ex=$('#appvMeExtra'); if(!ex){ ex=document.createElement('div'); ex.id='appvMeExtra'; ex.className='ametbox'; el.after(ex); }
-  ex.innerHTML='<button class="xlink" style="margin-top:0" onclick="openAppvIdea()">お題の案を送る<span>›</span></button>'
-    +'<p style="margin-top:12px">話を聞いてくれる場所：多摩学生相談室（総合棟2F・月〜金 9:30〜16:30・無料・予約制）</p>';
   el.innerHTML=`<h3>今学期 会えた人</h3>`+(L_.length?L_.map(x=>`<div class="amet"><span class="av" style="background:${gr(x.emoji)}">${esc(x.emoji||'🙂')}</span><b>${esc(x.name)}</b><small>${new Date(x.at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'})}${x.place?'・'+esc(x.place)+'のあたり':''}</small></div>`).join('')
     :'<p>会って3分のコードで友達になると、ここに残ります。あなたにだけ見えます</p>');
+}
+/* ---------- 📱 アプリver：自分パネル・プロフィール・設定（2026-11-01 あお「もっと大きな斬新な改善」「アイコンを押したときのマイページがごちゃごちゃしすぎ」） ----------
+   ・左上のアイコン → 自分パネル（openAppvMe）。よく使う「いまの状態・居場所が見える人・隠れる」と、プロフィール・設定への入口だけ
+   ・マイページ → プロフィール：人から見える形のカード（renderAppvMeCard）と、自分だけの記録（今学期 会えた人）だけ
+   ・設定（#s-set）：見せ方／通知／きせかえ・アンケート／ちかくについて の一覧。前はマイページに27個が8種類の箱で並んでいた
+   ・スイッチや説明の文は別の関数が書きかえるので、行はそのまま移すだけ。多摩キャンverに戻すと元の場所に戻る（appvMeLayout(false)） */
+function openAppvMe(){
+  if(!profile)return;
+  const g=ghostInfo(), cur=statusOf(profile), sn=appvSeers(), a=attrsOf(profile);
+  const left=g?Math.max(1,Math.round((g.until-Date.now())/60000)):0;
+  const seersTxt=g?'隠れている間は、だれにも見えません':!sharing?'位置を出していないので、だれにも見えません':fesOutside?'学外では位置を使いません'
+    :sn.length?sn.slice(0,3).map(x=>x.u.name).join('、')+(sn.length>3?' ほか':''):'まだだれにも見せていません';
+  $('#memSheet').innerHTML=`<div class="rinfo ame">
+    <button class="hd" onclick="closeMembers();go('me')"><span class="av" style="background:${gr(profile.emoji)}">${esc(profile.emoji||'🙂')}</span><span><b>${esc(profile.name)}</b><small>${esc([a.faculty,a.grade].filter(Boolean).join(' '))}</small></span><i>プロフィール ›</i></button>
+    <h3>いまの状態</h3>
+    <div class="chipsel">${APPV_STATUSES.map((s,i)=>`<button class="${cur===s?'on':''}" onclick="setAppvStatus(${i});openAppvMe()">${esc(s)}</button>`).join('')}</div>
+    <p class="mean">${cur?esc(APPV_STATUS_MEAN[cur]||'授業の時限が終わると消えます')+'。もう一度押すと消えます':'友達と近くの人のリストで、名前の横に出ます'}</p>
+    <div class="aset">
+      <button class="arow" onclick="openAppvSeers()"><span>居場所が見える人<small>${esc(seersTxt)}</small></span><i>›</i></button>
+      ${g?`<div class="arow ghost"><span>隠れています<small>あと${left}分で戻ります</small></span><div class="gb"><button onclick="endGhost()">いま戻る</button></div></div>`
+        :`<div class="arow ghost"><span>隠れる<small>相手には分かりません</small></span><div class="gb"><button onclick="startGhost(60)">1時間</button><button onclick="startGhost(0)">今日はずっと</button></div></div>`}
+    </div>
+    <div class="aset"><button class="arow" onclick="closeMembers();go('set')"><span>設定</span><i>›</i></button></div>
+  </div>`;
+  $('#memOverlay').classList.add('show');
+}
+// プロフィール：相手の画面に出る項目だけを、そのままの形で（入れていない項目は相手の画面に出ない）
+function renderAppvMeCard(){
+  const el=$('#appvMeCard'); if(!el||!profile||!appvOn())return;
+  const a=attrsOf(profile), chips=l=>`<div class="chips">${l.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`;
+  const items=[a.artist&&['よく聴く',esc(a.artist)],(a.aruaru||[]).length&&['わかる！あるある',chips(a.aruaru)],(a.goals||[]).length&&['これから・目標',chips(a.goals)],
+    a.course&&['これだけは落としたくない授業',esc(a.course)],a.hometown&&['出身',esc(a.hometown)]].filter(Boolean);
+  const miss=[!profile.bio&&'自己紹介',!a.artist&&'よく聴くアーティスト',!(a.aruaru||[]).length&&'あるある',!a.course&&'落としたくない授業'].filter(Boolean);
+  const h=`<div class="amecard"><div class="top"><span class="av${frCls(profile)}" style="background:${gr(profile.emoji)}">${esc(profile.emoji||'🙂')}</span><div><h2>${esc(profile.name)}</h2><div class="fac">${esc([a.faculty,a.dept,a.grade].filter(Boolean).join(' '))}</div></div></div>
+    ${profile.bio?`<p class="bio">${esc(profile.bio)}</p>`:''}
+    ${items.length?`<dl>${items.map(([t,v])=>`<dt>${t}</dt><dd>${v}</dd>`).join('')}</dl>`:''}
+    ${miss.length?`<div class="miss">まだ入れていない：${miss.join('・')}　<button onclick="openEdit()">入れる</button></div>`:''}</div>`;
+  if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
+}
+let appvMeMarks=null;
+// 移した行の見出しから絵文字を外す（多摩キャンverに戻す時は元の文字に）
+function appvRelabel(el,txt,on){
+  const lab=el&&el.querySelector('.lab'), tn=lab&&[...lab.childNodes].find(x=>x.nodeType===3&&x.textContent.trim()); if(!tn)return;
+  if(on){ if(el.dataset.lab==null)el.dataset.lab=tn.textContent; tn.textContent=txt; }
+  else if(el.dataset.lab!=null){ tn.textContent=el.dataset.lab; delete el.dataset.lab; }
+}
+// 文字列はマイページから移す行、配列は設定で作る行（[キー, 見出し, 説明, 押した時]）
+const APPV_SET=[
+  ['見せ方',['vis','match','block']],
+  ['通知',['push','prefs','center']],
+  ['きせかえ・アンケート',[['look','きせかえ','アイコン・背景・フレーム',"$('#lookDot').hidden=true;openLook()"],['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],'wtp','ck',['inv','友達をちかくに誘う','','openInvite()']]],
+  ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'appv','debug']]];
+const APPV_SET_LAB={vis:'見せる範囲',match:'すれ違いに使う共通点',block:'ブロックした人',prefs:'通知の種類・テスト通知',center:'届いた通知',wtp:'ちかくプラスのアンケート',ck:'ひとこと'};
+function appvMeLayout(on){
+  const set=$('#appvSet'); if(!set)return;
+  if(!appvMeMarks){ if(!on)return;
+    const me=$('#s-me'), row=fn=>{ const b=me.querySelector('[onclick^="'+fn+'("]'); return b&&(b.closest('.setrow')||b); }, tg=$('#tgPush'), no=$('#fesNo');
+    const nodes={vis:$('#visSum'),match:row('openMatchPrefs'),block:row('openBlocked'),push:tg&&tg.closest('.setrow'),prefs:row('openNotifPrefs'),center:row('openNotifCenter'),wtp:row('openWtp'),
+      ck:$('#ckRow'),appv:$('#appvRow'),debug:$('#debugBox'),note:me.querySelector('.note'),no:no&&no.parentNode,stop:me.querySelector('.stopbtn')};
+    appvMeMarks={}; Object.entries(nodes).forEach(([k,el])=>{ if(!el)return; const c=document.createComment('appv-me'); el.parentNode.insertBefore(c,el); appvMeMarks[k]={el,c}; });
+  }
+  const M=appvMeMarks;
+  Object.entries(APPV_SET_LAB).forEach(([k,t])=>{ if(M[k])appvRelabel(M[k].el,t,on); });
+  if(!on){ Object.values(M).forEach(({el,c})=>{ if(c.nextSibling!==el)c.after(el); }); if($('#s-set').classList.contains('active'))go('me'); return; }
+  if(!set.dataset.b){ set.dataset.b='1';
+    const r=([k,t,s,fn])=>`<div class="setrow visrow" data-r="${k}" onclick="${fn}"><div class="lab">${t}${s?`<small>${s}</small>`:''}</div><span class="go">›</span></div>`;
+    set.innerHTML=APPV_SET.map(([h,L_])=>`<div class="asetg"><h3>${h}</h3><div class="aset">${L_.map(x=>typeof x==='string'?`<div data-k="${x}"></div>`:r(x)).join('')}</div></div>`).join('')
+      +'<p class="asetfoot">話を聞いてくれる場所：多摩学生相談室（総合棟2F・月〜金 9:30〜16:30・無料・予約制）</p><div data-k="stop"></div><div data-k="note"></div><div data-k="no"></div>';
+  }
+  set.querySelectorAll('[data-k]').forEach(ph=>{ const m=M[ph.dataset.k]; if(m&&m.el.parentNode!==ph)ph.appendChild(m.el); });
+  renderAppvSet();
+}
+// 設定の中で、状態によって変わる行（アンケートは答えるまで・きせかえは新しく使えるものがある時に印）
+function renderAppvSet(){
+  const set=$('#appvSet'); if(!set||!set.dataset.b)return;
+  const sv=set.querySelector('[data-r="survey"]'); if(sv)sv.hidden=!surveyOpen()||surveyDone;
+  const lk=set.querySelector('[data-r="look"]'), ld=$('#lookDot');
+  if(lk&&ld){ let d=lk.querySelector('.dot'); if(!ld.hidden&&!d){ d=document.createElement('span'); d.className='dot'; lk.querySelector('.go').before(d); } else if(ld.hidden&&d)d.remove(); }
 }
 function renderAppvTT(){
   const el=$('#appvTT'); if(!el)return;
@@ -2887,8 +3106,26 @@ async function initBackend(){
         backendError(rl?'いま登録が混み合っています。1〜2分待ってから開き直すか、Wi-Fiを切ってモバイル回線で開いてください。':/disabled|not enabled|signups not allowed/i.test(m)?'匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。':'うまく始められませんでした（'+m.slice(0,80)+'）。少し待ってから開き直してください。'); return false; }
       user = r.data.user;
     }
-    myId = user.id; return true;
+    myId = user.id;
+    if(await banCheck())return false;   // 運営が利用を止めた人は、ここで止める（2026-11-01）
+    return true;
   }catch(e){ backendError('バックエンドに接続できません: '+e.message); return false; }
+}
+// 端末の印（運営が人を止めた時、同じ端末で作り直したアカウントも止めるため）。ランダムな文字で、個人の情報は入っていない
+function deviceKey(){
+  try{ let k=localStorage.getItem('tama_dev'); if(!k){ k=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2); localStorage.setItem('tama_dev',k); } return k; }catch(e){ return ''; }
+}
+// 運営が利用を止めた人か（supabase/tama_bans.sql。まだ実行していない・通信できない時は止めない）。
+// 止められていれば「利用を止めています」の画面だけを出す。書きこみはサーバーのトリガーでも断っている
+let bannedNow=false;
+async function banCheck(){
+  try{ const {data,error}=await sb.rpc('tama_ban_check',{p_device:deviceKey()}); if(error||!data||!data.banned)return false; }catch(e){ return false; }
+  bannedNow=true;
+  const n=$('#configNotice'); n.style.display='flex'; n.querySelector('div').textContent='';
+  n.querySelector('h2').textContent='利用を止めています';
+  n.querySelector('p').innerHTML='利用規約に反する使い方があったため、運営がこのアカウントの利用を止めています。<br><br>心当たりがない場合は、'
+    +(CONTACT.email?'<a href="mailto:'+esc(CONTACT.email)+'" style="color:inherit;font-weight:700">'+esc(CONTACT.email)+'</a>':'運営（法政大学 糸久ゼミ）')+' までご連絡ください。';
+  return true;
 }
 function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#c0392b;font-weight:700">'+esc(msg)+'</span><br><br>少し時間をおいてから、もう一度お試しください。<br>解決しない場合は運営（法政大学 糸久ゼミ）までお知らせください。'; }
 async function tryResumeSession(){
@@ -3283,7 +3520,7 @@ function obMove(d){
   onStart();
 }
 async function onStart(){
-  if(!myId){ if(!(await initBackend())){ if(!configured) return; myId='local-'+uuid(); } }
+  if(!myId){ if(!(await initBackend())){ if(!configured||bannedNow) return; myId='local-'+uuid(); } }
   const name=$('#obName').value.trim(), age=parseInt($('#obAge').value)||null;
   const bioVal=$('#obBio').value.trim();
   if(ngCheck(bioVal)){ toast('⚠️ 自己紹介に不適切な言葉が含まれています。修正してください。'); return; }
@@ -3328,6 +3565,7 @@ function renderMeHero(){
   // バッジは名前の横の小さな絵文字だけだと何か分からなかったので、名前つきで並べる（2026-10-09。Duolingo の実績のように）
   const mb=$('#meBadges'); if(mb)mb.innerHTML=badgeKeys(profile).map(k=>`<span class="${k===badgeShown(profile)?'on':''}" title="${esc(BADGES[k].desc)}" onclick="toast('${BADGES[k].icon} ${esc(BADGES[k].desc)}')">${BADGES[k].icon} ${esc(BADGES[k].label)}</span>`).join('');
   const h=$('#meFac'); if(h)h.textContent=[a.faculty,a.dept,a.grade].filter(Boolean).join(' ');
+  if(appvOn())renderAppvMeCard();   // 📱 アプリverのプロフィールのカード（2026-11-01）
 }
 
 /* ---------- GPS ---------- */
@@ -4787,6 +5025,7 @@ const TERMS_HTML=`
 <p>また、研究のため、利用状況（アプリを開いた日と回数、その日キャンパスの中にいたか、近くに表示された人数、通知とホーム画面のアプリを使っているか、今日のお題に答えたか）を記録します。この記録に位置は含みません。</p>
 <p>あわせて、すれ違った相手と日時・場所（建物の名前）を、記録した本人だけが見られる形で記録します。また、任意で答える「ひとこと」（人とのつながりの感じ方についての短い質問）の回答を記録します。「ひとこと」の回答はほかの利用者には見えず、答えなくてもすべての機能を使えます。</p>
 <p>一部の機能を初めて使う時に、有料になった場合に使いたいかどうかをおたずねし、その選択を記録します。本サービスが利用者に請求することはありません。</p>
+<p>第6条の利用停止を守るため、端末ごとにアプリが作るランダムな文字列（個人を特定できる情報は含みません）と、その端末で使われたアカウントを記録します。</p>
 <h4>第5条（禁止事項）</h4>
 <p>次の行為を禁止します。</p>
 <p>・他の利用者への迷惑行為、つきまとい、脅迫、差別的言動<br>
@@ -4873,8 +5112,20 @@ function openReport(uid,name){
     </div>
     <button class="rsn" style="border-style:dashed;margin-top:10px" onclick="submitReport(null)">🚫 通報はせず、ブロックだけする<small style="display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px">運営には知らせず、この人をあなたの画面に出さないだけにします（マイページで解除できます）</small></button>
     <div style="margin-top:12px;font-size:11.5px;color:var(--muted);line-height:1.75">身の危険を感じている場合は、通報だけで終わらせず<a onclick="closeReport();openContact()" style="color:var(--signal);font-weight:700;text-decoration:underline;cursor:pointer">運営・警察への連絡</a>もご検討ください。</div>
+    ${isAdmin&&!isTest(uid)?`<button class="rsn" style="margin-top:14px;color:var(--bad)" onclick="adminBan('${jsq(String(uid))}','${jsq(String(name||''))}')">運営：この人の利用を止める<small style="display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px">運営だけに出ています。名前と位置がみんなの画面から消え、書きこみもできなくなります</small></button>`:''}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeReport()">やめる</button>`;
   $('#reportOverlay').classList.add('show');
+}
+// 運営が利用を止める（2026-11-01。supabase/tama_bans.sql の tama_ban。戻すのは SQL Editor の tama_unban）
+async function adminBan(uid,name){
+  if(!isAdmin||!sb)return;
+  const why=prompt(name+' さんの利用を止めます。\n理由（運営だけが見ます。空でもOK）','');
+  if(why===null)return;
+  const {data,error}=await sb.rpc('tama_ban',{p_user:uid,p_reason:why||reportReason||''});
+  if(error){ toast(isMissingFn(error)?'止める仕組みがまだありません（supabase/tama_bans.sql を実行してください）':'止められませんでした'); return; }
+  if(data!=='ok'){ toast({denied:'運営として登録されていません',self:'自分は止められません',admin:'運営どうしは止められません'}[data]||'止められませんでした'); return; }
+  closeReport(); blocked.add(uid); renderNearby(); renderCross();
+  toast(name+' さんの利用を止めました');
 }
 function pickReason(i){
   reportReason=REPORT_REASONS[i];
@@ -4959,7 +5210,7 @@ function openSheet(u,d){
   let main;
   if(fr) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button>`;   // 友達は下の「💬 メッセージ」を使う
   else if(talking) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="closeSheet();openChat('${id}','match')">💬 トークを開く</button>`;
-  else if(reply) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">👋 いいねを返す（トーク開始）</button>`;
+  else if(reply) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">${appvOn()?'いいねを返す':'👋 いいねを返す（トーク開始）'}</button>`;
   else if(ended) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">💬 もう一度話す</button>`;
   else if(liked.has(id)) main=appvOn()
     ?`<button class="btn btn-wait" style="flex:1" disabled>いいね済み</button><button class="btn btn-ghost" style="flex:1" onclick="closeSheet();openFrAdd()">コードで友達になる</button>`   // 📱 D2 次の一歩を1タップで
@@ -9497,7 +9748,8 @@ function go(t){
   if(t==='tt')renderAppvTT();   // 📱 アプリverの時間割タブ（2026-10-24）
   if(t==='near'&&document.documentElement.classList.contains('appv'))renderAppvChrome();
   if(t==='near')loadRooms();if(t==='friends')setCmTab(cmTab);   // 2026-10-15：友達のページは「コミュニティ」（📚 授業／🏠 コミュニティ／👥 友達）
-  if(t==='me'){renderAppvRow();refreshPushToggle();renderNotifSum();renderWtpRow();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();}
+  if(t==='me'||t==='set'){renderAppvRow();refreshPushToggle();renderNotifSum();renderWtpRow();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();
+    if(appvOn()){renderAppvMeCard();renderAppvSet();}}   // 📱 アプリverのプロフィールと設定（2026-11-01）
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){applyAppv();setTimeout(maybeClassInvite,2500);   // 授業のコミュニティの招待のリンクから来た人（2026-10-20）
 loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
