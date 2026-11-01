@@ -1811,6 +1811,48 @@
   html.appv .btn-wave{background:var(--ink);color:var(--night);font-weight:600}
   html.appv #sheet .actions .btn{height:48px;padding:0 16px;border-radius:24px;font-size:var(--fs2)}
   html.appv .reportbtn{color:var(--muted)}
+  /* ---------- 2026-11-01 ホームのシートの作り直し（あお「Web版の いまの自分・時間割・お題・語りたいこと が触りやすかった」） ----------
+     上から：2枚のタイル（いまの自分／時間割）＋語りたいこと → ちかくタイム → 今日のお題 → 友達・すれ違い・近くの人。
+     大きな見出し・友達の状態の横並び・いまの状態／さそうの2行は出さない */
+  html.appv #ashTitle,html.appv #appvNotes,html.appv #appvStat{display:none!important}
+  html.appv .ash-grab{padding:6px 16px 2px}
+  html.appv .ash-grab i{margin-bottom:6px}
+  html.appv #ashBody>.scroll>#appvTiles{order:-2}
+  html.appv #ashBody>.scroll>#appvWeek{order:-1}
+  html.appv #ashBody>.scroll>#ctCard{order:1}
+  html.appv #ashBody>.scroll>#dailyCard{order:2}
+  html.appv #ashBody>.scroll>#appvSeg{order:3}
+  html.appv #ashBody>.scroll>.apane{order:4}
+  html.appv #appvTiles{padding:0 16px 4px}
+  html.appv .atiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  html.appv .atile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .atile:active,html.appv .awant:active,html.appv .ainvrow:active{background:color-mix(in srgb,var(--ink) 12%,var(--night))}
+  html.appv .atile small{font-size:var(--fs4);font-weight:600;color:var(--muted)}
+  html.appv .atile b{font-size:var(--fs2);font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .atile span{font-size:var(--fs4);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .awant{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:12px 14px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .awant small{flex:none;font-size:var(--fs4);font-weight:600;color:var(--muted)}
+  html.appv .awant b{flex:1;min-width:0;font-size:var(--fs3);font-weight:400;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .awant.on b{font-weight:600;color:var(--ink)}
+  html.appv .awant i,html.appv .ainvrow i{font-style:normal;font-size:18px;color:var(--muted2)}
+  /* 今日のお題：Web版のように、見出し・大きな問い・押しやすい答えのボタン */
+  html.appv #dailyCard.daily{margin:8px 16px;padding:14px 16px}
+  html.appv .daily.q .dqline{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;font-size:18px;font-weight:700;line-height:1.4;color:var(--ink)}
+  html.appv .daily.q .dqh{font-size:var(--fs4);font-weight:600}
+  html.appv .daily .dq{font-size:18px;font-weight:700;line-height:1.4}
+  html.appv .daily .chips{gap:8px;flex-wrap:wrap;overflow:visible}
+  html.appv .daily .chips .c{min-height:40px;padding:8px 16px;border-radius:20px;font-size:var(--fs2)}
+  html.appv .daily .dline{font-size:var(--fs3);line-height:1.6}
+  /* ちかくタイム：お題と同じ形の1枚に */
+  html.appv #ashBody>.scroll>#ctCard.ctcard:not(.after):not(.pre){margin:8px 16px;padding:14px 16px;border-radius:12px}
+  html.appv .ctcard .ctq{font-size:18px;font-weight:700;line-height:1.4}
+  html.appv .ctcard .ctbtns button{min-height:44px;font-size:var(--fs2)}
+  html.appv #appvSeg.aseg{margin:12px 16px 4px}
+  /* 友達の一覧の上の「いまからさそう」 */
+  html.appv .ainvrow{display:flex;align-items:center;gap:10px;width:calc(100% - 32px);margin:8px 16px 4px;padding:12px 14px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .ainvrow b{font-size:var(--fs2);font-weight:600}
+  html.appv .ainvrow span{flex:1;min-width:0;font-size:var(--fs4);color:var(--muted)}
+  html.appv .ainvrow[hidden]{display:none}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -2480,7 +2522,7 @@ function appvLayout(on){
     if(appvMarks.map.nextSibling!==map)appvMarks.map.after(map);
     if(appvMarks.sc.nextSibling!==sc)appvMarks.sc.after(sc);
     [['fb',fb],['cl',cl],['ul',ul]].forEach(([k,el])=>{ if(appvMarks[k].nextSibling!==el)appvMarks[k].after(el); });
-    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote','#appvNotes','#appvWeek'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
+    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote','#appvNotes','#appvWeek','#appvTiles','#appvInvRow'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
     appvMarkBuilding(''); if(appvCtPins&&fesMap){ fesMap.removeLayer(appvCtPins); appvCtPins=null; } if(appvTrailLayer&&fesMap){ fesMap.removeLayer(appvTrailLayer); appvTrailLayer=null; appvTrailKey=''; }
     if(lab)lab.textContent='ホーム';
     $('#appvTop').hidden=true; $('#appvSheet').hidden=true;
@@ -2495,7 +2537,7 @@ function setAppvPane(k,quiet){
   if(k==='fr')renderFriends(); if(k==='cross')renderCross();
 }
 // シートの高さ：low（見出しだけ）・mid（半分）・full（全画面）
-const ASH_H={low:'118px',mid:'52%',full:'calc(100% - 104px)'};   // 一番上でも、隅のボタンの下に地図を細く残す（E13。地図の上のシートだと分かるように）
+const ASH_H={low:'116px',mid:'52%',full:'calc(100% - 104px)'};   // 一番上でも、隅のボタンの下に地図を細く残す（E13。地図の上のシートだと分かるように）。低い時は「いまの自分・時間割」の2枚が見える高さ（2026-11-01）
 function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'), n=$('#s-near'); if(s)s.style.removeProperty('--ash-h'); if(n){ n.style.setProperty('--ash-h',ASH_H[d]); n.dataset.detent=d; } }
 function appvBindSheet(){
   const g=$('#ashGrab'), s=$('#appvSheet'); if(!g||!s||g.dataset.b)return; g.dataset.b='1';
@@ -2572,6 +2614,21 @@ function renderAppvChrome(){
   // ブレスト：週のふりかえり（金曜の夕方〜日曜・自分だけ）
   let wk=$('#appvWeek'); if(!wk&&sc2){ wk=document.createElement('div'); wk.id='appvWeek'; sc2.insertBefore(wk,sc2.firstChild); }
   if(wk){ const wh=appvWeekHTML(); wk.hidden=!wh; if(wk.dataset.h!==wh){ wk.dataset.h=wh; wk.innerHTML=wh; } }
+  // 2026-11-01 あお「Web版の、左上にいまの自分・右上に時間割・お題・語りたいこと が触りやすかった。下からのシートを劇的に変えていい」：
+  // シートの一番上を Web版と同じ2枚のタイル＋語りたいことの1行に。シートを下げていても2枚は見える（ASH_H.low）。
+  // 大きな見出し・友達の状態の横並び・「いまの状態」「いまからさそう」の2行は出さない（CSS）。状態は「いまの自分」から、さそうは友達の一覧の上から
+  let tl=$('#appvTiles'); if(!tl&&sc2){ tl=document.createElement('div'); tl.id='appvTiles'; }
+  if(tl&&sc2&&tl.parentNode!==sc2)sc2.insertBefore(tl,sc2.firstChild);
+  if(tl){ const nx2=appvNextClass(), tt=ttTodayText(), w=wantOf(profile);
+    const me1=g?'隠れています':!sharing?'位置を出していません':fesOutside?'学外にいます':curPlace||'学内にいます';
+    const t2=nx2?{m:(nx2.now?'いま ':'次 ')+nx2.i+'限 '+(nx2.name||'授業'),s:[nx2.room,nx2.now?nx2.en+'まで':nx2.st+'から'].filter(Boolean).join('・')}:{m:tt.main,s:tt.sub};
+    const th=`<div class="atiles"><button class="atile" onclick="openAppvMe()"><small>いまの自分</small><b>${esc(me1)}</b><span>${cur?esc(cur):'いまの状態を選ぶ'}</span></button>`
+      +`<button class="atile" onclick="${tt.empty?'openTimetable()':"go('tt')"}"><small>時間割</small><b>${esc(t2.m)}</b><span>${esc(t2.s)}</span></button></div>`
+      +`<button class="awant${w?' on':''}" onclick="openWantEdit()"><small>語りたいこと</small><b>${w?esc(w):'出すと、近くの人の一覧に今日だけ出ます'}</b><i>›</i></button>`;
+    if(tl.dataset.h!==th){ tl.dataset.h=th; tl.innerHTML=th; } }
+  const pf=$('#appvPane-fr');
+  if(pf){ let iv=$('#appvInvRow'); if(!iv){ iv=document.createElement('button'); iv.id='appvInvRow'; iv.className='ainvrow'; iv.onclick=()=>openAppvInvite(); iv.innerHTML='<b>友達をいまからさそう</b><span>空いている友達に</span><i>›</i>'; }
+    if(pf.firstChild!==iv)pf.insertBefore(iv,pf.firstChild); iv.hidden=!allFriendRows().some(r=>r.status==='accepted'); }
 }
 // C7 状態に「話しかけてOK」などの意味をはっきり持たせる（人は相手に好かれている度合いを低く見積もりがち）
 const APPV_STATUS_MEAN={'ひまです':'声をかけられたらうれしい、の合図','一緒にごはん行ける':'ごはんに誘われたらうれしい、の合図','バス待ち':'帰りのバスを待っている、の合図。行き先の駅は出ません'};
