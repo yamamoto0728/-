@@ -3062,8 +3062,26 @@ async function initBackend(){
         backendError(rl?'いま登録が混み合っています。1〜2分待ってから開き直すか、Wi-Fiを切ってモバイル回線で開いてください。':/disabled|not enabled|signups not allowed/i.test(m)?'匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。':'うまく始められませんでした（'+m.slice(0,80)+'）。少し待ってから開き直してください。'); return false; }
       user = r.data.user;
     }
-    myId = user.id; return true;
+    myId = user.id;
+    if(await banCheck())return false;   // 運営が利用を止めた人は、ここで止める（2026-11-01）
+    return true;
   }catch(e){ backendError('バックエンドに接続できません: '+e.message); return false; }
+}
+// 端末の印（運営が人を止めた時、同じ端末で作り直したアカウントも止めるため）。ランダムな文字で、個人の情報は入っていない
+function deviceKey(){
+  try{ let k=localStorage.getItem('tama_dev'); if(!k){ k=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2); localStorage.setItem('tama_dev',k); } return k; }catch(e){ return ''; }
+}
+// 運営が利用を止めた人か（supabase/tama_bans.sql。まだ実行していない・通信できない時は止めない）。
+// 止められていれば「利用を止めています」の画面だけを出す。書きこみはサーバーのトリガーでも断っている
+let bannedNow=false;
+async function banCheck(){
+  try{ const {data,error}=await sb.rpc('tama_ban_check',{p_device:deviceKey()}); if(error||!data||!data.banned)return false; }catch(e){ return false; }
+  bannedNow=true;
+  const n=$('#configNotice'); n.style.display='flex'; n.querySelector('div').textContent='';
+  n.querySelector('h2').textContent='利用を止めています';
+  n.querySelector('p').innerHTML='利用規約に反する使い方があったため、運営がこのアカウントの利用を止めています。<br><br>心当たりがない場合は、'
+    +(CONTACT.email?'<a href="mailto:'+esc(CONTACT.email)+'" style="color:inherit;font-weight:700">'+esc(CONTACT.email)+'</a>':'運営（法政大学 糸久ゼミ）')+' までご連絡ください。';
+  return true;
 }
 function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#c0392b;font-weight:700">'+esc(msg)+'</span><br><br>少し時間をおいてから、もう一度お試しください。<br>解決しない場合は運営（法政大学 糸久ゼミ）までお知らせください。'; }
 async function tryResumeSession(){
@@ -3458,7 +3476,7 @@ function obMove(d){
   onStart();
 }
 async function onStart(){
-  if(!myId){ if(!(await initBackend())){ if(!configured) return; myId='local-'+uuid(); } }
+  if(!myId){ if(!(await initBackend())){ if(!configured||bannedNow) return; myId='local-'+uuid(); } }
   const name=$('#obName').value.trim(), age=parseInt($('#obAge').value)||null;
   const bioVal=$('#obBio').value.trim();
   if(ngCheck(bioVal)){ toast('⚠️ 自己紹介に不適切な言葉が含まれています。修正してください。'); return; }
@@ -4963,6 +4981,7 @@ const TERMS_HTML=`
 <p>また、研究のため、利用状況（アプリを開いた日と回数、その日キャンパスの中にいたか、近くに表示された人数、通知とホーム画面のアプリを使っているか、今日のお題に答えたか）を記録します。この記録に位置は含みません。</p>
 <p>あわせて、すれ違った相手と日時・場所（建物の名前）を、記録した本人だけが見られる形で記録します。また、任意で答える「ひとこと」（人とのつながりの感じ方についての短い質問）の回答を記録します。「ひとこと」の回答はほかの利用者には見えず、答えなくてもすべての機能を使えます。</p>
 <p>一部の機能を初めて使う時に、有料になった場合に使いたいかどうかをおたずねし、その選択を記録します。本サービスが利用者に請求することはありません。</p>
+<p>第6条の利用停止を守るため、端末ごとにアプリが作るランダムな文字列（個人を特定できる情報は含みません）と、その端末で使われたアカウントを記録します。</p>
 <h4>第5条（禁止事項）</h4>
 <p>次の行為を禁止します。</p>
 <p>・他の利用者への迷惑行為、つきまとい、脅迫、差別的言動<br>
@@ -5049,8 +5068,20 @@ function openReport(uid,name){
     </div>
     <button class="rsn" style="border-style:dashed;margin-top:10px" onclick="submitReport(null)">🚫 通報はせず、ブロックだけする<small style="display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px">運営には知らせず、この人をあなたの画面に出さないだけにします（マイページで解除できます）</small></button>
     <div style="margin-top:12px;font-size:11.5px;color:var(--muted);line-height:1.75">身の危険を感じている場合は、通報だけで終わらせず<a onclick="closeReport();openContact()" style="color:var(--signal);font-weight:700;text-decoration:underline;cursor:pointer">運営・警察への連絡</a>もご検討ください。</div>
+    ${isAdmin&&!isTest(uid)?`<button class="rsn" style="margin-top:14px;color:var(--bad)" onclick="adminBan('${jsq(String(uid))}','${jsq(String(name||''))}')">運営：この人の利用を止める<small style="display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px">運営だけに出ています。名前と位置がみんなの画面から消え、書きこみもできなくなります</small></button>`:''}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeReport()">やめる</button>`;
   $('#reportOverlay').classList.add('show');
+}
+// 運営が利用を止める（2026-11-01。supabase/tama_bans.sql の tama_ban。戻すのは SQL Editor の tama_unban）
+async function adminBan(uid,name){
+  if(!isAdmin||!sb)return;
+  const why=prompt(name+' さんの利用を止めます。\n理由（運営だけが見ます。空でもOK）','');
+  if(why===null)return;
+  const {data,error}=await sb.rpc('tama_ban',{p_user:uid,p_reason:why||reportReason||''});
+  if(error){ toast(isMissingFn(error)?'止める仕組みがまだありません（supabase/tama_bans.sql を実行してください）':'止められませんでした'); return; }
+  if(data!=='ok'){ toast({denied:'運営として登録されていません',self:'自分は止められません',admin:'運営どうしは止められません'}[data]||'止められませんでした'); return; }
+  closeReport(); blocked.add(uid); renderNearby(); renderCross();
+  toast(name+' さんの利用を止めました');
 }
 function pickReason(i){
   reportReason=REPORT_REASONS[i];
