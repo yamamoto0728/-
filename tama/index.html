@@ -1853,6 +1853,71 @@
   html.appv .ainvrow b{font-size:var(--fs2);font-weight:600}
   html.appv .ainvrow span{flex:1;min-width:0;font-size:var(--fs4);color:var(--muted)}
   html.appv .ainvrow[hidden]{display:none}
+  /* ---------- 2026-11-01（続き）色を Web版に近づける（あお「さすがにモノクロ過ぎる。代表的なSNSの色使いも参考に、Web版くらいあってもいい」） ----------
+     インスタ・LINE・YouTube も、画面の地は白（黒）で、色は「押せるもの」と「中身ごとの印」に付けている。ちかくは Web版の色分けを使う：
+     主ボタン・選んでいる物＝オレンジ（Web版の主ボタンと同じ）、いまの自分＝オレンジ、時間割＝青、語りたいこと＝ピンクの点線、ちかくタイム＝青緑、お題＝あたたかいオレンジ、「同じ！」＝赤。
+     フォントは標準のまま・すりガラスなし・グラデーションなし（色は単色の淡い面と細い枠） */
+  html.appv:root{--tint:#e8730e;--on-tint:#fff;--tint-soft:rgba(245,151,47,.14);--amber:#e8730e;--amber-deep:#c85f06;--signal:#0a8fae;
+    --c-now:#fff3e5;--c-now-b:rgba(240,150,40,.45);--c-now-t:#b85f08;--c-tt:#eaf3ff;--c-tt-b:rgba(75,139,240,.42);--c-tt-t:#2a64c4;
+    --c-want:#fff1f7;--c-want-b:rgba(200,80,140,.45);--c-want-t:#ad3473;--c-ct:#e7f7fb;--c-ct-b:rgba(15,176,205,.42);--c-ct-t:#08788f;--c-daily:#fff6ec;--c-daily-b:rgba(245,151,47,.38);--c-daily-t:#a85a12}
+  @media (prefers-color-scheme: dark){ html.appv:root:not([data-theme="light"]){--tint:#ff9a3d;--on-tint:#1d0e00;--tint-soft:rgba(255,154,61,.16);--amber:#ff9a3d;--amber-deep:#ff8a1f;--signal:#4cc8de;
+    --c-now:rgba(245,151,47,.14);--c-now-b:rgba(245,151,47,.42);--c-now-t:#ffb066;--c-tt:rgba(75,139,240,.16);--c-tt-b:rgba(110,160,255,.42);--c-tt-t:#8db6ff;
+    --c-want:rgba(220,90,160,.14);--c-want-b:rgba(240,120,180,.45);--c-want-t:#ff8cc4;--c-ct:rgba(15,176,205,.14);--c-ct-b:rgba(76,200,222,.42);--c-ct-t:#63d6e8;--c-daily:rgba(245,151,47,.11);--c-daily-b:rgba(245,151,47,.36);--c-daily-t:#ffb066} }
+  html.appv .atile.now{background:var(--c-now);box-shadow:inset 0 0 0 1.5px var(--c-now-b)}
+  html.appv .atile.now small{color:var(--c-now-t)}
+  html.appv .atile.tt{background:var(--c-tt);box-shadow:inset 0 0 0 1.5px var(--c-tt-b)}
+  html.appv .atile.tt.empty{box-shadow:none;outline:1.5px dashed var(--c-tt-b);outline-offset:-1.5px}
+  html.appv .atile.tt small{color:var(--c-tt-t)}
+  html.appv .awant{background:var(--c-want);outline:1.5px dashed var(--c-want-b);outline-offset:-1.5px}
+  html.appv .awant small{color:var(--c-want-t)}
+  html.appv #ashBody>.scroll>#ctCard.ctcard{background:var(--c-ct)!important;box-shadow:inset 0 0 0 1.5px var(--c-ct-b)!important}
+  html.appv .ctcard .cth,html.appv .ctcard .cth *{color:var(--c-ct-t)}
+  html.appv .ctcard .ctleft{background:var(--c-ct-t);color:var(--night)}
+  html.appv .ctcard .ctbtns button{border:1.5px solid var(--c-ct-b);color:var(--c-ct-t);background:var(--night)}
+  html.appv .ctcard .ctsame{background:var(--c-ct-t);color:var(--night)}
+  html.appv #dailyCard.daily{background:var(--c-daily)!important;box-shadow:inset 0 0 0 1.5px var(--c-daily-b)!important}
+  html.appv .daily .dh,html.appv .daily.q .dqh,html.appv .daily .dh *{color:var(--c-daily-t)}
+  html.appv .daily .chips .c{border:1.5px solid var(--c-daily-b);color:var(--ink);background:var(--night)}
+  html.appv .daily .dmine b{color:var(--tint)}
+  html.appv .same{background:var(--rose);color:#fff}
+  html.appv .btn-wave{background:var(--tint);color:var(--on-tint)}
+  html.appv .atbtn.on{background:var(--tint);color:var(--on-tint)}
+  html.appv .ainvrow{background:var(--c-now)}
+  html.appv .ainvrow b{color:var(--c-now-t)}
+  /* シートは、つまみの所を大きく（中身のどこからでも引っぱれる。appvBindSheet） */
+  html.appv .ash-grab{padding:10px 16px 8px}
+  html.appv .ash-grab i{width:40px;margin-bottom:2px}
+  /* 語りたいこと：今日学内で出ているもの（人数つき） */
+  .wanth{margin:12px 0 6px;font-size:12px;font-weight:700;color:var(--muted)}
+  .wantpop .c small{margin-left:2px;font-size:11px;color:var(--muted)}
+  /* 時間割：シラバスの教室を自動で入れた時に、一瞬だけ色を付ける */
+  .ttrow input.room.auto{background:rgba(245,151,47,.18);transition:background .6s}
+  /* コミュニティの一覧（アプリver） */
+  html.appv #commSub,html.appv #commPane>div[style]{display:none!important}
+  html.appv .racts{display:flex;gap:8px;padding:8px 16px 4px}
+  html.appv .racts button{height:36px;padding:0 14px;border:0;border-radius:18px;background:var(--fill);color:var(--ink);font:inherit;font-size:var(--fs3);font-weight:600;cursor:pointer}
+  html.appv .racts button:first-child{background:var(--tint);color:var(--on-tint)}
+  html.appv .rhead{display:flex;align-items:baseline;gap:8px;margin:16px 16px 4px;font-size:var(--fs3);font-weight:700}
+  html.appv .rhead small{font-size:var(--fs4);font-weight:400;color:var(--muted)}
+  html.appv .rbadge{width:48px;height:48px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:20px;font-weight:700}
+  html.appv .rrow{display:flex;align-items:center;gap:12px;width:100%;padding:8px 16px;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .rrow:active{background:var(--fill)}
+  html.appv .rrow .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  html.appv .rrow .tx b{font-size:var(--fs2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .rrow .tx small{font-size:var(--fs3);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .rrow .rs{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+  html.appv .rrow time{font-size:var(--fs4);color:var(--muted);font-variant-numeric:tabular-nums}
+  html.appv .rrow .unbadge{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--rose);color:#fff;font-size:12px;font-weight:700;line-height:20px;text-align:center}
+  html.appv .rlist.dim{opacity:.6}
+  html.appv .rcards{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 12px;scroll-snap-type:x mandatory;scroll-padding:0 16px;scrollbar-width:none}
+  html.appv .rcards::-webkit-scrollbar{display:none}
+  html.appv .rcard{flex:none;width:150px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px;border:0;border-radius:14px;background:var(--fill);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .rcard b{width:100%;margin-top:6px;font-size:var(--fs2);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .rcard small{font-size:var(--fs4);line-height:1.5;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
+  html.appv .rcard .rk{margin-top:4px;padding:2px 8px;border-radius:10px;background:var(--night);font-size:11px;font-weight:600;color:var(--muted)}
+  html.appv .rcard .rk.cls{color:var(--c-tt-t);background:var(--c-tt)}
+  html.appv .rcard .rk.fit{color:var(--c-now-t);background:var(--c-now)}
+  html.appv .rcard .rm{font-size:11px;color:var(--muted)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -1862,6 +1927,7 @@
 <script src="/tama/courses-shakai.js"></script>
 <script src="/tama/artists.js"></script>
 <script src="/tama/rooms-tama.js"></script>
+<script src="/tama/course-rooms-shakai.js"></script>
 <script src="/tama/tamasai.js"></script>
 </head>
 <body>
@@ -2510,13 +2576,14 @@ function appvLayout(on){
     let st=$('#appvStat'); if(!st){ st=document.createElement('div'); st.id='appvStat'; st.className='astat'; }
     if(st.parentNode!==sc)sc.insertBefore(st,sc.firstChild);
     let seg=$('#appvSeg'); if(!seg){ seg=document.createElement('div'); seg.id='appvSeg'; seg.className='aseg';
-      seg.innerHTML=[['fr','友達'],['cross','すれ違い'],['near','近くの人']].map(([k,t])=>'<button data-p="'+k+'" onclick="setAppvPane(\''+k+'\')">'+t+'</button>').join(''); }
+      // 2026-11-01 あお「すれ違いと近くの人の違いが分かりづらい。すれ違いを残して近くの人を消して」：切りかえは2つ（近くの人の一覧は地図で見る）
+      seg.innerHTML=[['fr','友達'],['cross','すれ違い']].map(([k,t])=>'<button data-p="'+k+'" onclick="setAppvPane(\''+k+'\')">'+t+'</button>').join(''); }
     const dc=$('#dailyCard'); if(seg.previousElementSibling!==dc)dc.after(seg);
     const pane=(k,el)=>{ let p=$('#appvPane-'+k); if(!p){ p=document.createElement('div'); p.id='appvPane-'+k; p.className='apane'; } if(el.parentNode!==p)p.appendChild(el); return p; };
     let prev=seg; [['fr',fb],['cross',cl],['near',ul]].forEach(([k,el])=>{ const p=pane(k,el); if(p.previousElementSibling!==prev)prev.after(p); prev=p; });
     if(lab)lab.textContent='ちかく';
     $('#appvTop').hidden=false; $('#appvSheet').hidden=false;
-    if(!appvPane)appvPane=allFriendRows().some(r=>r.status==='accepted')?'fr':'near';
+    if(!appvPane||appvPane==='near')appvPane=allFriendRows().some(r=>r.status==='accepted')?'fr':'cross';
     appvBindSheet(); setAppvPane(appvPane,true); setAppvDetent(appvDetent); renderAppvChrome(); appvWatch(); setTimeout(appvFitMap,350);
   }else{
     if(appvMarks.map.nextSibling!==map)appvMarks.map.after(map);
@@ -2547,6 +2614,20 @@ function appvBindSheet(){
   g.addEventListener('pointerup',()=>{ if(y0==null)return; s.classList.remove('drag'); const H=s.parentNode.getBoundingClientRect().height, h=s.getBoundingClientRect().height; y0=null;
     if(!moved){ setAppvDetent(appvDetent==='full'?'mid':'full'); return; }   // タップは 半分⇔全画面
     const r=h/H; setAppvDetent(r<.33?'low':r<.72?'mid':'full'); if(navigator.vibrate)try{ navigator.vibrate(6); }catch(_){} });
+  // 2026-11-01 あお「タブを上に引っ張りづらい。当たり判定が小さい」：つまみだけでなく、シートの中のどこからでも引っぱれるように（Apple マップと同じ）。
+  // 全画面でない時に上へ、中身が一番上までスクロールされている時に下へ動かした時だけシートを動かす。横の動き・それ以外は中身のスクロールのまま
+  const body=$('#ashBody'); let t0=null;
+  if(body){
+    body.addEventListener('touchstart',e=>{ const sc=body.querySelector(':scope>.scroll'); t0={y:e.touches[0].clientY,x:e.touches[0].clientX,h:s.getBoundingClientRect().height,top:!sc||sc.scrollTop<=0,drag:false}; },{passive:true});
+    body.addEventListener('touchmove',e=>{
+      if(!t0)return; const dy=e.touches[0].clientY-t0.y, dx=e.touches[0].clientX-t0.x;
+      if(!t0.drag){ if(Math.abs(dy)<8||Math.abs(dx)>Math.abs(dy))return;
+        if((dy<0&&appvDetent!=='full')||(dy>0&&t0.top)){ t0.drag=true; s.classList.add('drag'); } else { t0=null; return; } }
+      e.preventDefault(); s.style.setProperty('--ash-h',Math.max(96,t0.h-dy)+'px');
+    },{passive:false});
+    body.addEventListener('touchend',()=>{ if(!t0)return; const was=t0.drag; t0=null; if(!was)return; s.classList.remove('drag');
+      const H=s.parentNode.getBoundingClientRect().height, r=s.getBoundingClientRect().height/H; setAppvDetent(r<.33?'low':r<.72?'mid':'full'); if(navigator.vibrate)try{ navigator.vibrate(6); }catch(_){} });
+  }
 }
 // 隠れる（1時間／今日はずっと）。位置の共有を止めるだけなので、友達や近くの人の画面では「学内にいない」と同じ見た目になり、隠れていることは相手に分からない
 const ghostInfo=()=>{ try{ const g=JSON.parse(localStorage.getItem('tama_ghost')||'null'); return g&&g.until>Date.now()?g:null; }catch(e){ return null; } };
@@ -2622,8 +2703,8 @@ function renderAppvChrome(){
   if(tl){ const nx2=appvNextClass(), tt=ttTodayText(), w=wantOf(profile);
     const me1=g?'隠れています':!sharing?'位置を出していません':fesOutside?'学外にいます':curPlace||'学内にいます';
     const t2=nx2?{m:(nx2.now?'いま ':'次 ')+nx2.i+'限 '+(nx2.name||'授業'),s:[nx2.room,nx2.now?nx2.en+'まで':nx2.st+'から'].filter(Boolean).join('・')}:{m:tt.main,s:tt.sub};
-    const th=`<div class="atiles"><button class="atile" onclick="openAppvMe()"><small>いまの自分</small><b>${esc(me1)}</b><span>${cur?esc(cur):'いまの状態を選ぶ'}</span></button>`
-      +`<button class="atile" onclick="${tt.empty?'openTimetable()':"go('tt')"}"><small>時間割</small><b>${esc(t2.m)}</b><span>${esc(t2.s)}</span></button></div>`
+    const th=`<div class="atiles"><button class="atile now" onclick="openAppvMe()"><small>いまの自分</small><b>${esc(me1)}</b><span>${cur?esc(cur):'いまの状態を選ぶ'}</span></button>`
+      +`<button class="atile tt${tt.empty?' empty':''}" onclick="${tt.empty?'openTimetable()':"go('tt')"}"><small>時間割</small><b>${esc(t2.m)}</b><span>${esc(t2.s)}</span></button></div>`
       +`<button class="awant${w?' on':''}" onclick="openWantEdit()"><small>語りたいこと</small><b>${w?esc(w):'出すと、近くの人の一覧に今日だけ出ます'}</b><i>›</i></button>`;
     if(tl.dataset.h!==th){ tl.dataset.h=th; tl.innerHTML=th; } }
   const pf=$('#appvPane-fr');
@@ -4301,14 +4382,21 @@ function wantOf(u){ const w=attrsOf(u).want; return w&&w.t&&w.d===jstDayOf(Date.
 function openWantEdit(){
   if(!profile){ toast('先にプロフィールを登録してね'); return; }
   const cur=wantOf(profile), ex=fesDayNow()?WANT_EX_FES:WANT_EX;
-  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">💬 語りたいこと・探している人</h2>
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">${appvOn()?'':'💬 '}語りたいこと・探している人</h2>
     <p class="psdesc">近くの人の一覧とプロフィールに出ます。見た人が「💬 それ話したい」と、いいねを送れます。<b style="color:var(--ink)">今日だけ</b>出ます（日付が変わると消えます）。</p>
     <div class="field"><input id="wantIn" maxlength="30" placeholder="例：Saenggi好きと語りたい" value="${esc(cur)}"></div>
+    ${(()=>{ const pop=wantPopular(5); return pop.length?`<div class="wanth">今日、学内で出ているもの</div><div class="chips wantex wantpop">${pop.map(([t,n])=>`<span class="c" data-t="${esc(t)}" onclick="$('#wantIn').value=this.dataset.t">${esc(t)}<small>（${n}人）</small></span>`).join('')}</div><div class="wanth">例</div>`:''; })()}
     <div class="chips wantex">${ex.map((x,i)=>`<span class="c" onclick="$('#wantIn').value=this.textContent">${esc(x)}</span>`).join('')}</div>
     <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:12px" onclick="saveWant()">出す</button>
     ${cur?`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="saveWant(true)">消す</button>`:''}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">やめる</button></div>`;
   $('#memOverlay').classList.add('show');
+}
+// 今日、学内のほかの人が出している「語りたいこと」を、同じ文ごとにまとめて多い順に（2026-11-01 あおの依頼「その日に誰かが選んだものを数個、（〇人）つきで候補に」）。[文, 人数]
+function wantPopular(lim){
+  const m=new Map();
+  others.filter(u=>!isTest(u.id)&&!blocked.has(u.id)&&u.id!==myId).forEach(u=>{ const w=wantOf(u).trim(); if(!w)return; const k=normAns(w); const e=m.get(k)||[w,0]; e[1]++; m.set(k,e); });
+  return [...m.values()].sort((a,b)=>b[1]-a[1]).slice(0,lim);
 }
 function saveWant(clear){
   if(!profile)return;
@@ -6297,7 +6385,8 @@ function renderRooms(){
         open=rooms.filter(r=>!r.joined&&!ci.has(rid(r.id))&&r.visibility!=='common').sort(by), ended=rooms.filter(r=>r.joined&&roomEnded(r));
   const sec=(t,arr)=>arr.length?`<div class="listhead" style="padding-left:6px">${t} <span class="cnt">${arr.length}</span></div>`+arr.map(roomRow).join(''):'';
   const el=$('#roomList');
-  if(el){
+  if(el&&appvOn())renderRoomsAppv(el,{joined,cls,forYou,open,ended});
+  else if(el){
     $('#commSub').textContent='部屋ごとにオーナーがいて、入れる人と期限が決まっています';
     if(talkTab==='comm')$('#matchCount').textContent=rooms.length?rooms.length+'部屋':'';
     el.innerHTML=collabCardLine()+(roomListErr?`<div class="roomerr">⚠️ コミュニティの一覧を読み込めませんでした。<button onclick="loadRooms()">もう一度</button><small>${esc(roomListErr)}</small></div>`:'')+(rooms.length?sec('参加中',joined)+sec('📚 あなたの授業',cls)+sec('🎯 あなたに合う部屋',forYou)+sec('みんなの部屋',open)+sec('終わった部屋（3日後に消えます）',ended)
@@ -6307,6 +6396,34 @@ function renderRooms(){
   if(hr)hr.innerHTML=top.length?top.map(roomRow).join(''):`<div style="padding:14px 16px;font-size:12.5px;color:var(--muted)">まだコミュニティがありません。<span onclick="go('comm')" style="color:var(--signal);font-weight:700;cursor:pointer">作ってみる ›</span></div>`;
 }
 
+/* ---------- 📱 アプリverのコミュニティの一覧（2026-11-01 あお「コミュニティの欄がまだ見づらい。SNSを参考に改善して」） ----------
+   前は1件が4行（説明・条件・人数・期限・最終）で、印はみんな同じ青緑の丸に絵文字、右に「開く ›」と「›」が二重だった。
+   ・参加中：LINE のオープンチャットと同じ2行の一覧（名前・話題か集まり／右に時刻と未読の数）
+   ・まだ入っていない部屋：Discord の「見つける」のように横に流れるカード（授業・あなたに合う・だれでも の札と人数）
+   ・部屋の印は絵文字をやめ、名前の1文字目を色つきの角丸の四角に（色は名前から決まるので、部屋ごとに見分けがつく）
+   ・作る・招待コードは、一番下の大きなボタンをやめて一番上の小さいボタンに */
+const ROOM_COLS=[['#ffe0c2','#9a4a08'],['#d6eaff','#1f5fa8'],['#ffd9e8','#a8285a'],['#d4f2df','#1d7a43'],['#e6dcff','#5b3fb0'],['#fff0b8','#7a5800']];
+function roomBadge(r){
+  const n=String(r.name||'?').trim(); let h=0; for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;
+  const [bg,fg]=ROOM_COLS[h%ROOM_COLS.length]; return `<span class="rbadge" style="background:${bg};color:${fg}">${esc([...n][0]||'?')}</span>`;
+}
+const roomTime=t=>{ const ms=Date.parse(t); if(!ms)return ''; const o={timeZone:'Asia/Tokyo'};
+  return jstDayOf(ms)===jstDayOf(Date.now())?new Date(ms).toLocaleTimeString('ja-JP',{...o,hour:'2-digit',minute:'2-digit'}):new Date(ms).toLocaleDateString('ja-JP',{...o,month:'numeric',day:'numeric'}); };
+function renderRoomsAppv(el,{joined,cls,forYou,open,ended}){
+  const kind=r=>isClassRoom(r)?'授業':r.visibility==='common'?(r.fits?'あなたに合う':'条件あり'):r.visibility==='invite'?'招待制':'だれでも';
+  const row=r=>{ const k=rid(r.id), s=roomStats[k]||{}, un=s.unread||0, mt=meetText(r.meet);
+    return `<button class="rrow" onclick="openRoom('${k}')">${roomBadge(r)}<span class="tx"><b>${esc(r.name)}</b><small>${esc(mt?'集まり '+mt:(r.topic||'みんなで話そう'))}</small></span>`
+      +`<span class="rs">${s.last?`<time>${esc(roomTime(s.last))}</time>`:''}${un?`<span class="unbadge">${un>99?'99+':un}</span>`:''}</span></button>`; };
+  const card=r=>{ const k=rid(r.id), s=roomStats[k]||{}, kd=kind(r);
+    return `<button class="rcard" onclick="openRoom('${k}')">${roomBadge(r)}<b>${esc(r.name)}</b><small>${esc(r.topic||'みんなで話そう')}</small><span class="rk${kd==='授業'?' cls':kd==='あなたに合う'?' fit':''}">${kd}</span><span class="rm">${s.members||0}人</span></button>`; };
+  const disc=cls.concat(forYou,open);
+  el.innerHTML=collabCardLine()+`<div class="racts"><button onclick="newRoom()">＋ 作る</button>${roomsV2?'<button onclick="openRoomCodeJoin()">招待コードで入る</button>':''}</div>`
+    +(roomListErr?`<div class="roomerr">コミュニティの一覧を読み込めませんでした。<button onclick="loadRooms()">もう一度</button><small>${esc(roomListErr)}</small></div>`:'')
+    +(joined.length?`<div class="rhead">参加中</div><div class="rlist">${joined.map(row).join('')}</div>`:'')
+    +(disc.length?`<div class="rhead">見つける</div><div class="rcards">${disc.map(card).join('')}</div>`:'')
+    +(ended.length?`<div class="rhead">終わった部屋<small>3日後に消えます</small></div><div class="rlist dim">${ended.map(row).join('')}</div>`:'')
+    +(!rooms.length&&!roomListErr?`<div class="aempty"><p>まだコミュニティがありません。授業や趣味で、最初の部屋を作れます</p><button class="abtn" onclick="newRoom()">コミュニティを作る</button></div>`:'');
+}
 /* ---------- 授業のコミュニティ（2026-10-09 あおの指示で作り直し） ----------
    ・勝手に作らない。だれかがオーナーとして作ったコミュニティだけ
    ・前面に出さない。自分の時間割の授業と、名前が一言一句同じコミュニティがある時だけ、コミュニティの一覧に「📚 あなたの授業」として出す（無ければ何も出さない）
@@ -8293,7 +8410,29 @@ let ttOffAsked=false, ttOffFix=[];
 function ttFixHTML(k){ if(!ttOffFix.includes(k))return ''; const l=officialList(ttDraft[k]||'',3,true); if(!l.length)return '';
   return `<div class="sugg ttfix"><span class="sh">📘 「${esc(ttDraft[k])}」の正式な授業名は？（押すと入ります）</span>${l.map((v,i)=>`<button type="button" class="off" onclick="ttUseOff('${k}',${i})">${esc(v)}</button>`).join('')}</div>`; }
 function ttUseOff(k,i){ const v=officialList(ttDraft[k]||'',3,true)[i]; if(!v)return; ttDraft[k]=v; ttOffFix=ttOffFix.filter(x=>x!==k); renderTimetable(); }
-function openTimetable(){ loadSuggest(); ttOpen=true; ttOffAsked=false; ttOffFix=[]; ttDraft={...myTimetable}; roomsDraft={...myRooms}; renderTimetable(); $('#placeOverlay').classList.add('show'); }
+function openTimetable(){ loadSuggest(); ttOpen=true; ttOffAsked=false; ttOffFix=[]; ttDraft={...myTimetable}; roomsDraft={...myRooms}; ttRoomAuto={};
+  Object.keys(ttDraft).forEach(k=>{ if(ttDraft[k]&&!roomsDraft[k]){ const r=syllabusRoom(ttDraft[k],k); if(r){ roomsDraft[k]=r; ttRoomAuto[k]=true; } } });   // 前に入れた授業で、教室が空のコマも埋める
+  renderTimetable(); $('#placeOverlay').classList.add('show'); }
+/* ---------- 授業名から教室を自動で入れる（2026-11-01 あおの依頼「授業を選んだら、シラバスに書いてある教室が教室名の一覧から勝手に選ばれるとうれしい。春学期と秋学期に気を付けて」） ----------
+   データは tama/course-rooms-shakai.js（COURSE_ROOMS。社会学部の正式名称ごとに [学期, [曜日-時限…], 教室]）。
+   いまの学期（4/1〜9/14 は春学期、それ以外は秋学期）か年間の授業で、そのコマ（曜日-時限）に当たる教室が1つに決まる時だけ入れる。
+   同じ授業名でクラスが分かれていて教室が違う時（決まらない時）は入れない。自分で書いた教室は上書きしない */
+let ttRoomAuto={};   // 自動で入れたコマ（授業名を変えたら入れ直してよいもの）
+function syllabusTerm(ms=Date.now()){ const d=new Date(ms+9*3600000), m=d.getUTCMonth()+1, day=d.getUTCDate(); return (m>=4&&m<9)||(m===9&&day<15)?'s':'f'; }
+function syllabusRoom(name,k){
+  if(typeof COURSE_ROOMS==='undefined')return '';
+  const L=COURSE_ROOMS[String(name||'').trim()]; if(!L)return '';
+  const t=syllabusTerm(), cur=L.filter(e=>e[0]===t||e[0]==='y');
+  const pick=list=>{ const rs=[...new Set(list.map(e=>e[2]))]; return rs.length===1?rs[0]:''; };
+  return pick(cur.filter(e=>e[1].includes(k)))||'';
+}
+function ttAutoRoom(k,inp){
+  const row=inp.closest('.ttrow'), rin=row&&row.querySelector('input.room'); if(!rin)return;
+  if(rin.value.trim()&&!ttRoomAuto[k])return;   // 自分で書いた教室はそのまま
+  const r=syllabusRoom(inp.value,k);
+  if(r){ rin.value=r; roomsDraft[k]=r; ttRoomAuto[k]=true; rin.classList.add('auto'); setTimeout(()=>rin.classList.remove('auto'),1200); }
+  else if(ttRoomAuto[k]){ rin.value=''; roomsDraft[k]=''; delete ttRoomAuto[k]; }   // 授業名を変えて合わなくなったら、自動で入れた教室は消す
+}
 function renderTimetable(){
   const keys=slotKeys(ttDraft);
   let grid='<div class="ttgrid"><div></div>'+TT_DAYS.map(d=>`<div class="tth">${d}</div>`).join('');
@@ -8308,7 +8447,7 @@ function renderTimetable(){
     ${grid}
     ${keys.length?`<div class="field" style="margin-top:14px"><label>授業名${roomsColMissing?'':'・教室'}（どちらも任意）</label>
       <div class="hint" style="margin:0 0 8px">授業名を入れると、同じ授業の人が「共通点」に出ます。${roomsColMissing?'':'教室を入れると、その授業の時間に「いまの自分」を開いた時、教室がボタンで出ます。'}</div>
-      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input data-sugg="course" maxlength="48" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value">${roomsColMissing?'':`<input class="room" data-sugg="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value">`}</div>${ttFixHTML(k)}`).join('')}</div>`:''}
+      ${keys.map(k=>`<div class="ttrow"><span>${slotLabel(k)}</span><input data-sugg="course" maxlength="48" placeholder="授業名 例：マーケティング論" value="${esc(ttDraft[k]||'').replace(/"/g,'&quot;')}" oninput="ttDraft['${k}']=this.value;ttAutoRoom('${k}',this)">${roomsColMissing?'':`<input class="room" data-sugg="room" maxlength="16" placeholder="教室" value="${esc(roomsDraft[k]||'').replace(/"/g,'&quot;')}" oninput="roomsDraft['${k}']=this.value;delete ttRoomAuto['${k}']">`}</div>${ttFixHTML(k)}`).join('')}</div>`:''}
     <div class="edbar"><button class="btn btn-ghost" onclick="closeTimetable()">閉じる</button><button class="btn btn-primary" onclick="saveTimetable()">保存する</button></div>`;
 }
 // 授業名を入れたコマを押した時は、名前ごと消えてしまうので確かめる
