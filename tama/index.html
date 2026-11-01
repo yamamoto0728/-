@@ -1769,6 +1769,48 @@
   html.appv .setrow .lab small,html.appv .aslist button span small{font-size:var(--fs4)}
   html.appv .blbl,html.appv .blbl.food,html.appv .blbl.field{font-size:12px}
   html.appv .blbl.key{font-size:13px}
+  /* ---------- 📱 アプリver 2026-11-01 フォントと雰囲気（あお「AI感がでかすぎる。インスタ・BeReal・setlog・YouTube に合わせて」） ----------
+     ・主流のSNSは、画面の文字にスマホの標準フォント（iPhone は SF＋ヒラギノ、Android は Roboto＋Noto）を使い、独自の字体はロゴだけ。
+       ちかくは見出し・ボタン・数字の約45か所に Zen 丸ゴシック・Zen 角ゴシック・JetBrains Mono が残っていた（AIが「おしゃれに」で選びがちな組み合わせ）
+     ・字の間を空けない（標準のまま）。AIの画面は字間を広げがち
+     ・色は白黒が基本（BeReal・setlog・Threads と同じ）。前の青緑 #08809a は Tailwind の cyan とほぼ同じで、AIの初期値に見えた。
+       色を付けるのは「自分」のオレンジと、地図の学内だけ
+     ・すりガラスをやめて、白い面に薄い影（Google マップと同じ） */
+  html.appv,html.appv *{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN",Roboto,"Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif!important;letter-spacing:0!important}
+  html.appv .frcode .num,html.appv .ctcard .ctleft{letter-spacing:.08em!important}   /* 向かい合って読む3分コードの数字だけは少し空ける */
+  html.appv:root{--tint:var(--ink);--on-tint:var(--night);--tint-soft:color-mix(in srgb,var(--ink) 6%,var(--night));--signal:var(--ink);--amber:var(--ink);--amber-deep:var(--ink)}
+  html.appv .atbtn,html.appv .atpill{background:var(--night);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  html.appv .atbtn.on{background:var(--ink);color:var(--night)}
+  html.appv .btn-primary,html.appv .abtn{font-weight:600}
+  html.appv .alink{font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+  /* 色を直接書いていた部品（多摩キャンverの青緑）を、アプリverでは白黒に */
+  html.appv .ctcard .cth,html.appv .ctcard .ctmine b,html.appv .urow .d .lk,html.appv .wavein .wh,html.appv .wavehead,html.appv .lstep.on b,html.appv .nearjump b{color:var(--ink)}
+  html.appv .ctcard .ctleft{background:var(--ink);color:var(--night)}
+  html.appv .ctcard .ctbtns button{border:1px solid var(--sep);border-radius:22px;background:var(--night);color:var(--ink);font-weight:600}
+  html.appv .ctcard .ctsame{background:var(--ink);color:var(--night);font-weight:600}
+  html.appv .stchip,html.appv .urow .crossb.rep,html.appv .btn-wait,html.appv .sugg button{color:var(--ink);background:var(--fill);border-color:transparent}
+  html.appv .pvhint,html.appv .wavein,html.appv .frsug,html.appv .notlove{background:var(--fill);border-color:transparent;color:var(--ink)}
+  html.appv .frmapbtn{border-color:var(--sep);color:var(--ink)}
+  html.appv .tipfocus{box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 35%,transparent)!important}
+  /* 人のプロフィール：紫などのグラデーションの帯・✨・色付きの枠・絵文字の行頭・青緑のグラデーションのボタンが重なって、いちばんAIっぽかった。
+     インスタのプロフィールと同じく、白い面の左にアイコン・右に名前。ボタンは黒1色。「同じ！」だけは黒い札で目立たせる（ちかくの印） */
+  html.appv #sheet .cover{display:grid;grid-template-columns:84px 1fr;gap:16px;align-items:center;height:auto;padding:56px 20px 8px;background:var(--night)!important}
+  html.appv #sheet .cover::after{display:none}
+  html.appv #sheet .cover .initial{position:static;width:84px;height:84px;font-size:42px;background:var(--fill);border:0;box-shadow:none!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+  html.appv #sheet .cover .close{position:absolute;top:12px;left:12px;background:var(--fill);color:var(--ink);backdrop-filter:none}
+  html.appv #sheet .cover .idn h2{font-size:var(--fs1)}
+  html.appv #sheet .cover .idn h2 span{display:block;font-size:var(--fs3);font-weight:400;color:var(--muted);margin-top:2px}
+  html.appv #sheet .body{background:var(--night)}
+  html.appv .metline,html.appv .metline.rep{background:var(--fill);border:0;border-radius:12px;font-size:var(--fs3)}
+  html.appv .metline b,html.appv .metline.rep b{color:var(--ink)}
+  html.appv .fesattr{background:transparent;padding:4px 0}
+  html.appv .fesattr .frow{font-size:15px;margin-bottom:8px}
+  html.appv .same{background:var(--ink);color:var(--night);font-weight:600;border-radius:6px;padding:1px 6px}
+  html.appv #sheet .ladder{display:none}   /* いいね→トーク→友達の3枚の説明は、下の1行（anext）で足りる */
+  html.appv #sheet .ladnote{background:transparent;color:var(--muted)}
+  html.appv .btn-wave{background:var(--ink);color:var(--night);font-weight:600}
+  html.appv #sheet .actions .btn{height:48px;padding:0 16px;border-radius:24px;font-size:var(--fs2)}
+  html.appv .reportbtn{color:var(--muted)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -2565,7 +2607,8 @@ setInterval(()=>{ if(!document.hidden)renderAppvChrome(); },5000);
 const APPV_EMO=/^\s*(?:\p{Extended_Pictographic}|️|‍|\p{Emoji_Modifier})+\s*/u;
 function appvStripEmoji(root){
   if(!document.documentElement.classList.contains('appv')||!root)return;
-  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago,.lk,.mtime,.frbtn,.nearsec,.clstg,.dline,.crosswhen,.wavehead,.ctsame,.dnote,.dcount,.stchip,.cth>span:first-child,.rolet,.frmapbtn,.nearmore,#friendBox .urow .b,.th>*,.tshow').forEach(el=>{   // ユーザーが書いた文（トークの最後の一言・語りたいこと）は対象にしない
+  root.querySelectorAll('.ctline,.dqh,.dh>span:first-child,.listhead,.common,.crossb,.cmsub,.frago,.lk,.mtime,.frbtn,.nearsec,.clstg,.dline,.crosswhen,.wavehead,.ctsame,.dnote,.dcount,.stchip,.cth>span:first-child,.rolet,.frmapbtn,.nearmore,#friendBox .urow .b,.th>*,.tshow,'
+    +'.metline,.fesattr .frow,.wavein .wh,.btn-wave,.btn-wait,.dist,.reportbtn,.rsn').forEach(el=>{   // 2026-11-01 人のプロフィール・通報の画面も   // ユーザーが書いた文（トークの最後の一言・語りたいこと）は対象にしない
     const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT); const t=w.nextNode(); if(t&&APPV_EMO.test(t.nodeValue))t.nodeValue=t.nodeValue.replace(APPV_EMO,'');
   });
 }
@@ -2573,6 +2616,7 @@ let appvObs=null;
 function appvWatch(){ const b=$('#ashBody'); if(!b||appvObs)return; appvObs=new MutationObserver(()=>appvStripEmoji(b)); appvObs.observe(b,{childList:true,subtree:true}); appvStripEmoji(b);
   const ml=$('#matchList'); if(ml){ new MutationObserver(()=>appvStripEmoji(ml)).observe(ml,{childList:true,subtree:true}); appvStripEmoji(ml); }   // トークの一覧も（E6）
   const tp=$('#chatTopics'); if(tp){ new MutationObserver(()=>appvStripEmoji(tp)).observe(tp,{childList:true,subtree:true}); }   // チャットの話題カードの見出し
+  ['#sheet','#reportSheet'].forEach(s=>{ const el=$(s); if(el)new MutationObserver(()=>appvStripEmoji(el)).observe(el,{childList:true}); });   // 人のプロフィール・通報（2026-11-01）
 }
 // 📱 アプリverの地図の動かせる範囲（2026-10-24 あお「地図を動かすと中心に戻る」→「ゆるめる」）。
 // 前はキャンパスより12%広いだけの枠に当たると、ばねのように戻っていた。アプリverは画面いっぱいの地図の下半分をシートが覆うので、
@@ -5166,7 +5210,7 @@ function openSheet(u,d){
   let main;
   if(fr) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button>`;   // 友達は下の「💬 メッセージ」を使う
   else if(talking) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="closeSheet();openChat('${id}','match')">💬 トークを開く</button>`;
-  else if(reply) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">👋 いいねを返す（トーク開始）</button>`;
+  else if(reply) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">${appvOn()?'いいねを返す':'👋 いいねを返す（トーク開始）'}</button>`;
   else if(ended) main=`<button class="btn btn-ghost" onclick="closeSheet()">閉じる</button><button class="btn btn-wave" onclick="openWave()">💬 もう一度話す</button>`;
   else if(liked.has(id)) main=appvOn()
     ?`<button class="btn btn-wait" style="flex:1" disabled>いいね済み</button><button class="btn btn-ghost" style="flex:1" onclick="closeSheet();openFrAdd()">コードで友達になる</button>`   // 📱 D2 次の一歩を1タップで
