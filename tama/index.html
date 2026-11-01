@@ -1918,6 +1918,29 @@
   html.appv .rcard .rk.cls{color:var(--c-tt-t);background:var(--c-tt)}
   html.appv .rcard .rk.fit{color:var(--c-now-t);background:var(--c-now)}
   html.appv .rcard .rm{font-size:11px;color:var(--muted)}
+  /* 2026-11-01（続き）あお「今日のお題の枠と選択肢の文字がでかすぎる」：問いは本文より少し大きいだけ、答えのボタンは補足の大きさに */
+  html.appv #dailyCard.daily{padding:12px 14px}
+  html.appv .daily.q .dqline{font-size:16px;margin-bottom:10px}
+  html.appv .daily .dq{font-size:16px}
+  html.appv .daily .chips{gap:6px}
+  html.appv .daily .chips .c{min-height:34px;padding:6px 14px;border-radius:17px;font-size:var(--fs3)}
+  html.appv #ashBody>.scroll>#ctCard.ctcard:not(.after):not(.pre){padding:12px 14px}
+  html.appv .ctcard .ctq{font-size:16px}
+  html.appv .ctcard .ctbtns button{min-height:38px;font-size:var(--fs3)}
+  /* あお「アイコン・フレーム・背景をいじれる画面に行くのが難しい」：プロフィールに「編集」「きせかえ」を並べ、アイコンを押しても開く */
+  html.appv #s-me #meEditBtn{display:none!important}
+  html.appv .ame2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 16px}
+  html.appv .ame2 button{height:44px;border:0;border-radius:22px;background:var(--fill);color:var(--ink);font:inherit;font-size:var(--fs2);font-weight:600;cursor:pointer}
+  html.appv .ame2 button:first-child{background:var(--tint);color:var(--on-tint)}
+  html.appv .amecard button.av{position:relative;border:0;padding:0;cursor:pointer}
+  html.appv .amecard button.av i{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);padding:1px 8px;border-radius:9px;background:var(--night);box-shadow:0 1px 3px rgba(0,0,0,.18);font-style:normal;font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap}
+  /* 編集画面の一番上の「アイコン・フレーム・背景」（多摩キャンverにも） */
+  .edlook{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 16px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface2);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  .edlook .av{width:48px;height:48px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:24px}
+  .edlook .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .edlook b{font-size:15px}
+  .edlook small{font-size:12.5px;color:var(--muted)}
+  .edlook i{font-style:normal;font-size:20px;color:var(--muted2)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -2120,7 +2143,9 @@
         <div class="appvx" id="appvMeCard"></div>
         <!-- アンケートの欄（答えると特典。中身は renderSurveyBox）。2026-10-09 あおの指示「見やすく」で、マイページの一番下からここ（プロフィールを編集のすぐ下）へ -->
         <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
-        <div class="appvx" id="appvMeSub"><button class="alink" onclick="openPreview('near')">友達・近くの人からの見え方</button><div id="appvMeRec"></div></div>
+        <!-- 2026-11-01 あお「アイコン・フレーム・背景をいじれる画面に行くのが難しい」：編集の横に「きせかえ」を並べる（インスタの「編集」「シェア」と同じ並び） -->
+        <div class="appvx" id="appvMeSub"><div class="ame2"><button onclick="openEdit()">プロフィールを編集</button><button onclick="openLook()">きせかえ</button></div>
+          <button class="alink" onclick="openPreview('near')">友達・近くの人からの見え方</button><div id="appvMeRec"></div></div>
         <div id="surveyBox"></div>
         <!-- 多摩祭の日だけ、ホームの「いまの自分・時間割」（#nowBar）をここへ移す（2026-10-15 しゅうすけさんの依頼。placeNowBar） -->
         <div id="meNowWrap" hidden><div class="listhead" style="margin-top:10px">📍 いまの自分・時間割</div><div id="meNowSlot"></div></div>
@@ -3065,7 +3090,7 @@ function renderAppvMeCard(){
   const items=[a.artist&&['よく聴く',esc(a.artist)],(a.aruaru||[]).length&&['わかる！あるある',chips(a.aruaru)],(a.goals||[]).length&&['これから・目標',chips(a.goals)],
     a.course&&['これだけは落としたくない授業',esc(a.course)],a.hometown&&['出身',esc(a.hometown)]].filter(Boolean);
   const miss=[!profile.bio&&'自己紹介',!a.artist&&'よく聴くアーティスト',!(a.aruaru||[]).length&&'あるある',!a.course&&'落としたくない授業'].filter(Boolean);
-  const h=`<div class="amecard"><div class="top"><span class="av${frCls(profile)}" style="background:${gr(profile.emoji)}">${esc(profile.emoji||'🙂')}</span><div><h2>${esc(profile.name)}</h2><div class="fac">${esc([a.faculty,a.dept,a.grade].filter(Boolean).join(' '))}</div></div></div>
+  const h=`<div class="amecard"><div class="top"><button class="av${frCls(profile)}" style="background:${gr(profile.emoji)}" onclick="openLook()" aria-label="アイコン・フレーム・背景を変える">${esc(profile.emoji||'🙂')}<i>変える</i></button><div><h2>${esc(profile.name)}</h2><div class="fac">${esc([a.faculty,a.dept,a.grade].filter(Boolean).join(' '))}</div></div></div>
     ${profile.bio?`<p class="bio">${esc(profile.bio)}</p>`:''}
     ${items.length?`<dl>${items.map(([t,v])=>`<dt>${t}</dt><dd>${v}</dd>`).join('')}</dl>`:''}
     ${miss.length?`<div class="miss">まだ入れていない：${miss.join('・')}　<button onclick="openEdit()">入れる</button></div>`:''}</div>`;
@@ -9669,6 +9694,7 @@ function openEdit(){
   const es=$('#editSheet');
   es.innerHTML=`
     <h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:16px">プロフィールを編集</h2>
+    <button class="edlook" onclick="closeEdit();openLook()"><span class="av${frCls(profile)}" style="background:${gr(profile.emoji)}">${esc(profile.emoji||'🙂')}</span><span class="t"><b>アイコン・フレーム・背景</b><small>きせかえで変える</small></span><i>›</i></button>
     <div class="field"><label>ニックネーム</label><input id="edName" maxlength="12" value="${esc(profile.name)}"></div>
     <div class="field"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
     <div class="field"><label>自己紹介<span class="opt">任意・だれにでも見えます</span></label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
