@@ -878,6 +878,24 @@
   /* スマホのブラウザで開いた時の「ホーム画面に追加してね」画面 */
   .homegate{position:absolute;inset:0;z-index:99;background:linear-gradient(180deg,#ffffff,#eef6ff);display:none;flex-direction:column;overflow-y:auto;padding:26px 22px 30px}
   .homegate.show{display:flex}
+  /* ログイン・引き継ぎ（2026-11-02）。アプリの中の最初の画面は全面、Web 版はシート */
+  .authgate{position:absolute;inset:0;z-index:39;background:linear-gradient(180deg,var(--night),var(--night2));display:none;flex-direction:column;overflow-y:auto;padding:calc(48px + env(safe-area-inset-top)) 24px 30px}
+  .authgate.show{display:flex}
+  .aulogo{font-weight:900;font-size:34px;text-align:center;color:var(--amber-deep);margin-bottom:22px;letter-spacing:.04em}
+  .auh{font-size:19px;font-weight:800;text-align:center;margin-bottom:8px;color:var(--ink)}
+  .auh2{font-size:19px;font-weight:800;margin-bottom:8px;color:var(--ink)}
+  .aud{font-size:12.5px;color:var(--muted);line-height:1.75;margin-bottom:16px}
+  .authgate .aud{text-align:center}
+  .aunote{font-size:13px;color:var(--ink);background:var(--surface2);border-radius:12px;padding:11px 13px;line-height:1.7;margin-bottom:12px;word-break:break-all}
+  .auerr{font-size:12.5px;color:var(--bad);margin:-4px 0 10px;line-height:1.6}
+  .aubtn{width:100%;padding:14px;font-size:15px;margin-top:4px}.aubtn[disabled]{opacity:.6}
+  .aubtn2{width:100%;padding:12px;font-size:13.5px;margin-top:10px}
+  .aufoot{font-size:11.5px;color:var(--muted);line-height:1.75;margin-top:18px}
+  /* Web 版の「アプリに引き継ぐ」のコード */
+  .xcode{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:27px;font-weight:700;letter-spacing:.12em;text-align:center;color:var(--ink);background:var(--surface2);border:1.5px dashed var(--line);border-radius:14px;padding:16px 8px;margin:4px 0 10px;user-select:all;-webkit-user-select:all}
+  .xsteps{font-size:12.5px;color:var(--muted);line-height:1.8;margin:12px 0 4px;padding-left:1.3em}
+  #authXfer{text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',ui-monospace,monospace}
+  .aulink{color:var(--amber-deep);text-decoration:underline;cursor:pointer}
   .homegate .hglogo{font-family:"Zen Maru Gothic";font-weight:900;font-size:34px;text-align:center;background:linear-gradient(90deg,var(--amber),var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
   .homegate .hgtag{text-align:center;font-size:13px;color:var(--muted);line-height:1.7;margin:6px 0 16px}
   .homegate .hgh{font-family:"Zen Maru Gothic";font-size:19px;font-weight:900;text-align:center;margin-bottom:6px;line-height:1.5}
@@ -2171,6 +2189,7 @@
         <button class="btn btn-ghost" style="margin:4px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
         <!-- 緊急時・問い合わせの連絡先（2026-10-02 追加）。中身は CONTACT で決まる -->
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openContact()">🆘 困ったとき・お問い合わせ</button>
+        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAcct()"><span id="meAuthLab">📲 アプリに引き継ぐ</span><small id="meAuthSub" style="display:block;font-size:11.5px;font-weight:400;margin-top:3px">コードを出して、アプリに貼るだけ</small></button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openTerms()">📄 利用規約を読む</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openInvite()">📨 友達をアプリに誘う（🎁 特典あり）</button>
@@ -2209,6 +2228,9 @@
   <div class="fesclosed" id="fesClosed"></div>
   <!-- スマホのブラウザで開いた時の画面（2026-09-28 あおの決定：スマホはホーム画面に追加したアプリでしか使えない。PCはそのまま使える） -->
   <div class="homegate" id="homeGate"></div>
+  <!-- ログイン・引き継ぎ（2026-11-02）。アプリの中は最初に全面で出す（authGate）、Web 版は設定からシートで開く（authOverlay） -->
+  <div class="authgate" id="authGate"></div>
+  <div class="overlay" id="authOverlay" onclick="if(event.target===this)closeAuth()"><div class="sheet" id="authSheet" style="padding:24px 22px 30px"></div></div>
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
   <canvas id="confetti" style="position:absolute;inset:0;z-index:55;pointer-events:none"></canvas>
@@ -3105,6 +3127,7 @@ function appvRelabel(el,txt,on){
 }
 // 文字列はマイページから移す行、配列は設定で作る行（[キー, 見出し, 説明, 押した時]）
 const APPV_SET=[
+  ['アカウント',[['acct',isNativeApp()?'ログイン':'アプリに引き継ぐ',' ','openAcct()']]],
   ['見せ方',['vis','match','block']],
   ['通知',['push','prefs','center']],
   ['きせかえ・アンケート',[['look','きせかえ','アイコン・背景・フレーム',"$('#lookDot').hidden=true;openLook()"],['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],'wtp','ck',['inv','友達をちかくに誘う','','openInvite()']]],
@@ -3127,7 +3150,7 @@ function appvMeLayout(on){
       +'<p class="asetfoot">話を聞いてくれる場所：多摩学生相談室（総合棟2F・月〜金 9:30〜16:30・無料・予約制）</p><div data-k="stop"></div><div data-k="note"></div><div data-k="no"></div>';
   }
   set.querySelectorAll('[data-k]').forEach(ph=>{ const m=M[ph.dataset.k]; if(m&&m.el.parentNode!==ph)ph.appendChild(m.el); });
-  renderAppvSet();
+  renderAppvSet(); renderAuthRow();
 }
 // 設定の中で、状態によって変わる行（アンケートは答えるまで・きせかえは新しく使えるものがある時に印）
 function renderAppvSet(){
@@ -3263,13 +3286,22 @@ async function initBackend(){
     let user = null;
     try{ const { data:{ session } } = await sb.auth.getSession(); if(session && session.user) user = session.user; }catch(e){}
     if(!user){ try{ const g = await sb.auth.getUser(); if(g.data && g.data.user) user = g.data.user; }catch(e){} }
+    authUser = user;
+    // 📱 アプリの中は、メールでログインするまで先に進まない（2026-11-02 あおの決定。匿名のままだと App Store 1.2 の「匿名チャット」に見られる）。
+    // 前からアプリを匿名で使っていた人は、その匿名アカウントにメールを結びつけるので、データはそのまま
+    if(isNativeApp() && (!user || !user.email)){ myId = user ? user.id : null; openAuth({gate:true}); return false; }
+    // 🌐 Web 版：アプリに引き継いでログアウトした後は、黙って新しいアカウントを作らずに、そう伝える
+    if(!user && !isNativeApp() && xferLeft()){ openXferLeft(); return false; }
     if(!user){ const r = await sb.auth.signInAnonymously();
       // 回数制限（同じ回線から短い時間に多くの人が登録した時など）は、原因と違う文を出さない（2026-10-15 のレビュー：学園祭のブースのWi-Fi）
       if(r.error){ const m=String(r.error.message||''), rl=r.error.status===429||/rate limit|too many/i.test(m);
         backendError(rl?'いま登録が混み合っています。1〜2分待ってから開き直すか、Wi-Fiを切ってモバイル回線で開いてください。':/disabled|not enabled|signups not allowed/i.test(m)?'匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。':'うまく始められませんでした（'+m.slice(0,80)+'）。少し待ってから開き直してください。'); return false; }
-      user = r.data.user;
+      user = r.data.user; authUser = user;
     }
     myId = user.id;
+    renderAuthRow();
+    // 🌐 Web 版でコードを出した後、画面を閉じている間にアプリで引き継がれていたら、ここで Web 版からログアウトする
+    if(!isNativeApp() && xferFlagAt() && await xferUsed()){ await xferWebLeave(false); openXferLeft(); return false; }
     if(await banCheck())return false;   // 運営が利用を止めた人は、ここで止める（2026-11-01）
     return true;
   }catch(e){ backendError('バックエンドに接続できません: '+e.message); return false; }
@@ -3291,6 +3323,249 @@ async function banCheck(){
   return true;
 }
 function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; n.querySelector('h2').textContent='接続エラー'; n.querySelector('p').innerHTML='<span style="color:#c0392b;font-weight:700">'+esc(msg)+'</span><br><br>少し時間をおいてから、もう一度お試しください。<br>解決しない場合は運営（法政大学 糸久ゼミ）までお知らせください。'; }
+/* ---------- ログイン（アプリ）・アプリへの引き継ぎ（Web 版）。2026-11-02 あおの決定 ----------
+   ・📱 アプリ：最初にメールのコードでログインが必須（initBackend）。どのメールアドレスでもよく、6けたのコードをメールで送る（パスワードは作らない）。
+     前からアプリを匿名で使っていた人は、その匿名アカウントにメールを結びつける（updateUser）ので、データはそのまま
+   ・🌐 Web 版：メールとは切り離す（今まで通り匿名ですぐ始められる。メールの登録はしない）
+   ・引き継ぎ：Web 版の「設定 → アプリに引き継ぐ」で10文字のコードを出す（24時間・1回だけ。supabase/tama_transfer.sql）→
+     アプリで、ログインした直後（まだ何も使っていない時）に、そのコードを貼る → Edge Function "tama-transfer" が、
+     いまできたアカウントを消して、そのメールを Web 版のアカウントに付ける → アプリは Web 版のアカウントに入り直す（ID が同じなので、データはそのまま）。
+     そのあと、アプリが Web 版のログインを切る（同じアカウントが学外の Web から位置を送ると、共有が止まってしまうため）
+   ・Supabase 側の準備（1回だけ）：メールの文面に {{ .Token }}・送る仕組み（SMTP）・tama_transfer.sql の実行・tama-transfer のデプロイ。手順は PR #107 */
+let authUser=null;
+const authSt={gate:false,mode:'link',email:'',step:1,busy:false,err:'',note:''};
+const authRegistered=()=>!!(authUser&&authUser.email);
+const authMask=e=>{ const [a,d]=String(e||'').split('@'); return d?a.slice(0,2)+'•••@'+d:''; };
+const authEmailOk=e=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+function authErrText(error){
+  const m=String((error&&error.message)||''), c=String((error&&error.code)||'');
+  if((error&&error.status===429)||/rate limit|too many|over_email_send_rate_limit/i.test(m+c))return '送る回数が多すぎます。1分ほど待ってから、もう一度お試しください';
+  if(/otp_expired|expired|invalid.*(otp|token)|token.*invalid/i.test(m+c))return 'コードがちがうか、時間が切れています。もう一度確かめるか、コードを送り直してください';
+  if(/signups not allowed|user not found|otp_disabled/i.test(m+c))return 'このメールアドレスで登録したアカウントは見つかりませんでした';
+  if(c==='email_address_invalid'||/invalid.*email|email.*invalid/i.test(m))return 'メールアドレスの形が正しくないようです';
+  return 'うまくいきませんでした（'+m.slice(0,60)+'）。電波の良い所でもう一度お試しください';
+}
+// 設定の「アカウント」の行：アプリはログインの状態、Web 版は引き継ぎのコード
+function openAcct(){ if(isNativeApp())openAuth(); else openXfer(); }
+function openAuth(o={}){
+  if(!isNativeApp()&&!o.gate){ openXfer(); return; }
+  authSt.gate=!!o.gate; authSt.step=1; authSt.err=''; authSt.note=''; authSt.busy=false;
+  // 匿名のアカウントがある時はメールを結びつける（データはそのまま）。無い時はログイン（新しい人ならアカウントを作る）
+  authSt.mode=authUser&&!authUser.email?'link':'signin';
+  if(!authSt.gate&&authRegistered()){ renderAuthDone(); return; }
+  authSt.gate=true; renderAuth();
+}
+function showAuth(h){
+  if(authSt.gate){ const g=$('#authGate'); g.innerHTML=h; g.classList.add('show'); }
+  else{ $('#authSheet').innerHTML=h; $('#authOverlay').classList.add('show'); }
+  const f=$({1:'#authEmail',2:'#authCode',3:'#authXfer'}[authSt.step]||'#none'); if(f&&!authSt.busy)setTimeout(()=>{ try{ f.focus(); }catch(e){} },80);
+}
+function closeAuth(){ xferStopPoll(); if(!authSt.gate)$('#authOverlay').classList.remove('show'); }
+const AU_FOOT=()=>`<div class="aufoot" style="text-align:center"><a class="aulink" onclick="openTerms()">利用規約</a>${CONTACT.email?`　困った時：${esc(CONTACT.email)}`:''}</div>`;
+function renderAuth(){
+  const s=authSt;
+  if(s.step===3){ renderAuthXfer(); return; }
+  const head=`<div class="aulogo">ちかく</div><div class="auh">メールアドレスでログイン</div>
+      <div class="aud">メールに届く6けたのコードを入れるだけです。パスワードは要りません。<br>アドレスは、ほかの人には表示されません。</div>`;
+  let body;
+  if(s.step===1){
+    body=`<div class="field"><label>メールアドレス</label><input id="authEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="例：name@example.com" value="${esc(s.email)}" onkeydown="if(event.key==='Enter')authSend()"></div>
+      ${s.err?`<div class="auerr">${esc(s.err)}</div>`:''}
+      <button class="btn btn-primary aubtn" onclick="authSend()" ${s.busy?'disabled':''}>${s.busy?'送っています…':'コードを送る'}</button>
+      <div class="aufoot"><b>Web 版（ブラウザ・ホーム画面）で使っていた人へ</b><br>ログインのあとで、Web 版の「設定 → アプリに引き継ぐ」に出るコードを貼ると、今までのプロフィール・友達・トーク・すれ違いをそのまま使えます。</div>`;
+  }else{
+    body=`<div class="aunote"><b>${esc(s.email)}</b> にコードを送りました。<br>届かない時は、迷惑メールのフォルダも見てください。</div>
+      ${s.note?`<div class="aunote">${esc(s.note)}</div>`:''}
+      <div class="field"><label>メールに届いたコード</label><input id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="if(event.key==='Enter')authVerify()"></div>
+      ${s.err?`<div class="auerr">${esc(s.err)}</div>`:''}
+      <button class="btn btn-primary aubtn" onclick="authVerify()" ${s.busy?'disabled':''}>${s.busy?'確かめています…':'ログイン'}</button>
+      <button class="btn btn-ghost aubtn2" onclick="authBack()">メールアドレスを入れ直す・送り直す</button>`;
+  }
+  showAuth(head+body+AU_FOOT());
+}
+function authBack(){ authSt.step=1; authSt.err=''; authSt.note=''; authSt.mode=authUser&&!authUser.email?'link':'signin'; renderAuth(); }
+async function authSend(){
+  const s=authSt; if(s.busy||!sb)return;
+  const e=(($('#authEmail')||{}).value||'').trim().toLowerCase(); s.email=e;
+  if(!authEmailOk(e)){ s.err='メールアドレスを確かめてください'; renderAuth(); return; }
+  s.busy=true; s.err=''; s.note=''; renderAuth();
+  let error=null;
+  try{
+    if(s.mode==='link'){
+      ({error}=await sb.auth.updateUser({email:e}));
+      // そのメールがもう別のアカウントに付いている → そのアカウントにログインする
+      if(error&&/already|exists|registered/i.test(String(error.message||'')+String(error.code||''))){
+        s.mode='signin';
+        s.note='このメールアドレスは、もう登録されています。登録したアカウントにログインします（いまのこの端末のデータは引き継がれません）';
+        ({error}=await sb.auth.signInWithOtp({email:e,options:{shouldCreateUser:false}}));
+      }
+    }else{
+      ({error}=await sb.auth.signInWithOtp({email:e,options:{shouldCreateUser:true}}));
+    }
+  }catch(x){ error={message:String(x&&x.message||x)}; }
+  s.busy=false;
+  if(error){ s.err=authErrText(error); renderAuth(); return; }
+  s.step=2; renderAuth();
+}
+async function authVerify(){
+  const s=authSt; if(s.busy||!sb)return;
+  const t=(($('#authCode')||{}).value||'').trim();
+  if(t.length<6){ s.err='メールに届いたコードを入れてください'; renderAuth(); return; }
+  s.busy=true; s.err=''; renderAuth();
+  let data=null, error=null;
+  try{ ({data,error}=await sb.auth.verifyOtp({email:s.email,token:t,type:s.mode==='link'?'email_change':'email'})); }
+  catch(x){ error={message:String(x&&x.message||x)}; }
+  s.busy=false;
+  if(error){ s.err=authErrText(error); renderAuth(); const c=$('#authCode'); if(c)c.value=t; return; }
+  authUser=(data&&data.user)||authUser;
+  // まだ何も使っていないアカウント（新しく作った・匿名で開いただけ）なら、Web 版から引き継ぐかを聞く
+  let fresh=false;
+  try{ const uid=authUser&&authUser.id; if(uid){ const r=await sb.from(T('profiles')).select('id').eq('id',uid).maybeSingle(); fresh=!r.error&&!r.data; } }catch(e){}
+  if(fresh){ s.step=3; s.err=''; renderAuth(); return; }
+  authFinish();
+}
+// ログインが終わった：匿名にメールを付けただけならそのまま、別のアカウントに入った時は前の人の端末の設定を消してから開き直す
+function authFinish(){ if(authSt.mode!=='link')authClearLocal(); location.reload(); }
+function renderAuthXfer(){
+  const s=authSt;
+  showAuth(`<div class="aulogo">ちかく</div><div class="auh">Web 版で使っていましたか？</div>
+    <div class="aud">Web 版（ブラウザ・ホーム画面）の<b>「設定 → アプリに引き継ぐ」</b>に出るコードを貼ると、今までのプロフィール・友達・トーク・すれ違いを、そのまま使えます。</div>
+    <div class="field"><label>引き継ぎのコード（10文字）</label><input id="authXfer" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" placeholder="ABCDE-FGHJK" onkeydown="if(event.key==='Enter')authXfer()"></div>
+    ${s.err?`<div class="auerr">${esc(s.err)}</div>`:''}
+    <button class="btn btn-primary aubtn" onclick="authXfer()" ${s.busy?'disabled':''}>${s.busy?'引き継いでいます…':'引き継ぐ'}</button>
+    <button class="btn btn-ghost aubtn2" onclick="authFinish()" ${s.busy?'disabled':''}>はじめて使う（引き継がない）</button>
+    <div class="aufoot">あとから引き継ぐことはできません。Web 版を使っていた人は、ここでコードを貼ってください。</div>`+AU_FOOT());
+}
+const xferNorm=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const XFER_ERR={
+  bad_code:'コードがちがうか、時間が切れています（24時間・1回だけ使えます）。Web 版で新しいコードを出して、もう一度貼ってください',
+  too_many:'ちがうコードが何度も入りました。1時間ほど待ってから、もう一度お試しください',
+  same_account:'このコードは、いまログインしているアカウントのものです',
+  new_has_data:'このアカウントはもう使い始めているので、引き継げません',
+  failed:'うまくいきませんでした。電波の良い所で、もう一度お試しください'};
+async function authXfer(){
+  const s=authSt; if(s.busy||!sb)return;
+  const raw=(($('#authXfer')||{}).value||''), v=xferNorm(raw);
+  if(v.length!==10){ s.err='コードは10文字です。Web 版に出ているコードを、そのまま貼ってください'; renderAuth(); const f=$('#authXfer'); if(f)f.value=raw; return; }
+  s.busy=true; s.err=''; renderAuth();
+  let data=null, error=null;
+  try{ ({data,error}=await sb.functions.invoke('tama-transfer',{body:{code:v}})); }catch(x){ error=x; }
+  const back=msg=>{ s.busy=false; s.err=msg; renderAuth(); const f=$('#authXfer'); if(f)f.value=raw; };
+  if(error||!data)return back('いまは引き継ぎを使えません。少し時間をおいてから、もう一度お試しください');
+  if(!data.ok){
+    const er=String(data.error||'failed');
+    // ログインからやり直す（いまのアカウントは消えた・メールが前のアカウントに付いた、など）
+    if(er==='relogin'||er==='need_email'||er==='not_signed_in'||er==='old_has_email'){
+      try{ await sb.auth.signOut({scope:'local'}); }catch(e){}
+      authUser=null; s.busy=false; s.mode='signin'; s.step=1;
+      s.err=er==='old_has_email'?'そのコードのアカウントには、もうメールアドレスが付いています。そのメールアドレスでログインしてください'
+        :'お手数ですが、同じメールアドレスで、もう一度ログインしてください'+(er==='relogin'?'（ログインのあとで、引き継ぎのコードをもう一度貼ってください）':'');
+      renderAuth(); return;
+    }
+    return back(XFER_ERR[er]||XFER_ERR.failed);
+  }
+  // Web 版のアカウントに入る（メールは送らない、使い捨ての印）
+  let r=null;
+  try{ r=await sb.auth.verifyOtp({token_hash:data.token_hash,type:'magiclink'}); }catch(x){ r={error:x}; }
+  if(r&&r.error){ try{ await sb.auth.signOut({scope:'local'}); }catch(e){} authUser=null; s.busy=false; s.mode='signin'; s.step=1; s.err='引き継ぎました。お手数ですが、同じメールアドレスで、もう一度ログインしてください'; renderAuth(); return; }
+  // Web 版のログインを切る（この端末以外）
+  try{ await sb.auth.signOut({scope:'others'}); }catch(e){}
+  authClearLocal(); toast('✅ Web 版から引き継ぎました'); setTimeout(()=>location.reload(),700);
+}
+// アカウントを切りかえる時に、端末に覚えている前の人の設定を消す（端末の印・アプリverの選択・規約の版・引き継いだ印は残す）
+function authClearLocal(){
+  const keep=new Set(['tama_dev','tama_appv','tama_appv_off','tama_termsVer','tama_xferAt']);
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('tama_')&&!keep.has(k)).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+}
+function renderAuthDone(){
+  authSt.gate=false; authSt.step=0;
+  showAuth(`<h2 class="auh2">ログイン</h2>
+    <div class="aunote">✅ <b>${esc(authMask(authUser&&authUser.email))}</b> でログインしています。<br>機種変更の時は、新しい端末のアプリで、このメールアドレスでログインすると、今のアカウントをそのまま使えます。</div>
+    <button class="btn btn-ghost aubtn2" onclick="authLogout()">ログアウト</button>
+    <button class="btn btn-ghost aubtn2" onclick="closeAuth()">閉じる</button>`);
+}
+async function authLogout(){
+  if(!confirm('ログアウトしますか？\n\n近くの人の一覧から消え、この端末には通知が届かなくなります。もう一度使う時は、同じメールアドレスでログインすれば、今のアカウントに戻れます'))return;
+  try{ await stopSharingEverywhere(); }catch(e){}
+  try{ await disablePush(); }catch(e){}
+  try{ await sb.auth.signOut(); }catch(e){}
+  authClearLocal(); location.reload();
+}
+/* 🌐 Web 版：アプリに引き継ぐコード */
+let xferPollT=null, xferCode=null;
+const xferFlagAt=()=>{ try{ return +localStorage.getItem('tama_xferAt')||0; }catch(e){ return 0; } };
+const xferLeft=()=>{ const t=xferFlagAt(); return !!t&&Date.now()-t<14*864e5; };
+const xferFmt=c=>c.slice(0,5)+'-'+c.slice(5);
+async function openXfer(fresh){
+  authSt.gate=false; authSt.step=0;
+  if(!sb||!myId){ toast('通信できる所で、もう一度開いてください'); return; }
+  if(!xferCode||fresh||new Date(xferCode.expires_at).getTime()-Date.now()<60e3){
+    showAuth(`<h2 class="auh2">アプリに引き継ぐ</h2><div class="aud">コードを出しています…</div>`);
+    let data=null, error=null;
+    try{ ({data,error}=await sb.rpc('tama_transfer_issue')); }catch(x){ error=x; }
+    if(error||!data||!data.code){
+      const m=String((error&&error.message)||'');
+      showAuth(`<h2 class="auh2">アプリに引き継ぐ</h2><div class="aunote">${/too_many/.test(m)?'コードを出す回数が多すぎます。1時間ほど待ってから、もう一度お試しください。'
+        :/Could not find|PGRST202|does not exist/i.test(m)?'いまは準備中です。もう少し待ってください。':'コードを出せませんでした。電波の良い所で、もう一度お試しください。'}</div>
+        <button class="btn btn-ghost aubtn2" onclick="closeAuth()">閉じる</button>`);
+      return;
+    }
+    xferCode=data;
+    try{ localStorage.setItem('tama_xferAt',String(Date.now())); }catch(e){}
+  }
+  renderXfer(); xferStartPoll();
+}
+function renderXfer(){
+  // 24時間なので、日付も出す（例：11月3日 14:55）
+  const c=xferCode, until=new Date(c.expires_at), hm=(until.getMonth()+1)+'月'+until.getDate()+'日 '+until.getHours()+':'+String(until.getMinutes()).padStart(2,'0');
+  showAuth(`<h2 class="auh2">アプリに引き継ぐ</h2>
+    <div class="aud">アプリでこのコードを貼ると、今のプロフィール・友達・トーク・すれ違いを、アプリでそのまま使えます。</div>
+    <div class="xcode" id="xferCode">${esc(xferFmt(c.code))}</div>
+    <button class="btn btn-primary aubtn" onclick="xferCopy()">コードをコピー</button>
+    <ol class="xsteps"><li>ちかくのアプリを開いて、メールアドレスでログイン</li><li>「Web 版で使っていましたか？」に、このコードを貼る</li></ol>
+    <div class="aunote">コードは <b>${hm}</b> まで・1回だけ使えます。<br>引き継ぐと、この Web 版からはログアウトします。</div>
+    <div class="aud" style="margin-bottom:6px">このコードは、ほかの人に教えないでください。教えると、その人があなたのアカウントを使えてしまいます。</div>
+    <button class="btn btn-ghost aubtn2" onclick="openXfer(true)">新しいコードを出す</button>
+    <button class="btn btn-ghost aubtn2" onclick="closeAuth()">閉じる</button>`);
+}
+async function xferCopy(){
+  const t=xferCode&&xferFmt(xferCode.code); if(!t)return;
+  try{ await navigator.clipboard.writeText(t); toast('📋 コピーしました。アプリに貼ってください'); }
+  catch(e){ try{ const r=document.createRange(); r.selectNodeContents($('#xferCode')); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); }catch(_){} toast('コードを長押しして、コピーしてください'); }
+}
+async function xferUsed(){ try{ const {data,error}=await sb.rpc('tama_transfer_status'); return !error&&data===true; }catch(e){ return false; } }
+function xferStartPoll(){ xferStopPoll(); xferPollT=setInterval(async()=>{ if(!$('#authOverlay').classList.contains('show')){ xferStopPoll(); return; } if(await xferUsed()){ xferStopPoll(); xferWebLeave(); } },4000); }
+function xferStopPoll(){ if(xferPollT){ clearInterval(xferPollT); xferPollT=null; } }
+// アプリに引き継がれた：この Web 版からログアウトする。共有や通知の設定はアプリの物なので、サーバーの行は消さない（この端末の通知の送り先だけ消す）
+async function xferWebLeave(reload=true){
+  try{
+    const reg=swReg||(navigator.serviceWorker&&await navigator.serviceWorker.getRegistration());
+    const sub=reg?await reg.pushManager.getSubscription():null;
+    if(sub){ try{ await sb.from(T('push_devices')).delete().eq('endpoint',sub.endpoint); }catch(e){} try{ await sub.unsubscribe(); }catch(e){} }
+  }catch(e){}
+  try{ await sb.auth.signOut({scope:'local'}); }catch(e){}
+  authClearLocal();
+  try{ localStorage.setItem('tama_xferAt',String(Date.now())); }catch(e){}
+  if(reload)location.reload();
+}
+// アプリに引き継いでログアウトした Web 版を開いた時
+function openXferLeft(){
+  authSt.gate=true; authSt.step=0;
+  showAuth(`<div class="aulogo">ちかく</div><div class="auh">アプリに引き継ぎました</div>
+    <div class="aud">この Web 版のアカウントは、アプリに引き継いだので、<br>ここではログアウトしています。<br>続きは、ちかくのアプリで使えます。</div>
+    <button class="btn btn-ghost aubtn2" onclick="xferStartNew()">Web 版で新しく始める</button>`+AU_FOOT());
+}
+function xferStartNew(){
+  if(!confirm('Web 版で、新しいアカウントで始めますか？\n\nアプリに引き継いだアカウントとは別になります（プロフィール・友達は引き継がれません）'))return;
+  try{ localStorage.removeItem('tama_xferAt'); }catch(e){}
+  location.reload();
+}
+const authRowText=()=>isNativeApp()?(authRegistered()?'ログイン中：'+authMask(authUser.email):''):'コードを出して、アプリに貼るだけ';
+function renderAuthRow(){
+  const r=document.querySelector('#appvSet [data-r="acct"] small'); if(r)r.textContent=authRowText();
+  const w=$('#meAuthSub'); if(w)w.textContent=authRowText();
+  const l=$('#meAuthLab'); if(l)l.textContent=isNativeApp()?'🔑 ログイン':'📲 アプリに引き継ぐ';
+}
 async function tryResumeSession(){
   if(!myId||!sb) return false;
   try{
@@ -3684,7 +3959,7 @@ function obMove(d){
   onStart();
 }
 async function onStart(){
-  if(!myId){ if(!(await initBackend())){ if(!configured||bannedNow) return; myId='local-'+uuid(); } }
+  if(!myId){ if(!(await initBackend())){ if(!configured||bannedNow||authSt.gate) return; myId='local-'+uuid(); } }
   const name=$('#obName').value.trim(), age=parseInt($('#obAge').value)||null;
   const bioVal=$('#obBio').value.trim();
   if(ngCheck(bioVal)){ toast('⚠️ 自己紹介に不適切な言葉が含まれています。修正してください。'); return; }
@@ -5218,7 +5493,8 @@ const TERMS_HTML=`
 <p>他の利用者に見えるのは、約30mの区切りに丸めた位置（「ぼかして出す」を選んだ場合は約100m）と、そこから計算したおおよその距離だけです。正確な位置は、すれ違いの判定のためにサーバーに最新の1件だけを置き、他の利用者には送りません。この正確な位置は3時間以内に自動で消します。</p>
 <p>共有は設定からいつでも停止できます。停止している間は、ほかの人の位置も約100mの区切りでしか見えず、すれ違いも記録されません。</p>
 <h4>第4条（登録情報）</h4>
-<p>氏名・電話番号・メールアドレス・住所などの個人情報は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
+<p>氏名・電話番号・住所は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
+<p>アプリ版では、ログインのためにメールアドレスを登録していただきます（Web 版では登録しません）。そのアドレスは、ログインのコードを送ること、ご本人の確認、アカウントや利用停止に関するご連絡のためだけに使います。ほかの利用者には表示しません。</p>
 <p>また、研究のため、利用状況（アプリを開いた日と回数、その日キャンパスの中にいたか、近くに表示された人数、通知とホーム画面のアプリを使っているか、今日のお題に答えたか）を記録します。この記録に位置は含みません。</p>
 <p>あわせて、すれ違った相手と日時・場所（建物の名前）を、記録した本人だけが見られる形で記録します。また、任意で答える「ひとこと」（人とのつながりの感じ方についての短い質問）の回答を記録します。「ひとこと」の回答はほかの利用者には見えず、答えなくてもすべての機能を使えます。</p>
 <p>一部の機能を初めて使う時に、有料になった場合に使いたいかどうかをおたずねし、その選択を記録します。本サービスが利用者に請求することはありません。</p>
