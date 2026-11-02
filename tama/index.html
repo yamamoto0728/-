@@ -3327,7 +3327,7 @@ function backendError(msg){ const n=$('#configNotice'); n.style.display='flex'; 
    ・📱 アプリ：最初にメールのコードでログインが必須（initBackend）。どのメールアドレスでもよく、6けたのコードをメールで送る（パスワードは作らない）。
      前からアプリを匿名で使っていた人は、その匿名アカウントにメールを結びつける（updateUser）ので、データはそのまま
    ・🌐 Web 版：メールとは切り離す（今まで通り匿名ですぐ始められる。メールの登録はしない）
-   ・引き継ぎ：Web 版の「設定 → アプリに引き継ぐ」で10文字のコードを出す（30分・1回だけ。supabase/tama_transfer.sql）→
+   ・引き継ぎ：Web 版の「設定 → アプリに引き継ぐ」で10文字のコードを出す（24時間・1回だけ。supabase/tama_transfer.sql）→
      アプリで、ログインした直後（まだ何も使っていない時）に、そのコードを貼る → Edge Function "tama-transfer" が、
      いまできたアカウントを消して、そのメールを Web 版のアカウントに付ける → アプリは Web 版のアカウントに入り直す（ID が同じなので、データはそのまま）。
      そのあと、アプリが Web 版のログインを切る（同じアカウントが学外の Web から位置を送ると、共有が止まってしまうため）
@@ -3438,7 +3438,7 @@ function renderAuthXfer(){
 }
 const xferNorm=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 const XFER_ERR={
-  bad_code:'コードがちがうか、時間が切れています（30分・1回だけ使えます）。Web 版で新しいコードを出して、もう一度貼ってください',
+  bad_code:'コードがちがうか、時間が切れています（24時間・1回だけ使えます）。Web 版で新しいコードを出して、もう一度貼ってください',
   too_many:'ちがうコードが何度も入りました。1時間ほど待ってから、もう一度お試しください',
   same_account:'このコードは、いまログインしているアカウントのものです',
   new_has_data:'このアカウントはもう使い始めているので、引き継げません',
@@ -3516,7 +3516,8 @@ async function openXfer(fresh){
   renderXfer(); xferStartPoll();
 }
 function renderXfer(){
-  const c=xferCode, until=new Date(c.expires_at), hm=until.getHours()+':'+String(until.getMinutes()).padStart(2,'0');
+  // 24時間なので、日付も出す（例：11月3日 14:55）
+  const c=xferCode, until=new Date(c.expires_at), hm=(until.getMonth()+1)+'月'+until.getDate()+'日 '+until.getHours()+':'+String(until.getMinutes()).padStart(2,'0');
   showAuth(`<h2 class="auh2">アプリに引き継ぐ</h2>
     <div class="aud">アプリでこのコードを貼ると、今のプロフィール・友達・トーク・すれ違いを、アプリでそのまま使えます。</div>
     <div class="xcode" id="xferCode">${esc(xferFmt(c.code))}</div>

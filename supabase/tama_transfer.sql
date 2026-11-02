@@ -2,7 +2,7 @@
 -- Supabase の SQL Editor でこのファイルの内容をそのまま実行してください（何回実行しても大丈夫）。
 --
 -- 流れ：
---   1. Web 版の「設定 → アプリに引き継ぐ」で tama_transfer_issue() を呼ぶ → 10文字のコードが出る（30分だけ・1回だけ使える）
+--   1. Web 版の「設定 → アプリに引き継ぐ」で tama_transfer_issue() を呼ぶ → 10文字のコードが出る（24時間・1回だけ使える。2026-11-02 あおの決定で30分から延ばした）
 --   2. アプリで、メールのコードでログインする（新しいアカウントができる）
 --   3. まだ何も使っていなければ「Web 版から引き継ぐ」にコードを貼る → Edge Function "tama-transfer" が
 --      tama_transfer_check() でコードを確かめ、いまできたアカウントを消して、Web 版のアカウントにそのメールを付ける
@@ -48,7 +48,7 @@ declare
   b   bytea;
   c   text := '';
   i   int;
-  exp timestamptz := now() + interval '30 minutes';
+  exp timestamptz := now() + interval '24 hours';
 begin
   if me is null then raise exception 'not_signed_in'; end if;
   delete from tama_transfer_codes where created_at < now() - interval '2 days';
