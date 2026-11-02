@@ -3310,6 +3310,7 @@ async function tryResumeSession(){
     // 属性を追加する前に登録した人は必須項目が空で、誰とも共通点が出ないので入力してもらう
     if(attrMissing(attrStateFrom(profile.fa))) setTimeout(()=>{ if(appvOn())return; toast('多摩キャン版のプロフィール項目が増えました。入力をお願いします'); openEdit(); },900);
     maybeShowGuide(data.guide_seen===true);
+    setTimeout(termsChangedNotice,2500);
     visitOpen();
     return true;
   }catch(e){ return false; }
@@ -3888,16 +3889,38 @@ async function fetchUsers(){
   // 次はここから。自分の時計より先の時刻（時計が進んでいる端末の分）には合わせない
   pollCursor=Math.min(now,Math.max(pollCursor,...data.map(u=>Date.parse(u.updated_at)||0)));
 }
+/* ---------- 近くの人の位置は tama_nearby() から（2026-11-02、supabase/tama_location_guard.sql） ----------
+   前は tama_profiles に全員の正確な緯度・経度が入っていて、匿名ログインさえすればだれでも全員分を読めた（NauNau と同じ形の問題）。
+   SQL の実行後は、表には約100mに丸めた位置だけが残り、正確な位置はサーバーの中だけに置かれる。
+   tama_nearby() は、呼んだ本人がいまキャンパスの中で位置を共有している時だけ、まわりの人の
+   「約30mの区切りの位置（ぼかす人は約100m）」と「すれ違いの距離（50m）以内か」を返す。正確な位置は返さない。
+   SQL の実行前（関数が無い）は、今までどおりプロフィールの位置を使う */
+let nearRpc='unknown', nearPos=new Map();
+async function fetchNearPos(){
+  if(nearRpc==='missing')return;
+  const {data,error}=await sb.rpc('tama_nearby');
+  if(error){ if(error.code==='PGRST202'||/Could not find the function|does not exist/i.test(error.message||''))nearRpc='missing'; console.warn('[nearby] 近くの人の位置を取れません',error.message); return; }
+  nearRpc='ok'; nearPos=new Map((data||[]).map(r=>[r.uid,r]));
+}
+const posFuzzed=()=>nearRpc==='ok';   // 位置を区切って出す作りが動いているか（画面の説明を変える）
+// サーバーが「キャンパスの中」と確かめた位置（srv）は、区切った点が敷地の端から少し出ても外にしない
+const uOnCampus=u=>u.lat!=null&&(u.srv||inCampus(u.lat,u.lng));
+// 同じ区切りにいる人のアイコンが重ならないよう、地図でだけ人ごとに決まった分（10mほど）ずらす
+function gridJit(id){ let h=0; for(const c of String(id))h=(h*31+c.charCodeAt(0))|0; return [((h&255)/255-.5)*0.00018,(((h>>8)&255)/255-.5)*0.00022]; }
 async function pollUsers(){
   let out=[];
   if(sb&&!fesOutside){
-    await fetchUsers();
+    await Promise.all([fetchUsers(),fetchNearPos()]);
     // 手元に持っている人も、閉じてから SHOW_CLOSED_MS たったら出さない（全員分の取り直しは10分ごとなので、それまで残らないように）
-    const since=shownSince();
-    out=[...userCache.values()].filter(u=>(Date.parse(u.updated_at)||0)>since).map(u=>({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fes_attrs||{},lat:u.lat,lng:u.lng,updated_at:u.updated_at}));
-  }else{ userCache.clear(); lastFullPoll=0; }
+    const since=shownSince(), rpc=nearRpc==='ok';
+    out=[...userCache.values()].filter(u=>(Date.parse(u.updated_at)||0)>since).map(u=>{ const np=rpc?nearPos.get(u.id):null;
+      return {id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags||[],work:u.work,looking:u.looking||[],likes:u.likes||[],interests:u.interests||[],fa:u.fes_attrs||{},
+        lat:np?np.glat:u.lat,lng:np?np.glng:u.lng,srv:!!np,
+        // すれ違いの判定：関数が動いている時はサーバーの答え（返ってこない人＝キャンパスで共有していない人は、すれ違わない）
+        near:rpc?!!(np&&np.near):undefined,updated_at:u.updated_at}; });
+  }else{ userCache.clear(); lastFullPoll=0; nearPos=new Map(); }
   // キャンパス限定の時は、敷地の外から位置を送ってきている人を表示もすれ違いもしない
-  others=out.filter(u=>!blocked.has(u.id)&&(!FES.campusOnly||(u.lat!=null&&inCampus(u.lat,u.lng)))).concat(testUsers);renderNearby();
+  others=out.filter(u=>!blocked.has(u.id)&&(!FES.campusOnly||uOnCampus(u))).concat(testUsers);renderNearby();
   recordEncounters();
   // マッチの確認は3回に1回（18秒ごと）
   if(sb&&(pollN++)%3===0) await refreshMatches();
@@ -4763,9 +4786,10 @@ function drawMap(list){
   if(fesMap){
     fesLayer.clearLayers();
     // 地図はキャンパスだけを映すので、キャンパスの外にいる人（自分も）のアイコンは出さない
-    list.forEach(({u,d})=>{ if(u.lat==null||!inCampus(u.lat,u.lng))return;
+    list.forEach(({u,d})=>{ if(!uOnCampus(u))return;
       if(appvOn()&&friendOnMap(u.id))return;   // 📱 地図に出す友達は drawFriendMarkers で1回だけ描く（2回描かれていた）
-      L.marker([u.lat,u.lng],{icon:mapIcon(u.emoji,false,isClosed(u),isFriend(u.id))}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
+      const j=u.srv?gridJit(u.id):[0,0];
+      L.marker([u.lat+j[0],u.lng+j[1]],{icon:mapIcon(u.emoji,false,isClosed(u),isFriend(u.id))}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
     if(myPos&&inCampus(myPos.lat,myPos.lng)){
       const ll=[myPos.lat,myPos.lng], icon=mapIcon(profile?profile.emoji:'📍',true);
       if(!fesMe){
@@ -4796,7 +4820,7 @@ async function checkClosedNearby(){
     // 「閉じた人」＝位置の更新が90秒以上止まっているが、止まってからまだ FES.nearbyPushStaleMin 分以内の人。
     // 通信量を抑えるため、別に問い合わせず手元の others（今日キャンパスにいた人）から選ぶ
     const data=others.filter(u=>!isTest(u.id)&&u.updated_at&&isClosed(u)&&now-Date.parse(u.updated_at)<FES.nearbyPushStaleMin*60000);
-    const cands=data.filter(u=>!blocked.has(u.id)&&u.lat!=null&&(!FES.campusOnly||inCampus(u.lat,u.lng)))
+    const cands=data.filter(u=>!blocked.has(u.id)&&u.lat!=null&&(!FES.campusOnly||uOnCampus(u)))
       .map(u=>{ const r=relMeters(myPos,u); return {u,d:Math.hypot(r.e,r.n),common:commonFor(u,matchOffOf(u)).map(x=>x.label)}; })   // 相手あての通知なので、相手が選んだ項目で
       .filter(x=>x.d<=(fesDayNow()?150:FES.nearbyPushRangeM)&&x.common.length)   // 多摩祭の日は150m（2026-10-17 あおの依頼）
       .sort((a,b)=>a.d-b.d).slice(0,3);
@@ -4881,7 +4905,8 @@ function recordEncounters(){
     // アプリを閉じた人は、最後にいた位置のままなので数えない（もうそこにはいない）
     if(isTest(u.id)||u.lat==null||isClosed(u)||!crossAllowed(u))continue;   // すれ違いの設定（お互いさま）
     const r=relMeters(myPos,u); const d=Math.hypot(r.e,r.n);
-    if(d<=FES.encounterRangeM){ if(!insideSet.has(u.id)){ insideSet.add(u.id); addEncounter(u); } }
+    // サーバーが正確な位置で判定した答えがあればそれを使う（手元の位置は約30mの区切りなので、距離では判定しない）
+    if(u.near!=null?u.near:d<=FES.encounterRangeM){ if(!insideSet.has(u.id)){ insideSet.add(u.id); addEncounter(u); } }
     else insideSet.delete(u.id);
   }
 }
@@ -5189,7 +5214,9 @@ const TERMS_HTML=`
 <h4>第2条（利用条件）</h4>
 <p>本サービスは18歳以上の方のみご利用いただけます。登録時に年齢の確認を行います。18歳未満の方はご利用いただけません。</p>
 <h4>第3条（位置情報の取り扱い）</h4>
-<p>本サービスは、利用者が許可した場合にのみ位置情報を取得し、同じサービスを利用している他の利用者に共有します。共有は設定からいつでも停止でき、おおまかな位置（約100m）で共有することも選べます。アプリを閉じている間は位置情報を取得しません。</p>
+<p>本サービスは、利用者が許可した場合にのみ、多摩キャンパスの中にいる間だけ位置情報を取得し、同じサービスを利用している他の利用者に共有します。キャンパスの外の位置は送信・保存しません。アプリを閉じている間は位置情報を取得しません。</p>
+<p>他の利用者に見えるのは、約30mの区切りに丸めた位置（「ぼかして出す」を選んだ場合は約100m）と、そこから計算したおおよその距離だけです。正確な位置は、すれ違いの判定のためにサーバーに最新の1件だけを置き、他の利用者には送りません。この正確な位置は3時間以内に自動で消します。</p>
+<p>共有は設定からいつでも停止できます。停止している間は、ほかの人の位置も約100mの区切りでしか見えず、すれ違いも記録されません。</p>
 <h4>第4条（登録情報）</h4>
 <p>氏名・電話番号・メールアドレス・住所などの個人情報は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
 <p>また、研究のため、利用状況（アプリを開いた日と回数、その日キャンパスの中にいたか、近くに表示された人数、通知とホーム画面のアプリを使っているか、今日のお題に答えたか）を記録します。この記録に位置は含みません。</p>
@@ -5199,13 +5226,21 @@ const TERMS_HTML=`
 <h4>第5条（禁止事項）</h4>
 <p>次の行為を禁止します。</p>
 <p>・他の利用者への迷惑行為、つきまとい、脅迫、差別的言動<br>
+・位置情報やすれ違いの記録を使って、相手の居場所を探る・待ち伏せする・後をつける行為<br>
+・異性との交際や性的な関係を求めることを目的とした利用、またはそのための勧誘<br>
+・わいせつ、暴力的、差別的な内容、自傷や違法行為をすすめる内容の投稿<br>
 ・他人になりすます行為<br>
-・営業、宗教、投資、勧誘を目的とした利用<br>
-・他の利用者に個人情報の提供を強要する行為<br>
+・営業、宗教、投資、マルチ商法などの勧誘を目的とした利用<br>
+・他の利用者に個人情報の提供を強要する行為、他の利用者の個人情報（本名・連絡先・住所・時間割など）を本人の許可なく公開する行為<br>
+・他の利用者のプロフィール・トーク・位置が写った画面を、本人の許可なく撮影・転載する行為<br>
+・位置を偽る、プログラムで自動的に操作する、本サービスのデータを不正に読み取るなどの行為<br>
+・利用を止められた人が、別のアカウントで利用する行為<br>
 ・法令または公序良俗に反する行為<br>
 ・本サービスの運営を妨害する行為</p>
+<p>運営は、不適切な投稿や他の利用者を傷つける行為を一切容認しません。</p>
 <h4>第6条（通報・ブロック・利用停止）</h4>
-<p>利用者は、他の利用者を通報およびブロックできます。運営は通報内容を確認し、禁止事項に該当すると判断した場合、事前の通知なく当該利用者の情報を削除し、利用を停止することがあります。</p>
+<p>利用者は、他の利用者や投稿を通報し、他の利用者をブロックできます。ブロックすると、おたがいの画面に出なくなり、相手からあなたのプロフィールや位置も見えなくなります。</p>
+<p>運営は、通報を受けてから原則として24時間以内に内容を確認するよう努めます。禁止事項に該当すると判断した場合、事前の通知なく、該当する投稿や当該利用者の情報を削除し、利用を停止することがあります。</p>
 <h4>第7条（料金）</h4>
 <p>本サービスの利用は無料です。すべての機能を無料でご利用いただけ、請求や決済は一切発生しません。</p>
 <h4>第8条（利用者間のトラブル）</h4>
@@ -5222,15 +5257,34 @@ const TERMS_HTML=`
 <p>${CONTACT.org}<br>
 ${CONTACT.email?`メール：${CONTACT.email}<br>`:''}${CONTACT.urgentEmail?`緊急時のメール：${CONTACT.urgentEmail}<br>`:''}${CONTACT.tel?`電話：${CONTACT.tel}（${CONTACT.telHours}）<br>`:''}</p>
 <p>※ 運営は学生による研究チームのため、24時間の受付ではありません。身の危険が迫っている場合は、先に<b>警察（110番）</b>へご連絡ください。</p>
+<h4>第12条（データの保存先）</h4>
+<p>本サービスのデータは、米国の事業者が提供するクラウドサービス（データベースの Supabase、サイトの配信の Vercel）を使って保存・送信します。運営は、これらの事業者に本サービスの運営に必要な範囲でデータの取り扱いを任せており、他の目的で第三者に提供することはありません。</p>
+<h4>第13条（規約の変更）</h4>
+<p>運営は、法令の変更や本サービスの内容の変更に合わせて、本規約を変更することがあります。変更する場合は、変更後の内容と、変更が効力を持つ日を、その日より前にアプリの中でお知らせします。利用者に不利になる変更の場合は、あらためて同意をお願いすることがあります。</p>
+<p class="tver">2026年11月2日 改定</p>
 `;
-function openTerms(){
+function openTerms(news){
   $('#termsSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:4px">利用規約</h2>
     <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">ちかく（実証実験版）</div>
+    ${typeof news==='string'&&news?`<div class="cwarn" style="margin-bottom:12px;font-size:12.5px;line-height:1.7;background:var(--surface2);border-color:var(--line);color:var(--ink)">${news}</div>`:''}
     <div class="termsbody" style="max-height:52vh;overflow-y:auto">${TERMS_HTML}</div>
     <button class="btn btn-primary" style="width:100%;padding:14px;margin-top:16px;font-size:15px" onclick="closeTerms()">閉じる</button>`;
   $('#termsOverlay').classList.add('show');
 }
 function closeTerms(){ $('#termsOverlay').classList.remove('show'); }
+// 規約を変えた時、前から使っている人に1回だけ知らせる（民法548条の4：変更の内容と効力が生じる日を、前もって知らせる）。
+// 変える時は TERMS_VER を上げ、TERMS_NEWS に何が変わったかを1行で書く。新しく登録した人は登録の時に読んでいるので出さない
+const TERMS_VER='2026-11-02', TERMS_DATE='2026年11月2日', TERMS_NEWS='位置の見え方（約30mの区切り）・禁止事項・ブロック・データの保存先・規約の変更について書き足しました';
+function termsChangedNotice(){
+  let seen=''; try{ seen=localStorage.getItem('tama_termsVer')||''; }catch(e){}
+  let reg=0; try{ reg=+(localStorage.getItem('tama_regDay')||0); }catch(e){}
+  const mark=()=>{ try{ localStorage.setItem('tama_termsVer',TERMS_VER); }catch(e){} };
+  if(seen>=TERMS_VER)return;
+  if(reg&&reg>=Date.parse(TERMS_VER+'T00:00:00+09:00')){ mark(); return; }   // 改定の後に登録した人
+  mark();
+  if(document.querySelector('.overlay.show'))return;   // ほかのシートが開いている時は出さない（次に開いた時にも出ないが、規約はいつでも読める）
+  openTerms(`📄 <b>利用規約を改定しました（${TERMS_DATE}）</b><br>${esc(TERMS_NEWS)}`);
+}
 /* ---------- 困ったとき・お問い合わせ（2026-10-02） ----------
    連絡先の中身は上の CONTACT だけで決まる。ここには直書きしない。
    緊急時（つきまとい・脅迫など）は、まず警察・大学の窓口を案内してから運営の連絡先を出す。
@@ -5452,7 +5506,7 @@ function openPreview(mode){
         🚫 時間割（見せると決めた友達だけ）<br>
         ${(a.purposes||[]).length&&a.purpose_vis!=='all'?`🤝 「${WORRY_LABEL}」（${a.purposes.map(esc).join('・')}）は、<b>同じことを選んだ人にだけ</b>見えます。だからこのプレビューには出ていません<br>`:''}
         👀 見えるのは上のカードと、地図・一覧に出るアイコン・位置・距離です<br>
-        📍 地図の位置は、${coarse?'いまは「ぼかして出す」設定なので<b>約100mぼかしています</b>':'<b>スマホのGPSの位置そのまま</b>です（数m〜数十mの誤差があります）。マイページの「🔒 見せる範囲」で「ぼかして出す」にすると約100mぼかせます'}</div>`}
+        📍 地図の位置は、${coarse?'いまは「ぼかして出す」設定なので<b>約100mぼかしています</b>':posFuzzed()?'<b>約30mの区切り</b>で出しています（正確な位置は、ほかの人には届きません）。マイページの「🔒 見せる範囲」で「ぼかして出す」にすると約100mになります':'<b>スマホのGPSの位置そのまま</b>です（数m〜数十mの誤差があります）。マイページの「🔒 見せる範囲」で「ぼかして出す」にすると約100mぼかせます'}</div>`}
     ${miss.length?`<div class="pvmiss"><b>まだ入れていない項目</b>：${miss.map(esc).join('・')}<br>入れた項目だけが相手の画面に出ます。共通点が見つかると、相手の一覧であなたが上に出やすくなります。</div>`:''}
     ${!sharing?`<div class="pvmiss"><b>位置情報の共有が止まっています</b>：いまは「ホーム」の一覧・地図にあなたは出ていません。マイページの「🔒 見せる範囲」で戻せます。</div>`:''}
     <div class="pvlist" style="display:flex;gap:8px;margin-top:14px">
@@ -9564,7 +9618,7 @@ function renderVisHub(){
     <div class="pssec"><div class="psh">👀 近くの人 <span>（今日キャンパスにいる、このアプリの人）</span></div>
       <div class="field"><label>地図・一覧に</label><div class="chips">${Object.entries(NEAR_VIS).map(([k,v])=>chip(near===k,v,`setNearVis('${k}')`)).join('')}</div>
         <div class="vishint">${near==='off'?'いまは<b>近くの人の地図・一覧に出ていません</b>。友達にも、いる建物・教室は見えません。'
-          :`見えるのは、アイコン・名前・学部・プロフィールと、${near==='coarse'?'約100mぼかした':'スマホのGPSの'}位置・距離です。キャンパスの外では出ません。${near==='coarse'?'<br>⚠️ ぼかしている間は、ほかの人の側で、あなたとのすれ違い（'+FES.encounterRangeM+'m）が正しく記録されません。':''}`}</div></div>
+          :`見えるのは、アイコン・名前・学部・プロフィールと、${near==='coarse'?'約100mぼかした':posFuzzed()?'約30mの区切りの':'スマホのGPSの'}位置・距離です。キャンパスの外では出ません。${near==='coarse'?'<br>⚠️ ぼかしている間は、ほかの人の側で、あなたとのすれ違い（'+FES.encounterRangeM+'m）が正しく記録されません。':''}`}</div></div>
       <button class="vislink" onclick="closeVisHub();openPreview('near')">👀 プロフィールの見え方を見る ›</button></div>
     <div class="pssec"><div class="psh">👥 友達</div>
       <div class="field"><label>いる建物・教室</label><div class="chips">${Object.entries(VIS_LABEL).map(([k,v])=>chip(myPresence.visibility===k,v,`setVisibility('${k}')`)).join('')}</div>
