@@ -894,6 +894,15 @@
   /* Web 版の「アプリに引き継ぐ」のコード */
   .xcode{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:27px;font-weight:700;letter-spacing:.12em;text-align:center;color:var(--ink);background:var(--surface2);border:1.5px dashed var(--line);border-radius:14px;padding:16px 8px;margin:4px 0 10px;user-select:all;-webkit-user-select:all}
   .xsteps{font-size:12.5px;color:var(--muted);line-height:1.8;margin:12px 0 4px;padding-left:1.3em}
+  /* Apple・Google でサインインのボタン（Apple の決まりに合わせて、黒地に白・暗い表示では白地に黒。Google は白地に色のロゴ） */
+  .ausoc{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;height:50px;border-radius:12px;font-size:16px;font-weight:600;font-family:inherit;margin-bottom:10px;cursor:pointer;border:1px solid transparent}
+  .ausoc[disabled]{opacity:.6}
+  .ausoc-ic{width:19px;height:19px;flex-shrink:0;font-size:20px;line-height:19px}
+  .ausoc-apple{background:#000;color:#fff}
+  .ausoc-google{background:#fff;color:#1f1f1f;border-color:#747775}
+  .auor{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--muted);margin:8px 0 14px}
+  .auor::before,.auor::after{content:'';flex:1;height:1px;background:var(--line)}
+  @media (prefers-color-scheme:dark){ html.appv:not([data-theme="light"]) .ausoc-apple{background:#fff;color:#000} html.appv:not([data-theme="light"]) .ausoc-google{background:#131314;color:#e3e3e3;border-color:#8e918f} }
   #authXfer{text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',ui-monospace,monospace}
   .aulink{color:var(--amber-deep);text-decoration:underline;cursor:pointer}
   .homegate .hglogo{font-family:"Zen Maru Gothic";font-weight:900;font-size:34px;text-align:center;background:linear-gradient(90deg,var(--amber),var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -3365,11 +3374,18 @@ const AU_FOOT=()=>`<div class="aufoot" style="text-align:center"><a class="aulin
 function renderAuth(){
   const s=authSt;
   if(s.step===3){ renderAuthXfer(); return; }
-  const head=`<div class="aulogo">ちかく</div><div class="auh">メールアドレスでログイン</div>
+  // Apple・Google のボタンは、新しくログインする時だけ（匿名で使っていたアプリにメールを付ける時は、データを残すためメールだけ）
+  const prov=s.step===1&&s.mode==='signin'?socialProviders():[];
+  const head=prov.length
+    ?`<div class="aulogo">ちかく</div><div class="auh">ちかくにログイン</div>
+      <div class="aud">${prov.includes('apple')?'Apple・':''}Google のアカウントか、メールアドレスでログインできます。パスワードは要りません。<br>アドレスは、ほかの人には表示されません。</div>`
+    :`<div class="aulogo">ちかく</div><div class="auh">メールアドレスでログイン</div>
       <div class="aud">メールに届く6けたのコードを入れるだけです。パスワードは要りません。<br>アドレスは、ほかの人には表示されません。</div>`;
   let body;
   if(s.step===1){
-    body=`<div class="field"><label>メールアドレス</label><input id="authEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="例：name@example.com" value="${esc(s.email)}" onkeydown="if(event.key==='Enter')authSend()"></div>
+    body=(prov.length?prov.map(p=>`<button class="ausoc ausoc-${p}" onclick="authSocial('${p}')" ${s.busy?'disabled':''}>${p==='apple'?APPLE_LOGO+'Apple でサインイン':GOOGLE_G+'Google でログイン'}</button>`).join('')
+        +(s.serr?`<div class="auerr">${esc(s.serr)}</div>`:'')+'<div class="auor"><span>またはメールアドレスで</span></div>':'')
+      +`<div class="field"><label>メールアドレス</label><input id="authEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="例：name@example.com" value="${esc(s.email)}" onkeydown="if(event.key==='Enter')authSend()"></div>
       ${s.err?`<div class="auerr">${esc(s.err)}</div>`:''}
       <button class="btn btn-primary aubtn" onclick="authSend()" ${s.busy?'disabled':''}>${s.busy?'送っています…':'コードを送る'}</button>
       <div class="aufoot"><b>Web 版（ブラウザ・ホーム画面）で使っていた人へ</b><br>ログインのあとで、Web 版の「設定 → アプリに引き継ぐ」に出るコードを貼ると、今までのプロフィール・友達・トーク・すれ違いをそのまま使えます。</div>`;
@@ -3383,7 +3399,65 @@ function renderAuth(){
   }
   showAuth(head+body+AU_FOOT());
 }
-function authBack(){ authSt.step=1; authSt.err=''; authSt.note=''; authSt.mode=authUser&&!authUser.email?'link':'signin'; renderAuth(); }
+function authBack(){ authSt.step=1; authSt.err=''; authSt.serr=''; authSt.note=''; authSt.mode=authUser&&!authUser.email?'link':'signin'; renderAuth(); }
+/* ---------- Apple・Google でサインイン（2026-11-02 あおの依頼） ----------
+   ・アプリ（J:\chikaku-app に @capgo/capacitor-social-login を入れた版）の中だけ。Web 版はログインしないので出さない
+   ・Apple・Google の画面は端末のもの（プラグイン）。受け取った ID トークンを Supabase に渡す（signInWithIdToken）
+   ・同じメールアドレスのアカウントがもうあれば、Supabase がそのアカウントにつなぐ（メールで作った人が Google でログインしても同じ人）
+   ・下の ID は秘密ではない（秘密の鍵は Supabase にだけ置く）。空のあいだはボタンを出さない。
+     Apple は Apple Developer の有料登録と、アプリに「Sign in with Apple」を付けた版ができてから true にする。
+     Apple の決まり 4.8：iPhone で Google を出すなら Apple も出す（ストアに出す前に両方そろえる） */
+const SOCIAL={
+  googleWeb:'',   // Google Cloud の OAuth クライアント「ウェブ アプリケーション」の ID（Android もこれを使う）
+  googleIOS:'',   // Google Cloud の OAuth クライアント「iOS」の ID
+  apple:false
+};
+const GOOGLE_G='<svg class="ausoc-ic" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.2C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.5 5.8c4.4-4 6.8-10 6.8-17.2z"/><path fill="#FBBC05" d="M10.6 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.2C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.2 0-11.5-4.1-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
+const APPLE_LOGO='<svg class="ausoc-ic" viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>';
+const socialPlugin=()=>{ try{ return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.SocialLogin)||null; }catch(e){ return null; } };
+const appPlatform=()=>{ try{ return (window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform())||''; }catch(e){ return ''; } };
+function socialProviders(){
+  if(!isNativeApp()||!socialPlugin())return [];   // プラグインを入れる前のアプリでは出さない
+  const p=appPlatform(), out=[];
+  if(SOCIAL.apple&&p==='ios')out.push('apple');
+  if(SOCIAL.googleWeb&&(p==='android'||(p==='ios'&&SOCIAL.googleIOS)))out.push('google');
+  return out;
+}
+let socialReady=null;
+function socialInit(){
+  if(!socialReady){
+    const o={};
+    if(SOCIAL.googleWeb)o.google=Object.assign({webClientId:SOCIAL.googleWeb,mode:'online'},SOCIAL.googleIOS?{iOSClientId:SOCIAL.googleIOS,iOSServerClientId:SOCIAL.googleWeb}:{});
+    if(SOCIAL.apple)o.apple={clientId:'jp.chikaku.tama'};
+    socialReady=Promise.resolve(socialPlugin().initialize(o)).catch(e=>{ socialReady=null; throw e; });
+  }
+  return socialReady;
+}
+const randHex=n=>[...crypto.getRandomValues(new Uint8Array(n))].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function sha256hex(t){ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+async function authSocial(provider){
+  const s=authSt; if(s.busy||!sb||!socialPlugin())return;
+  s.busy=true; s.err=''; s.serr=''; renderAuth();
+  try{
+    await socialInit();
+    // nonce（使い回されないための使い捨ての値）：Apple・Google にはハッシュを、Supabase には元の値を渡す（Supabase がハッシュして照らし合わせる）
+    const raw=randHex(16);
+    const r=await socialPlugin().login({provider,options:{scopes:provider==='apple'?['email']:['email','profile'],nonce:await sha256hex(raw)}});
+    const tok=r&&r.result&&r.result.idToken;
+    if(!tok)throw {message:'no id token'};
+    const {data,error}=await sb.auth.signInWithIdToken({provider,token:tok,nonce:raw});
+    if(error)throw error;
+    authUser=(data&&data.user)||authUser; s.mode='signin'; s.busy=false;
+    await authAfterLogin();
+  }catch(x){
+    s.busy=false;
+    const m=String((x&&(x.message||x.errorMessage||x.code))||x||'');
+    if(/cancel|1001|12501/i.test(m)){ renderAuth(); return; }   // 自分で閉じた時は何も言わない
+    s.serr=(provider==='apple'?'Apple':'Google')+' でログインできませんでした。メールアドレスでもログインできます（'+m.slice(0,60)+'）';
+    renderAuth();
+  }
+}
+const authProv=()=>{ const p=authUser&&authUser.app_metadata&&authUser.app_metadata.provider; return p==='google'?'Google':p==='apple'?'Apple':''; };
 async function authSend(){
   const s=authSt; if(s.busy||!sb)return;
   const e=(($('#authEmail')||{}).value||'').trim().toLowerCase(); s.email=e;
@@ -3418,8 +3492,11 @@ async function authVerify(){
   s.busy=false;
   if(error){ s.err=authErrText(error); renderAuth(); const c=$('#authCode'); if(c)c.value=t; return; }
   authUser=(data&&data.user)||authUser;
-  // まだ何も使っていないアカウント（新しく作った・匿名で開いただけ）なら、Web 版から引き継ぐかを聞く
-  let fresh=false;
+  await authAfterLogin();
+}
+// ログインできた後：まだ何も使っていないアカウント（新しく作った・匿名で開いただけ）なら、Web 版から引き継ぐかを聞く
+async function authAfterLogin(){
+  const s=authSt; let fresh=false;
   try{ const uid=authUser&&authUser.id; if(uid){ const r=await sb.from(T('profiles')).select('id').eq('id',uid).maybeSingle(); fresh=!r.error&&!r.data; } }catch(e){}
   if(fresh){ s.step=3; s.err=''; renderAuth(); return; }
   authFinish();
@@ -3480,7 +3557,7 @@ function authClearLocal(){
 function renderAuthDone(){
   authSt.gate=false; authSt.step=0;
   showAuth(`<h2 class="auh2">ログイン</h2>
-    <div class="aunote">✅ <b>${esc(authMask(authUser&&authUser.email))}</b> でログインしています。<br>機種変更の時は、新しい端末のアプリで、このメールアドレスでログインすると、今のアカウントをそのまま使えます。</div>
+    <div class="aunote">✅ ${authProv()?authProv()+'（<b>'+esc(authMask(authUser&&authUser.email))+'</b>）':'<b>'+esc(authMask(authUser&&authUser.email))+'</b> '}でログインしています。<br>機種変更の時は、新しい端末のアプリで、${authProv()?'同じ '+authProv()+' のアカウントか、':''}このメールアドレスでログインすると、今のアカウントをそのまま使えます。</div>
     <button class="btn btn-ghost aubtn2" onclick="authLogout()">ログアウト</button>
     <button class="btn btn-ghost aubtn2" onclick="closeAuth()">閉じる</button>`);
 }
@@ -3560,7 +3637,7 @@ function xferStartNew(){
   try{ localStorage.removeItem('tama_xferAt'); }catch(e){}
   location.reload();
 }
-const authRowText=()=>isNativeApp()?(authRegistered()?'ログイン中：'+authMask(authUser.email):''):'コードを出して、アプリに貼るだけ';
+const authRowText=()=>isNativeApp()?(authRegistered()?'ログイン中：'+(authProv()?authProv()+'・':'')+authMask(authUser.email):''):'コードを出して、アプリに貼るだけ';
 function renderAuthRow(){
   const r=document.querySelector('#appvSet [data-r="acct"] small'); if(r)r.textContent=authRowText();
   const w=$('#meAuthSub'); if(w)w.textContent=authRowText();
@@ -5494,7 +5571,7 @@ const TERMS_HTML=`
 <p>共有は設定からいつでも停止できます。停止している間は、ほかの人の位置も約100mの区切りでしか見えず、すれ違いも記録されません。</p>
 <h4>第4条（登録情報）</h4>
 <p>氏名・電話番号・住所は取得しません。登録するのはニックネーム、年齢、興味関心などに限られます。</p>
-<p>アプリ版では、ログインのためにメールアドレスを登録していただきます（Web 版では登録しません）。そのアドレスは、ログインのコードを送ること、ご本人の確認、アカウントや利用停止に関するご連絡のためだけに使います。ほかの利用者には表示しません。</p>
+<p>アプリ版では、ログインのためにメールアドレスを登録していただくか、Apple・Google のアカウントでログインしていただきます（Web 版ではどちらも使いません）。Apple・Google から受け取るのは、メールアドレスと、そのサービスでのあなたの番号です（Apple で「メールを非公開」を選んだ場合は、Apple が作った転送用のアドレスになります）。Google からは、Google に登録している名前とアイコンの画像も届くことがありますが、ちかくでは使わず、ほかの利用者にも表示しません。メールアドレスは、ログインのコードを送ること、ご本人の確認、アカウントや利用停止に関するご連絡のためだけに使います。ほかの利用者には表示しません。</p>
 <p>また、研究のため、利用状況（アプリを開いた日と回数、その日キャンパスの中にいたか、近くに表示された人数、通知とホーム画面のアプリを使っているか、今日のお題に答えたか）を記録します。この記録に位置は含みません。</p>
 <p>あわせて、すれ違った相手と日時・場所（建物の名前）を、記録した本人だけが見られる形で記録します。また、任意で答える「ひとこと」（人とのつながりの感じ方についての短い質問）の回答を記録します。「ひとこと」の回答はほかの利用者には見えず、答えなくてもすべての機能を使えます。</p>
 <p>一部の機能を初めて使う時に、有料になった場合に使いたいかどうかをおたずねし、その選択を記録します。本サービスが利用者に請求することはありません。</p>
