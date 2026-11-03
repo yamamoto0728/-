@@ -1974,6 +1974,9 @@
   /* 審査：アプリ版に「ホーム画面に追加」の案内を出さない（Apple 4.2・2.1）。設定のまとまりを隠せるように */
   html.appv .addhome{display:none!important}
   html.appv .asetg[hidden]{display:none}
+  /* 2026-11-03 Web版と比べた結果：みんなの語りたいことへの入口・ダークのお題の入力欄 */
+  html.appv .awantall{display:block;margin:6px 4px 0 auto;padding:4px 6px;border:0;background:none;color:var(--c-want-t);font:inherit;font-size:var(--fs4);font-weight:600;cursor:pointer}
+  html.appv .daily .drow input{background:var(--night);color:var(--ink);border-color:var(--sep)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -2651,7 +2654,7 @@ function appvLayout(on){
     if(appvMarks.map.nextSibling!==map)appvMarks.map.after(map);
     if(appvMarks.sc.nextSibling!==sc)appvMarks.sc.after(sc);
     [['fb',fb],['cl',cl],['ul',ul]].forEach(([k,el])=>{ if(appvMarks[k].nextSibling!==el)appvMarks[k].after(el); });
-    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote','#appvNotes','#appvWeek','#appvTiles','#appvInvRow'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
+    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote','#appvNotes','#appvWeek','#appvTiles','#appvInvRow','#appvNearBack'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
     appvMarkBuilding(''); if(appvCtPins&&fesMap){ fesMap.removeLayer(appvCtPins); appvCtPins=null; } if(appvTrailLayer&&fesMap){ fesMap.removeLayer(appvTrailLayer); appvTrailLayer=null; appvTrailKey=''; }
     if(lab)lab.textContent='ホーム';
     $('#appvTop').hidden=true; $('#appvSheet').hidden=true;
@@ -2765,11 +2768,16 @@ function renderAppvChrome(){
   if(tl){ const nx2=appvNextClass(), tt=ttTodayText(), w=wantOf(profile);
     const me1=g?'隠れています':!sharing?'位置を出していません':fesOutside?'学外にいます':curPlace||'学内にいます';
     const t2=nx2?{m:(nx2.now?'いま ':'次 ')+nx2.i+'限 '+(nx2.name||'授業'),s:[nx2.room,nx2.now?nx2.en+'まで':nx2.st+'から'].filter(Boolean).join('・')}:{m:tt.main,s:tt.sub};
-    const th=`<div class="atiles"><button class="atile now" onclick="openAppvMe()"><small>いまの自分</small><b>${esc(me1)}</b><span>${cur?esc(cur):'いまの状態を選ぶ'}</span></button>`
+    // いまの自分のタイルは状態を大きく（場所は上の1行と同じになるので小さく。2026-11-03 比べた結果）
+    const th=`<div class="atiles"><button class="atile now" onclick="openAppvMe()"><small>いまの自分</small><b>${cur?esc(cur):'状態を選ぶ'}</b><span>${esc(me1)}</span></button>`
       +`<button class="atile tt${tt.empty?' empty':''}" onclick="${tt.empty?'openTimetable()':"go('tt')"}"><small>時間割</small><b>${esc(t2.m)}</b><span>${esc(t2.s)}</span></button></div>`
-      +`<button class="awant${w?' on':''}" onclick="openWantEdit()"><small>語りたいこと</small><b>${w?esc(w):'出すと、近くの人の一覧に今日だけ出ます'}</b><i>›</i></button>`;
+      +`<button class="awant${w?' on':''}" onclick="openWantEdit()"><small>語りたいこと</small><b>${w?esc(w):'今日だけ出す話題を書く'}</b><i>›</i></button>`
+      +(wantPopular(1).length?`<button class="awantall" onclick="openWantList()">みんなの語りたいことを見る ›</button>`:'');   // Web版の「みんなの◯件」（数は出さない）
     if(tl.dataset.h!==th){ tl.dataset.h=th; tl.innerHTML=th; } }
   const pf=$('#appvPane-fr');
+  const pn=$('#appvPane-near');
+  if(pn){ let bk=$('#appvNearBack'); if(!bk){ bk=document.createElement('button'); bk.id='appvNearBack'; bk.className='xsetrow'; bk.onclick=()=>setAppvPane('cross'); bk.innerHTML='<span>‹</span><b>すれ違いに戻る</b>'; }
+    if(pn.firstChild!==bk)pn.insertBefore(bk,pn.firstChild); }
   if(pf){ let iv=$('#appvInvRow'); if(!iv){ iv=document.createElement('button'); iv.id='appvInvRow'; iv.className='ainvrow'; iv.onclick=()=>openAppvInvite(); iv.innerHTML='<b>友達をいまからさそう</b><span>空いている友達に</span><i>›</i>'; }
     if(pf.firstChild!==iv)pf.insertBefore(iv,pf.firstChild); iv.hidden=!allFriendRows().some(r=>r.status==='accepted'); }
 }
@@ -2847,6 +2855,10 @@ function appvFitMap(){
 const appvJ=(ms=Date.now())=>{ const j=new Date(ms+9*3600000); return {dow:j.getUTCDay(),min:j.getUTCHours()*60+j.getUTCMinutes(),day:j.toISOString().slice(0,10)}; };
 const appvHM=s=>{ const [h,m]=s.split(':').map(Number); return h*60+m; };
 // C14 時間帯で変わる1文（人がいない時の見出しの下）。本当のこと（昼休みは人が多い・ちかくタイムの時刻）だけを言う
+// 空の画面のボタン：時間割が空なら「入れる」（前は空でも「見る」で、空の時間割に飛んでいた。2026-11-03）
+function appvTTBtn(){ return Object.keys(myTimetable||{}).length?['時間割を見る',"go('tt')"]:['時間割を入れる','openTimetable()']; }
+// 「いま近くにいる人」の一覧（切りかえからは外したが、すれ違いの欄の一番上から開く。戻るは一覧の一番上の行。2026-11-03）
+function appvShowNear(){ setAppvPane('near'); setAppvDetent('full'); renderNearby(); }
 function appvQuietLine(){
   const {dow,min}=appvJ();
   if(dow<1||dow>5)return '今日は休みの日です。平日の昼休みがいちばんにぎやかです';
@@ -3143,7 +3155,7 @@ function appvRelabel(el,txt,on){
 // 文字列はマイページから移す行、配列は設定で作る行（[キー, 見出し, 説明, 押した時]）
 const APPV_SET=[
   ['アカウント',[['acct',isNativeApp()?'ログイン':'アプリに引き継ぐ',' ','openAcct()']]],
-  ['見せ方',['vis','match','block']],
+  ['見せ方',['vis',['xpref','すれ違いの設定','すべての人・共通点がある人だけ・使わない','openCrossPrefs()'],'match','block']],
   ['通知',['push','prefs','center']],
   ['きせかえ・アンケート',[['look','きせかえ','アイコン・背景・フレーム',"$('#lookDot').hidden=true;openLook()"],['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],'wtp','ck',['inv','友達をちかくに誘う','','openInvite()']]],
   ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['privacy','プライバシーポリシー','取る情報・見える範囲・保存期間・消し方',"location.href='/privacy/'"],['delacct','アカウントを削除','ログインの記録まで、すべて消えます','deleteAccount()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'appv','debug']]];
@@ -4850,8 +4862,8 @@ function renderNearby(){
   // 📱 アプリver（B2・B3）：空の画面は「いまの状態＋理由」の1文とボタン1つ。読み込み中は0件と出さない
   if(appvOn()&&!all.length){
     ul.innerHTML=!lastFullPoll&&!fesOutside?appvSkeleton()
-      :fesOutside?appvEmpty('学外なので、いまは位置を使っていません。キャンパスに入ると、近くの人が出ます',['時間割を見る',"go('tt')"])
-      :appvEmpty('近くでアプリを開いている人が、ここに出ます。共通点のある人ほど上に並びます',['時間割を見る',"go('tt')"],[['共通点のある人が来たら、どう見える？','openSample()']]);   // 見出しの「いまは静か」をくり返さない
+      :fesOutside?appvEmpty('学外なので、いまは位置を使っていません。キャンパスに入ると、近くの人が出ます',appvTTBtn())
+      :appvEmpty('近くでアプリを開いている人が、ここに出ます。共通点のある人ほど上に並びます',appvTTBtn(),[['共通点のある人が来たら、どう見える？','openSample()']]);   // 見出しの「いまは静か」をくり返さない
     return;
   }
   if(fesOutside&&!all.length){
@@ -5292,15 +5304,16 @@ function renderCross(){
     ?`<div class="nearsec" style="padding-left:6px;margin-top:8px">前の日にすれ違った人 <span class="cnt">${past.length}人</span></div>`+past.slice(0,50).map(row).join('')
     :`<button class="btn btn-ghost nearmore" onclick="openCrossPast()">🕘 前の日にすれ違った人を見る（${past.length}人）</button>`;
   // 📱 アプリver：一番上に「すれ違いの設定」の1行（openCrossPrefs）。「使わない」の時は一覧の代わりに説明だけ
-  const xsetH=appvOn()&&profile?`<button class="xsetrow" onclick="openCrossPrefs()"><span>すれ違い</span><b>${CROSS_MODES[crossModeOf(profile)]}${crossStarOf(profile)?' ・ ★ '+esc(crossStarOf(profile).label):''}</b><i>›</i></button>`:'';
-  if(xsetH&&crossModeOf(profile)==='off'){ ul.innerHTML=xsetH+`<div class="empty"><p>すれ違いを使わない設定です。<br>知らない人とは、お互いに記録も表示もしません。</p></div>`; return; }
+  // 2026-11-03：一番上は「いま近くにいる人」への入口に（「近くの人」の切りかえをやめたので、ここから一覧を開く）。すれ違いの設定は「設定 → 見せ方」へ移した
+  const xsetH=appvOn()&&profile?`<button class="xsetrow" onclick="appvShowNear()"><span>いま近く</span><b>近くにいる人を、共通点の多い順に見る</b><i>›</i></button>`:'';
+  if(xsetH&&crossModeOf(profile)==='off'){ ul.innerHTML=xsetH+`<div class="empty"><p>すれ違いを使わない設定です。<br>知らない人とは、お互いに記録も表示もしません。</p><button class="alink" onclick="openCrossPrefs()">すれ違いの設定を変える</button></div>`; return; }
   // 📱 アプリver（B3・B6）：0件の理由を書き分け、前の日のすれ違いを上に出す（いつのことかを必ず書く）
   if(appvOn()&&!arr.length){
     const week=jstTodayStart().getTime()-6*86400000, recent=past.filter(u=>(u.last_at||0)>=week).slice(0,10);
     const why=fesOutside?'学外なので、いまは位置を使っていません。キャンパスに入ると、すれ違いの記録が始まります':`今日のすれ違いは、ここに残ります。アプリを開いているあいだだけ、${FES.encounterRangeM}m以内に入った人を記録します`;
     ul.innerHTML=xsetH+(recent.length
       ?`<div class="aempty slim"><p>${why}</p></div><div class="nearsec" style="padding-left:6px">この1週間にすれ違った人</div>`+recent.map(row).join('')
-      :appvEmpty(why,['時間割を見る',"go('tt')"]));
+      :appvEmpty(why,appvTTBtn()));
     return;
   }
   if(!arr.length){ ul.innerHTML=xsetH+`<div class="empty"><div class="big">🚶</div><p>今日はまだ誰ともすれ違っていません。<br>アプリを開いたままキャンパスを歩くと、<br>${FES.encounterRangeM}m以内に入った人が記録されます。</p></div>`+pastH; return; }
@@ -5930,12 +5943,13 @@ function openFromPush(rt){
   switch(rt.go){
     case 'chat': whenReady(()=>!!matches[rt.u]||isFriend(rt.u),()=>openChat(rt.u),()=>go('match')); break;
     case 'talk': go('match'); setTalkTab('dm'); break;
-    case 'friends': openCm('fr'); break;   // 2026-10-15：友達は「コミュニティ」のページの「👥 友達」
+    // 📱 アプリverは、友達・すれ違いのページ（下のタブに無い）ではなく、ホームのシートの切りかえを開く（前は中身の空のページになっていた。2026-11-03）
+    case 'friends': if(appvOn()){ go('near'); setAppvPane('fr'); setAppvDetent('full'); } else openCm('fr'); break;   // 2026-10-15：友達は「コミュニティ」のページの「👥 友達」
     case 'room': go('match'); setTalkTab('comm'); whenReady(()=>rooms.some(x=>rid(x.id)===rid(rt.r)),()=>openRoom(rt.r)); break;
     case 'where': go('near'); setTimeout(()=>openPlaceEdit(false),300); break;
     case 'daily': go('near'); dailyOpen=true; dailyShown=null; renderDaily(); setTimeout(()=>{ const el=$('#dailyCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300); break;
     case 'ct': go('near'); loadCt(true).then(()=>{ const el=$('#ctCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); }); break;
-    case 'cross': go('cross'); break;   // 多摩祭1日目の夜の「今日のすれ違い」（2026-10-14）
+    case 'cross': if(appvOn()){ go('near'); setAppvPane('cross'); setAppvDetent('full'); } else go('cross'); break;   // 多摩祭1日目の夜の「今日のすれ違い」（2026-10-14）
     case 'role': go('near'); setTimeout(()=>{ if(fesRoleOf(profile))toast('🏮 出店・出演中：'+fesRoleOf(profile)+'（🎪カードの「くわしく ▾」から変えられます）'); else openFesRolePick(); },500); break;   // 出店者向けの「無料で宣伝しませんか」（2026-10-16）
     case 'tamasai': go('near'); renderTamasai(); setTimeout(()=>{ const el=$('#tamasaiCard'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300); break;   // 多摩祭のアンケート
     default: go('near');
