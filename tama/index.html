@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- 📱 包んだアプリ（Capacitor）の中は、画面が時計・電池の表示の下まで広がる。安全な領域（env(safe-area-inset-*)）を使えるように viewport-fit=cover を足す（2026-11-03）。
+     Safari・ホーム画面のアプリは今のまま -->
+<script>if(/ChikakuApp/.test(navigator.userAgent)){var vp=document.querySelector('meta[name=viewport]');if(vp)vp.content+=', viewport-fit=cover';}</script>
 <title>ちかく 多摩キャン版</title>
 <!-- 多摩キャン版（学園祭の前に学食のQRから入ってもらう簡易実験用）。学園祭版 fes/index.html を複製して改変。
      /tama と /tama/ のどちらで開かれても参照がずれないよう、パスはすべてサイトのルートから書く（地図の形 campus-geo.js は多摩キャン版のものを共用） -->
@@ -1959,6 +1962,18 @@
   .edlook b{font-size:15px}
   .edlook small{font-size:12.5px;color:var(--muted)}
   .edlook i{font-style:normal;font-size:20px;color:var(--muted2)}
+  /* ---------- 2026-11-03 あお「アプリ版のホームの上のアイコンと位置のバーは最上に固定」 ----------
+     ・包んだアプリでは画面が時計・電池の表示の下まで広がるので、上の段は安全な領域のすぐ下に置く（Safari・ホーム画面のアプリでは 0 なので今と同じ）
+     ・シートより手前に出す（前はシートの方が手前で、全画面や引っぱっている途中にバーが隠れた）。シートはバーの下までしか上がらない
+     ・ほかの画面の見出し（トーク・時間割・プロフィール・設定・チャット）も、時計の表示とかぶらないように下げる */
+  html.appv .appvtop{top:calc(env(safe-area-inset-top,0px) + 8px);z-index:700}
+  html.appv .appvsheet{max-height:calc(100% - env(safe-area-inset-top,0px) - 64px)}
+  html.appv .apphead{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
+  html.appv .aphead{padding-top:calc(env(safe-area-inset-top,0px) + 6px)}
+  html.appv .chathead{padding-top:calc(env(safe-area-inset-top,0px) + 8px)}
+  /* 審査：アプリ版に「ホーム画面に追加」の案内を出さない（Apple 4.2・2.1）。設定のまとまりを隠せるように */
+  html.appv .addhome{display:none!important}
+  html.appv .asetg[hidden]{display:none}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -2020,7 +2035,7 @@
             </div>
           </div>
           <div class="shot">
-            <div class="sh">✨ キャンパスで、新しい出会い</div>
+            <div class="sh">✨ キャンパスで、新しい友達</div>
             <div class="sd">同じアーティスト・同じ授業の人が、共通点つきで地図と一覧に出ます。めずらしい共通点ほど上に。</div>
             <div class="mini">
               <div class="mrow2"><div class="mav" style="background:linear-gradient(135deg,#c89b6b,#8b6b4a)">☕</div><div class="mtx"><div class="mn">ゆい <span style="font-weight:500;color:var(--muted)">社会 2年</span></div><div class="mb"><span class="mtag">✨ 同じアーティスト「ヨルシカ」</span></div></div><div class="md">32m</div></div>
@@ -2651,7 +2666,7 @@ function setAppvPane(k,quiet){
   if(k==='fr')renderFriends(); if(k==='cross')renderCross();
 }
 // シートの高さ：low（見出しだけ）・mid（半分）・full（全画面）
-const ASH_H={low:'116px',mid:'52%',full:'calc(100% - 104px)'};   // 一番上でも、隅のボタンの下に地図を細く残す（E13。地図の上のシートだと分かるように）。低い時は「いまの自分・時間割」の2枚が見える高さ（2026-11-01）
+const ASH_H={low:'116px',mid:'52%',full:'calc(100% - env(safe-area-inset-top,0px) - 68px)'};   // 一番上は、上のアイコンと位置のバーのすぐ下まで（2026-11-03）   // 一番上でも、隅のボタンの下に地図を細く残す（E13。地図の上のシートだと分かるように）。低い時は「いまの自分・時間割」の2枚が見える高さ（2026-11-01）
 function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'), n=$('#s-near'); if(s)s.style.removeProperty('--ash-h'); if(n){ n.style.setProperty('--ash-h',ASH_H[d]); n.dataset.detent=d; } }
 function appvBindSheet(){
   const g=$('#ashGrab'), s=$('#appvSheet'); if(!g||!s||g.dataset.b)return; g.dataset.b='1';
@@ -3131,7 +3146,7 @@ const APPV_SET=[
   ['見せ方',['vis','match','block']],
   ['通知',['push','prefs','center']],
   ['きせかえ・アンケート',[['look','きせかえ','アイコン・背景・フレーム',"$('#lookDot').hidden=true;openLook()"],['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],'wtp','ck',['inv','友達をちかくに誘う','','openInvite()']]],
-  ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'appv','debug']]];
+  ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['privacy','プライバシーポリシー','取る情報・見える範囲・保存期間・消し方',"location.href='/privacy/'"],['delacct','アカウントを削除','ログインの記録まで、すべて消えます','deleteAccount()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'appv','debug']]];
 const APPV_SET_LAB={vis:'見せる範囲',match:'すれ違いに使う共通点',block:'ブロックした人',prefs:'通知の種類・テスト通知',center:'届いた通知',wtp:'ちかくプラスのアンケート',ck:'ひとこと'};
 function appvMeLayout(on){
   const set=$('#appvSet'); if(!set)return;
@@ -3156,6 +3171,9 @@ function appvMeLayout(on){
 function renderAppvSet(){
   const set=$('#appvSet'); if(!set||!set.dataset.b)return;
   const sv=set.querySelector('[data-r="survey"]'); if(sv)sv.hidden=!surveyOpen()||surveyDone;
+  // 包んだアプリ（ストア版）では、ブラウザの通知の仕組みが使えない（アプリの通知はこれから作る）。動かないスイッチは出さない（Apple 2.1）。
+  // 「ちかくプラス」（有料の予定のアンケート）も、買えない有料の話になるので出さない（Apple 3.1.1）
+  if(isNativeApp()){ const pg=set.querySelector('[data-k="push"]'); if(pg&&pg.closest('.asetg'))pg.closest('.asetg').hidden=true; const w=set.querySelector('[data-k="wtp"]'); if(w)w.hidden=true; }
   const lk=set.querySelector('[data-r="look"]'), ld=$('#lookDot');
   if(lk&&ld){ let d=lk.querySelector('.dot'); if(!ld.hidden&&!d){ d=document.createElement('span'); d.className='dot'; lk.querySelector('.go').before(d); } else if(ld.hidden&&d)d.remove(); }
 }
@@ -3361,7 +3379,7 @@ function showAuth(h){
   const f=$({1:'#authEmail',2:'#authCode',3:'#authXfer'}[authSt.step]||'#none'); if(f&&!authSt.busy)setTimeout(()=>{ try{ f.focus(); }catch(e){} },80);
 }
 function closeAuth(){ xferStopPoll(); if(!authSt.gate)$('#authOverlay').classList.remove('show'); }
-const AU_FOOT=()=>`<div class="aufoot" style="text-align:center"><a class="aulink" onclick="openTerms()">利用規約</a>${CONTACT.email?`　困った時：${esc(CONTACT.email)}`:''}</div>`;
+const AU_FOOT=()=>`<div class="aufoot" style="text-align:center"><a class="aulink" onclick="openTerms()">利用規約</a>　<a class="aulink" href="/privacy/">プライバシーポリシー</a>${CONTACT.email?`　困った時：${esc(CONTACT.email)}`:''}</div>`;
 function renderAuth(){
   const s=authSt;
   if(s.step===3){ renderAuthXfer(); return; }
@@ -4088,7 +4106,10 @@ function onErr(e){ geoDenied=e.code===1; geoState('bad'); onGeoFail(geoDenied?'�
 function onGeoFail(msg){geoSettled();const lb=$('#locbar');lb.className='locbar bad';$('#locPlace').textContent=msg;
   $('#meLoc').textContent='📍 位置情報オフ';
   // 近くの人・すれ違いだけ使えない。オンにする場所は端末で違う（ホーム画面のアプリはブラウザの設定に従う）
-  $('#locCoord').textContent=!geoDenied?'電波の良い所で「再試行」を押してください':isIOS()?'近くの人を見るには、iPhoneの「設定 → プライバシーとセキュリティ → 位置情報サービス → Safari Webサイト」を「使用中のみ」に':'近くの人を見るには、Chromeの「設定 → サイトの設定 → 位置情報」で許可してください';
+  // 包んだアプリ（ストア版）では Safari・Chrome の設定ではなく、アプリの設定を案内する（2026-11-03 審査：アプリの中にブラウザの説明を出さない）
+  $('#locCoord').textContent=!geoDenied?'電波の良い所で「再試行」を押してください'
+    :isNativeApp()?(isIOS()?'近くの人を見るには、iPhoneの「設定 → ちかく → 位置情報」を「このAppの使用中のみ許可」に':'近くの人を見るには、「設定 → アプリ → ちかく → 権限 → 位置情報」で許可してください')
+    :isIOS()?'近くの人を見るには、iPhoneの「設定 → プライバシーとセキュリティ → 位置情報サービス → Safari Webサイト」を「使用中のみ」に':'近くの人を見るには、Chromeの「設定 → サイトの設定 → 位置情報」で許可してください';
   $('#locAcc').innerHTML='<button class="retry" onclick="startGeo()">再試行</button>';}
 function geoState(cls,t){const c=$('#gpsChip');c.className='g '+(cls==='ok'?'on':cls==='bad'?'err':'');$('#gpsTxt').textContent=cls==='ok'?(sharing?'共有中':'停止中'):t||'GPS';}
 
@@ -4368,7 +4389,7 @@ function openMatchPrefs(){ if(!profile){ toast('先にプロフィールを登�
 function closeMatchPrefs(){ $('#matchOverlay').classList.remove('show'); renderMatchSum(); }
 function renderMatchPrefs(){
   const off=matchOffOf(profile);
-  $('#matchSheet').innerHTML=`<h2 class="pstitle">🎯 マッチングに使う共通点</h2>
+  $('#matchSheet').innerHTML=`<h2 class="pstitle">${appvOn()?'すれ違いに使う共通点':'🎯 マッチングに使う共通点'}</h2>
     <p class="psdesc">オンにした項目が同じ人を「共通点のある人」にします。<b style="color:var(--ink)">変わるのはあなたの画面だけ</b>（近くの人の並び・🎯共通の表示・話題、あなたに届く「共通点のある人が近くにいます」の通知）で、相手の画面は変わりません。最低1つは残してください。</p>
     ${MATCH_KINDS.map(m=>{ const v=matchMyValue(m.k), on=!off.includes(m.k);
       return `<div class="sharerow" style="margin-bottom:7px"><div class="lab">${m.icon} ${m.label}<small>${v?'あなた：'+esc(v):'まだ入れていません'}</small></div><div class="toggle${on?' on':''}" onclick="toggleMatchKind('${m.k}')"><div class="k"></div></div></div>`; }).join('')}
@@ -5533,6 +5554,8 @@ const TERMS_HTML=`
 <p>${CONTACT.org}<br>
 ${CONTACT.email?`メール：${CONTACT.email}<br>`:''}${CONTACT.urgentEmail?`緊急時のメール：${CONTACT.urgentEmail}<br>`:''}${CONTACT.tel?`電話：${CONTACT.tel}（${CONTACT.telHours}）<br>`:''}</p>
 <p>※ 運営は学生による研究チームのため、24時間の受付ではありません。身の危険が迫っている場合は、先に<b>警察（110番）</b>へご連絡ください。</p>
+<h4>プライバシーポリシー</h4>
+<p>取る情報・ほかの人に見える範囲・保存する期間・削除のしかたは、<a href="/privacy/">プライバシーポリシー</a>（https://chikaku-hosei.vercel.app/privacy/）にまとめています。</p>
 <h4>第12条（データの保存先）</h4>
 <p>本サービスのデータは、米国の事業者が提供するクラウドサービス（データベースの Supabase、サイトの配信の Vercel）を使って保存・送信します。運営は、これらの事業者に本サービスの運営に必要な範囲でデータの取り扱いを任せており、他の目的で第三者に提供することはありません。</p>
 <h4>第13条（規約の変更）</h4>
@@ -6640,7 +6663,7 @@ function renderRoomLegacy(){ const box=$('#roomMsgs'); if(!box||!curRoom)return;
   let lastDay='';
   box.innerHTML=msgs.map(m=>{const mine=m.from_id===myId, at=Date.parse(m.created_at)||0; let sep='';
     if(at){ const dl=dayLabel(at); if(dl!==lastDay){ lastDay=dl; sep=`<div class="day">${dl}</div>`; } }
-    return sep+`<div class="bub ${mine?'me':'them'}">${mine?'':`<div class="who" onclick="openUserById('${m.from_id}')">${esc(m.emoji||'')} ${esc(m.name||'匿名')}</div>`}${esc(m.text)}${at?`<span class="tm">${hhmm(at)}</span>`:''}</div>`;}).join('');
+    return sep+`<div class="bub ${mine?'me':'them'}">${mine?'':`<div class="who" onclick="openUserById('${m.from_id}')">${esc(m.emoji||'')} ${esc(m.name||'名前なし')}</div>`}${esc(m.text)}${at?`<span class="tm">${hhmm(at)}</span>`:''}</div>`;}).join('');
   box.scrollTop=box.scrollHeight;
 }
 async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(); if(!t||!curRoom)return;
@@ -6649,7 +6672,7 @@ async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(
   if(ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください。'); return; }
   inp.value='';
   if(!sb){toast('バックエンド未接続です');return;}
-  const m={room_id:curRoom.id,from_id:myId,name:profile?profile.name:'匿名',emoji:profile?profile.emoji:'🙂',text:t};
+  const m={room_id:curRoom.id,from_id:myId,name:profile?profile.name:'名前なし',emoji:profile?profile.emoji:'🙂',text:t};
   curRoom.msgs=(curRoom.msgs||[]).concat(m); renderRoom();
   // 保存できなかった時は、知らせて画面からも外す（2026-10-15。前は失敗しても何も出さず、ほかの人に通知だけ届いていた）
   const {error:pe}=await sb.from(T('room_messages')).insert(m);
@@ -7200,7 +7223,8 @@ async function loadPaywall(){
 function paywallPrice(){ return 500; }   // 2026-10-09 あおの指示で500円に固定（前は人ごとに100・300・500円）
 // 使い始めた日は聞かない（2026-10-09 あおの「本来の機能やコンセプトの邪魔をしないように」。初日に「有料」と見ると、お金を取るアプリという第一印象になるため）
 // 多摩祭の日は聞かない（出店者・出演者が部屋を作る時に止まらないように。2026-10-15 エージェントの体験から）
-function paywallNeed(f){ return !!profile&&!tamasaiDay()&&!paywallMissing&&!paywallAnswered[f]&&!debugMode()&&firstUseDay()<jstTodayStart().getTime(); }
+// 包んだアプリ（ストア版）では聞かない：買えない「有料の予定」を見せると、Apple 3.1.1・2.3 で引っかかる（2026-11-03）
+function paywallNeed(f){ return !!profile&&!isNativeApp()&&!tamasaiDay()&&!paywallMissing&&!paywallAnswered[f]&&!debugMode()&&firstUseDay()<jstTodayStart().getTime(); }
 function paywallAsk(f,next){
   paywallNext=next; const p=PAYWALL[f], price=paywallPrice();
   $('#memSheet').innerHTML=`<div class="rinfo pw"><div class="pwic">${p.icon}</div>
@@ -7348,7 +7372,7 @@ function renderRoom(){
     h+=msgs.map(m=>{ const mine=m.from_id===myId, at=Date.parse(m.created_at)||0; let sep='';
       if(at){ const dl=dayLabel(at); if(dl!==lastDay){ lastDay=dl; sep=`<div class="day">${dl}</div>`; } }
       const own=m.from_id===r.owner_id?' 👑':'';
-      return sep+`<div class="bub ${mine?'me':'them'}"${m.id!=null?` onclick="roomMsgMenu('${esc(String(m.id))}')"`:''}>${mine?'':`<div class="who" onclick="event.stopPropagation();openUserById('${m.from_id}')">${esc(m.emoji||'')} ${esc(m.name||'匿名')}${own}</div>`}${esc(m.text)}${at?`<span class="tm">${hhmm(at)}</span>`:''}</div>`; }).join('');
+      return sep+`<div class="bub ${mine?'me':'them'}"${m.id!=null?` onclick="roomMsgMenu('${esc(String(m.id))}')"`:''}>${mine?'':`<div class="who" onclick="event.stopPropagation();openUserById('${m.from_id}')">${esc(m.emoji||'')} ${esc(m.name||'名前なし')}${own}</div>`}${esc(m.text)}${at?`<span class="tm">${hhmm(at)}</span>`:''}</div>`; }).join('');
   }
   // 2.5秒ごとに描き直すので、変わった時だけ差し替える（読んでいる途中で一番下に戻されないように）
   if(box.dataset.h!==h){ const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60||box.dataset.room!==rid(r.id); box.dataset.h=h; box.dataset.room=rid(r.id); box.innerHTML=h; if(atBottom&&joined)box.scrollTop=box.scrollHeight; else if(!joined)box.scrollTop=0; }
@@ -7382,7 +7406,7 @@ function roomMsgMenu(id){
   const mine=m.from_id===myId, canDel=mine||canModRoom(r);   // 運営（影のオーナー）も消せる（2026-10-15）
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">この投稿</h2><div class="sec">${esc(m.text)}</div>
     ${canDel?`<button class="rbtn warn" onclick="deleteRoomMsg('${esc(String(id))}')">🗑 この投稿を消す${mine?'':`<small>${isRoomOwner(r)?'オーナー':'運営'}として消します（書いた人には通知されません）</small>`}</button>`:''}
-    ${mine?'':`<button class="rbtn warn" onclick="closeMembers();reportContext='コミュニティ「${jsq(r.name)}」の投稿「${jsq(m.text.slice(0,30))}」';openReport('${m.from_id}','${jsq(m.name||'匿名')}')">⚠ この投稿を通報する<small>書いた人はあなたの画面に出なくなります</small></button>`}
+    ${mine?'':`<button class="rbtn warn" onclick="closeMembers();reportContext='コミュニティ「${jsq(r.name)}」の投稿「${jsq(m.text.slice(0,30))}」';openReport('${m.from_id}','${jsq(m.name||'名前なし')}')">⚠ この投稿を通報する<small>書いた人はあなたの画面に出なくなります</small></button>`}
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
 }
@@ -9908,18 +9932,32 @@ function renderVisHub(){
     <div class="pssec"><div class="psh">🚫 だれにも見えないもの</div>
       <div class="vishint" style="margin:0 0 10px">年齢・キャンパスの外での位置（アプリを閉じている間は位置を取りません）</div></div>
     <div class="pssec"><div class="psh">📵 スマホの位置情報そのものを止めたい時</div>
-      <div class="vishint" style="margin:0 0 10px">ちかくはホーム画面に追加したWebアプリなので、iPhoneの「設定 ▶ アプリ」には出てきません。<br>
+      <div class="vishint" style="margin:0 0 10px">${isNativeApp()?`<b>iPhone</b>：設定 ▶ ちかく ▶ 位置情報 ▶「なし」<br>
+        <b>Android</b>：設定 ▶ アプリ ▶ ちかく ▶ 権限 ▶ 位置情報 ▶「許可しない」`
+        :`ちかくはホーム画面に追加したWebアプリなので、iPhoneの「設定 ▶ アプリ」には出てきません。<br>
         <b>iPhone</b>：設定 ▶ プライバシーとセキュリティ ▶ 位置情報サービス ▶ Safariのサイト ▶「なし」<br>
         <b>Android</b>：Chrome ▶ ︙ ▶ 設定 ▶ サイトの設定 ▶ 位置情報 で、このサイトをブロック<br>
-        ※ iPhoneのこの設定はSafariで開くほかのサイトにも効きます。ちかくだけ止めるなら、上の「近くの人」を「出さない」にしてください。</div></div>
+        ※ iPhoneのこの設定はSafariで開くほかのサイトにも効きます。ちかくだけ止めるなら、上の「近くの人」を「出さない」にしてください。`}</div></div>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:4px;color:var(--muted)" onclick="closeVisHub()">閉じる</button>`;
 }
 function saveLocPrefs(){ try{ localStorage.setItem('tama_shareOff',sharing?'0':'1'); localStorage.setItem('tama_coarse',coarse?'1':'0'); }catch(e){} }
 // 「プロフィールを消して共有をやめる」。1回押しただけで消えないよう確認する（何が消えて何が残るかも書く）
 // 2026-10-05 アイデア班のフィードバック：時間割だけ残っていたので一緒に消す。消した後はトーストだけだと何が起きたか分からないので、
 // 消えたもの・残っているもの・また使う時の手順をポップで出す（leaveDoneSheet）
-async function leaveAll(){
-  if(!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録・ひとことの回答も消えます\n・時間割（友達に見せる設定も）も消えます\n・トーク（相手の画面からも）・いいね・友達・コミュニティの参加と投稿も消えます\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
+// アカウントの削除（2026-11-03 アプリ化の審査：Apple 5.1.1(v)・Google。ゲストのアカウントも含めて、ログインの記録まで消す）。
+// 先に leaveAll で本人の権限で消せる物を消し、そのあとサーバーの関数 tama-delete-account（supabase/functions/）が残りとログインの記録を消す。
+// 関数がまだ無い時は、ここまで消えたことと、メールでの依頼を案内する。端末の印（tama_dev）は利用停止を守るため残す
+async function deleteAccount(){
+  if(!confirm('アカウントを削除しますか？\n\n・プロフィール・位置・トーク・いいね・友達・時間割・コミュニティの参加と投稿・ログインの記録が消えます\n・元には戻せません'))return;
+  if(!profileDeleted)await leaveAll(true);
+  let ok=false; try{ const {data,error}=await sb.functions.invoke('tama-delete-account',{body:{}}); ok=!error&&!!data&&data.ok===true; }catch(e){}
+  if(!ok){ toast('プロフィールなどは消しました。ログインの記録の削除は、設定の「困ったとき・お問い合わせ」のメールでご依頼ください'); return; }
+  try{ await sb.auth.signOut(); }catch(e){}
+  try{ Object.keys(localStorage).filter(k=>(/^tama|^sb-/.test(k))&&k!=='tama_dev').forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  alert('アカウントを削除しました。ご利用ありがとうございました'); location.reload();
+}
+async function leaveAll(skipConfirm){
+  if(!skipConfirm&&!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録・ひとことの回答も消えます\n・時間割（友達に見せる設定も）も消えます\n・トーク（相手の画面からも）・いいね・友達・コミュニティの参加と投稿も消えます\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
   sharing=false; stopGeo(); saveLocPrefs();
   await stopSharingEverywhere();
   let talksOk=true;
