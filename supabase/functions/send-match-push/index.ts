@@ -43,14 +43,74 @@ if (vapidReady) {
 // 通知を押した時に開く場所は、このサイトの中だけ（よそのページに飛ばされないように。sw.js でも確かめる）
 const safeUrl = (u: unknown) => (typeof u === "string" && u.startsWith("/") && !u.startsWith("//") ? u : "./index.html");
 
+// ---- 📱 アプリの通知（2026-11-05。supabase/tama_native_push.sql） ----
+// tama_push_devices の subscription が {type:'fcm'|'apns', token} の行は、ブラウザの通知ではなく、それぞれの通知サーバーに送る。
+// Secrets（入れるまでは、その端末には送らない）：
+//   Android … FCM_SERVICE_ACCOUNT（Firebase → プロジェクトの設定 → サービス アカウント → 新しい秘密鍵 の JSON をそのまま）
+//   iPhone  … APNS_KEY（.p8 の中身）・APNS_KEY_ID・APNS_TEAM_ID・APNS_TOPIC（jp.chikaku.tama）・APNS_PROD（TestFlight・ストアは 1、Xcode から入れた版は空）
+const b64u = (b: ArrayBuffer | Uint8Array | string) => {
+  const s = typeof b === "string" ? b : String.fromCharCode(...new Uint8Array(b instanceof Uint8Array ? b : new Uint8Array(b)));
+  return btoa(typeof b === "string" ? unescape(encodeURIComponent(s)) : s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+};
+const pemBytes = (pem: string) => Uint8Array.from(atob(pem.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+async function signJwt(header: Record<string, unknown>, claims: Record<string, unknown>, pem: string, alg: "RS256" | "ES256") {
+  const key = await crypto.subtle.importKey("pkcs8", pemBytes(pem),
+    alg === "RS256" ? { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" } : { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const data = `${b64u(JSON.stringify(header))}.${b64u(JSON.stringify(claims))}`;
+  const sig = await crypto.subtle.sign(alg === "RS256" ? { name: "RSASSA-PKCS1-v1_5" } : { name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(data));
+  return `${data}.${b64u(sig)}`;
+}
+let fcmTok: { t: string; exp: number } | null = null;
+async function fcmAccess(sa: { client_email: string; private_key: string; token_uri?: string }) {
+  if (fcmTok && fcmTok.exp > Date.now() + 60000) return fcmTok.t;
+  const now = Math.floor(Date.now() / 1000), aud = sa.token_uri || "https://oauth2.googleapis.com/token";
+  const jwt = await signJwt({ alg: "RS256", typ: "JWT" }, { iss: sa.client_email, scope: "https://www.googleapis.com/auth/firebase.messaging", aud, iat: now, exp: now + 3600 }, sa.private_key, "RS256");
+  const r = await fetch(aud, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}` });
+  const j = await r.json();
+  if (!j.access_token) throw new Error("FCM の鍵を受け取れません: " + JSON.stringify(j).slice(0, 120));
+  fcmTok = { t: j.access_token, exp: Date.now() + (j.expires_in ?? 3600) * 1000 };
+  return fcmTok.t;
+}
+let apnsJwt: { t: string; at: number } | null = null;
+// 返り値：'sent' | 'gone'（端末の番号が無効。表から消す）| 'off'（Secrets が無い）| 'fail'
+async function sendNative(type: string, token: string, msg: { title: string; body: string; url: string; tag?: string }): Promise<string> {
+  try {
+    if (type === "fcm") {
+      const raw = Deno.env.get("FCM_SERVICE_ACCOUNT"); if (!raw) return "off";
+      const sa = JSON.parse(raw);
+      const r = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
+        method: "POST", headers: { "Authorization": `Bearer ${await fcmAccess(sa)}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ message: { token, notification: { title: msg.title, body: msg.body }, data: { url: msg.url },
+          android: { notification: { ...(msg.tag ? { tag: msg.tag } : {}) } } } }),
+      });
+      if (r.ok) return "sent";
+      const t = await r.text();
+      if (r.status === 404 || /UNREGISTERED|INVALID_ARGUMENT.*token/i.test(t)) return "gone";
+      console.error("[send-match-push] FCM", r.status, t.slice(0, 160)); return "fail";
+    }
+    if (type === "apns") {
+      const key = Deno.env.get("APNS_KEY"), kid = Deno.env.get("APNS_KEY_ID"), team = Deno.env.get("APNS_TEAM_ID"), topic = Deno.env.get("APNS_TOPIC") || "jp.chikaku.tama";
+      if (!key || !kid || !team) return "off";
+      // Apple の決まり：通知の鍵（JWT）は20分〜1時間ごとに作り直す
+      if (!apnsJwt || Date.now() - apnsJwt.at > 40 * 60000) apnsJwt = { t: await signJwt({ alg: "ES256", kid }, { iss: team, iat: Math.floor(Date.now() / 1000) }, key, "ES256"), at: Date.now() };
+      const host = Deno.env.get("APNS_PROD") === "1" ? "api.push.apple.com" : "api.sandbox.push.apple.com";
+      const r = await fetch(`https://${host}/3/device/${token}`, {
+        method: "POST", headers: { "authorization": `bearer ${apnsJwt.t}`, "apns-topic": topic, "apns-push-type": "alert", "apns-priority": "10", "Content-Type": "application/json" },
+        body: JSON.stringify({ aps: { alert: { title: msg.title, body: msg.body }, sound: "default", ...(msg.tag ? { "thread-id": msg.tag } : {}) }, url: msg.url }),
+      });
+      if (r.ok) return "sent";
+      const t = await r.text();
+      if (r.status === 410 || /BadDeviceToken|Unregistered|DeviceTokenNotForTopic/.test(t)) return "gone";
+      console.error("[send-match-push] APNs", r.status, t.slice(0, 160)); return "fail";
+    }
+  } catch (e) { console.error("[send-match-push] アプリの通知", type, String(e).slice(0, 160)); }
+  return "fail";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    if (!vapidReady) {
-      console.error("[send-match-push] VAPID未設定のため送信を中止");
-      return reply({ ok: false, reason: "vapid not configured" });
-    }
 
     const { to, title: rawTitle, body: rawBody, url, kind, tag, badge } = await req.json();
     console.log("[send-match-push] request received, to:", to, "kind:", kind ?? "-");
@@ -124,9 +184,16 @@ Deno.serve(async (req) => {
     if (error) console.error("[send-match-push] push_subscriptions取得エラー:", error.message);
     if (data?.subscription?.endpoint) subs.set(data.subscription.endpoint, data.subscription);
     const { data: devs, error: dErr } = await supabase.from("tama_push_devices").select("endpoint,subscription").eq("user_id", to);
-    if (!dErr) for (const d of devs ?? []) if (d.subscription?.endpoint) subs.set(d.endpoint, d.subscription);
+    // 📱 アプリの端末（fcm・apns）は別に集める
+    const natives: { endpoint: string; type: string; token: string }[] = [];
+    if (!dErr) for (const d of devs ?? []) {
+      const t = d.subscription?.type;
+      if ((t === "fcm" || t === "apns") && d.subscription?.token) natives.push({ endpoint: d.endpoint, type: t, token: d.subscription.token });
+      else if (d.subscription?.endpoint) subs.set(d.endpoint, d.subscription);
+    }
+    if (!vapidReady) { if (subs.size) console.error("[send-match-push] VAPID未設定のため、ブラウザの通知は送らない"); subs.clear(); }
 
-    if (subs.size === 0) {
+    if (subs.size === 0 && natives.length === 0) {
       console.log("[send-match-push] 購読情報なし (to:", to, ") — このユーザーは通知を有効化していない");
       await log("fail");
       return reply({ ok: false, reason: "no subscription", devices: 0, sent: 0 });
@@ -157,10 +224,18 @@ Deno.serve(async (req) => {
         }
       }
     }));
+    // 📱 アプリの端末
+    const msg = { title: title || "ちかく", body: body || "", url: safeUrl(url), tag: typeof tag === "string" && tag ? tag.slice(0, 64) : undefined };
+    await Promise.all(natives.map(async (n) => {
+      const r = await sendNative(n.type, n.token, msg);
+      if (r === "sent") sent++;
+      else { errors.push(n.type + ":" + r); if (r === "gone") await supabase.from("tama_push_devices").delete().eq("endpoint", n.endpoint); }
+    }));
 
-    console.log("[send-match-push] 送信", sent, "/", subs.size, "(to:", to, ")");
+    const devices = subs.size + natives.length;
+    console.log("[send-match-push] 送信", sent, "/", devices, "(to:", to, ")");
     await log(sent ? "sent" : "fail");
-    return reply(sent ? { ok: true, sent, devices: subs.size } : { ok: false, sent, devices: subs.size, error: errors.join(",") });
+    return reply(sent ? { ok: true, sent, devices } : { ok: false, sent, devices, error: errors.join(",") });
   } catch (e) {
     console.error("[send-match-push] 想定外エラー:", String(e));
     return reply({ error: String(e) }, 500);
