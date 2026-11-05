@@ -12,6 +12,11 @@
 //     kind  … 通知の種類（msg・like・friend・nearby・room・test など）。本人がその種類をオフにしていたら送らない。送った記録を tama_push_events に書く
 //     tag   … 同じ tag の通知は、前の通知を置きかえる（別の人からのメッセージが消し合わないように、相手ごとに変える）
 //     badge … true ならアプリのアイコンの数字を1つ増やす（sw.js）
+// 2026-11-05 安全の見直し：呼んだ人（ログイン必須）と送り先の間に、その種類を送る理由があるかを確かめる。
+//   msg＝5分以内にその人とのトークに書いた／like＝その人にいいねした／friend＝友達か申請がある／nearby＝tama_push_claim で記録した／
+//   room＝同じコミュニティに入っている／test＝自分あて。kind が無い・ほかの種類は断る（学園祭版を使う時は kind を付ける）。
+//   10分あたり、呼んだ人ごとに60通・同じ相手に20通まで。止められた人・相手にブロックされている人からは送らない。
+//   ⚠️ supabase/tama_safety.sql を実行してからデプロイする（実行前は「近くの人」の通知が断られる）
 // 送り先は push_subscriptions（1人1行）と tama_push_devices（端末ごと）の両方。同じ送り先には1回だけ送る。
 // 送り先が無効（404・410）なら両方から消す。
 
@@ -47,19 +52,59 @@ Deno.serve(async (req) => {
       return reply({ ok: false, reason: "vapid not configured" });
     }
 
-    const { to, title, body, url, kind, tag, badge } = await req.json();
+    const { to, title: rawTitle, body: rawBody, url, kind, tag, badge } = await req.json();
     console.log("[send-match-push] request received, to:", to, "kind:", kind ?? "-");
-    if (!to) return reply({ error: "to is required" }, 400);
+    if (!to || typeof to !== "string" || !/^[0-9a-f-]{36}$/i.test(to)) return reply({ error: "to is required" }, 400);
     const k = typeof kind === "string" && /^[a-z]{1,16}$/.test(kind) ? kind : "";
+    // 長すぎる文は切る（通知の画面に入る長さ）
+    const title = typeof rawTitle === "string" ? rawTitle.slice(0, 60) : "";
+    const body = typeof rawBody === "string" ? rawBody.slice(0, 200) : "";
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+
+    // ---- だれが送らせているか（2026-11-05 安全の見直し） ----
+    // 前は、ログインした人ならだれでも、だれにでも、好きな文で通知を送れた。
+    // いまは「呼んだ人」と「送り先」の間に、その種類の通知を送る理由（トークを送った・いいねした・友達・同じコミュニティ など）が
+    // あるかをここで確かめ、10分あたりの回数にも上限をつける。サーバーの中の呼び出し（強い鍵）は確かめない
+    const jwt = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+    const internal = !!jwt && jwt === serviceKey;
+    let sender: string | null = null;
+    if (!internal) {
+      const { data: got } = await supabase.auth.getUser(jwt);
+      sender = got?.user?.id ?? null;
+      if (!sender) return reply({ ok: false, reason: "not signed in" }, 401);
+      const deny = async (why: string) => { console.log("[send-match-push] 送らない:", why, "(from:", sender!.slice(0, 8), "to:", to.slice(0, 8), "kind:", k || "-", ")"); return reply({ ok: false, reason: why }); };
+      const one = async (q: PromiseLike<{ data: unknown[] | null; error: unknown }>) => { const { data, error } = await q; return !error && Array.isArray(data) && data.length > 0; };
+      const since = (min: number) => new Date(Date.now() - min * 60000).toISOString();
+      if (await one(supabase.from("tama_bans").select("user_id").eq("user_id", sender).limit(1))) return deny("banned");
+      if (await one(supabase.from("tama_blocks").select("blocker_id").eq("blocker_id", to).eq("blocked_id", sender).limit(1))) return deny("blocked");
+      // その種類を送る理由があるか
+      let why = false;
+      if (k === "test") why = to === sender;
+      else if (to === sender) why = false;
+      else if (k === "msg") why = await one(supabase.from("tama_messages").select("id").eq("from_id", sender).in("match_key", [[sender, to].sort().join("__")]).gt("created_at", since(5)).limit(1));
+      else if (k === "like") why = await one(supabase.from("tama_likes").select("to_id").eq("from_id", sender).eq("to_id", to).limit(1));
+      else if (k === "friend") why = await one(supabase.from("tama_friends").select("id").or(`and(from_id.eq.${sender},to_id.eq.${to}),and(from_id.eq.${to},to_id.eq.${sender})`).limit(1));
+      else if (k === "nearby") why = await one(supabase.from("tama_push_log").select("id").eq("sender_id", sender).eq("recipient_id", to).gt("created_at", since(5)).limit(1));
+      else if (k === "room") {
+        const { data: mine } = await supabase.from("tama_room_members").select("room_id").eq("user_id", sender).limit(200);
+        const ids = (mine ?? []).map((r) => r.room_id);
+        why = ids.length > 0 && await one(supabase.from("tama_room_members").select("room_id").eq("user_id", to).in("room_id", ids).limit(1));
+      }
+      if (!why) return deny("no relation");
+      // 回数の上限：呼んだ人ごとに10分で60通・同じ相手には10分で20通
+      const { count: nAll } = await supabase.from("tama_push_events").select("id", { count: "exact", head: true }).eq("sender_id", sender).gt("created_at", since(10));
+      if ((nAll ?? 0) >= 60) return deny("too many");
+      const { count: nPair } = await supabase.from("tama_push_events").select("id", { count: "exact", head: true }).eq("sender_id", sender).eq("user_id", to).gt("created_at", since(10));
+      if ((nPair ?? 0) >= 20) return deny("too many to one");
+    }
+
     // 記録（テーブルが無い時＝SQL の実行前は何もしない）
     const log = async (ev: string) => {
       if (!k) return;
-      const { error } = await supabase.from("tama_push_events").insert({ user_id: to, kind: k, ev });
+      let { error } = await supabase.from("tama_push_events").insert({ user_id: to, kind: k, ev, sender_id: sender });
+      if (error && /sender_id/.test(error.message)) ({ error } = await supabase.from("tama_push_events").insert({ user_id: to, kind: k, ev }));   // tama_safety.sql の実行前
       if (error) console.log("[send-match-push] 記録できません（tama_notify.sql の実行前?）:", error.message);
     };
 
