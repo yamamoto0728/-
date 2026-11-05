@@ -897,6 +897,9 @@
   /* Web 版の「アプリに引き継ぐ」のコード */
   .xcode{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:27px;font-weight:700;letter-spacing:.12em;text-align:center;color:var(--ink);background:var(--surface2);border:1.5px dashed var(--line);border-radius:14px;padding:16px 8px;margin:4px 0 10px;user-select:all;-webkit-user-select:all}
   .xsteps{font-size:12.5px;color:var(--muted);line-height:1.8;margin:12px 0 4px;padding-left:1.3em}
+  /* 📱 閉じていても、すれ違う の説明（2026-11-05） */
+  .bgask .bglist{margin:4px 0 12px;padding-left:1.2em;font-size:14px;line-height:1.7;color:var(--ink)}
+  .bgask .bglist li{margin-bottom:4px}
   /* Apple・Google でサインインのボタン（Apple の決まりに合わせて、黒地に白・暗い表示では白地に黒。Google は白地に色のロゴ） */
   .ausoc{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;height:50px;border-radius:12px;font-size:16px;font-weight:600;font-family:inherit;margin-bottom:10px;cursor:pointer;border:1px solid transparent}
   .ausoc[disabled]{opacity:.6}
@@ -2719,10 +2722,12 @@ async function startGhost(min){
   const prev=nearVisKey()==='off'?'on':nearVisKey();
   try{ localStorage.setItem('tama_ghost',JSON.stringify({until,prev})); }catch(e){}
   closeMembers(); if(nearVisKey()!=='off')await setNearVis('off'); renderAppvChrome();
+  if(bgOnLocal()&&sb)sb.rpc('tama_bg_pause',{p_until:new Date(until).toISOString()}).then(()=>{},()=>{});   // 📱 閉じている間も記録しない
 }
 async function endGhost(auto){
   let g=null; try{ g=JSON.parse(localStorage.getItem('tama_ghost')||'null'); localStorage.removeItem('tama_ghost'); }catch(e){}
   if(!auto)closeMembers(); if(nearVisKey()==='off')await setNearVis((g&&g.prev)||'on'); renderAppvChrome();
+  if(bgOnLocal()&&sb)sb.rpc('tama_bg_pause',{p_until:null}).then(()=>{},()=>{});
   if(auto)toast('居場所の表示を再開しました');   // A3 時間が来て戻った時は、本人にだけ1回知らせる（気づかないまま見えているのを防ぐ）
 }
 setInterval(()=>{ let g=null; try{ g=JSON.parse(localStorage.getItem('tama_ghost')||'null'); }catch(e){} if(g&&g.until<=Date.now()&&profile)endGhost(true); },30000);   // 時間が来たら自動で戻る
@@ -3615,6 +3620,7 @@ async function authLogout(){
   if(!confirm('ログアウトしますか？\n\n近くの人の一覧から消え、この端末には通知が届かなくなります。もう一度使う時は、同じメールアドレスでログインすれば、今のアカウントに戻れます'))return;
   try{ await stopSharingEverywhere(); }catch(e){}
   try{ await disablePush(); }catch(e){}
+  try{ await bgDisable(true); }catch(e){}
   try{ await sb.auth.signOut(); }catch(e){}
   authClearLocal(); location.reload();
 }
@@ -3704,6 +3710,7 @@ async function tryResumeSession(){
     renderMeHero();
     $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
     startGeo();buildInvite();startLoops();
+    if(isNativeApp())setTimeout(bgBoot,2500);   // 📱 閉じていても、すれ違う（オンの人は続ける・まだの人には1回だけ聞く）
     renderStatusRow();
     syncPushSubscription();   // 許可済みなら購読を登録し直す（通知は常にオンのままにする）
     // 登録済みの人が開き直した時は、まだ通知を許可していなければ聞く（何のアプリかはもう分かっているため）
@@ -3716,6 +3723,83 @@ async function tryResumeSession(){
     visitOpen();
     return true;
   }catch(e){ return false; }
+}
+
+/* ---------- 📱 閉じていても、すれ違う（2026-11-05 あおの依頼「まだ入れてないものは入れて」。要件定義書 v0.1 の目的①） ----------
+   ・包んだアプリ（位置の部品 Transistorsoft 入り）の中だけ。部品の窓口は /tama/bgloc.js（元は app/bgloc/index.js）
+   ・オンにすると、端末ごとの合言葉（tama_bg_token_issue）を受け取り、部品が学内にいる間だけ位置を取って、閉じていてもサーバーに送る。
+     すれ違いの判定・お互いさま・通知はサーバー（supabase/tama_bg_cross.sql）。閉じている人は地図・近くの人には出ない
+   ・聞くのは1回だけ（登録のあと・すれ違いの設定が「使わない」でない時）。説明の画面 →「オンにする」→ 位置の許可（「常に」）。
+     あとから、すれ違いの設定の「閉じている間も」で切りかえられる
+   ・すれ違いを「使わない」にした・ログアウト・アカウントの削除 → オフにして合言葉を消す。「隠れる」の間は、サーバーで記録しない（tama_bg_pause） */
+// 起こす合図の円（キャンパスの形を覆う半径200mの円11個。10/29 の試作で確かめた配置。iPhone が見張れる円は20個まで）。
+// 大学・キャンパスを足す時は、ここをキャンパスの設定から読む形にする
+const CAMPUS_WAKES={radius:200,pts:[[35.61101,139.29969],[35.61101,139.30276],[35.6135,139.29357],[35.6135,139.29663],[35.6135,139.29969],[35.61599,139.29357],[35.61599,139.29663],[35.61599,139.29969],[35.61848,139.29051],[35.61848,139.29357],[35.62097,139.29051]]};
+let bgLoading=null;
+const bgOnLocal=()=>{ try{ return localStorage.getItem('tama_bgOn')==='1'; }catch(e){ return false; } };
+// 部品の窓口を読む（アプリの中だけ。部品が入っていない古いアプリでは何もしない）
+function bgLoad(){
+  if(!isNativeApp())return Promise.resolve(false);
+  if(window.ChikakuBG)return Promise.resolve(true);
+  if(!(window.Capacitor&&window.Capacitor.isPluginAvailable&&window.Capacitor.isPluginAvailable('BackgroundGeolocation')))return Promise.resolve(false);
+  if(!bgLoading)bgLoading=new Promise(ok=>{ const s=document.createElement('script'); s.src='/tama/bgloc.js'; s.onload=()=>ok(!!window.ChikakuBG); s.onerror=()=>{ bgLoading=null; ok(false); }; document.head.appendChild(s); });
+  return bgLoading;
+}
+function bgCfg(token){
+  return {url:SUPABASE_URL+'/rest/v1/rpc/tama_bg_ingest',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},
+    token,wakes:CAMPUS_WAKES.pts,radius:CAMPUS_WAKES.radius};
+}
+let bgState={available:false,enabled:false}, bgPerm='unknown';
+// 開いた時：オンにしている人は続ける。まだ聞いていない人には1回だけ聞く
+async function bgBoot(){
+  if(!profile||!(await bgLoad()))return;
+  try{
+    const tok=localStorage.getItem('tama_bgTok')||'';
+    if(bgOnLocal()&&tok){ bgState=await window.ChikakuBG.resume(bgCfg(tok)); bgPerm=await window.ChikakuBG.permission(); }
+    else bgState=await window.ChikakuBG.state();
+  }catch(e){ console.warn('[bg] 位置の部品を動かせません',e); return; }
+  let asked=false; try{ asked=!!localStorage.getItem('tama_bgAsked'); }catch(e){}
+  if(!asked&&!bgOnLocal()&&crossModeOf(profile)!=='off')bgAskWhenFree(0);
+}
+// ほかの画面（規約の改定のお知らせ・通知の許可 など）が出ている間は、閉じるまで待つ（最大で約3分）
+function bgAskWhenFree(n){ setTimeout(()=>{ if($$('.overlay.show').length||$('#authGate').classList.contains('show')){ if(n<36)bgAskWhenFree(n+1); return; } openBgAsk(); },n?5000:1500); }
+function openBgAsk(){
+  try{ localStorage.setItem('tama_bgAsked',String(Date.now())); }catch(e){}
+  $('#memSheet').innerHTML=`<div class="rinfo bgask"><h2 class="pstitle">閉じていても、すれ違う</h2>
+    <p class="psdesc">学内にいる間だけ、アプリを閉じているときも位置情報を使って、すれ違いを記録します。</p>
+    <ul class="bglist"><li>学外では位置情報を使いません。家や通学路の位置は残しません</li><li>閉じている人は、地図や近くの人の一覧には出ません</li><li>共通点のある人とすれ違った時だけ、通知でお知らせします</li></ul>
+    <p class="psdesc">次の画面で、位置情報を<b>「常に許可」</b>にしてください。${isIOS()?'iPhone は、あとからもう一度「常に許可」の確認が出ます。':''}あとから、すれ違いの設定で変えられます。</p>
+    <button class="btn btn-primary" style="width:100%;padding:13px" onclick="closeMembers();bgEnable()">オンにする</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">今はしない</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function bgEnable(){
+  if(!(await bgLoad())){ toast('この版のアプリでは使えません。アプリを新しくしてください'); return; }
+  if(crossModeOf(profile)==='off'){ toast('すれ違いを「使わない」にしている間は使えません'); return; }
+  let tok='';
+  try{ const {data,error}=await sb.rpc('tama_bg_token_issue'); if(error)throw error; tok=String(data||''); }
+  catch(e){ console.warn('[bg] 合言葉を受け取れません',e&&e.message); toast(/Could not find|PGRST202/.test(String(e&&e.message))?'いまは準備中です。もう少し待ってください':'うまくいきませんでした。電波の良い所でもう一度どうぞ'); return; }
+  try{
+    localStorage.setItem('tama_bgTok',tok); localStorage.setItem('tama_bgOn','1');
+    bgState=await window.ChikakuBG.enable(bgCfg(tok)); bgPerm=await window.ChikakuBG.permission();
+  }catch(e){ console.warn('[bg] オンにできません',e); toast('オンにできませんでした'); return; }
+  const g=ghostInfo(); if(g)sb.rpc('tama_bg_pause',{p_until:new Date(g.until).toISOString()}).then(()=>{},()=>{});
+  toast(bgPerm==='always'?'閉じていても、学内ですれ違えるようになりました':'位置情報を「常に」にすると、閉じていてもすれ違えます');
+  if($('#memOverlay').classList.contains('show')&&$('#bgRow'))renderCrossPrefs();
+}
+async function bgDisable(quiet){
+  try{ localStorage.removeItem('tama_bgOn'); localStorage.removeItem('tama_bgTok'); }catch(e){}
+  try{ if(window.ChikakuBG)bgState=await window.ChikakuBG.disable(); }catch(e){}
+  try{ if(sb)await sb.rpc('tama_bg_revoke'); }catch(e){}
+  if(!quiet)toast('閉じている間のすれ違いをやめました');
+}
+// すれ違いの設定の中の1行（アプリの中だけ）
+function bgRowHtml(){
+  if(!isNativeApp())return '';
+  const on=bgOnLocal(), off=crossModeOf(profile)==='off';
+  const sub=off?'すれ違いを「使わない」にしている間は使えません':!on?'学内にいる間だけ。学外では位置情報を使いません'
+    :bgPerm==='always'?'オン：学内にいる間は、閉じていても記録します':bgPerm==='whenInUse'?'位置情報が「使用中のみ」です。スマホの設定 → ちかく → 位置情報 で「常に」にしてください':'オン';
+  return `<div class="sharerow" id="bgRow" style="margin-top:12px"><div class="lab">閉じている間も、すれ違う<small>${sub}</small></div><div class="toggle${on&&!off?' on':''}" onclick="${on?'bgDisable().then(renderCrossPrefs)':'bgEnable()'}"></div></div>`;
 }
 
 /* ---------- push notifications ---------- */
@@ -4102,6 +4186,7 @@ async function onStart(){
   maybeShowGuide(false);   // 新規登録なので必ず出す
   await saveNewProfile();   // 位置を取り始める前に保存する（後だと、遅れて届いた sharing:false が本当の位置を上書きする）
   startGeo();startLoops();
+  if(isNativeApp())setTimeout(bgBoot,4000);   // 📱 閉じていても、すれ違う（登録のあとに1回だけ聞く）
   syncPushSubscription();   // 登録が終わってから購読をDBに保存する（許可だけ先に取れている場合がある）
   visitOpen();
   funnelLog('reg');   // 登録までのどこで抜けたか（2026-10-14）
@@ -4526,6 +4611,7 @@ const PUSH_KINDS=[
   {k:'like',  icon:'👋', label:'いいね・トークの始まり'},
   {k:'friend',icon:'👥', label:'友達', sub:'申請・承認・新しい共通点'},
   {k:'nearby',icon:'👀', label:'近くに共通点のある人がいる時'},
+  {k:'cross', icon:'🚶', label:'閉じている間のすれ違い', sub:'共通点のある人とすれ違った時（1日3通まで）', app:true},
   {k:'room',  icon:'🏠', label:'コミュニティ', sub:'部屋ごとの通知は部屋の中で切れます'},
   {k:'ct',    icon:'⏰', label:'ちかくタイム', sub:'週2〜3回・休み時間に10分だけのお題'},
   {k:'daily', icon:'🎲', label:'今日のお題', sub:'平日の昼休み（まだ答えていない日だけ）'},
@@ -4573,7 +4659,7 @@ function renderNotifPrefs(){
   const off=pushOffOf(profile);
   $('#notifSheet').innerHTML=`<h2 class="pstitle">🔔 通知の種類</h2>
     <p class="psdesc">いらない通知だけオフにできます。自動で届く通知（お題・ちかくタイム・授業）は、1日2通まで（ちかくタイムの日だけ3通）です。</p>
-    ${PUSH_KINDS.map(m=>{ const on=!off.includes(m.k);
+    ${PUSH_KINDS.filter(m=>!m.app||isNativeApp()).map(m=>{ const on=!off.includes(m.k);
       return `<div class="sharerow" style="margin-bottom:7px"><div class="lab">${m.icon} ${m.label}${m.sub?`<small>${m.sub}</small>`:''}</div><div class="toggle${on?' on':''}" onclick="toggleNotifKind('${m.k}')"><div class="k"></div></div></div>`; }).join('')}
     <h2 class="pstitle" style="margin-top:18px;font-size:16px">📨 通知が届かない時</h2>
     <p class="psdesc">自分あてにテストの通知を1通送ります。届かなければ、登録を作り直してもう一度送ります。</p>
@@ -5491,6 +5577,7 @@ function renderCrossPrefs(){
   $('#memSheet').innerHTML=`<h2 class="pstitle">すれ違い</h2>
     <div class="xmodes">${Object.keys(CROSS_MODES).map(k=>`<button class="xmode${k===m?' on':''}" onclick="setCrossMode('${k}')"><b>${CROSS_MODES[k]}</b><small>${sub[k]}</small></button>`).join('')}</div>
     <p class="psdesc" style="margin-top:8px">自分を出さない人には、相手も見えません（お互いさま）。</p>
+    ${bgRowHtml()}
     <div class="xsec">探している共通点<small>1つだけ。合う人とすれ違うと一番上に出て、知らせます</small></div>
     ${opts.length?`<div class="chips xstar">${opts.map((o,i)=>`<span class="c${star&&star.key===o.key?' on':''}" onclick="setCrossStar(${i})">${star&&star.key===o.key?'★ ':''}${esc(o.label)}</span>`).join('')}</div>`
       :`<p class="psdesc">アーティスト・授業・時間割を入れると、ここから選べます。</p>`}
@@ -5501,6 +5588,7 @@ function renderCrossPrefs(){
 }
 async function setCrossMode(k){
   profile.fa=profile.fa||{}; if(k==='all')delete profile.fa.cross; else profile.fa.cross=k;
+  if(k==='off'&&bgOnLocal())await bgDisable(true);   // 📱 使わない人は、閉じている間の位置も取らない
   renderCrossPrefs(); renderNearby(); renderCross(); await saveMyAttrs();
 }
 async function setCrossStar(i){
@@ -5631,7 +5719,7 @@ const TERMS_HTML=`
 <h4>第2条（利用条件）</h4>
 <p>本サービスは18歳以上の方のみご利用いただけます。登録時に年齢の確認を行います。18歳未満の方はご利用いただけません。</p>
 <h4>第3条（位置情報の取り扱い）</h4>
-<p>本サービスは、利用者が許可した場合にのみ、多摩キャンパスの中にいる間だけ位置情報を取得し、同じサービスを利用している他の利用者に共有します。キャンパスの外の位置は送信・保存しません。アプリを閉じている間は位置情報を取得しません。</p>
+<p>本サービスは、利用者が許可した場合にのみ、多摩キャンパスの中にいる間だけ位置情報を取得し、同じサービスを利用している他の利用者に共有します。キャンパスの外の位置は送信・保存しません。アプリを閉じている間は位置情報を取得しません。ただし、アプリ版で「閉じている間も、すれ違う」をオンにした場合に限り、キャンパスの中にいる間は、アプリを閉じている間も位置情報を取得し、すれ違いの記録と、そのお知らせにだけ使います。この位置は、ほかの利用者の地図や近くの人の一覧には表示しません。</p>
 <p>他の利用者に見えるのは、約30mの区切りに丸めた位置（「ぼかして出す」を選んだ場合は約100m）と、そこから計算したおおよその距離だけです。正確な位置は、すれ違いの判定のためにサーバーに最新の1件だけを置き、他の利用者には送りません。この正確な位置は3時間以内に自動で消します。</p>
 <p>共有は設定からいつでも停止できます。停止している間は、ほかの人の位置も約100mの区切りでしか見えず、すれ違いも記録されません。</p>
 <h4>第4条（登録情報）</h4>
@@ -5694,7 +5782,7 @@ function openTerms(news){
 function closeTerms(){ $('#termsOverlay').classList.remove('show'); }
 // 規約を変えた時、前から使っている人に1回だけ知らせる（民法548条の4：変更の内容と効力が生じる日を、前もって知らせる）。
 // 変える時は TERMS_VER を上げ、TERMS_NEWS に何が変わったかを1行で書く。新しく登録した人は登録の時に読んでいるので出さない
-const TERMS_VER='2026-11-02', TERMS_DATE='2026年11月2日', TERMS_NEWS='位置の見え方（約30mの区切り）・禁止事項・ブロック・運営の責任の範囲・データの保存先・規約の変更について書き足しました';
+const TERMS_VER='2026-11-05', TERMS_DATE='2026年11月5日', TERMS_NEWS='アプリ版の「閉じている間も、すれ違う」（オンにした人だけ）について、位置情報の取り扱い（第3条）に書き足しました';
 function termsChangedNotice(){
   let seen=''; try{ seen=localStorage.getItem('tama_termsVer')||''; }catch(e){}
   let reg=0; try{ reg=+(localStorage.getItem('tama_regDay')||0); }catch(e){}
@@ -10082,6 +10170,7 @@ async function leaveAll(skipConfirm){
   if(!skipConfirm&&!confirm('プロフィールを消して、位置情報の共有をやめますか？\n\n・近くの人・すれ違いの一覧から消えます\n・友達に見せている「いまの自分」と、開いた日の記録・ひとことの回答も消えます\n・時間割（友達に見せる設定も）も消えます\n・トーク（相手の画面からも）・いいね・友達・コミュニティの参加と投稿も消えます\n\n元には戻せません（「見せる範囲」で近くの人に出すと、いまの内容でプロフィールを作り直します）'))return;
   sharing=false; stopGeo(); saveLocPrefs();
   await stopSharingEverywhere();
+  if(bgOnLocal())await bgDisable(true);
   let talksOk=true;
   if(sb){ const {error}=await sb.from(T('profiles')).delete().eq('id',myId); if(error)console.warn('[leave] プロフィールを消せませんでした',error.message);
     if(!visitsMissing)sb.rpc('tama_forget_visits').then(({error})=>{ if(error)console.warn('[leave] 開いた日の記録を消せませんでした',error.message); });
