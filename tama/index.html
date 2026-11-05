@@ -3311,6 +3311,24 @@ const gradOf=e=>GRADS[e]||(appvOn()?['#9fd3dc','#9fd3dc']:['#8b9dff','#63d6e8'])
 const gr=e=>appvOn()?`color-mix(in srgb,${gradOf(e)[0]} 42%,#fff)`:`linear-gradient(135deg,${gradOf(e)[0]},${gradOf(e)[1]})`;
 function uuid(){return (crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(36).slice(2));}
 
+/* ---------- CAPTCHA（ロボットの大量登録を防ぐ。2026-11-05、審査の報告書 A8） ----------
+   Cloudflare Turnstile。CAPTCHA.sitekey が空のあいだは何もしない（今と同じ）。ふつうの人には何も出ず、怪しい時だけ画面の下に確認が出る。
+   入れる時の順番（⚠️ 逆にすると、だれも登録・ログインできなくなる）：
+     ① Cloudflare → Turnstile でサイトを作る（ドメイン chikaku-hosei.vercel.app・Managed）→ サイトキーを下に入れてマージ・デプロイ
+     ② Supabase → Authentication → Attack Protection → CAPTCHA をオン（Turnstile・シークレットキー） */
+const CAPTCHA={sitekey:''};
+let capLoad=null;
+function captchaToken(){
+  if(!CAPTCHA.sitekey)return Promise.resolve(undefined);
+  if(!capLoad)capLoad=new Promise((ok,ng)=>{ const sc=document.createElement('script'); sc.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; sc.async=true; sc.onload=()=>ok(); sc.onerror=()=>{ capLoad=null; ng(new Error('captcha load')); }; document.head.appendChild(sc); });
+  return capLoad.then(()=>new Promise((ok,ng)=>{
+    let box=$('#capBox'); if(!box){ box=document.createElement('div'); box.id='capBox'; box.style.cssText='position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2000'; document.body.appendChild(box); }
+    box.innerHTML='';
+    const t=setTimeout(()=>ng(new Error('captcha timeout')),45000);
+    window.turnstile.render(box,{sitekey:CAPTCHA.sitekey,appearance:'interaction-only',language:'ja',
+      callback:tok=>{ clearTimeout(t); setTimeout(()=>{ box.innerHTML=''; },300); ok(tok); },'error-callback':()=>{ clearTimeout(t); ng(new Error('captcha')); }});
+  }));
+}
 /* ---------- backend (Supabase) ---------- */
 const configured = !SUPABASE_URL.includes("PASTE_") && !SUPABASE_ANON_KEY.includes("PASTE_") && SUPABASE_ANON_KEY.length>20;
 let sb=null, myId=null;
@@ -3331,10 +3349,10 @@ async function initBackend(){
     if(isNativeApp() && (!user || !user.email)){ myId = user ? user.id : null; openAuth({gate:true}); return false; }
     // 🌐 Web 版：アプリに引き継いでログアウトした後は、黙って新しいアカウントを作らずに、そう伝える
     if(!user && !isNativeApp() && xferLeft()){ openXferLeft(); return false; }
-    if(!user){ const r = await sb.auth.signInAnonymously();
+    if(!user){ const cap = await captchaToken().catch(()=>undefined); const r = await sb.auth.signInAnonymously(cap?{options:{captchaToken:cap}}:undefined);
       // 回数制限（同じ回線から短い時間に多くの人が登録した時など）は、原因と違う文を出さない（2026-10-15 のレビュー：学園祭のブースのWi-Fi）
       if(r.error){ const m=String(r.error.message||''), rl=r.error.status===429||/rate limit|too many/i.test(m);
-        backendError(rl?'いま登録が混み合っています。1〜2分待ってから開き直すか、Wi-Fiを切ってモバイル回線で開いてください。':/disabled|not enabled|signups not allowed/i.test(m)?'匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。':'うまく始められませんでした（'+m.slice(0,80)+'）。少し待ってから開き直してください。'); return false; }
+        backendError(/captcha/i.test(m)?'ロボットでないかの確認ができませんでした。電波の良い所で、開き直してください。':rl?'いま登録が混み合っています。1〜2分待ってから開き直すか、Wi-Fiを切ってモバイル回線で開いてください。':/disabled|not enabled|signups not allowed/i.test(m)?'匿名ログインが有効になっていません。SupabaseでAnonymous sign-insをONにしてください。':'うまく始められませんでした（'+m.slice(0,80)+'）。少し待ってから開き直してください。'); return false; }
       user = r.data.user; authUser = user;
     }
     myId = user.id;
@@ -3378,6 +3396,7 @@ const authMask=e=>{ const [a,d]=String(e||'').split('@'); return d?a.slice(0,2)+
 const authEmailOk=e=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 function authErrText(error){
   const m=String((error&&error.message)||''), c=String((error&&error.code)||'');
+  if(/captcha/i.test(m+c))return 'ロボットでないかの確認ができませんでした。もう一度お試しください';
   if((error&&error.status===429)||/rate limit|too many|over_email_send_rate_limit/i.test(m+c))return '送る回数が多すぎます。1分ほど待ってから、もう一度お試しください';
   if(/otp_expired|expired|invalid.*(otp|token)|token.*invalid/i.test(m+c))return 'コードがちがうか、時間が切れています。もう一度確かめるか、コードを送り直してください';
   if(/signups not allowed|user not found|otp_disabled/i.test(m+c))return 'このメールアドレスで登録したアカウントは見つかりませんでした';
@@ -3475,7 +3494,8 @@ async function authSocial(provider){
     const r=await socialPlugin().login({provider,options:{scopes:provider==='apple'?['email']:['email','profile'],nonce:await sha256hex(raw)}});
     const tok=r&&r.result&&r.result.idToken;
     if(!tok)throw {message:'no id token'};
-    const {data,error}=await sb.auth.signInWithIdToken({provider,token:tok,nonce:raw});
+    const cap=await captchaToken().catch(()=>undefined);
+    const {data,error}=await sb.auth.signInWithIdToken({provider,token:tok,nonce:raw,...(cap?{options:{captchaToken:cap}}:{})});
     if(error)throw error;
     authUser=(data&&data.user)||authUser; s.mode='signin'; s.busy=false;
     await authAfterLogin();
@@ -3501,10 +3521,10 @@ async function authSend(){
       if(error&&/already|exists|registered/i.test(String(error.message||'')+String(error.code||''))){
         s.mode='signin';
         s.note='このメールアドレスは、もう登録されています。登録したアカウントにログインします（いまのこの端末のデータは引き継がれません）';
-        ({error}=await sb.auth.signInWithOtp({email:e,options:{shouldCreateUser:false}}));
+        ({error}=await sb.auth.signInWithOtp({email:e,options:{shouldCreateUser:false,captchaToken:await captchaToken().catch(()=>undefined)}}));
       }
     }else{
-      ({error}=await sb.auth.signInWithOtp({email:e,options:{shouldCreateUser:true}}));
+      ({error}=await sb.auth.signInWithOtp({email:e,options:{shouldCreateUser:true,captchaToken:await captchaToken().catch(()=>undefined)}}));
     }
   }catch(x){ error={message:String(x&&x.message||x)}; }
   s.busy=false;
@@ -5196,7 +5216,7 @@ function drawMap(list){
 // ブラウザは閉じている間の位置を取れない。そこで、アプリを開いている人の端末が
 // 閉じた人の「閉じる直前の位置」の近くに来たら、閉じた人に通知を送る。
 // 同じ人への通知は tama_push_log に記録し、送る端末が何台あっても FES.nearbyPushCooldownMin 分に1回までにする
-let pushLogMissing=false;
+let pushLogMissing=false, pushClaimRpc='unknown';
 async function checkClosedNearby(){
   if(!FES.nearbyPush||!sb||!profile||!myPos||fesOutside||pushLogMissing)return;
   if(myPos.acc>FES.maxAccuracyM)return;
@@ -5210,6 +5230,17 @@ async function checkClosedNearby(){
       .filter(x=>x.d<=(fesDayNow()?150:FES.nearbyPushRangeM)&&x.common.length)   // 多摩祭の日は150m（2026-10-17 あおの依頼）
       .sort((a,b)=>a.d-b.d).slice(0,3);
     if(!cands.length)return;
+    // 2026-11-05：通知の記録は読めなくなった（supabase/tama_safety.sql）。「最近送ったか」はサーバーの関数が確かめて、送ってよい時だけ記録する
+    if(pushClaimRpc!=='missing'){
+      let any=false;
+      for(const {u,common} of cands){
+        const {data:okSend,error:ce}=await sb.rpc('tama_push_claim',{p_to:u.id,p_kind:'nearby',p_min:FES.nearbyPushCooldownMin});
+        if(ce){ if(ce.code==='PGRST202'||/Could not find the function/i.test(ce.message||'')){ pushClaimRpc='missing'; break; } console.warn('[push] 送ってよいか確かめられません',ce.message); return; }
+        any=true; if(okSend!==true)continue;
+        notifyPush(u.id,'近くに共通点のある人がいます👀','「'+common[0]+'」が同じ人が、いまあなたの近くにいます。アプリを開いてみて！',{kind:'nearby',go:'near',tag:'nearby'});
+      }
+      if(any||pushClaimRpc!=='missing')return;
+    }
     const {data:logs,error:le}=await sb.from(T('push_log')).select('recipient_id')
       .in('recipient_id',cands.map(x=>x.u.id)).eq('kind','nearby')
       .gt('created_at',new Date(now-FES.nearbyPushCooldownMin*60000).toISOString());
@@ -5560,7 +5591,7 @@ async function sendWave(u,text){
   if(le&&/matched/.test(le.message)){
     console.warn('[attrs] tama_likes に matched 列がありません。supabase/tama_tables.sql を実行してください:',le.message);
     await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:text});
-  }else if(le){ console.warn('[wave] 送れませんでした',le.message); toast('⚠️ 送れませんでした。電波の良い所でもう一度どうぞ'); liked.delete(uid); delete myWaves[uid]; renderNearby(); return; }
+  }else if(le){ console.warn('[wave] 送れませんでした',le.message); toast(/too_many/.test(le.message)?'今日はたくさんいいねを送りました。また明日どうぞ':'⚠️ 送れませんでした。電波の良い所でもう一度どうぞ'); liked.delete(uid); delete myWaves[uid]; renderNearby(); return; }
   const gated=init&&surveyGateOn(); if(gated){ initToday++; renderSurveyBox(); }
   const me=profile?profile.name:'だれか';
   // 始め直しの時は、手元のトークの残り時間もすぐ今から24時間にする（次の refreshMatches を待たずに開けるように）
@@ -6601,7 +6632,7 @@ async function sendChatText(uid,t){
   // 保存できなかった時は、知らせて画面からも外す（2026-10-15 あおの指摘「送りあったのに Supabase に反映されない」。前は失敗しても何も出さず、通知だけ届いていた）
   const {error}=await sb.from(T('messages')).insert({match_key:chatKey(uid),from_id:myId,text:t});
   if(error){ console.warn('[chat] 送れませんでした',error.code,error.message); c.msgs=c.msgs.filter(x=>!(x.from===myId&&x.text===t&&Date.now()-x.at<60000)); renderChat();
-    toast('⚠️ 送れませんでした'+(/row-level security|violates/i.test(error.message)?'（このトークに書ける条件に当てはまっていません。おたがいにいいね、か友達になっているか確かめてください）':'（'+esc(String(error.message).slice(0,60))+'）'));
+    toast('⚠️ 送れませんでした'+(/too_many/.test(error.message)?'（短い時間にたくさん送りました。少し待ってからどうぞ）':/row-level security|violates/i.test(error.message)?'（このトークに書ける条件に当てはまっていません。おたがいにいいね、か友達になっているか確かめてください）':'（'+esc(String(error.message).slice(0,60))+'）'));
     const inp=$('#chatInput'); if(inp&&!inp.value)inp.value=t; return; }
   notifyMsg(uid,c,t);   // 保存できた時だけ、相手に通知
 }
@@ -6768,7 +6799,7 @@ async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(
   // 保存できなかった時は、知らせて画面からも外す（2026-10-15。前は失敗しても何も出さず、ほかの人に通知だけ届いていた）
   const {error:pe}=await sb.from(T('room_messages')).insert(m);
   if(pe){ console.warn('[room] 投稿できませんでした',pe.code,pe.message); curRoom.msgs=(curRoom.msgs||[]).filter(x=>x!==m); renderRoom(); inp.value=t;
-    toast('⚠️ 投稿できませんでした'+(/row-level security|violates/i.test(pe.message)?'（この部屋に参加しているか確かめてください）':'（'+esc(String(pe.message).slice(0,60))+'）')); return; }
+    toast('⚠️ 投稿できませんでした'+(/too_many/.test(pe.message)?'（短い時間にたくさん投稿しました。少し待ってからどうぞ）':/row-level security|violates/i.test(pe.message)?'（この部屋に参加しているか確かめてください）':'（'+esc(String(pe.message).slice(0,60))+'）')); return; }
   misMark('post');   // 今日のミッション（コミュニティに書き込む）
   markRoomRead(curRoom.id,true); notifyRoomMembers(curRoom,t);
 }

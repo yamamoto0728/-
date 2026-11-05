@@ -196,7 +196,7 @@ Deno.serve(async (req) => {
     if (ctToday && ctToday.length) return json({ ok: true, skipped: "chikaku time today" });
     const today = await todaysQuestion(jstMs);
     const todayStr = today?.d ?? new Date(jstMs - (jstMs % 86400000)).toISOString().slice(0, 10);
-    const { data, error } = await supabase.from("tama_profiles").select("id,fa:fes_attrs,sharing,updated_at,lat");
+    const { data, error } = await supabase.from("tama_profiles").select("id,fa:fes_attrs,sharing,updated_at");
     if (error) return json({ ok: false, reason: error.message });
     const rows = data ?? [];
     // 今日のお題にまだ答えていない人だけ（答えた人には送らない）
@@ -207,8 +207,11 @@ Deno.serve(async (req) => {
     url = "/tama/?go=daily&n=daily"; tag = "tama-daily"; pref = "daily";
     // いまキャンパスにいる人（位置を見せていて、15分以内に位置が更新された人＝アプリを開いている人）。
     // 3人以上いる時だけ、人数と「あなたと共通点のある人」の数を入れる（少ないと寂しく見える・だれか分かるため）
+    // 2026-11-05：位置は tama_profiles に残さなくなった（supabase/tama_safety.sql）。学内にいるかは、サーバーの中だけの tama_locs で見る
     const now = Date.now();
-    const onCampus = rows.filter((r) => r.sharing && r.lat != null && r.updated_at && now - Date.parse(r.updated_at) < 15 * 60000);
+    const { data: locs } = await supabase.from("tama_locs").select("id").gt("at", new Date(now - 15 * 60000).toISOString());
+    const here = new Set((locs ?? []).map((l) => String(l.id)));
+    const onCampus = rows.filter((r) => r.sharing && here.has(String(r.id)) && r.updated_at && now - Date.parse(r.updated_at) < 15 * 60000);
     if (onCampus.length >= 3) {
       const { data: tts } = await supabase.from("tama_timetable").select("id,slots");
       const ttOf = new Map<string, Record<string, string>>();
