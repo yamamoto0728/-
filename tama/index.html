@@ -3802,6 +3802,44 @@ function bgRowHtml(){
   return `<div class="sharerow" id="bgRow" style="margin-top:12px"><div class="lab">閉じている間も、すれ違う<small>${sub}</small></div><div class="toggle${on&&!off?' on':''}" onclick="${on?'bgDisable().then(renderCrossPrefs)':'bgEnable()'}"></div></div>`;
 }
 
+/* ---------- 📱 アプリの通知（2026-11-05 あおの依頼「まだ入れてないものは入れて」。supabase/tama_native_push.sql） ----------
+   包んだアプリの中は、ブラウザの通知（Service Worker）が使えない。通知の部品（@capacitor/push-notifications）で端末の番号を受け取り、
+   tama_push_register_native で送り先に入れる。送るのは send-match-push（Android は FCM・iPhone は APNs）。
+   NATIVE_PUSH を true にするのは準備ができてから：
+     Android … Firebase のプロジェクトを作り、google-services.json を J:\chikaku-app\android\app に置いて APK を作り直した後
+               （置かないまま true にすると、Android のアプリが落ちる）
+     iPhone  … Apple Developer の有料登録・Xcode で Push Notifications を付けた後
+   false の間は今と同じ（アプリでは通知を出さない）。聞くのは、いいねを送った後など意味の分かる場面だけ（今のアプリverと同じ） */
+const NATIVE_PUSH={android:false,ios:false};
+const nPush=()=>{ try{ return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.PushNotifications)||null; }catch(e){ return null; } };
+const nativePushOn=()=>isNativeApp()&&!!nPush()&&!!NATIVE_PUSH[appPlatform()];
+let nPushBound=false;
+function nPushBind(){
+  if(nPushBound)return; nPushBound=true; const P=nPush();
+  P.addListener('registration',async t=>{ const tok=t&&t.value; if(!tok||!sb||!myId)return;
+    const {error}=await sb.rpc('tama_push_register_native',{p_platform:appPlatform()==='ios'?'apns':'fcm',p_token:tok});
+    if(error)console.warn('[push] アプリの通知の送り先を保存できません',error.message); else{ try{ localStorage.setItem('tama_nPushTok',tok); }catch(e){} } });
+  P.addListener('registrationError',e=>console.warn('[push] アプリの通知を登録できません',e&&e.error));
+  // 通知を押した時：その画面を開く（このサイトの中だけ）
+  P.addListener('pushNotificationActionPerformed',a=>{ const u=a&&a.notification&&a.notification.data&&a.notification.data.url; if(typeof u==='string'&&u.startsWith('/')&&!u.startsWith('//'))location.href=u; });
+}
+// ask：まだ聞いていない時に、いま聞くか
+async function nativePushEnsure(ask){
+  if(!nativePushOn()||!profile||isPushOptOut())return false;
+  const P=nPush(); nPushBind();
+  try{
+    let st=(await P.checkPermissions()).receive;
+    if(st!=='granted'&&ask&&/^prompt/.test(st))st=(await P.requestPermissions()).receive;
+    if(st!=='granted')return false;
+    await P.register(); return true;
+  }catch(e){ console.warn('[push] アプリの通知',e); return false; }
+}
+async function nativePushOff(){
+  let tok=''; try{ tok=localStorage.getItem('tama_nPushTok')||''; localStorage.removeItem('tama_nPushTok'); }catch(e){}
+  if(tok&&sb)try{ await sb.from(T('push_devices')).delete().eq('endpoint',(appPlatform()==='ios'?'apns:':'fcm:')+tok); }catch(e){}
+  try{ const P=nPush(); if(P)await P.unregister(); }catch(e){}
+}
+
 /* ---------- push notifications ---------- */
 const VAPID_PUBLIC_KEY = "BO7wrifKnS7_EaYHHNu9I4rd-lChbdpM9kT8tluf1EMrjjVrDRAn6-PZ3ZDKcjsNCkYNFybj8diYC8PLqWlOrr8";
 function urlBase64ToUint8Array(base64String){
@@ -3855,6 +3893,7 @@ async function enablePush(){
   }catch(e){ console.error('[push] 通知の有効化に失敗', e); toast('通知を有効にできませんでした'); return false; }
 }
 async function disablePush(){
+  if(isNativeApp()){ await nativePushOff(); setPushOptOut(true); return; }
   try{
     if(!swReg) swReg = await navigator.serviceWorker.getRegistration();
     const sub = swReg ? await swReg.pushManager.getSubscription() : null;
@@ -3950,7 +3989,7 @@ function setPushWhy(k){ if(typeof tamasaiDay==='function'&&tamasaiDay()&&['open'
 let pushAskCtx=false;
 function askPushSoon(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} pushAskCtx=true; setTimeout(autoAskPush,1200); }
 // ボタンを押した直後に聞く（押した直後なので、iPhoneでもそのまま端末の許可画面を出せる）
-function askPushNow(kind){ setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} pushGateSkipped=false; openPushGate(); requestPushPermission(); }
+function askPushNow(kind){ if(nativePushOn()){ try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} setPushOptOut(false); nativePushEnsure(true); return; } setPushWhy(kind); try{ localStorage.setItem('tama_pushReady','1'); }catch(e){} pushGateSkipped=false; openPushGate(); requestPushPermission(); }
 // まだ許可も拒否もしていない（＝聞いてよい）か
 function pushCanAsk(){ return pushSupported()&&!(isIOS()&&!isStandalone())&&!isPushOptOut()&&Notification.permission==='default'; }
 function pushOk(){ return pushSupported()&&Notification.permission==='granted'&&!isPushOptOut(); }
@@ -3961,6 +4000,8 @@ function emptyPushHTML(){
   return '';
 }
 async function autoAskPush(){
+  // 📱 包んだアプリ：通知の部品で聞く（意味の分かる場面だけ聞く。許可済みなら送り先を登録し直す）
+  if(isNativeApp()){ const ask=pushAskCtx; pushAskCtx=false; if(nativePushOn())nativePushEnsure(ask); return; }
   if(appvOn()&&!pushAskCtx) return;   // 📱 アプリverは開いた時には聞かない
   pushAskCtx=false;
   // iPhoneでSafariのタブのまま開いている場合は Notification 自体が無いので、ここで止まる（ホーム画面への追加案内は別にある）
@@ -4681,6 +4722,16 @@ function pushCheckList(){
 }
 async function testPush(){
   const say=h=>{ const el=$('#notifTest'); if(el)el.innerHTML=h; };
+  // 📱 包んだアプリ：通知の部品で許可・登録してから、自分あてに送る
+  if(isNativeApp()){
+    if(!nativePushOn()){ say('この版のアプリでは、まだ通知を使えません'); return; }
+    setPushOptOut(false); say('送っています…');
+    if(!await nativePushEnsure(true)){ say('🚫 通知が許可されていません。スマホの設定 → ちかく → 通知 をオンにしてください'); return; }
+    await new Promise(r=>setTimeout(r,1500));   // 送り先の保存を待つ
+    const {data,error}=await sb.functions.invoke('send-match-push',{body:{to:myId,title:'テスト通知',body:'通知はこのように届きます',url:'/tama/?n=test',kind:'test',tag:'test'}});
+    say(!error&&data&&data.ok?'✅ 送りました。10秒たっても届かなければ、スマホの設定 → ちかく → 通知 を確かめてください':'⚠️ 送れませんでした'+(data&&(data.error||data.reason)?'（'+esc(String(data.error||data.reason))+'）':''));
+    return;
+  }
   if(!pushSupported()){ say('このブラウザは通知に対応していません'); return; }
   if(isIOS()&&!isStandalone()){ say('📲 iPhoneは、ホーム画面に追加したアプリでだけ通知が届きます'); return; }
   if(Notification.permission==='denied'){ say('🚫 通知が「許可しない」になっています。端末の設定から許可してください<br><br>'+pushCheckList()); return; }
