@@ -3428,6 +3428,7 @@ const AU_FOOT=()=>`<div class="aufoot" style="text-align:center"><a class="aulin
 function renderAuth(){
   const s=authSt;
   if(s.step===3){ renderAuthXfer(); return; }
+  if(s.step===4){ renderAuthDemo(); return; }
   // Apple・Google のボタンは、新しくログインする時だけ（匿名で使っていたアプリにメールを付ける時は、データを残すためメールだけ）
   const prov=s.step===1&&s.mode==='signin'?socialProviders():[];
   const head=prov.length
@@ -3517,6 +3518,7 @@ async function authSend(){
   const s=authSt; if(s.busy||!sb)return;
   const e=(($('#authEmail')||{}).value||'').trim().toLowerCase(); s.email=e;
   if(!authEmailOk(e)){ s.err='メールアドレスを確かめてください'; renderAuth(); return; }
+  if(DEMO.emails.includes(e)&&s.mode==='signin'){ s.step=4; s.err=''; renderAuth(); return; }   // 審査用のアカウントはパスワードで
   s.busy=true; s.err=''; s.note=''; renderAuth();
   let error=null;
   try{
@@ -3547,6 +3549,33 @@ async function authVerify(){
   s.busy=false;
   if(error){ s.err=authErrText(error); renderAuth(); const c=$('#authCode'); if(c)c.value=t; return; }
   authUser=(data&&data.user)||authUser;
+  await authAfterLogin();
+}
+/* ---------- 審査用のアカウント（2026-11-05、審査の報告書 A10。Apple 2.1「動くデモ用アカウント」） ----------
+   審査をする人は多摩キャンパスにいないし、メールのコードも受け取れない。そこで DEMO.emails のアドレスだけ、
+   ①パスワードでログインできる（Supabase → Authentication → Users → Add user で、パスワードつきで作る）
+   ②位置をいつもキャンパスの中（DEMO.pos）として扱う（端末の位置は使わない。閉じている間のすれ違いも使わない）
+   2人を友達にしてトークの履歴を入れるのは supabase/tama_demo.sql。審査のメモにアドレスとパスワードを書く */
+const DEMO={emails:['chikaku.hosei+review1@gmail.com','chikaku.hosei+review2@gmail.com'],pos:{lat:35.61387,lng:139.29758}};
+const demoUser=()=>!!(authUser&&authUser.email&&DEMO.emails.includes(String(authUser.email).toLowerCase()));
+function renderAuthDemo(){
+  const s=authSt;
+  showAuth(`<div class="aulogo">ちかく</div><div class="auh">審査用のアカウント</div>
+    <div class="aud"><b>${esc(s.email)}</b> は審査用のアカウントです。パスワードを入れてください。</div>
+    <div class="field"><label>パスワード</label><input id="authPw" type="password" autocomplete="current-password" maxlength="72" onkeydown="if(event.key==='Enter')authDemoPw()"></div>
+    ${s.err?`<div class="auerr">${esc(s.err)}</div>`:''}
+    <button class="btn btn-primary aubtn" onclick="authDemoPw()" ${s.busy?'disabled':''}>${s.busy?'確かめています…':'ログイン'}</button>
+    <button class="btn btn-ghost aubtn2" onclick="authBack()">メールアドレスを入れ直す</button>`+AU_FOOT());
+}
+async function authDemoPw(){
+  const s=authSt; if(s.busy||!sb)return;
+  const pw=(($('#authPw')||{}).value||''); if(!pw){ s.err='パスワードを入れてください'; renderAuth(); return; }
+  s.busy=true; s.err=''; renderAuth();
+  let data=null, error=null;
+  try{ ({data,error}=await sb.auth.signInWithPassword({email:s.email,password:pw,options:{captchaToken:await captchaToken().catch(()=>undefined)}})); }catch(x){ error={message:String(x&&x.message||x)}; }
+  s.busy=false;
+  if(error){ s.err=/invalid/i.test(String(error.message))?'パスワードがちがいます':authErrText(error); renderAuth(); return; }
+  authUser=(data&&data.user)||authUser; s.mode='signin';
   await authAfterLogin();
 }
 // ログインできた後：まだ何も使っていないアカウント（新しく作った・匿名で開いただけ）なら、Web 版から引き継ぐかを聞く
@@ -3752,7 +3781,7 @@ function bgCfg(token){
 let bgState={available:false,enabled:false}, bgPerm='unknown';
 // 開いた時：オンにしている人は続ける。まだ聞いていない人には1回だけ聞く
 async function bgBoot(){
-  if(!profile||!(await bgLoad()))return;
+  if(!profile||demoUser()||!(await bgLoad()))return;   // 審査用のアカウントは、閉じている間のすれ違いを使わない（位置がキャンパスの中の決まった点のため）
   try{
     const tok=localStorage.getItem('tama_bgTok')||'';
     if(bgOnLocal()&&tok){ bgState=await window.ChikakuBG.resume(bgCfg(tok)); bgPerm=await window.ChikakuBG.permission(); }
@@ -4261,7 +4290,10 @@ function renderMeHero(){
 }
 
 /* ---------- GPS ---------- */
+let demoGeoT=null;
 function startGeo(){
+  // 審査用のアカウントは、いつもキャンパスの中として扱う（審査をする人は多摩にいないため。DEMO）
+  if(demoUser()){ if(!demoGeoT){ const f=()=>onPos({coords:{latitude:DEMO.pos.lat,longitude:DEMO.pos.lng,accuracy:10}}); f(); demoGeoT=setInterval(f,15000); } return; }
   if(!('geolocation' in navigator)){geoState('bad','非対応');onGeoFail('この端末は位置情報に非対応');return;}
   // 2026-10-07：始める時は watchPosition だけにした（これも最初の位置をすぐ返す）。
   // 前は getCurrentPosition と同時に呼んでいて、iPhoneのホーム画面のアプリでは許可の確認が続けて2回出ることがあった。
