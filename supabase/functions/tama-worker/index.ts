@@ -11,17 +11,16 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const URL_ = Deno.env.get("SUPABASE_URL")!;
-const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
-const OPS = Deno.env.get("OPS_EMAIL") ?? "";
-const FROM = Deno.env.get("MAIL_FROM") ?? "ちかく 運営 <onboarding@resend.dev>";
+// 鍵は動くたびに読み直す（2026-11-05：起きた時に1回だけ読む作りだと、あとから Secrets を入れても「なし」のままだった）
+const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const json = (o: unknown) => new Response(JSON.stringify(o), { headers: { "Content-Type": "application/json" } });
 
 type Job = { id: number; kind: string; payload: Record<string, unknown>; tries: number };
 
 async function doReport(p: Record<string, unknown>): Promise<string | null> {
-  if (!RESEND || !OPS) return "メールの設定がありません（RESEND_API_KEY・OPS_EMAIL）";
+  const RESEND = env("RESEND_API_KEY"), OPS = env("OPS_EMAIL");
+  const FROM = env("MAIL_FROM") || "ちかく 運営 <onboarding@resend.dev>";
+  if (!RESEND || !OPS) return `メールの設定がありません（RESEND_API_KEY：${RESEND ? "あり" : "なし"}・OPS_EMAIL：${OPS ? "あり" : "なし"}）`;
   const contact = p.contact === true;
   const subject = contact ? "【ちかく】運営への連絡が届きました" : p.hidden ? "【ちかく】通報：3人以上から通報された人を自動で隠しました" : "【ちかく】通報が届きました";
   const text = [
@@ -41,14 +40,14 @@ async function doReport(p: Record<string, unknown>): Promise<string | null> {
     headers: { "Authorization": `Bearer ${RESEND}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from: FROM, to: [OPS], subject, text }),
   });
-  if (!r.ok) return `メールを送れません（${r.status} ${(await r.text()).slice(0, 120)}）`;
+  if (!r.ok) return `メールを送れません（${r.status} ${(await r.text()).slice(0, 160)}）`;
   return null;
 }
 
 async function doPush(p: Record<string, unknown>): Promise<string | null> {
-  const r = await fetch(`${URL_}/functions/v1/send-match-push`, {
+  const r = await fetch(`${env("SUPABASE_URL")}/functions/v1/send-match-push`, {
     method: "POST",
-    headers: { "Authorization": `Bearer ${SERVICE}`, "Content-Type": "application/json" },
+    headers: { "Authorization": `Bearer ${env("SUPABASE_SERVICE_ROLE_KEY")}`, "Content-Type": "application/json" },
     body: JSON.stringify(p),
   });
   if (!r.ok) return `通知を送れません（${r.status}）`;
@@ -56,7 +55,7 @@ async function doPush(p: Record<string, unknown>): Promise<string | null> {
 }
 
 Deno.serve(async () => {
-  const admin = createClient(URL_, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const admin = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: jobs, error } = await admin.from("tama_jobs").select("id,kind,payload,tries").is("done_at", null).lt("tries", 5).order("id").limit(50);
   if (error) return json({ ok: false, error: error.message });
   let done = 0, failed = 0;
