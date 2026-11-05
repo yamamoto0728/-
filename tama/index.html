@@ -897,6 +897,48 @@
   /* Web 版の「アプリに引き継ぐ」のコード */
   .xcode{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:27px;font-weight:700;letter-spacing:.12em;text-align:center;color:var(--ink);background:var(--surface2);border:1.5px dashed var(--line);border-radius:14px;padding:16px 8px;margin:4px 0 10px;user-select:all;-webkit-user-select:all}
   .xsteps{font-size:12.5px;color:var(--muted);line-height:1.8;margin:12px 0 4px;padding-left:1.3em}
+  /* 📲 Web 版からアプリへの案内（2026-11-05）。アプリの見た目の決まり（tama/DESIGN-app.md）に合わせる：標準のフォント・単色・絵文字なし・線の SVG */
+  .aintro{--ai-tint:#e8730e;--ai-on:#fff;--ai-soft:rgba(232,115,14,.12);--ai-ink:#111418;--ai-muted:#6b6e76;--ai-sep:rgba(60,60,67,.16);--ai-fill:#f2f2f6;--ai-bg:#fff;
+    position:absolute;inset:0;z-index:45;background:var(--ai-bg);color:var(--ai-ink);display:none;flex-direction:column;overflow-y:auto;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Roboto,sans-serif;letter-spacing:0;
+    padding:calc(12px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom))}
+  @media (prefers-color-scheme:dark){ .aintro{--ai-tint:#ff9a3d;--ai-on:#1d0e00;--ai-soft:rgba(255,154,61,.16);--ai-ink:#f2f2f7;--ai-muted:#9a9aa1;--ai-sep:rgba(84,84,88,.55);--ai-fill:#1c1c1e;--ai-bg:#000} }
+  html.appv .aintro{z-index:950}
+  .aintro.show{display:flex}
+  .aintro .ai-top{display:flex;justify-content:flex-end;min-height:44px;align-items:center}
+  .aintro .ai-later{border:0;background:none;font:inherit;font-size:16px;color:var(--ai-muted);padding:10px 4px;cursor:pointer}
+  .aintro .ai-kick{font-size:14px;font-weight:600;color:var(--ai-tint);margin:4px 0 6px}
+  .aintro h2{font-size:28px;line-height:1.3;font-weight:700;margin:0 0 8px;word-break:auto-phrase}
+  .aintro .ai-lead{font-size:16px;line-height:1.6;color:var(--ai-ink);margin:0 0 20px}
+  /* ある日の学内（例）：Web 版は開いていた時だけ、アプリは学内にいた間ずっと */
+  .aintro .ai-day{background:var(--ai-fill);border-radius:12px;padding:14px 14px 10px;margin-bottom:8px}
+  .aintro .ai-dayh{font-size:12px;color:var(--ai-muted);margin-bottom:10px}
+  .aintro .ai-row{display:grid;grid-template-columns:52px 1fr;align-items:center;gap:8px;margin-bottom:12px}
+  .aintro .ai-rl{font-size:14px;font-weight:600}
+  .aintro .ai-trk{position:relative;height:18px}
+  .aintro .ai-trk::before{content:"";position:absolute;left:0;right:0;top:8px;height:2px;border-radius:1px;background:var(--ai-sep)}
+  .aintro .ai-seg{position:absolute;top:5px;height:8px;border-radius:4px;background:var(--ai-tint)}
+  .aintro .ai-seg.web{opacity:.45}
+  .aintro .ai-dot{position:absolute;top:1px;width:16px;height:16px;margin-left:-8px;border-radius:50%;border:2px solid var(--ai-tint);background:var(--ai-bg)}
+  .aintro .ai-dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--ai-tint)}
+  .aintro .ai-cap{font-size:12px;color:var(--ai-muted);margin:-6px 0 0 60px}
+  .aintro .ai-cap+.ai-row{margin-top:10px}
+  .aintro .ai-axis{display:flex;justify-content:space-between;font-size:12px;color:var(--ai-muted);margin:2px 0 0 60px}
+  .aintro .ai-list{list-style:none;margin:16px 0 20px;padding:0}
+  .aintro .ai-list li{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--ai-sep)}
+  .aintro .ai-list li:last-child{border-bottom:0}
+  .aintro .ai-list svg{width:24px;height:24px;margin-top:1px;color:var(--ai-tint)}
+  .aintro .ai-list b{display:block;font-size:16px;font-weight:600;line-height:1.4}
+  .aintro .ai-list span{display:block;font-size:14px;line-height:1.6;color:var(--ai-muted);margin-top:2px}
+  .aintro .ai-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;border:0;border-radius:25px;background:var(--ai-tint);color:var(--ai-on);font:inherit;font-size:16px;font-weight:600;text-decoration:none;cursor:pointer;margin-bottom:10px}
+  .aintro .ai-btn[aria-disabled="true"]{background:var(--ai-fill);color:var(--ai-muted);cursor:default}
+  .aintro .ai-btn2{background:none;color:var(--ai-ink);border:1px solid var(--ai-sep)}
+  .aintro .ai-sec{font-size:16px;font-weight:600;margin:20px 0 4px}
+  .aintro .ai-steps{margin:8px 0 14px;padding-left:1.4em;font-size:14px;line-height:1.7;color:var(--ai-ink)}
+  .aintro .ai-steps li{margin-bottom:4px}
+  .aintro .ai-steps small{display:block;font-size:12px;color:var(--ai-muted)}
+  .aintro .ai-foot{font-size:12px;line-height:1.6;color:var(--ai-muted);margin-top:8px}
+  .aintro .ai-pre{font-size:12px;line-height:1.6;color:var(--ai-muted);background:var(--ai-fill);border-radius:8px;padding:8px 10px;margin-bottom:12px}
   /* Apple・Google でサインインのボタン（Apple の決まりに合わせて、黒地に白・暗い表示では白地に黒。Google は白地に色のロゴ） */
   .ausoc{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;height:50px;border-radius:12px;font-size:16px;font-weight:600;font-family:inherit;margin-bottom:10px;cursor:pointer;border:1px solid transparent}
   .ausoc[disabled]{opacity:.6}
@@ -2216,7 +2258,7 @@
         <button class="btn btn-ghost" style="margin:4px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openGuide()">📖 使い方を見る</button>
         <!-- 緊急時・問い合わせの連絡先（2026-10-02 追加）。中身は CONTACT で決まる -->
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openContact()">🆘 困ったとき・お問い合わせ</button>
-        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAcct()"><span id="meAuthLab">📲 アプリに引き継ぐ</span><small id="meAuthSub" style="display:block;font-size:11.5px;font-weight:400;margin-top:3px">コードを出して、アプリに貼るだけ</small></button>
+        <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAcct()" id="meAuthBtn"><span id="meAuthLab">📲 アプリに引き継ぐ</span><small id="meAuthSub" style="display:block;font-size:11.5px;font-weight:400;margin-top:3px">コードを出して、アプリに貼るだけ</small></button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openTerms()">📄 利用規約を読む</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openAddHome()">📱 ホーム画面に追加する方法</button>
         <button class="btn btn-ghost" style="margin:8px 16px 0;width:calc(100% - 32px);padding:13px;font-size:14px" onclick="openInvite()">📨 友達をアプリに誘う（🎁 特典あり）</button>
@@ -2257,6 +2299,7 @@
   <div class="homegate" id="homeGate"></div>
   <!-- ログイン・引き継ぎ（2026-11-02）。アプリの中は最初に全面で出す（authGate）、Web 版は設定からシートで開く（authOverlay） -->
   <div class="authgate" id="authGate"></div>
+  <div class="aintro" id="appIntro" role="dialog" aria-modal="true" aria-labelledby="aiH"></div>
   <div class="overlay" id="authOverlay" onclick="if(event.target===this)closeAuth()"><div class="sheet" id="authSheet" style="padding:24px 22px 30px"></div></div>
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="matchpop" id="matchpop"></div>
@@ -3163,7 +3206,7 @@ function appvRelabel(el,txt,on){
 }
 // 文字列はマイページから移す行、配列は設定で作る行（[キー, 見出し, 説明, 押した時]）
 const APPV_SET=[
-  ['アカウント',[['acct',isNativeApp()?'ログイン':'アプリに引き継ぐ',' ','openAcct()']]],
+  ['アカウント',[['acct',isNativeApp()?'ログイン':'アプリに移る',' ','openAcct()']]],
   ['見せ方',['vis',['xpref','すれ違いの設定','すべての人・共通点がある人だけ・使わない','openCrossPrefs()'],'match','block']],
   ['通知',['push','prefs','center']],
   ['きせかえ・アンケート',[['look','きせかえ','アイコン・背景・フレーム',"$('#lookDot').hidden=true;openLook()"],['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],'wtp','ck',['inv','友達をちかくに誘う','','openInvite()']]],
@@ -3385,7 +3428,7 @@ function authErrText(error){
   return 'うまくいきませんでした（'+m.slice(0,60)+'）。電波の良い所でもう一度お試しください';
 }
 // 設定の「アカウント」の行：アプリはログインの状態、Web 版は引き継ぎのコード
-function openAcct(){ if(isNativeApp())openAuth(); else openXfer(); }
+function openAcct(){ if(isNativeApp())openAuth(); else if(appIntroOn())openAppIntro(); else openXfer(); }
 function openAuth(o={}){
   if(!isNativeApp()&&!o.gate){ openXfer(); return; }
   authSt.gate=!!o.gate; authSt.step=1; authSt.err=''; authSt.note=''; authSt.busy=false;
@@ -3629,7 +3672,7 @@ function renderXfer(){
     <div class="aud">アプリでこのコードを貼ると、今のプロフィール・友達・トーク・すれ違いを、アプリでそのまま使えます。</div>
     <div class="xcode" id="xferCode">${esc(xferFmt(c.code))}</div>
     <button class="btn btn-primary aubtn" onclick="xferCopy()">コードをコピー</button>
-    <ol class="xsteps"><li>ちかくのアプリを開いて、メールアドレスでログイン</li><li>「Web 版で使っていましたか？」に、このコードを貼る</li></ol>
+    <ol class="xsteps"><li>ちかくのアプリを開いて、ログイン</li><li>「Web 版で使っていましたか？」に、このコードを貼る</li></ol>
     <div class="aunote">コードは <b>${hm}</b> まで・1回だけ使えます。<br>引き継ぐと、この Web 版からはログアウトします。</div>
     <div class="aud" style="margin-bottom:6px">このコードは、ほかの人に教えないでください。教えると、その人があなたのアカウントを使えてしまいます。</div>
     <button class="btn btn-ghost aubtn2" onclick="openXfer(true)">新しいコードを出す</button>
@@ -3667,11 +3710,88 @@ function xferStartNew(){
   try{ localStorage.removeItem('tama_xferAt'); }catch(e){}
   location.reload();
 }
-const authRowText=()=>isNativeApp()?(authRegistered()?'ログイン中：'+(authProv()?authProv()+'・':'')+authMask(authUser.email):''):'コードを出して、アプリに貼るだけ';
+/* ---------- 📲 Web 版からアプリへの案内（2026-11-05 あおの依頼「引き継ぎ画面で、アプリの利点の『閉じていても位置情報』を全面に押し出す。
+   アプリ化する日までは Web 版を使えるようにしたいから、画面の用意だけ」） ----------
+   ・APP_LAUNCH.date（日本時間のその日の0時から）になるまでは、ふつうの人には何も出さない（マイページの「アプリに引き継ぐ」も隠す）。
+     試す6人（アプリver）と、URL に ?appintro=1 を付けた時だけ見える（見た目の確認用）
+   ・その日になったら：Web 版を開いた時に1回だけ全画面で出す。そのあとはマイページの「アプリに移る」からいつでも開ける
+   ・言うことは1つ「閉じていても、すれ違える」。学外では位置を使わないことを同じ画面で言う（「常に許可」をお願いするので）
+   ・アプリが出る日・ストアの URL が決まったら、下の APP_LAUNCH を埋めるだけでよい */
+const APP_LAUNCH={
+  date:'',       // 例 '2027-04-01'。空のあいだは、ふつうの人には出さない
+  ios:'',        // App Store の URL（https://apps.apple.com/jp/app/…）
+  android:'',    // Google Play の URL（https://play.google.com/store/apps/details?id=jp.chikaku.tama）
+  webUntil:''    // Web 版を使える最後の日（決まったら。例 '2027-05-31'）。空なら「このまま使えます」
+};
+const appLaunched=()=>{ if(!APP_LAUNCH.date)return false; const t=new Date(APP_LAUNCH.date+'T00:00:00+09:00').getTime(); return !isNaN(t)&&Date.now()>=t; };
+const appIntroPreview=()=>{ try{ return /[?&]appintro=1/.test(location.search)||appvTester(); }catch(e){ return false; } };
+const appIntroOn=()=>!isNativeApp()&&(appLaunched()||appIntroPreview());
+const AI_IC={
+  pocket:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.5h3"/><path d="M4 10.5a8 8 0 0 0 0 5M20 10.5a8 8 0 0 1 0 5"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
+  campus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><path d="M9.5 10l1.8 1.8L14.8 8.3"/></svg>'
+};
+const aiDate=s=>{ const d=new Date(s+'T00:00:00+09:00'); return isNaN(d)?'':(d.getMonth()+1)+'月'+d.getDate()+'日'; };
+function openAppIntro(){
+  if(isNativeApp())return;
+  const el=$('#appIntro'); if(!el)return;
+  const ios=isIOS(), and=isAndroid(), launched=appLaunched();
+  // ストアのボタン：iPhone は App Store、Android は Google Play、パソコンなどは両方
+  const stores=[];
+  if(!and)stores.push(['ios','App Store で入手',APP_LAUNCH.ios]);
+  if(!ios)stores.push(['android','Google Play で入手',APP_LAUNCH.android]);
+  const storeBtns=launched
+    ?stores.map(([k,t,u])=>u?`<a class="ai-btn" href="${esc(u)}" target="_blank" rel="noopener">${t}</a>`:`<span class="ai-btn" aria-disabled="true">${t}（準備中）</span>`).join('')
+    :`<span class="ai-btn" aria-disabled="true">公開の準備中です</span>`;
+  // Web 版の行（開いていた時だけ）とアプリの行（学内にいた間ずっと）。点はすれ違い。時刻は 9:00〜17:00 を 0〜100 にした「例」
+  const seg=(l,w,c)=>`<i class="ai-seg ${c||''}" style="left:${l}%;width:${w}%"></i>`, dot=l=>`<i class="ai-dot" style="left:${l}%"></i>`;
+  el.innerHTML=`<div class="ai-top"><button class="ai-later" onclick="closeAppIntro()">${launched?'あとで':'閉じる'}</button></div>
+    ${launched?'':`<div class="ai-pre">アプリが出る日まで、試す人にだけ見えている画面です。${APP_LAUNCH.date?'公開は '+esc(aiDate(APP_LAUNCH.date))+' の予定です。':'公開の日は、まだ決まっていません。'}</div>`}
+    <div class="ai-kick">ちかくのアプリ</div>
+    <h2 id="aiH">閉じていても、<wbr>すれ違える</h2>
+    <p class="ai-lead">アプリなら、スマホをポケットに入れたままでも、学内ですれ違った人が残ります。</p>
+    <div class="ai-day" aria-label="ある日の学内の例。Web 版は開いていた時だけ、アプリは学内にいた間ずっと、すれ違いを記録します">
+      <div class="ai-dayh">ある日の学内（例）</div>
+      <div class="ai-row"><div class="ai-rl">Web 版</div><div class="ai-trk">${seg(8,6,'web')}${seg(44,8,'web')}${dot(48)}${seg(78,5,'web')}</div></div>
+      <div class="ai-cap">開いていた時だけ</div>
+      <div class="ai-row"><div class="ai-rl">アプリ</div><div class="ai-trk">${seg(0,100)}${dot(12)}${dot(30)}${dot(48)}${dot(63)}${dot(86)}</div></div>
+      <div class="ai-cap">学内にいた間ずっと</div>
+      <div class="ai-axis"><span>9:00</span><span>13:00</span><span>17:00</span></div>
+    </div>
+    <ul class="ai-list">
+      <li>${AI_IC.pocket}<div><b>閉じていても、すれ違いが残る</b><span>画面を消していても、学内にいる間は記録します。</span></div></li>
+      <li>${AI_IC.bell}<div><b>通知がとどく</b><span>共通点のある人とすれ違った時・友達になった時・ちかくタイム。</span></div></li>
+      <li>${AI_IC.campus}<div><b>位置を使うのは学内だけ</b><span>キャンパスに入った時だけ動きます。家や通学路の位置は残しません。</span></div></li>
+    </ul>
+    ${storeBtns}
+    <div class="ai-sec">今のデータを、そのまま持っていく</div>
+    <ol class="ai-steps">
+      <li>アプリを入れて、ログインする</li>
+      <li>「Web 版で使っていましたか？」に、引き継ぎのコードを貼る<small>プロフィール・友達・トーク・すれ違いが、そのまま残ります</small></li>
+      <li>位置の許可を聞かれたら「常に許可」を選ぶ<small>閉じていてもすれ違えるのは「常に」の時だけです。あとから設定でも変えられます</small></li>
+    </ol>
+    <button class="ai-btn ai-btn2" onclick="aiToXfer()">引き継ぎのコードを出す</button>
+    <div class="ai-foot">${APP_LAUNCH.webUntil&&launched?'Web 版は '+esc(aiDate(APP_LAUNCH.webUntil))+' まで使えます。':'Web 版も、このまま使えます。'}</div>`;
+  el.scrollTop=0; el.classList.add('show');
+}
+function closeAppIntro(){ const el=$('#appIntro'); if(el)el.classList.remove('show'); }
+function aiToXfer(){ closeAppIntro(); openXfer(); }
+// 公開の日から、Web 版を開いた時に1回だけ出す（引き継ぎのコードを出したことがある人には出さない）。
+// ほかの画面（プロフィールの入力のお願い・規約の改定 など）が出ている間は、閉じるまで待つ（最大で約3分）
+function maybeAppIntro(n=0){
+  if(!appLaunched()||isNativeApp()||xferFlagAt())return;
+  try{ if(localStorage.getItem('tama_aiSeen'))return; }catch(e){ return; }
+  if($$('.overlay.show').length||$('#authGate').classList.contains('show')){ if(n<36)setTimeout(()=>maybeAppIntro(n+1),5000); return; }
+  try{ localStorage.setItem('tama_aiSeen',String(Date.now())); }catch(e){}
+  openAppIntro();
+}
+const authRowText=()=>isNativeApp()?(authRegistered()?'ログイン中：'+(authProv()?authProv()+'・':'')+authMask(authUser.email):''):'閉じていても、すれ違えるように';
 function renderAuthRow(){
   const r=document.querySelector('#appvSet [data-r="acct"] small'); if(r)r.textContent=authRowText();
   const w=$('#meAuthSub'); if(w)w.textContent=authRowText();
-  const l=$('#meAuthLab'); if(l)l.textContent=isNativeApp()?'🔑 ログイン':'📲 アプリに引き継ぐ';
+  const l=$('#meAuthLab'); if(l)l.textContent=isNativeApp()?'🔑 ログイン':'📲 アプリに移る';
+  // 🌐 Web 版：アプリが出る日（APP_LAUNCH.date）までは、試す人にだけ出す（ほかの人はアプリをまだ入れられないため）
+  const b=$('#meAuthBtn'); if(b)b.style.display=isNativeApp()||appIntroOn()?'':'none';
 }
 async function tryResumeSession(){
   if(!myId||!sb) return false;
@@ -3693,6 +3813,7 @@ async function tryResumeSession(){
     if(attrMissing(attrStateFrom(profile.fa))) setTimeout(()=>{ if(appvOn())return; toast('多摩キャン版のプロフィール項目が増えました。入力をお願いします'); openEdit(); },900);
     maybeShowGuide(data.guide_seen===true);
     setTimeout(termsChangedNotice,2500);
+    setTimeout(maybeAppIntro,1800);   // 📲 アプリが出た日から、Web 版を開いた時に1回だけ案内する
     visitOpen();
     return true;
   }catch(e){ return false; }
