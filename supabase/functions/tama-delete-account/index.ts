@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
     ["tama_timetable", ["id"]], ["tama_loc_shares", ["owner_id", "friend_id"]], ["tama_likes", ["from_id", "to_id"]],
     ["tama_encounters", ["owner_id", "other_id"]], ["tama_friends", ["from_id", "to_id"]], ["tama_room_members", ["user_id"]],
     ["tama_checkins", ["user_id"]], ["tama_paywall", ["user_id"]],
+    ["tama_bg_tokens", ["user_id"]],   // 閉じている間のすれ違いの合言葉（2026-11-05）
   ];
   for (const [table, cols] of rest) {
     for (const col of cols) {
