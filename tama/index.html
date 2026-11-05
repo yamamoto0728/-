@@ -3507,8 +3507,8 @@ function authBack(){ authSt.step=1; authSt.err=''; authSt.serr=''; authSt.note='
      Apple の決まり 4.8：iPhone で Google を出すなら Apple も出す（ストアに出す前に両方そろえる） */
 const SOCIAL={
   googleWeb:'367877670798-ghl377eshpfaj4qoebpm5va03i2igvfb.apps.googleusercontent.com',   // Google Cloud の OAuth クライアント「ウェブ アプリケーション」の ID（Android もこれを使う）
-  googleIOS:'',   // Google Cloud の OAuth クライアント「iOS」の ID
-  apple:false
+  googleIOS:'367877670798-jjm61h1rj7cec962ooljsrdouv2kpeuj.apps.googleusercontent.com',   // Google Cloud の OAuth クライアント「iOS」の ID（2026-11-05）
+  apple:true   // 2026-11-05：Apple Developer（しゅうすけさんの個人の名義）に登録し、jp.chikaku.tama に Sign in with Apple を付けた
 };
 const GOOGLE_G='<svg class="ausoc-ic" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.2C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.5 5.8c4.4-4 6.8-10 6.8-17.2z"/><path fill="#FBBC05" d="M10.6 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.2C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.2 0-11.5-4.1-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
 const APPLE_LOGO='<svg class="ausoc-ic" viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>';
@@ -3960,7 +3960,7 @@ function bgRowHtml(){
                （置かないまま true にすると、Android のアプリが落ちる）
      iPhone  … Apple Developer の有料登録・Xcode で Push Notifications を付けた後
    false の間は今と同じ（アプリでは通知を出さない）。聞くのは、いいねを送った後など意味の分かる場面だけ（今のアプリverと同じ） */
-const NATIVE_PUSH={android:false,ios:false};
+const NATIVE_PUSH={android:false,ios:true};   // 2026-11-05：iPhone は APNs の鍵を Secrets に入れた。Android は Firebase の準備のあと
 const nPush=()=>{ try{ return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.PushNotifications)||null; }catch(e){ return null; } };
 const nativePushOn=()=>isNativeApp()&&!!nPush()&&!!NATIVE_PUSH[appPlatform()];
 let nPushBound=false;
