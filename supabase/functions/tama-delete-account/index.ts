@@ -33,14 +33,28 @@ Deno.serve(async (req) => {
   if (!me) return reply({ ok: false, error: "not_signed_in" });
   const id = me.id;
 
-  // 2. 残りを消す（[表, 列…]。どれか1つでも本人なら消す）。失敗しても次へ進む
+  // 2. 残りを消す。まず SQL の関数 tama_delete_user_data（supabase/tama_hardening.sql。人の id が入る列を持つ表を全部見て消す）を呼ぶ。
+  //    2026-11-07 安全の総点検：前の下の一覧だけでは、トーク・コミュニティの投稿・ブロック・通知の宛先・今週のイベントの答えなどが残っていた。
+  //    関数がまだ無い時（SQL の実行前）は、下の一覧で消す
+  const { data: gone, error: fe } = await admin.rpc("tama_delete_user_data", { p_user: id });
+  if (fe) console.warn("[tama-delete-account] tama_delete_user_data", fe.message);
+  else console.log("[tama-delete-account] 消した行", JSON.stringify(gone));
+  // 前からの一覧（[表, 列…]。どれか1つでも本人なら消す）。失敗しても次へ進む
   const rest: [string, string[]][] = [
     ["tama_profiles", ["id"]], ["tama_private", ["id"]], ["tama_locs", ["id"]], ["tama_presence", ["id"]],
     ["tama_timetable", ["id"]], ["tama_loc_shares", ["owner_id", "friend_id"]], ["tama_likes", ["from_id", "to_id"]],
     ["tama_encounters", ["owner_id", "other_id"]], ["tama_friends", ["from_id", "to_id"]], ["tama_room_members", ["user_id"]],
     ["tama_checkins", ["user_id"]], ["tama_paywall", ["user_id"]],
     ["tama_bg_tokens", ["user_id"]],   // 閉じている間のすれ違いの合言葉（2026-11-05）
+    ["tama_room_messages", ["from_id"]], ["tama_blocks", ["blocker_id", "blocked_id"]], ["tama_push_devices", ["user_id"]],
+    ["push_subscriptions", ["id"]], ["tama_wk_answers", ["user_id"]], ["tama_wk_votes", ["user_id"]], ["tama_arrive_watch", ["watcher_id", "target_id"]],
+    ["tama_encounter_log", ["owner_id", "other_id"]], ["tama_timetable_shares", ["owner_id", "friend_id"]],
   ];
+  // トーク（2人の id をつないだ鍵）
+  for (const k of [`${id}__%`, `%__${id}`]) {
+    const { error } = await admin.from("tama_messages").delete().like("match_key", k);
+    if (error && !/does not exist|schema cache/i.test(error.message)) console.warn("[tama-delete-account] tama_messages", error.message);
+  }
   for (const [table, cols] of rest) {
     for (const col of cols) {
       const { error } = await admin.from(table).delete().eq(col, id);
