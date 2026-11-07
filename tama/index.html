@@ -2025,6 +2025,75 @@
   html.appv .apphead{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
   html.appv .aphead{padding-top:calc(env(safe-area-inset-top,0px) + 6px)}
   html.appv .chathead{padding-top:calc(env(safe-area-inset-top,0px) + 8px)}
+  /* 📱 アプリの中は画面が時計・電池の表示の下まで広がるので、最初の画面と使い方の「スキップ」も下げる（2026-11-05 TestFlight で「ちかく」が時計と重なった） */
+  html.appv .wel{padding-top:calc(env(safe-area-inset-top,0px) + 22px)}
+  html.appv .guide .gtop{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
+  /* トークの見出しは #s-match .apphead の padding（強い指定）で、上の時計のすき間が消えていた（2026-11-06「トーク」が時計の表示に重なって透けた）。
+     登録の画面（.ob）も時計の下まで上がっていた。下から出るシートも、一番上まで伸びた時に時計にかからないように */
+  html.appv #s-match .apphead{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
+  /* 📚 授業のコミュニティ（コミュニティの一覧の一番上・ホームのタイル。2026-11-06） */
+  html.appv .rrow .rgo{padding:5px 12px;border-radius:14px;background:var(--tint);color:var(--on-tint,#fff);font-size:var(--fs4);font-weight:700}
+  html.appv .rrow .rgo.on{background:var(--fill);color:var(--ink)}
+  html.appv .rrow.cls.live .tx small{color:var(--c-tt-t)}
+  html.appv .atile.tt.cls small{color:var(--c-tt-t);font-weight:700}
+  html.appv .rtoggle{display:flex;align-items:center;gap:12px;width:100%;padding:8px 16px;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .rtoggle:active{background:var(--fill)}
+  html.appv .rtoggle .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  html.appv .rtoggle .tx b{font-size:var(--fs2);font-weight:600}
+  html.appv .rtoggle .tx small{font-size:var(--fs3);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .rtoggle .rcnt{margin-left:6px;font-size:var(--fs4);font-weight:600;color:var(--muted)}
+  html.appv .rtoggle .rs{display:flex;align-items:center;gap:8px;flex:none}
+  html.appv .rtoggle .rchev{font-style:normal;font-size:11px;color:var(--muted)}
+  html.appv .rlist.rsub .rrow{padding-left:28px}
+  html.appv .sharerow.dim .toggle{opacity:.45}
+  html.appv .tkclear{display:block;margin:14px auto 22px;padding:8px 16px;border:0;border-radius:16px;background:none;color:var(--muted);font:inherit;font-size:var(--fs4);cursor:pointer}
+  html.appv .tkclear:active{background:var(--fill)}
+  html.appv .ob{padding-top:calc(env(safe-area-inset-top,0px) + 26px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
+  html.appv .wel{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
+  html.appv .guide .gnav{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+  html.appv .sheet{max-height:min(92%,calc(100% - env(safe-area-inset-top,0px) - 10px))}
+  html.appv,html.appv body{overflow:hidden;overscroll-behavior:none}
+  /* 🌙 ダークモード：背景を白で決め打ちしていた所は、文字だけ白っぽくなって読めなかった（2026-11-05 TestFlight）。
+     画面全体は黒・カードは --surface・カードの中の行やボタンは --fill にする。ライトモードと Web 版は今のまま。
+     スイッチのつまみ（.toggle .k）は白のまま。ホーム画面に追加の案内（.homegate）はアプリの中に出ないので触らない */
+  @media (prefers-color-scheme: dark){
+    html.appv:not([data-theme="light"]) #guide,html.appv:not([data-theme="light"]) #pushGate,html.appv:not([data-theme="light"]) #configNotice{background:var(--night)!important}
+    html.appv:not([data-theme="light"]) .wsteps>div,html.appv:not([data-theme="light"]) .shot,html.appv:not([data-theme="light"]) .mroom,html.appv:not([data-theme="light"]) .frrow,html.appv:not([data-theme="light"]) details.fold,html.appv:not([data-theme="light"]) .clsbar.empty,html.appv:not([data-theme="light"]) .cprow,html.appv:not([data-theme="light"]) .qrbox,html.appv:not([data-theme="light"]) .lk .lkbl .lkc,html.appv:not([data-theme="light"]) .ufcard,html.appv:not([data-theme="light"]) .invrow,html.appv:not([data-theme="light"]) .sheet .body,html.appv:not([data-theme="light"]) .fesclosed,html.appv:not([data-theme="light"]) .wantall,html.appv:not([data-theme="light"]) .bmk,html.appv:not([data-theme="light"]) .boothpop,html.appv:not([data-theme="light"]) .rxpick,html.appv:not([data-theme="light"]) .frmapbtn,html.appv:not([data-theme="light"]) .bigopt,html.appv:not([data-theme="light"]) .ladder,html.appv:not([data-theme="light"]) .qhelp,html.appv:not([data-theme="light"]) #meetSheet .mtsec,html.appv:not([data-theme="light"]) .frnudge,html.appv:not([data-theme="light"]) .rjoin,html.appv:not([data-theme="light"]) .rinfo .sec,html.appv:not([data-theme="light"]) .bigpick,html.appv:not([data-theme="light"]) .ncrow,html.appv:not([data-theme="light"]) .startcard,html.appv:not([data-theme="light"]) .tscard .tsgo,html.appv:not([data-theme="light"]) .tscard .tsrole{background:var(--surface)}
+    html.appv:not([data-theme="light"]) .mrow2,html.appv:not([data-theme="light"]) .mbub.them,html.appv:not([data-theme="light"]) .svcard .svbtn,html.appv:not([data-theme="light"]) .tscard .tsstat button,html.appv:not([data-theme="light"]) .fsv .fsvopts button,html.appv:not([data-theme="light"]) .fsv .fsvnps button,html.appv:not([data-theme="light"]) .tscard .tsqo button,html.appv:not([data-theme="light"]) .tscard .tscp,html.appv:not([data-theme="light"]) .tscard .tssv,html.appv:not([data-theme="light"]) .tscard .tstest button,html.appv:not([data-theme="light"]) .wtpf button,html.appv:not([data-theme="light"]) .fradd .frrow2 input,html.appv:not([data-theme="light"]) .urow .d .frchat,html.appv:not([data-theme="light"]) .fchip,html.appv:not([data-theme="light"]) .wavefree input,html.appv:not([data-theme="light"]) .checkin .ckopts button,html.appv:not([data-theme="light"]) #meetSheet .mtback,html.appv:not([data-theme="light"]) .rinfo .mrow2 button,html.appv:not([data-theme="light"]) .shoplist button,html.appv:not([data-theme="light"]) .shopkinds button,html.appv:not([data-theme="light"]) .clslist .clsrow button,html.appv:not([data-theme="light"]) .commbox .urow,html.appv:not([data-theme="light"]) #pushGateSkip{background:var(--fill)!important}
+    html.appv:not([data-theme="light"]) .seg button.on{background:#636366}
+    /* 黒っぽい文字の色を決め打ちしていて、ダークの暗い背景に溶けていた所（紺の #3a4066・緑の #0f8f6f・ピンクの #a8335a など）。
+       色の種類は残して、白を混ぜて明るくする。オレンジのボタンの上の茶色の文字は、背景もオレンジのままなので触らない */
+    html.appv:not([data-theme="light"]) .cpcard .cpdone{color:color-mix(in srgb,#0a7f96 45%,#fff)}
+    html.appv:not([data-theme="light"]) .frrow .fr-on,html.appv:not([data-theme="light"]) .mrow2 .nm small.rcm,html.appv:not([data-theme="light"]) .mrow .frtag,html.appv:not([data-theme="light"]) .fchip.hit{color:color-mix(in srgb,#0f8f6f 45%,#fff)}
+    html.appv:not([data-theme="light"]) .worrycnt b,html.appv:not([data-theme="light"]) .worrysame,html.appv:not([data-theme="light"]) .frfreeline,html.appv:not([data-theme="light"]) .frfree .ffrow b{color:color-mix(in srgb,#14805c 45%,#fff)}
+    html.appv:not([data-theme="light"]) .surveydone{color:color-mix(in srgb,#1d8a63 45%,#fff)}
+    html.appv:not([data-theme="light"]) .qrfallback{color:color-mix(in srgb,#333 45%,#fff)}
+    html.appv:not([data-theme="light"]) .sheet .bio,html.appv:not([data-theme="light"]) .interest .irow,html.appv:not([data-theme="light"]) .termsbody,html.appv:not([data-theme="light"]) .cwarn,html.appv:not([data-theme="light"]) .pvmiss{color:color-mix(in srgb,#3a4066 45%,#fff)}
+    html.appv:not([data-theme="light"]) .worrycnt{color:color-mix(in srgb,#3d5a50 45%,#fff)}
+    html.appv:not([data-theme="light"]) .privacy{color:color-mix(in srgb,#4a3410 45%,#fff)}
+    html.appv:not([data-theme="light"]) .matchpop p{color:color-mix(in srgb,#5a6086 45%,#fff)}
+    html.appv:not([data-theme="light"]) .checkin .ckh,html.appv:not([data-theme="light"]) .checkin .ckthx,html.appv:not([data-theme="light"]) .duob .dv.diff,html.appv:not([data-theme="light"]) .urow .rcond{color:color-mix(in srgb,#5a63a8 45%,#fff)}
+    html.appv:not([data-theme="light"]) .warn-msg,html.appv:not([data-theme="light"]) .fesbar{color:color-mix(in srgb,#6b4a10 45%,#fff)}
+    html.appv:not([data-theme="light"]) .fesbar.warn{color:color-mix(in srgb,#8a1d3d 45%,#fff)}
+    html.appv:not([data-theme="light"]) .privacy b{color:color-mix(in srgb,#8a5a00 45%,#fff)}
+    html.appv:not([data-theme="light"]) .nearsec.cls,html.appv:not([data-theme="light"]) .urow .rcond.meet,html.appv:not([data-theme="light"]) .rmeet b,html.appv:not([data-theme="light"]) .clslist .clsrow button{color:color-mix(in srgb,#9a5a10 45%,#fff)}
+    html.appv:not([data-theme="light"]) .lkh.dev{color:color-mix(in srgb,#9a6a00 45%,#fff)}
+    html.appv:not([data-theme="light"]) .tscard .tsst .tm,html.appv:not([data-theme="light"]) .tscard .tsstat>span,html.appv:not([data-theme="light"]) .tscard .tssvs,html.appv:not([data-theme="light"]) .fsv .fsvh,html.appv:not([data-theme="light"]) .tscard .tsmorebtn,html.appv:not([data-theme="light"]) .tscard .tsst1.collab .nm,html.appv:not([data-theme="light"]) .tscard .tsst.collab b,html.appv:not([data-theme="light"]) .collabrow b,html.appv:not([data-theme="light"]) .joined-tag.co,html.appv:not([data-theme="light"]) .shoplist .shoph,html.appv:not([data-theme="light"]) .tscard .tsgo,html.appv:not([data-theme="light"]) .tscard .tsrole{color:color-mix(in srgb,#a8335a 45%,#fff)}
+    html.appv:not([data-theme="light"]) .wantt{color:color-mix(in srgb,#b03a7c 45%,#fff)}
+    html.appv:not([data-theme="light"]) .frnote{color:color-mix(in srgb,#b04a4a 45%,#fff)}
+    html.appv:not([data-theme="light"]) .topics .tshow.meet,html.appv:not([data-theme="light"]) .duob button.sub,html.appv:not([data-theme="light"]) .joined-tag.own{color:color-mix(in srgb,#b0651a 45%,#fff)}
+    html.appv:not([data-theme="light"]) .rinfo .mrow2 button.rptbtn{color:color-mix(in srgb,#c0392b 45%,#fff)}
+    html.appv:not([data-theme="light"]) .tscard .tsh,html.appv:not([data-theme="light"]) .tscard .tsn b,html.appv:not([data-theme="light"]) .tscard .tsnote b,html.appv:not([data-theme="light"]) .tstoday b,html.appv:not([data-theme="light"]) .cprow .cpb em,html.appv:not([data-theme="light"]) .cpcard .cptext,html.appv:not([data-theme="light"]) .tscard .tsqo button,html.appv:not([data-theme="light"]) .tscard .tscp,html.appv:not([data-theme="light"]) .tscard .tssv{color:color-mix(in srgb,#c0456a 45%,#fff)}
+    html.appv:not([data-theme="light"]) .wantall b{color:color-mix(in srgb,#c0458a 45%,#fff)}
+    html.appv:not([data-theme="light"]) .svcard .svbtn{color:color-mix(in srgb,#c4620e 45%,#fff)}
+    html.appv:not([data-theme="light"]) .tscard .tsofc,html.appv:not([data-theme="light"]) .shopsrc a{color:color-mix(in srgb,#c8361f 45%,#fff)}
+    html.appv:not([data-theme="light"]) #configNotice h2{color:var(--ink)!important}html.appv:not([data-theme="light"]) #configNotice p{color:var(--muted)!important}html.appv:not([data-theme="light"]) #configNotice b{color:var(--tint)!important}
+    /* 白の半透明（rgba(255,255,255,.6〜.95)）の上に --ink・--muted の文字 */
+    html.appv:not([data-theme="light"]) #pushGate .pgkinds,html.appv:not([data-theme="light"]) .daily .dyday,html.appv:not([data-theme="light"]) #helpSheet .hsec,html.appv:not([data-theme="light"]) .pssec,html.appv:not([data-theme="light"]) .maptype{background:var(--fill)}
+    /* うすい色で決め打ちしていて、文字の色が --ink・--muted（ダークで白っぽくなる）の所。茶色などの濃い文字の色を書いてある所は、そのままで読めるので触らない */
+    html.appv:not([data-theme="light"]) .mline,html.appv:not([data-theme="light"]) .lk .lkgate,html.appv:not([data-theme="light"]) .daily.fesq .fqmine span,html.appv:not([data-theme="light"]) .collabrow,html.appv:not([data-theme="light"]) .rnotice,html.appv:not([data-theme="light"]) .cpcard,html.appv:not([data-theme="light"]) .lk .lkc.on,html.appv:not([data-theme="light"]) .lk .lkbl .lkc.on,html.appv:not([data-theme="light"]) .ufcard.dev,html.appv:not([data-theme="light"]) .wantme,html.appv:not([data-theme="light"]) .wantbox,html.appv:not([data-theme="light"]) .waveopt.rare,html.appv:not([data-theme="light"]) .rxpick button.on,html.appv:not([data-theme="light"]) #meetSheet .mtsay,html.appv:not([data-theme="light"]) #meetSheet .duoopts button,html.appv:not([data-theme="light"]) .duob,html.appv:not([data-theme="light"]) .rmeet,html.appv:not([data-theme="light"]) #paySheet .pledge,html.appv:not([data-theme="light"]) .invlad,html.appv:not([data-theme="light"]) .hgref,html.appv:not([data-theme="light"]) .startcard .mispeek,html.appv:not([data-theme="light"]) .misgot{background:rgba(255,159,10,.16)}
+    html.appv:not([data-theme="light"]) .checkin,html.appv:not([data-theme="light"]) .tscard .tstest{background:var(--fill)}
+  }
   /* 審査：アプリ版に「ホーム画面に追加」の案内を出さない（Apple 4.2・2.1）。設定のまとまりを隠せるように */
   html.appv .addhome{display:none!important}
   html.appv .asetg[hidden]{display:none}
@@ -2824,10 +2893,13 @@ function renderAppvChrome(){
   if(tl&&sc2&&tl.parentNode!==sc2)sc2.insertBefore(tl,sc2.firstChild);
   if(tl){ const nx2=appvNextClass(), tt=ttTodayText(), w=wantOf(profile);
     const me1=g?'隠れています':!sharing?'位置を出していません':fesOutside?'学外にいます':curPlace||'学内にいます';
+    // 授業中は、右のタイルを「いまの授業のコミュニティ」にする（2026-11-06 あおの依頼。時間割は下のタブの「時間割」から）
+    const cnow2=(()=>{ try{ return classMissing||fesDayNow()?null:classNow(); }catch(e){ return null; } })(), cc2=cnow2?(classOf(cnow2.name)||{}):{};   // 読み込みの途中でも落ちないように
     const t2=nx2?{m:(nx2.now?'いま ':'次 ')+nx2.i+'限 '+(nx2.name||'授業'),s:[nx2.room,nx2.now?nx2.en+'まで':nx2.st+'から'].filter(Boolean).join('・')}:{m:tt.main,s:tt.sub};
     // いまの自分のタイルは状態を大きく（場所は上の1行と同じになるので小さく。2026-11-03 比べた結果）
     const th=`<div class="atiles"><button class="atile now" onclick="openAppvMe()"><small>いまの自分</small><b>${cur?esc(cur):'状態を選ぶ'}</b><span>${esc(me1)}</span></button>`
-      +`<button class="atile tt${tt.empty?' empty':''}" onclick="${tt.empty?'openTimetable()':"go('tt')"}"><small>時間割</small><b>${esc(t2.m)}</b><span>${esc(t2.s)}</span></button></div>`
+      +(cnow2?`<button class="atile tt cls" onclick="openClassRoom('${jsq(cnow2.name)}')"><small>いまの授業のコミュニティ</small><b>${esc(cnow2.name)}</b><span>${esc(cc2.joined?`${cc2.members||0}人が参加${cc2.unread?'・新着 '+cc2.unread:''}`:`同じ授業の人 ${cc2.takers||0}人・タップで入る`)}</span></button></div>`
+        :`<button class="atile tt${tt.empty?' empty':''}" onclick="${tt.empty?'openTimetable()':"go('tt')"}"><small>時間割</small><b>${esc(t2.m)}</b><span>${esc(t2.s)}</span></button></div>`)
       +`<button class="awant${w?' on':''}" onclick="openWantEdit()"><small>語りたいこと</small><b>${w?esc(w):'今日だけ出す話題を書く'}</b><i>›</i></button>`
       +(wantPopular(1).length?`<button class="awantall" onclick="openWantList()">みんなの語りたいことを見る ›</button>`:'');   // Web版の「みんなの◯件」（数は出さない）
     if(tl.dataset.h!==th){ tl.dataset.h=th; tl.innerHTML=th; } }
@@ -2983,7 +3055,8 @@ function appvEmpty(text,btn,links){
 const appvSkeleton=()=>'<div class="askel"><i></i><i></i><i></i></div>';
 // B7 まだアプリを使っていない友達に、LINE で送る（特典なし・ちかくの言葉で1文）
 function appvShareLine(){
-  const url=location.origin+'/tama/', text='多摩キャンパスの人だけのアプリ「ちかく」入れてみた。13:00 のちかくタイムに学食で開いてみて '+url;
+  // 包んだアプリの中は location.origin が capacitor://localhost になり、送った相手が開けないので、本番の URL にする（2026-11-05）
+  const url=(/^https?:$/.test(location.protocol)?location.origin:'https://chikaku-hosei.vercel.app')+'/tama/', text='多摩キャンパスの人だけのアプリ「ちかく」入れてみた。13:00 のちかくタイムに学食で開いてみて '+url;
   if(navigator.share){ navigator.share({text}).catch(()=>{}); return; }
   location.href='https://line.me/R/share?text='+encodeURIComponent(text);
 }
@@ -3215,7 +3288,7 @@ const APPV_SET=[
   ['見せ方',['vis',['xpref','すれ違いの設定','すべての人・共通点がある人だけ・使わない','openCrossPrefs()'],'match','block']],
   ['通知',['push','prefs','center']],
   ['きせかえ・アンケート',[['look','きせかえ','アイコン・背景・フレーム',"$('#lookDot').hidden=true;openLook()"],['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],'wtp','ck',['inv','友達をちかくに誘う','','openInvite()']]],
-  ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['privacy','プライバシーポリシー','取る情報・見える範囲・保存期間・消し方',"location.href='/privacy/'"],['delacct','アカウントを削除','ログインの記録まで、すべて消えます','deleteAccount()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'appv','debug']]];
+  ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['privacy','プライバシーポリシー','取る情報・見える範囲・保存期間・消し方',"location.href='/privacy/index.html'"],['delacct','アカウントを削除','ログインの記録まで、すべて消えます','deleteAccount()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'appv','debug']]];
 const APPV_SET_LAB={vis:'見せる範囲',match:'すれ違いに使う共通点',block:'ブロックした人',prefs:'通知の種類・テスト通知',center:'届いた通知',wtp:'ちかくプラスのアンケート',ck:'ひとこと'};
 function appvMeLayout(on){
   const set=$('#appvSet'); if(!set)return;
@@ -3464,10 +3537,12 @@ function openAuth(o={}){
 function showAuth(h){
   if(authSt.gate){ const g=$('#authGate'); g.innerHTML=h; g.classList.add('show'); }
   else{ $('#authSheet').innerHTML=h; $('#authOverlay').classList.add('show'); }
-  const f=$({1:'#authEmail',2:'#authCode',3:'#authXfer'}[authSt.step]||'#none'); if(f&&!authSt.busy)setTimeout(()=>{ try{ f.focus(); }catch(e){} },80);
+  // 📱 アプリの最初のログイン画面（メールを入れる段）では、メール欄に自動で入らない。キーボードが開いて画面が押し上げられ、
+  //    上の名前・説明が見えず、Apple・Google のボタンも隠れた（2026-11-05 TestFlight）。コードを入れる段からは今まで通り
+  const f=$({1:'#authEmail',2:'#authCode',3:'#authXfer'}[authSt.step]||'#none'); if(f&&!authSt.busy&&!(authSt.step===1&&/ChikakuApp/.test(navigator.userAgent)))setTimeout(()=>{ try{ f.focus(); }catch(e){} },80);
 }
 function closeAuth(){ xferStopPoll(); if(!authSt.gate)$('#authOverlay').classList.remove('show'); }
-const AU_FOOT=()=>`<div class="aufoot" style="text-align:center"><a class="aulink" onclick="openTerms()">利用規約</a>　<a class="aulink" href="/privacy/">プライバシーポリシー</a>${CONTACT.email?`　困った時：${esc(CONTACT.email)}`:''}</div>`;
+const AU_FOOT=()=>`<div class="aufoot" style="text-align:center"><a class="aulink" onclick="openTerms()">利用規約</a>　<a class="aulink" href="/privacy/index.html">プライバシーポリシー</a>${CONTACT.email?`　困った時：${esc(CONTACT.email)}`:''}</div>`;
 function renderAuth(){
   const s=authSt;
   if(s.step===3){ renderAuthXfer(); return; }
@@ -3891,8 +3966,10 @@ const bgOnLocal=()=>{ try{ return localStorage.getItem('tama_bgOn')==='1'; }catc
 function bgLoad(){
   if(!isNativeApp())return Promise.resolve(false);
   if(window.ChikakuBG)return Promise.resolve(true);
-  if(!(window.Capacitor&&window.Capacitor.isPluginAvailable&&window.Capacitor.isPluginAvailable('BackgroundGeolocation')))return Promise.resolve(false);
-  if(!bgLoading)bgLoading=new Promise(ok=>{ const s=document.createElement('script'); s.src='/tama/bgloc.js'; s.onload=()=>ok(!!window.ChikakuBG); s.onerror=()=>{ bgLoading=null; ok(false); }; document.head.appendChild(s); });
+  // 📱 iPhone は Apple の位置の仕組み（アプリの中の ChikakuLocation）。Android は今まで通り Transistorsoft（tama/bgloc.js）。2026-11-06
+  const C=window.Capacitor, has=n=>!!(C&&C.isPluginAvailable&&C.isPluginAvailable(n)), src=has('ChikakuLocation')?'/tama/bgloc-native.js':has('BackgroundGeolocation')?'/tama/bgloc.js':'';
+  if(!src)return Promise.resolve(false);
+  if(!bgLoading)bgLoading=new Promise(ok=>{ const s=document.createElement('script'); s.src=src; s.onload=()=>ok(!!window.ChikakuBG); s.onerror=()=>{ bgLoading=null; ok(false); }; document.head.appendChild(s); });
   return bgLoading;
 }
 function bgCfg(token){
@@ -4810,6 +4887,7 @@ const PUSH_KINDS=[
   {k:'ct',    icon:'⏰', label:'ちかくタイム', sub:'週2〜3回・休み時間に10分だけのお題'},
   {k:'daily', icon:'🎲', label:'今日のお題', sub:'平日の昼休み（まだ答えていない日だけ）'},
   {k:'class', icon:'📍', label:'授業の始まり', sub:'その日最初の授業（友達がいる人だけ）'},
+  {k:'arrive',icon:'🏫', label:'友達が学内に来た時', sub:'「学内に来たら知らせる」を選んだ友達だけ（1日1人1回）'},
   {k:'tamasai',icon:'🎪', label:'多摩祭のお知らせ', sub:'1日目の夜の「今日のすれ違い」・閉会前のアンケート'},
 ];
 const pushOffOf=u=>{ const o=attrsOf(u).push_off; return Array.isArray(o)?o:[]; };
@@ -5354,7 +5432,7 @@ function initMap(){
   if(window.CAMPUS_GEO){ fesIllust=buildIllust().addTo(fesMap); }
   else{ fesMap.setMaxZoom(18); L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',{maxZoom:18,attribution:GSI_ATTR}).addTo(fesMap); }
   // キャンパスの外を白く覆って、キャンパスだけが見えるようにする（世界全体の四角にキャンパスの形の穴をあける）
-  fesOutMask=L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{stroke:false,fillColor:mapC('--map-out','#f4f7fe'),fillOpacity:.95,interactive:false}).addTo(fesMap);
+  if(!window.CAMPUS_GEO)fesOutMask=L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{stroke:false,fillColor:mapC('--map-out','#f4f7fe'),fillOpacity:1,interactive:false}).addTo(fesMap);   // 絵がある時は buildIllust の中で描く
   fesEdge=L.polygon(CAMPUS,{color:mapC('--map-edge','#0fb0cd'),weight:appvOn()?2:2.5,fill:false,interactive:false}).addTo(fesMap);
   fesMap.fitBounds(bounds,{padding:[6,6]});
   fesMap.setMinZoom(fesMap.getZoom());   // キャンパス全体より引いて見られないようにする
@@ -5415,7 +5493,7 @@ function mapC(k,fb){ if(!appvOn())return fb; const v=getComputedStyle(document.d
 function buildIllust(){
   const G=window.CAMPUS_GEO, A=appvOn();
   fesMap.createPane('illust'); fesMap.getPane('illust').style.zIndex=250;   // 地図画像（200）と覆い（400）の間
-  const renderer=L.canvas({pane:'illust',padding:0.5});
+  const renderer=L.canvas({pane:'illust',padding:1});   // 画面の外も1画面ぶん先に描いておく（速く動かした時に描き遅れが見えにくいように）
   const group=L.layerGroup();
   group.getAttribution=()=>'地図 © OpenStreetMap';
   const base={renderer,pane:'illust',interactive:false};
@@ -5442,6 +5520,10 @@ function buildIllust(){
   });
   illustRoads=[casing,road,foot,footCase];
   fesMap.on('zoomend',styleIllustRoads); styleIllustRoads();
+  // キャンパスの外の覆いは、地図の絵と同じキャンバスの一番上に描く（2026-11-06 あおの指摘「地図を速く動かすと枠の外の緑が見える」）。
+  // 前は覆いだけ別の SVG（画面の外は1割ぶんしか描かない）で、絵のキャンバス（半画面ぶん描く）より先に切れて、すき間から外の緑地が見えていた。
+  // 同じキャンバスなら、絵が描かれている所には必ず覆いもある。濃さも .95 → 1（外の絵がうっすら透けないように）
+  fesOutMask=L.polygon([[[85,-179],[85,179],[-85,179],[-85,-179]],CAMPUS],{...base,stroke:false,fillColor:mapC('--map-out','#f4f7fe'),fillOpacity:1}).addTo(group);
   return group;
 }
 // 道の太さをズームに合わせる（引きの時に道が太すぎて建物を隠さないように）
@@ -5968,7 +6050,7 @@ const TERMS_HTML=`
 ${CONTACT.email?`メール：${CONTACT.email}<br>`:''}${CONTACT.urgentEmail?`緊急時のメール：${CONTACT.urgentEmail}<br>`:''}${CONTACT.tel?`電話：${CONTACT.tel}（${CONTACT.telHours}）<br>`:''}</p>
 <p>※ 運営は学生による研究チームのため、24時間の受付ではありません。身の危険が迫っている場合は、先に<b>警察（110番）</b>へご連絡ください。</p>
 <h4>プライバシーポリシー</h4>
-<p>取る情報・ほかの人に見える範囲・保存する期間・削除のしかたは、<a href="/privacy/">プライバシーポリシー</a>（https://chikaku-hosei.vercel.app/privacy/）にまとめています。</p>
+<p>取る情報・ほかの人に見える範囲・保存する期間・削除のしかたは、<a href="/privacy/index.html">プライバシーポリシー</a>（https://chikaku-hosei.vercel.app/privacy/）にまとめています。</p>
 <h4>第12条（データの保存先）</h4>
 <p>本サービスのデータは、米国の事業者が提供するクラウドサービス（データベースの Supabase、サイトの配信の Vercel）を使って保存・送信します。運営は、これらの事業者に本サービスの運営に必要な範囲でデータの取り扱いを任せており、他の目的で第三者に提供することはありません。</p>
 <h4>第13条（規約の変更）</h4>
@@ -6286,7 +6368,10 @@ let talkNew=0;   // 「トーク」タブを最後に見てから始まったト
    最後に開いた時刻を端末に持ち、それより新しい相手の発言を未読として数える。 */
 function readAtMap(){ try{ return JSON.parse(localStorage.getItem('tama_readAt')||'{}'); }catch(e){ return {}; } }
 function markTalkRead(uid){
-  const m=readAtMap(); m[uid]=Date.now();
+  // 読んだ時刻は端末の時計、メッセージの時刻はサーバーの時計。端末の時計が少し遅れていると、読んだのに未読の「1」が消えなかった（2026-11-06）。
+  // 見えているメッセージのいちばん新しい時刻より前にはしない
+  const m=readAtMap(), c=chatOf(uid), p=talkPreview[chatKey(uid)];
+  m[uid]=Math.max(Date.now(),...((c&&c.msgs)||[]).map(x=>x.at||0),(p&&p.at)||0);
   try{ localStorage.setItem('tama_readAt',JSON.stringify(m)); }catch(e){}
 }
 // その相手からの、まだ読んでいないメッセージ。
@@ -6324,6 +6409,15 @@ function updateTalkDot(){
    通知の url は /tama/?go=…&n=…（go＝開く所、u＝トークの相手、r＝コミュニティ、n＝通知の種類）。
    アプリを閉じていた時は、その url で開くので起動のあとに（pushRoute）、開いていた時は sw.js が postMessage で知らせる。
    押して開いた記録（tama_push_events の open）を残し、どの通知が効いているかを比べる（supabase/tama_notify.sql の見るための SQL） */
+// 📱 iPhone のアプリの中は、文字を入れるとキーボードの分だけ画面全体が押し上げられ、閉じても戻らないことがあった
+//    （2026-11-06 あおの指摘「全体的に画面が上にずれる」）。入力していない時は、ページ全体を一番上に戻す
+if(/ChikakuApp/.test(navigator.userAgent)){
+  const typing=()=>{ const a=document.activeElement; return !!a&&(/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable); };
+  const back=()=>{ const se=document.scrollingElement||document.documentElement; if(!typing()&&(window.scrollY||se.scrollTop))window.scrollTo(0,0); };
+  document.addEventListener('focusout',()=>setTimeout(back,150),true);
+  if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>setTimeout(back,150));
+  window.addEventListener('scroll',()=>{ if(!typing())back(); },{passive:true});
+}
 let pushRoute=null;
 function routeFromUrl(href){
   try{ const p=new URL(href,location.href).searchParams; if(!p.get('go')&&!p.get('n'))return null;
@@ -6370,7 +6464,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 const waveAt=w=>{ const a=w&&w.at; return typeof a==='number'?a:(Date.parse(a)||0); };
 const wavesSeenAt=()=>{ try{ return +localStorage.getItem('tama_wavesSeen')||0; }catch(e){ return 0; } };
 function newWavesN(){ const s=wavesSeenAt(); return Object.keys(wavesIn).filter(id=>!blocked.has(id)&&waveAt(wavesIn[id])>s).length; }
-function markWavesSeen(){ const m=Math.max(0,...Object.values(wavesIn).map(waveAt)); if(m>wavesSeenAt())try{ localStorage.setItem('tama_wavesSeen',String(m)); }catch(e){} }
+function markWavesSeen(){ const m=Math.max(0,...Object.values(wavesIn).map(waveAt)); if(m>wavesSeenAt()){ try{ localStorage.setItem('tama_wavesSeen',String(m)); }catch(e){} setTimeout(()=>{ if(profile)updateTalkDot(); },0); } }   // 見たらすぐ下のタブの数字も数え直す（2026-11-06）
 function setAppBadgeCount(n){
   if(n===appBadgeNow||!('setAppBadge' in navigator))return; appBadgeNow=n;
   try{ (n>0?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{}); }catch(e){}
@@ -6512,14 +6606,25 @@ function renderAppvTalks(){
       <span class="tx"><span class="l1"><b>${esc(u.name)}</b>${st?`<em>${esc(st)}</em>`:''}<span class="tm">${tm}</span></span>
       <span class="l2"><span class="last${un?' un':''}">${sub}</span>${unreadBadge(id)}</span>${end?`<span class="l3">${end}・友達になると期限なし</span>`:''}</span></button>`;
   }).join('');
+  // 一覧のいちばん下に、ささやかに「すべて既読にする」（2026-11-07 あおの依頼「今ある通知を全てクリア。押したら新着の赤丸が消える」）。未読がある時だけ出す
+  if(talkNew||newWavesN()||rows.some(r=>hasUnread(r.id)))h+=`<button class="tkclear" onclick="markAllTalksRead()">すべて既読にする</button>`;
   list.innerHTML=h; updateTalkDot();
+}
+// トークの新着をまとめて消す：全部のトークを読んだことにして、届いたいいね・新しく始まったトークの数も0に。
+// 通知センターに残っている、ちかくの通知も消す（アプリの中だけ）。メッセージやいいねそのものは消さない
+function markAllTalksRead(){
+  const ids=[...new Set([...allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf),...Object.keys(matches)])];
+  ids.forEach(id=>markTalkRead(id));
+  talkNew=0; markWavesSeen();
+  try{ const P=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.PushNotifications; if(P&&P.removeAllDeliveredNotifications)P.removeAllDeliveredNotifications().catch(()=>{}); }catch(e){}
+  updateTalkDot(); renderMatches(); toast('すべて既読にしました');
 }
 // コミュニティを開く／一覧に戻る（トークの画面の中で切りかえる。上に「‹ トーク」）
 let appvComm=false;
 function appvOpenComm(on){
   appvComm=on; $('#matchList').hidden=on; $('#commPane').hidden=!on;
   let b=$('#appvCommBack');
-  if(on){ if(!b){ b=document.createElement('button'); b.id='appvCommBack'; b.className='tkback'; b.textContent='‹ トーク一覧'; b.onclick=()=>appvOpenComm(false); $('#commPane').prepend(b); } b.hidden=false; renderRooms(); loadRooms(); }
+  if(on){ if(!b){ b=document.createElement('button'); b.id='appvCommBack'; b.className='tkback'; b.textContent='‹ トーク一覧'; b.onclick=()=>appvOpenComm(false); $('#commPane').prepend(b); } b.hidden=false; renderRooms(); loadRooms(); loadClassRooms(); }
   else{ if(b)b.hidden=true; renderMatches(); }
   updateTalkDot();
 }
@@ -6803,10 +6908,12 @@ async function openChat(uid,from){
     if(!friendChats[uid]){ friendChats[uid]={u:friendUser(uid),msgs:[],matchedAt:null}; await loadChat(uid); }
   }
   chatPeer=uid; chatReturn=from||(matches[uid]?'match':'friends'); const m=chatOf(uid);
+  // 通知から直接トークを開いた時も、「新しく始まったトーク」の数を減らす（前は「トーク」タブを開くまで 1 が残った。2026-11-06）
+  if(!(uid in readAtMap()))talkNew=Math.max(0,talkNew-1);
   markTalkRead(uid); updateTalkDot();
   $('#chatAv').style.background=gr(m.u.emoji);$('#chatAv').textContent=m.u.emoji;$('#chatAv').className='av'+frCls(m.u);$('#chatNm').textContent=m.u.name;renderChat();go('chat');
   clearInterval(chatPoll);if(isTest(uid)||!sb)return;
-  chatPoll=setInterval(async()=>{if(chatPeer!==uid)return;const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at');const c=chatOf(uid);if(data&&c){c.msgs=data.map(x=>({id:x.id!=null?String(x.id):'',from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0}));if((++reactTick)%2===0)await loadReacts(uid);markTalkRead(uid);renderChat();}},2500);
+  chatPoll=setInterval(async()=>{if(chatPeer!==uid)return;const {data}=await sb.from(T('messages')).select('*').eq('match_key',chatKey(uid)).order('created_at');const c=chatOf(uid);if(data&&c){c.msgs=data.map(x=>({id:x.id!=null?String(x.id):'',from:x.from_id,text:x.text,at:Date.parse(x.created_at)||0}));if((++reactTick)%2===0)await loadReacts(uid);markTalkRead(uid);updateTalkDot();renderChat();}},2500);
 }
 // チャットの上の友達ボタン。マッチしただけでは友達にならず、ここから誘う（申請 → 相手が承認）
 function renderChatHead(){
@@ -7201,6 +7308,7 @@ function roomBadge(r){
 }
 const roomTime=t=>{ const ms=Date.parse(t); if(!ms)return ''; const o={timeZone:'Asia/Tokyo'};
   return jstDayOf(ms)===jstDayOf(Date.now())?new Date(ms).toLocaleTimeString('ja-JP',{...o,hour:'2-digit',minute:'2-digit'}):new Date(ms).toLocaleDateString('ja-JP',{...o,month:'numeric',day:'numeric'}); };
+function toggleAppvClassList(){ let v=false; try{ v=localStorage.getItem('tama_clsOpen')!=='1'; localStorage.setItem('tama_clsOpen',v?'1':'0'); }catch(e){} renderRooms(); if(v)loadClassRooms(); }
 function renderRoomsAppv(el,{joined,cls,forYou,open,ended}){
   const kind=r=>isClassRoom(r)?'授業':r.visibility==='common'?(r.fits?'あなたに合う':'条件あり'):r.visibility==='invite'?'招待制':'だれでも';
   const row=r=>{ const k=rid(r.id), s=roomStats[k]||{}, un=s.unread||0, mt=meetText(r.meet);
@@ -7208,10 +7316,31 @@ function renderRoomsAppv(el,{joined,cls,forYou,open,ended}){
       +`<span class="rs">${s.last?`<time>${esc(roomTime(s.last))}</time>`:''}${un?`<span class="unbadge">${un>99?'99+':un}</span>`:''}</span></button>`; };
   const card=r=>{ const k=rid(r.id), s=roomStats[k]||{}, kd=kind(r);
     return `<button class="rcard" onclick="openRoom('${k}')">${roomBadge(r)}<b>${esc(r.name)}</b><small>${esc(r.topic||'みんなで話そう')}</small><span class="rk${kd==='授業'?' cls':kd==='あなたに合う'?' fit':''}">${kd}</span><span class="rm">${s.members||0}人</span></button>`; };
-  const disc=cls.concat(forYou,open);
+  const disc=cls.filter(r=>!isOfficialClassRoom(r)).concat(forYou,open);
+  // 📚 授業のコミュニティ（2026-11-06 あおの指摘「授業ごとのコミュニティがどこにあるか分からない」）。
+  //   アプリverでは「コミュニティ」のページ（#s-friends の「📚 授業」）に行くボタンが無く、だれかが入った授業しか「見つける」に出ていなかった。
+  //   時間割に入れた授業を全部、一番上に並べる。部屋がまだ無くても出し、押すと入る（無ければ tama_class_room_join がその時に作る）。
+  //   授業のコミュニティは、下の「参加中」には重ねて出さない
+  const cn=(classMissing||fesDayNow())?[]:myCourseNames(), cnow=classNow(), live=n=>!!cnow&&normAns(cnow.name)===normAns(n);
+  const crow=n=>{ const c=classOf(n)||{}, un=c.unread||0, mem=c.members||0;
+    const sub=live(n)?`いま授業中・${c.joined?mem+'人が参加':'タップで入る'}`:c.joined?`${mem}人が参加${c.last_at?'・最終 '+agoText(c.last_at):''}`:mem?`${mem}人が参加中・同じ授業の人 ${c.takers||0}人`:`同じ授業の人 ${c.takers||0}人・最初の1人に`;
+    return `<button class="rrow cls${live(n)?' live':''}" onclick="openClassRoom('${jsq(n)}')"><span class="rbadge" style="background:var(--c-tt);color:var(--c-tt-t)">📚</span><span class="tx"><b>${esc(n)}</b><small>${esc(classSlotsText(n))}・${esc(sub)}</small></span>`
+      +`<span class="rs">${un?`<span class="unbadge">${un>99?'99+':un}</span>`:`<span class="rgo${c.joined?' on':''}">${c.joined?'開く':'入る'}</span>`}</span></button>`; };
+  const csorted=cn.slice().sort((a,b)=>live(b)-live(a));
+  // 2026-11-06 あおの指摘「授業じゃない既存のコミュニティの邪魔をしている」：「参加中」の下に1行のトグルでまとめ、押した時だけ並べる。
+  //   閉じている時も、授業中の授業と新着の数は1行に出す（開けておくかどうかは端末に覚える）
+  const clsOpen=(()=>{ try{ return localStorage.getItem('tama_clsOpen')==='1'; }catch(e){ return false; } })();
+  const cun=csorted.reduce((t,n)=>t+((classOf(n)||{}).unread||0),0), clive=csorted.find(live);
+  const ctog=`<button class="rtoggle${clsOpen?' on':''}" onclick="toggleAppvClassList()"><span class="rbadge" style="background:var(--c-tt);color:var(--c-tt-t)">📚</span><span class="tx"><b>授業のコミュニティ<span class="rcnt">${csorted.length}</span></b><small>${esc(clive?'いま授業中：'+clive:'時間割の授業ごとに自動で並びます')}</small></span>`
+    +`<span class="rs">${cun?`<span class="unbadge">${cun>99?'99+':cun}</span>`:''}<i class="rchev">${clsOpen?'▲':'▼'}</i></span></button>`;
+  const clsSec=classMissing||fesDayNow()?'':
+    (csorted.length?`<div class="rhead">授業</div>${ctog}${clsOpen?`<div class="rlist rsub">${csorted.map(crow).join('')}</div>`:''}`
+      :`<button class="rrow" onclick="openTimetable()"><span class="rbadge" style="background:var(--c-tt);color:var(--c-tt-t)">📚</span><span class="tx"><b>時間割に授業を入れる</b><small>入れた授業の人と、課題・テスト・休講の情報交換ができます</small></span><span class="rs"><span class="rgo">入れる</span></span></button>`);
+  const joined2=clsSec?joined.filter(r=>!isOfficialClassRoom(r)):joined;
   el.innerHTML=collabCardLine()+`<div class="racts"><button onclick="newRoom()">＋ 作る</button>${roomsV2?'<button onclick="openRoomCodeJoin()">招待コードで入る</button>':''}</div>`
     +(roomListErr?`<div class="roomerr">コミュニティの一覧を読み込めませんでした。<button onclick="loadRooms()">もう一度</button><small>${esc(roomListErr)}</small></div>`:'')
-    +(joined.length?`<div class="rhead">参加中</div><div class="rlist">${joined.map(row).join('')}</div>`:'')
+    +(joined2.length?`<div class="rhead">参加中</div><div class="rlist">${joined2.map(row).join('')}</div>`:'')
+    +clsSec
     +(disc.length?`<div class="rhead">見つける</div><div class="rcards">${disc.map(card).join('')}</div>`:'')
     +(ended.length?`<div class="rhead">終わった部屋<small>3日後に消えます</small></div><div class="rlist dim">${ended.map(row).join('')}</div>`:'')
     +(!rooms.length&&!roomListErr?`<div class="aempty"><p>まだコミュニティがありません。授業や趣味で、最初の部屋を作れます</p><button class="abtn" onclick="newRoom()">コミュニティを作る</button></div>`:'');
@@ -7277,6 +7406,7 @@ async function loadClassRooms(){
     const {data,error}=await sb.rpc('tama_class_rooms');
     if(error){ if(error.code==='PGRST202'||/schema cache|does not exist/i.test(error.message)){ classMissing=true; console.warn('[class] 授業のコミュニティを読めません。supabase/tama_class_community.sql を実行してください'); } renderClassList(); return; }
     classRooms=data||[]; renderClassList(); renderStartCard(); updateCmDots();
+    if(appvOn()){ if(appvComm)renderRooms(); renderAppvChrome(); }   // 📱 アプリverの授業のコミュニティの欄・ホームのタイル（2026-11-06）
   }catch(e){}
 }
 // いま授業中の授業（授業中だけ。休み時間・授業が無い時は null）
@@ -8562,7 +8692,36 @@ async function loadLocShares(){
   // 相手が自分に見せているか（A9。RLS で friend_id が自分の行も読める）
   const r2=await sb.from(T('loc_shares')).select('owner_id,friend_id').eq('friend_id',myId);
   if(!r2.error)locSharesFrom=new Set((r2.data||[]).map(r=>r.owner_id));
+  loadArriveWatch();
   if(appvOn())renderAppvChrome();
+}
+/* ---------- 📍 友達が学内に来たら知らせる（2026-11-06 あおの依頼「あいつ今日学校いるんだ・キタキタ」。supabase/tama_arrive.sql） ----------
+   知らせてほしい友達を自分で選ぶ。知らせるのは、その友達が「学内での居場所を見せる」を自分にオンにしている時だけ（居場所を見せていない人の「来た」は伝えない）。
+   その日はじめて学内に入った時に1回だけ（1日1人1回）。通知の種類は arrive（「通知」の設定で切れる） */
+let arriveWatch=new Set(), arriveMissing=false;
+async function loadArriveWatch(){
+  if(!sb||!myId||String(myId).startsWith('local-')||arriveMissing)return;
+  const {data,error}=await sb.from(T('arrive_watch')).select('target_id').eq('watcher_id',myId);
+  if(error){ if(isSchemaErr(error))arriveMissing=true; return; }
+  arriveWatch=new Set((data||[]).map(r=>r.target_id));
+}
+function arriveRowHTML(id){
+  if(arriveMissing||isTest(id))return '';
+  const can=locSharesFrom.has(id), on=arriveWatch.has(id)&&can;
+  return `<div class="sharerow${can?'':' dim'}"><div class="lab">学内に来たら知らせる<small>${can?(on?'この友達がその日はじめて学内に来た時に、通知でお知らせします（1日1回）':'オンにすると、この友達がその日はじめて学内に来た時にお知らせします'):'この友達が、あなたに「学内での居場所を見せる」をオンにしている時だけ使えます'}</small></div>`
+    +`<div class="toggle${on?' on':''}" onclick="toggleArriveWatch('${id}')"><div class="k"></div></div></div>`;
+}
+async function toggleArriveWatch(id){
+  if(arriveMissing||!sb){ toast('この機能はまだ準備中です'); return; }
+  if(!locSharesFrom.has(id)){ toast('この友達が、あなたに居場所を見せている時だけ使えます'); return; }
+  const on=!arriveWatch.has(id);
+  const q=on?sb.from(T('arrive_watch')).insert({watcher_id:myId,target_id:id}):sb.from(T('arrive_watch')).delete().eq('watcher_id',myId).eq('target_id',id);
+  const {error}=await q;
+  if(error){ if(isSchemaErr(error)){ arriveMissing=true; toast('この機能はまだ準備中です'); } else { console.warn('[arrive] 保存できません',error.message); toast('保存できませんでした'); } return; }
+  if(on)arriveWatch.add(id); else arriveWatch.delete(id);
+  const u=friendUser(id); toast(on?esc(u?u.name:'')+'さんが学内に来たら、お知らせします':esc(u?u.name:'')+'さんが来ても、お知らせしません');
+  if(on&&typeof askPushSoon==='function')try{ askPushSoon(); }catch(e){}   // 通知をまだ許していない人には、許可を聞く
+  refreshSheetFriendBtn(id);
 }
 // 📱 A8 名前を出すと気まずい場所（Pokémon GO が家の40m以内を消した教訓）。建物の一覧には今は無いが、教室・ひとことは自由に書けるので、そこで守る
 const PRIVATE_PLACE=/保健|医務|診療|相談室|学生相談|カウンセ|更衣|トイレ|寮/;
@@ -8868,7 +9027,7 @@ function friendBtnHTML(u){
       +(friendOnMap(u.id)?`<button class="btn btn-ghost frbtn" onclick="showFriendOnMap('${u.id}')">🗺 地図で見る</button>`:'')
       +(friendTT[u.id]?`<button class="btn btn-ghost frbtn" onclick="openFriendTT('${u.id}')">🗓 ${esc(u.name)}さんの時間割を見る</button>`:'')
       +(appvOn()&&!locShareMissing&&!isTest(u.id)?`<div class="sharerow"><div class="lab">学内での居場所を見せる<small>${locSharesTo.has(u.id)?'いる建物・教室・ひとことが、この友達に見えます':'オフの間は、この友達にも居場所は見えません'}。切りかえても相手に知らせは届きません。オフの時は、相手からは学内にいない時と同じに見えます</small></div>
-        <div class="toggle${locSharesTo.has(u.id)?' on':''}" onclick="toggleLocShare('${u.id}')"><div class="k"></div></div></div>${mutualShareHTML(u.id)}${appvNextMeetHTML(u.id)}${appvMemoHTML(u.id)}`:'')
+        <div class="toggle${locSharesTo.has(u.id)?' on':''}" onclick="toggleLocShare('${u.id}')"><div class="k"></div></div></div>${mutualShareHTML(u.id)}${arriveRowHTML(u.id)}${appvNextMeetHTML(u.id)}${appvMemoHTML(u.id)}`:'')
       +(ttShareMissing||isTest(u.id)?'':`<div class="sharerow"><div class="lab">🗓 自分の時間割を見せる<small>${hasCourseNames()?'授業名・教室・時限が、この友達にだけ見えます':'時間割に授業名か教室を入れると見せられます'}</small></div>
         <div class="toggle${ttSharesTo.has(u.id)?' on':''}" onclick="toggleTTShare('${u.id}')"><div class="k"></div></div></div>`)
       +`<button class="frquit" onclick="removeFriendRow(${r.id},true)">友達をやめる</button>`;
