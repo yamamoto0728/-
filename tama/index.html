@@ -2051,6 +2051,15 @@
   /* 設定：アカウントの削除は一番下に小さく、赤い文字で（2026-11-07） */
   html.appv .asetdel{display:block;margin:28px auto 6px;padding:10px 18px;border:0;border-radius:18px;background:none;color:var(--rose);font:inherit;font-size:var(--fs3);cursor:pointer}
   html.appv .asetdel:active{background:var(--fill)}
+  /* ホームのシートの「友達」「すれ違い」：人数と1行の説明（2026-11-07） */
+  html.appv .aseg button small{margin-left:6px;font-size:var(--fs4);font-weight:600;color:var(--muted)}
+  html.appv .asegnote{order:3;display:flex;align-items:center;gap:8px;margin:2px 16px 6px;font-size:var(--fs4);color:var(--muted);line-height:1.45}
+  html.appv .asegnote span{flex:1;min-width:0}
+  html.appv .asegnote button{flex:none;padding:4px 10px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);font:inherit;font-size:var(--fs4);cursor:pointer}
+  html.appv #ashBody>.scroll>.asegnote{order:4}
+  html.appv .hwh{margin:14px 0 6px;font-size:var(--fs3);font-weight:700}
+  html.appv .hwl{margin:0;padding-left:18px;font-size:var(--fs3);line-height:1.7;color:var(--ink)}
+  html.appv .hwl li{margin-bottom:4px}
   html.appv #appvSet .setrow .toggle{flex:none}
   html.appv .ob{padding-top:calc(env(safe-area-inset-top,0px) + 26px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
   html.appv .wel{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
@@ -2782,12 +2791,44 @@ function appvLayout(on){
     if(appvMarks.map.nextSibling!==map)appvMarks.map.after(map);
     if(appvMarks.sc.nextSibling!==sc)appvMarks.sc.after(sc);
     [['fb',fb],['cl',cl],['ul',ul]].forEach(([k,el])=>{ if(appvMarks[k].nextSibling!==el)appvMarks[k].after(el); });
-    ['#appvStat','#appvSeg','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote','#appvNotes','#appvWeek','#appvTiles','#appvInvRow','#appvNearBack'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
+    ['#appvStat','#appvSeg','#appvSegNote','#appvPane-fr','#appvPane-cross','#appvPane-near','#appvLoc','#appvNote','#appvNotes','#appvWeek','#appvTiles','#appvInvRow','#appvNearBack'].forEach(s=>{ const e=$(s); if(e)e.remove(); });
     appvMarkBuilding(''); if(appvCtPins&&fesMap){ fesMap.removeLayer(appvCtPins); appvCtPins=null; } if(appvTrailLayer&&fesMap){ fesMap.removeLayer(appvTrailLayer); appvTrailLayer=null; appvTrailKey=''; }
     if(lab)lab.textContent='ホーム';
     $('#appvTop').hidden=true; $('#appvSheet').hidden=true;
   }
   if(typeof fesMap!=='undefined'&&fesMap)setTimeout(()=>{ try{ fesMap.invalidateSize(); appvMapBounds(on); }catch(e){} },80);
+}
+// 「友達」「すれ違い」の切りかえに人数を出し、その下に、いま開いている方が何かを1行で（2026-11-07 あおの指摘「今日のお題の下の友達・すれ違いが見づらい、よく分からない」）
+function renderAppvSegInfo(){
+  const seg=$('#appvSeg'); if(!seg)return;
+  let nF=0, nX=0;
+  try{ nF=allFriendRows().filter(r=>r.status==='accepted').map(otherIdOf).filter(id=>friendOnMap(id)).length; }catch(e){}
+  try{ const t0=jstTodayStart().getTime(); nX=crossShown().filter(u=>(u.last_at||0)>=t0).length; }catch(e){}
+  const lab={fr:'友達'+(nF?`<small>学内 ${nF}</small>`:''),cross:'すれ違い'+(nX?`<small>今日 ${nX}</small>`:'')};
+  seg.querySelectorAll('button').forEach(b=>{ const h=lab[b.dataset.p]; if(h!=null&&b.dataset.h!==h){ b.dataset.h=h; b.innerHTML=h; } });
+  let note=$('#appvSegNote'); if(!note){ note=document.createElement('div'); note.id='appvSegNote'; note.className='asegnote'; }
+  if(note.previousElementSibling!==seg)seg.after(note);
+  const txt=appvPane==='cross'?'今日、学内で50m以内ですれ違った人。共通点がある人ほど上に出ます':'いま学内にいる友達と、その居場所（あなたに見せている人だけ）';
+  const h=`<span>${txt}</span><button onclick="openCrossHow()">しくみ</button>`;
+  if(note.dataset.h!==h){ note.dataset.h=h; note.innerHTML=h; }
+}
+// すれ違い・地図のしくみ（いまの決まりをそのまま、やさしい言葉で）
+function openCrossHow(){
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">すれ違い・地図のしくみ</h2>
+    <h3 class="hwh">すれ違いになる時</h3>
+    <ul class="hwl"><li>学内で、ほかの人と<b>50m以内</b>に入った時（学外では記録しません）</li>
+      <li>同じ人とは<b>30分に1回</b>まで数えます</li>
+      <li>位置のずれが大きい時（50mより大きい時）は数えません</li>
+      <li>「閉じていても、すれ違う」をオンにしていれば、アプリを閉じていても記録します。閉じている人には、共通点がある時だけ通知が届きます（8時〜22時・1日3通まで）</li>
+      <li>すれ違いの設定は<b>お互いさま</b>です。どちらかが「使わない」なら記録しません。「共通点がある人だけ」の人とは、共通点がある時だけ記録します</li></ul>
+    <h3 class="hwh">地図に出る人</h3>
+    <ul class="hwl"><li><b>友達</b>：あなたに「学内での居場所を見せる」をオンにしている友達</li>
+      <li><b>友達ではない人</b>：いまアプリを開いていて、学内にいて、「近くの人に出す」をオンにしている人。すれ違いの設定が合う人だけです</li>
+      <li>友達ではない人の位置は、<b>約30mのます目</b>にぼかして出します（ぴったりの場所は出しません）</li>
+      <li>アプリを閉じている人・隠れている人・ブロックした人／された人は出ません</li></ul>
+    <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px" onclick="closeMembers();openCrossPrefs()">すれ違いの設定を見る</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
 }
 function setAppvPane(k,quiet){
   appvPane=k;
@@ -2795,6 +2836,7 @@ function setAppvPane(k,quiet){
   ['fr','cross','near'].forEach(x=>{ const p=$('#appvPane-'+x); if(p)p.hidden=x!==k; });
   if(!quiet&&appvDetent==='low')setAppvDetent('mid');
   if(k==='fr')renderFriends(); if(k==='cross')renderCross();
+  renderAppvSegInfo();
 }
 // シートの高さ：low（見出しだけ）・mid（半分）・full（全画面）
 const ASH_H={low:'116px',mid:'52%',full:'calc(100% - env(safe-area-inset-top,0px) - 68px)'};   // 一番上は、上のアイコンと位置のバーのすぐ下まで（2026-11-03）   // 一番上でも、隅のボタンの下に地図を細く残す（E13。地図の上のシートだと分かるように）。低い時は「いまの自分・時間割」の2枚が見える高さ（2026-11-01）
@@ -2907,6 +2949,7 @@ function renderAppvChrome(){
       +`<button class="awant${w?' on':''}" onclick="openWantEdit()"><small>語りたいこと</small><b>${w?esc(w):'今日だけ出す話題を書く'}</b><i>›</i></button>`
       +(wantPopular(1).length?`<button class="awantall" onclick="openWantList()">みんなの語りたいことを見る ›</button>`:'');   // Web版の「みんなの◯件」（数は出さない）
     if(tl.dataset.h!==th){ tl.dataset.h=th; tl.innerHTML=th; } }
+  renderAppvSegInfo();
   const pf=$('#appvPane-fr');
   const pn=$('#appvPane-near');
   if(pn){ let bk=$('#appvNearBack'); if(!bk){ bk=document.createElement('button'); bk.id='appvNearBack'; bk.className='xsetrow'; bk.onclick=()=>setAppvPane('cross'); bk.innerHTML='<span>‹</span><b>すれ違いに戻る</b>'; }
