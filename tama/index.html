@@ -10922,7 +10922,7 @@ function renderVisHub(){
         <div class="vishint">${WORRY_VIS_NOTE[a.purpose_vis==='all'?'all':'same']}</div>${worryCountHTML(a.purposes)}</div>`
       :`<div class="vishint" style="margin:0 0 10px">選んでいません（任意）。<a onclick="closeVisHub();openEdit()">プロフィール編集で選ぶ ›</a></div>`}</div>
     <div class="pssec"><div class="psh">🚫 だれにも見えないもの</div>
-      <div class="vishint" style="margin:0 0 10px">年齢・キャンパスの外での位置（アプリを閉じている間は位置を取りません）</div></div>
+      <div class="vishint" style="margin:0 0 10px">年齢・キャンパスの外での位置。アプリを閉じている間の位置は、「閉じている間も、すれ違う」をオンにした時だけ、学内にいる間だけ取り、すれ違いの記録にだけ使います（地図には出ません）</div></div>
     <div class="pssec"><div class="psh">📵 スマホの位置情報そのものを止めたい時</div>
       <div class="vishint" style="margin:0 0 10px">${isNativeApp()?`<b>iPhone</b>：設定 ▶ ちかく ▶ 位置情報 ▶「なし」<br>
         <b>Android</b>：設定 ▶ アプリ ▶ ちかく ▶ 権限 ▶ 位置情報 ▶「許可しない」`
