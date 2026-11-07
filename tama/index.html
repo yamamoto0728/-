@@ -1475,6 +1475,8 @@
   html.appv .pmk.me{border-radius:50%;box-shadow:0 0 0 3px var(--me),0 3px 8px rgba(0,0,0,.18)}
   html.appv .pmk.closed{opacity:.5;filter:grayscale(1);box-shadow:none}
   html.appv .pmk.closed::after{display:none}
+  html.appv .pmk.xd{font-size:16px;border-width:2px;box-shadow:0 0 0 2.5px var(--tint),0 2px 6px rgba(0,0,0,.18)}
+  html.appv .pmk .xmark{position:absolute;right:-7px;bottom:-5px;width:16px;height:16px;border-radius:50%;background:var(--night);box-shadow:0 0 0 1.5px var(--tint);font-size:9px;font-style:normal;line-height:16px;text-align:center}
   /* 建物名：枠を外して、縁取りした文字だけ（Apple のマップと同じ） */
   html.appv .blbl,html.appv .blbl.food,html.appv .blbl.field{background:none;border:0;box-shadow:none;padding:0;color:var(--map-label);font-size:11px;font-weight:600;letter-spacing:.02em;
     text-shadow:0 0 2px var(--map-ground),0 0 2px var(--map-ground),0 0 4px var(--map-ground)}
@@ -2060,6 +2062,11 @@
   html.appv .hwh{margin:14px 0 6px;font-size:var(--fs3);font-weight:700}
   html.appv .hwl{margin:0;padding-left:18px;font-size:var(--fs3);line-height:1.7;color:var(--ink)}
   html.appv .hwl li{margin-bottom:4px}
+  html.appv .hwleg{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:var(--fs3)}
+  html.appv .hwleg .lg{flex:none;display:grid;place-items:center;border-radius:50%;background:var(--fill);border:2px solid #fff}
+  html.appv .hwleg .lg.fr{width:28px;height:28px;border-width:3px}
+  html.appv .hwleg .lg.xd{width:22px;height:22px;box-shadow:0 0 0 2.5px var(--tint);font-size:10px}
+  html.appv .hwleg .lg.nb{width:16px;height:16px}
   html.appv #appvSet .setrow .toggle{flex:none}
   html.appv .ob{padding-top:calc(env(safe-area-inset-top,0px) + 26px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
   html.appv .wel{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
@@ -2821,6 +2828,10 @@ function openCrossHow(){
       <li>位置のずれが大きい時（50mより大きい時）は数えません</li>
       <li>「閉じていても、すれ違う」をオンにしていれば、アプリを閉じていても記録します。閉じている人には、共通点がある時だけ通知が届きます（8時〜22時・1日3通まで）</li>
       <li>すれ違いの設定は<b>お互いさま</b>です。どちらかが「使わない」なら記録しません。「共通点がある人だけ」の人とは、共通点がある時だけ記録します</li></ul>
+    <h3 class="hwh">地図の見分け方</h3>
+    <div class="hwleg"><span class="lg fr"></span><span><b>友達</b>：大きいアイコンと名前</span></div>
+    <div class="hwleg"><span class="lg xd">👣</span><span><b>今日すれ違った人</b>：色の輪と足あとの印</span></div>
+    <div class="hwleg"><span class="lg nb"></span><span><b>近くの人</b>：小さいアイコン（まだすれ違っていない人）</span></div>
     <h3 class="hwh">地図に出る人</h3>
     <ul class="hwl"><li><b>友達</b>：あなたに「学内での居場所を見せる」をオンにしている友達</li>
       <li><b>友達ではない人</b>：いまアプリを開いていて、学内にいて、「近くの人に出す」をオンにしている人。すれ違いの設定が合う人だけです</li>
@@ -5641,11 +5652,15 @@ function toggleMapFull(){
   if(fesMap)setTimeout(()=>{ fesMap.invalidateSize(); if(on&&myPos&&inCampus(myPos.lat,myPos.lng))fesMap.setView([myPos.lat,myPos.lng],Math.max(fesMap.getZoom(),17)); layoutLabels(); },60);
 }
 // closed：アプリを閉じた人（最後にいた位置に薄く出す）
-function mapIcon(emoji,me,closed,fr){
-  const A=appvOn(), s=A?(me||fr?40:24):(me?30:28), tail=A&&fr&&!me;
+// 📱 2026-11-07 あおの依頼「すれ違いを強みに。地図で友達とすれ違いの人の違いがあると良い」：
+//   友達＝大きく・名前つき（drawFriendMarkers）／今日すれ違った人＝中くらい・アクセントの輪と足あとの印／ほかの近くの人＝小さく
+function mapIcon(emoji,me,closed,fr,crossed){
+  const A=appvOn(), x=A&&crossed&&!fr&&!me, s=A?(me||fr?40:x?30:24):(me?30:28), tail=A&&fr&&!me;
   return L.divIcon({className:'',iconSize:[s,s],iconAnchor:tail?[s/2,s+6]:[s/2,s/2],
-    html:`<div class="pmk${me?' me':''}${tail?' fr':''}${closed?' closed':''}" style="background:${me&&!A?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${esc(emoji)}</div>`});
+    html:`<div class="pmk${me?' me':''}${tail?' fr':''}${x?' xd':''}${closed?' closed':''}" style="background:${me&&!A?'linear-gradient(135deg,#ffd7a8,#f78b3c)':gr(emoji)}">${esc(emoji)}${x?'<i class="xmark">👣</i>':''}</div>`});
 }
+// 今日すれ違った人か（自分の記録）
+function crossedToday(id){ const e=encMap[id]; if(!e)return false; const t=typeof e.last_at==='number'?e.last_at:Date.parse(e.last_at)||0; return t>=jstTodayStart().getTime(); }
 function centerOnMe(){
   if(!fesMap)return;
   if(!myPos){ toast('現在地を取得中です'); return; }
@@ -5660,7 +5675,8 @@ function drawMap(list){
     list.forEach(({u,d})=>{ if(!uOnCampus(u))return;
       if(appvOn()&&friendOnMap(u.id))return;   // 📱 地図に出す友達は drawFriendMarkers で1回だけ描く（2回描かれていた）
       const j=u.srv?gridJit(u.id):[0,0];
-      L.marker([u.lat+j[0],u.lng+j[1]],{icon:mapIcon(u.emoji,false,isClosed(u),isFriend(u.id))}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
+      const xd=crossedToday(u.id);
+      L.marker([u.lat+j[0],u.lng+j[1]],{zIndexOffset:xd?300:0,icon:mapIcon(u.emoji,false,isClosed(u),isFriend(u.id),xd)}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
     if(myPos&&inCampus(myPos.lat,myPos.lng)){
       const ll=[myPos.lat,myPos.lng], icon=mapIcon(profile?profile.emoji:'📍',true);
       if(!fesMe){
