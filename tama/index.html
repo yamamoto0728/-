@@ -2680,21 +2680,33 @@ const INTEREST_OPTS={
   'アート':['絵画','写真','デザイン','美術館','陶芸','ハンドメイド','建築','現代アート','イラスト'],
   '勉強・学び':['英語','プログラミング','資格','読書','投資','起業','語学','歴史','心理学','副業']
 };
-const NGWORDS=[
-  // 暴言・攻撃
-  '死ね','しね','殺す','ころす','殺害','消えろ','うざい','ウザい','きもい','キモい','きしょい','ブス','ブサイク','デブ','ハゲ','クズ','低能','無能',
-  // 差別
-  '障害者','きちがい','キチガイ','池沼','土人',
-  // 性的
-  'セックス','セフレ','エッチ','えっち','ヤりたい','童貞','処女','中出し','全裸','下着','パンツ見せ','ちんこ','まんこ','おっぱい','巨乳','風俗','エロ','くんに','勃起','ビラビラ',
-  // 売買春・金銭・勧誘
-  '援交','援助交際','パパ活','ママ活','稼げる','儲かる','副業紹介','投資しません','バイナリー','ネットワークビジネス','マルチ商法','宗教の勧誘',
-  // 連絡先の強要
-  'line交換','ライン交換','LINE教え','id教え','電話番号教え','住所教え','本名教え',
-  // 危険な誘い
-  'ホテル行','泊まって','お酒飲ませ','クスリ'
-];
-function ngCheck(text){ if(!text)return null; const low=text.toLowerCase(); const hit=NGWORDS.filter(w=>low.includes(w.toLowerCase())); return hit.length?hit:null; }
+/* ---------- 使えない言葉（2026-11-07 安全の総点検） ----------
+   正はサーバーの表 tama_ng_words と関数 tama_ng_hit（supabase/tama_moderation.sql）。サーバーは保存する前に必ず確かめる（画面は改造できるため）。
+   画面は tama_ng_list() で同じ一覧を受け取り、送る前に先に知らせるだけ。SQL の実行前は、下の NG_FALLBACK で確かめる。
+   書き方をそろえてから比べる：全角・半角・大文字・カタカナ→ひらがな・空白や記号を抜く（「し ね」「ｼﾈ」も同じに見る）。
+   scope：'public'＝知らない人も見る所（出会い目的・連絡先も止める）／'dm'＝友達どうし（ひどい言葉だけ） */
+const NG_FALLBACK=['死ね','氏ね','しねよ','殺す','ころすぞ','殺害','消えろ','きしょい','ぶさいく','人間のくず','ガイジ','きちがい','池沼',
+  'セックス','セフレ','ヤリモク','中出し','全裸','ちんこ','まんこ','おっぱい','風俗','エロい','裏垢','ラブホ','援交','パパ活','ママ活','闇バイト','大麻','覚醒剤'];
+const NG_FALLBACK_PUBLIC=['出会い目的','出会い系','彼女募集','彼氏募集','恋人募集','LINE交換','ライン交換','LINEID','ラインID','インスタ交換','DMください','電話番号教え'];
+const ngNorm=t=>String(t||'').normalize('NFKC').toLowerCase().replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)).replace(/[^a-z0-9ぁ-ゖ一-鿿々]/g,'');
+let ngList=null;   // [{w:そろえた言葉, k:'block'|'public'}]
+async function loadNgList(){ if(!sb||ngList)return; try{ const {data,error}=await sb.rpc('tama_ng_list'); if(!error&&Array.isArray(data)&&data.length)ngList=data; }catch(e){} }
+function ngCheck(text,scope){
+  if(!text)return null; scope=scope==='dm'?'dm':'public';
+  const n=ngNorm(text), list=ngList||NG_FALLBACK.map(w=>({w:ngNorm(w),k:'block'})).concat(NG_FALLBACK_PUBLIC.map(w=>({w:ngNorm(w),k:'public'})));
+  const hit=list.filter(x=>x.w&&(x.k==='block'||scope==='public')&&n.includes(x.w)).map(x=>x.w);
+  if(scope==='public'){
+    const raw=String(text).normalize('NFKC').toLowerCase().replace(/\s+/g,'');
+    if(/(https?:|www\.|[a-z0-9-]+\.(com|jp|net|org|me|io|ly|link|xyz|info|co)([^a-z]|$))/.test(raw))hit.push('URL');
+    else if(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/.test(raw))hit.push('メールアドレス');
+    if(/(^|[^0-9])0[0-9]{9,10}([^0-9]|$)/.test(raw.replace(/[-()（）ー‐]/g,'')))hit.push('電話番号');
+    if(/@[a-z0-9_.]{3,}/.test(raw))hit.push('SNSのID');
+  }
+  return hit.length?hit:null;
+}
+// サーバーが「使えない言葉」で止めた時のエラーか（supabase/tama_moderation.sql の ng_word）
+const isNgErr=e=>!!e&&/ng_word/.test(String(e.message||'')+String(e.hint||''));
+const NG_MSG='⚠️ 使えない言葉（ひどい言葉・連絡先・出会い目的の言葉など）が入っています。書き直してください';
 const GRADS={'🌙':['#8b9dff','#63d6e8'],'⭐':['#ffd166','#ff9d70'],'🌸':['#ff7e9d','#ffb0c8'],'🔥':['#ff6b4a','#ffb066'],'🐱':['#ffb066','#ffd166'],'🎧':['#a78bfa','#63d6e8'],'☕':['#c89b6b','#8b6b4a'],'📷':['#63d6e8','#4b8bf0'],'🍜':['#ff9d70','#ffcf6b'],'🌿':['#7be0b0','#4bc0d9'],'🎨':['#ff7e9d','#a78bfa'],'🏃':['#63d6e8','#7be0b0'],
   '🐶':['#ffcf8a','#ff9d70'],'🐰':['#ffc2d6','#d6b8ff'],'🐻':['#c89b6b','#ffcf8a'],'🦊':['#ff9d4a','#ffd166'],'🐼':['#b8c4d6','#8b9dff'],'🐧':['#63b0f0','#8be0f0'],
   '🐸':['#7be0b0','#c6f06b'],'🦄':['#d6b8ff','#ff9dd6'],'🐳':['#4b8bf0','#63d6e8'],'🌻':['#ffd166','#ffb066'],'🍀':['#6bd98b','#c6f06b'],'🌈':['#ff9d70','#8b9dff'],
@@ -2897,6 +2909,7 @@ async function saveXItem(k,v){
   profile.fa=profile.fa||{};
   const key=k==='xmsg'?'xmsg':(XF.find(f=>f.k===k)||{}).fa; if(!key)return;
   const val=Array.isArray(v)?v.slice(0,6):String(v||'').trim().slice(0,30);
+  if(typeof val==='string'&&val&&ngCheck(val)){ toast(NG_MSG); return; }   // 2026-11-07：知らない人も見るので、連絡先も書けない
   if(!val||(Array.isArray(val)&&!val.length))delete profile.fa[key]; else profile.fa[key]=val;
   closeMembers(); renderAppvXItems(); updateRarity(); renderNearby(); renderCross();
   await saveMyAttrs(); toast('保存しました');
@@ -4131,6 +4144,7 @@ async function tryResumeSession(){
     profile={id:myId,name:data.name,age:data.age,emoji:data.emoji,bio:data.bio,tags:data.tags||[],work:data.work,looking:data.looking||[],likes:data.likes||[],interests:data.interests||[],fa:data.fes_attrs||{}};
     // 年齢は本人だけが読める tama_private にある（2026-10-10 セキュリティの見直し。supabase/tama_security.sql）。無ければ前のまま
     if(data.age==null)sb.from(T('private')).select('age').eq('id',myId).maybeSingle().then(({data:pv})=>{ if(pv&&pv.age&&profile)profile.age=pv.age; },()=>{});
+    loadMyPurposes();   // 隠している悩みは tama_private にある（2026-11-07）
     renderMeHero();
     $('#s-welcome').classList.remove('active');$('#s-onboard').classList.remove('active');$('#nav').style.display='flex';go('near');
     startGeo();buildInvite();startLoops();
@@ -4670,7 +4684,7 @@ async function saveNewProfile(){
   if(!fesAttrColMissing)row.fes_attrs=profile.fa||{};
   let {error}=await sb.from(T('profiles')).upsert(row);
   if(error&&/fes_attrs/.test(error.message)){ fesAttrColMissing=true; delete row.fes_attrs; ({error}=await sb.from(T('profiles')).upsert(row)); }
-  if(error)console.warn('[profile] 登録内容を保存できませんでした',error.message);
+  if(error){ console.warn('[profile] 登録内容を保存できませんでした',error.message); if(isNgErr(error))toast(NG_MSG); }
 }
 // マイページに、同じ悩み・不安を選んでいる人の数（5人以上の時だけ。話さなくても「自分だけじゃない」が分かるように。2026-10-04）
 function renderMeWorry(){ const el=$('#meWorry'); if(!el)return; const p=attrsOf(profile).purposes||[];
@@ -4804,7 +4818,8 @@ let fesAttrColMissing=false;
 async function saveMyAttrs(){
   if(!sb||!myId||!profile||fesAttrColMissing)return;
   const {error}=await sb.from(T('profiles')).update({fes_attrs:profile.fa||{}}).eq('id',myId);
-  if(error)console.warn('[attrs] 属性を保存できませんでした',error.message);
+  if(error){ console.warn('[attrs] 属性を保存できませんでした',error.message); if(isNgErr(error))toast(NG_MSG); }
+  return error||null;
 }
 // 日本時間の今日0時。アプリを閉じた人は、その日のうちで閉じてから2時間（SHOW_CLOSED_MS）まで、最後にいた位置に表示し続ける（地図にいつも人がいるように）
 function jstTodayStart(ms=Date.now()){ return new Date(ms-(ms+9*3600000)%86400000); }
@@ -4939,7 +4954,33 @@ function worryCountHTML(list){
   return hit.length?`<div class="worrycnt">🤝 ${hit.map(o=>`「${esc(o.x)}」は、今日キャンパスに <b>${o.c}人</b>`).join('<br>')}<br><span>あなただけじゃありません</span></div>`
     :`<div class="worrycnt dim">同じことを選んでいる人の数は、${WORRY_MIN_SHOW}人以上になると表示します</div>`;
 }
-function attrsOf(u){ return (u&&(u.fa||u.fes_attrs))||{}; }
+function attrsOf(u){ const a=(u&&(u.fa||u.fes_attrs))||{}; if(a.pur_h&&a.purposes===undefined&&u.id&&u.id!==myId)purFill(u.id,a); return a; }
+/* 「悩み・不安」を「同じことを選んだ人にだけ」にしている人の分（2026-11-07 安全の総点検。supabase/tama_hardening.sql の 7.）
+   前は全員の悩みをだれでも読める表に置いて、画面で隠しているだけだった。いまはサーバーが本人だけ読める所（tama_private）に移し、
+   プロフィールには「隠している」印（pur_h）だけを置く。ほかの人の分は、自分と重なっているものだけを tama_shared_purposes() で受け取る */
+let purShared={}, purAsked={}, purQueue=new Set(), purTimer=null;
+function purFill(id,a){
+  if(purShared[id]){ a.purposes=purShared[id]; return; }
+  if(!((attrsOf(profile).purposes||[]).length))return;   // 自分が選んでいなければ、重なるものは無い
+  if(purAsked[id]&&Date.now()-purAsked[id]<10*60000)return;
+  purQueue.add(id); if(!purTimer)purTimer=setTimeout(purFetch,1200);
+}
+async function purFetch(){
+  purTimer=null; const ids=[...purQueue].slice(0,300); purQueue=new Set(); if(!ids.length||!sb)return;
+  ids.forEach(id=>purAsked[id]=Date.now());
+  try{
+    const {data,error}=await sb.rpc('tama_shared_purposes',{p_ids:ids});
+    if(error){ if(!isSchemaErr(error))console.warn('[purposes] 重なる悩みを読めませんでした',error.message); return; }
+    let got=false; (data||[]).forEach(r=>{ if(Array.isArray(r.purposes)&&r.purposes.length){ purShared[r.id]=r.purposes; got=true; } });
+    if(got){ updateRarity(); renderNearby(); renderCross(); }
+  }catch(e){}
+}
+// 自分の悩みは、本人だけが読める tama_private から戻す
+async function loadMyPurposes(){
+  if(!sb||!myId||!profile)return; const fa=profile.fa||{}; if(!fa.pur_h||Array.isArray(fa.purposes))return;
+  try{ const {data}=await sb.from(T('private')).select('purposes').eq('id',myId).maybeSingle();
+    if(data&&Array.isArray(data.purposes)&&profile){ profile.fa.purposes=data.purposes; renderMeHero(); renderMeWorry(); } }catch(e){}
+}
 function toggleArr(a,v){ const i=a.indexOf(v); if(i>=0)a.splice(i,1); else a.push(v); }
 // 選択肢が入れ替わった項目は、いまのFAに無い値を落としてから入力欄に流す。
 // そうすると学園祭向けの古い値（「食べ歩き」など）が残っている人は必須が空になり、
@@ -6228,7 +6269,7 @@ async function sendWave(u,text){
   if(le&&/matched/.test(le.message)){
     console.warn('[attrs] tama_likes に matched 列がありません。supabase/tama_tables.sql を実行してください:',le.message);
     await sb.from(T('likes')).upsert({from_id:myId,to_id:uid,reason:text});
-  }else if(le){ console.warn('[wave] 送れませんでした',le.message); toast(/too_many/.test(le.message)?'今日はたくさんいいねを送りました。また明日どうぞ':'⚠️ 送れませんでした。電波の良い所でもう一度どうぞ'); liked.delete(uid); delete myWaves[uid]; renderNearby(); return; }
+  }else if(le){ console.warn('[wave] 送れませんでした',le.message); toast(isNgErr(le)?NG_MSG:/too_many/.test(le.message)?'今日はたくさんいいねを送りました。また明日どうぞ':'⚠️ 送れませんでした。電波の良い所でもう一度どうぞ'); liked.delete(uid); delete myWaves[uid]; renderNearby(); return; }
   const gated=init&&surveyGateOn(); if(gated){ initToday++; renderSurveyBox(); }
   const me=profile?profile.name:'だれか';
   // 始め直しの時は、手元のトークの残り時間もすぐ今から24時間にする（次の refreshMatches を待たずに開けるように）
@@ -7275,7 +7316,7 @@ function renderChat(){const m=chatOf(chatPeer);if(!m)return;const box=$('#msgs')
 async function sendMsg(){const inp=$('#chatInput');const t=inp.value.trim();if(!t||!chatPeer)return;
   const c=chatOf(chatPeer); if(!c)return;
   if(isExpired(c)){ toast('このトークは24時間を過ぎたので、もう話せません（友達になると期限なしで話せます）'); return; }
-  if(ngCheck(t)){ toast('⚠️ 不適切な言葉が含まれています。書き直してください。'); return; }
+  if(ngCheck(t,isFriend(chatPeer)?'dm':'public')){ toast(isFriend(chatPeer)?'⚠️ 不適切な言葉が含まれています。書き直してください。':'⚠️ 使えない言葉か、連絡先（URL・電話番号・ID など）が入っています。友達になる前は、連絡先は送れません'); return; }
   inp.value='';
   await sendChatText(chatPeer,t);
 }
@@ -7294,7 +7335,7 @@ async function sendChatText(uid,t){
   // 保存できなかった時は、知らせて画面からも外す（2026-10-15 あおの指摘「送りあったのに Supabase に反映されない」。前は失敗しても何も出さず、通知だけ届いていた）
   const {error}=await sb.from(T('messages')).insert({match_key:chatKey(uid),from_id:myId,text:t});
   if(error){ console.warn('[chat] 送れませんでした',error.code,error.message); c.msgs=c.msgs.filter(x=>!(x.from===myId&&x.text===t&&Date.now()-x.at<60000)); renderChat();
-    toast('⚠️ 送れませんでした'+(/too_many/.test(error.message)?'（短い時間にたくさん送りました。少し待ってからどうぞ）':/row-level security|violates/i.test(error.message)?'（このトークに書ける条件に当てはまっていません。おたがいにいいね、か友達になっているか確かめてください）':'（'+esc(String(error.message).slice(0,60))+'）'));
+    toast(isNgErr(error)?NG_MSG:'⚠️ 送れませんでした'+(/too_many/.test(error.message)?'（短い時間にたくさん送りました。少し待ってからどうぞ）':/row-level security|violates/i.test(error.message)?'（このトークに書ける条件に当てはまっていません。おたがいにいいね、か友達になっているか確かめてください）':'（'+esc(String(error.message).slice(0,60))+'）'));
     const inp=$('#chatInput'); if(inp&&!inp.value)inp.value=t; return; }
   notifyMsg(uid,c,t);   // 保存できた時だけ、相手に通知
 }
@@ -7461,7 +7502,7 @@ async function sendRoomMsg(){ const inp=$('#roomInput'); const t=inp.value.trim(
   // 保存できなかった時は、知らせて画面からも外す（2026-10-15。前は失敗しても何も出さず、ほかの人に通知だけ届いていた）
   const {error:pe}=await sb.from(T('room_messages')).insert(m);
   if(pe){ console.warn('[room] 投稿できませんでした',pe.code,pe.message); curRoom.msgs=(curRoom.msgs||[]).filter(x=>x!==m); renderRoom(); inp.value=t;
-    toast('⚠️ 投稿できませんでした'+(/too_many/.test(pe.message)?'（短い時間にたくさん投稿しました。少し待ってからどうぞ）':/row-level security|violates/i.test(pe.message)?'（この部屋に参加しているか確かめてください）':'（'+esc(String(pe.message).slice(0,60))+'）')); return; }
+    toast(isNgErr(pe)?NG_MSG:'⚠️ 投稿できませんでした'+(/too_many/.test(pe.message)?'（短い時間にたくさん投稿しました。少し待ってからどうぞ）':/row-level security|violates/i.test(pe.message)?'（この部屋に参加しているか確かめてください）':'（'+esc(String(pe.message).slice(0,60))+'）')); return; }
   misMark('post');   // 今日のミッション（コミュニティに書き込む）
   markRoomRead(curRoom.id,true); notifyRoomMembers(curRoom,t);
 }
@@ -8184,7 +8225,7 @@ function renderRoom(){
   // 2.5秒ごとに描き直すので、変わった時だけ差し替える（読んでいる途中で一番下に戻されないように）
   if(box.dataset.h!==h){ const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60||box.dataset.room!==rid(r.id); box.dataset.h=h; box.dataset.room=rid(r.id); box.innerHTML=h; if(atBottom&&joined)box.scrollTop=box.scrollHeight; else if(!joined)box.scrollTop=0; }
 }
-const ROOM_JOIN_MSG={ok:'✅ 参加しました',full:'定員に達しているため、参加できません',unfit:'この部屋は、条件に当てはまる人だけが参加できます',code:'招待コードが違います',
+const ROOM_JOIN_MSG={ok:'✅ 参加しました',too_many:'招待コードを何度もまちがえたので、10分ほど待ってからどうぞ',full:'定員に達しているため、参加できません',unfit:'この部屋は、条件に当てはまる人だけが参加できます',code:'招待コードが違います',
   banned:'この部屋には参加できません',ended:'この部屋は終わりました',gone:'この部屋は閉じられました'};
 async function joinRoomV2(code){
   if(!curRoom||!sb)return;
@@ -8360,13 +8401,13 @@ async function kickRoomMember(uid,name){
   if(!confirm(`${name}さんに、この部屋から退出してもらいますか？\n（${name}さんはこの部屋にもう参加できなくなります。相手には通知されません）`))return;
   const {data,error}=await sb.rpc('tama_room_kick',{p_room:rid(curRoom.id),p_user:uid,p_ban:true});
   if(error||data!=='ok'){ toast('できませんでした'); return; }
-  toast(`${name}さんに退出してもらいました`); await loadRooms(); openRoomInfo();
+  toast(`${esc(name)}さんに退出してもらいました`); await loadRooms(); openRoomInfo();
 }
 async function transferRoom(uid,name){
   if(!confirm(`${name}さんにオーナーを譲りますか？\n（あなたは参加者として残ります。部屋の編集・閉じるはできなくなります）`))return;
   const {data,error}=await sb.rpc('tama_room_transfer',{p_room:rid(curRoom.id),p_user:uid});
   if(error||data!=='ok'){ toast('譲れませんでした'); return; }
-  toast(`👑 ${name}さんがオーナーになりました`); closeMembers(); await loadRooms();
+  toast(`👑 ${esc(name)}さんがオーナーになりました`); closeMembers(); await loadRooms();
   notifyPush(uid,'👑 コミュニティのオーナーになりました',`「${curRoom.name}」のオーナーを譲られました。部屋を見守ってください`,{kind:'room',go:'room',r:String(curRoom.id),tag:'room-'+curRoom.id});
 }
 async function closeRoomV2(){
@@ -9376,7 +9417,7 @@ function psPickRoom(){ const cs=ttCurrentSlot(); if(!cs||!myRooms[cs.k])return; 
 function closePlaceEdit(){ ttOpen=false; $('#placeOverlay').classList.remove('show'); if(roomForm&&$('#payOverlay').classList.contains('show'))renderRoomFormChips(); }   // コミュニティを作る画面から時間割を開いた時は、授業の選択肢を入れ直す
 function savePlaceEdit(){
   const place=$('#psPlace').value||null, room=$('#psRoom').value.trim(), note=$('#psNote').value.trim();
-  if(ngCheck(room)||ngCheck(note)){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
+  if(ngCheck(room,'dm')||ngCheck(note,'dm')){ toast('⚠️ 不適切な言葉が含まれています。修正してください'); return; }
   myPresence.place=place; curPlace=place; placeCand=place; placeCandSince=Date.now();
   myPresence.room=room; myPresence.note=note;
   myPresence.expires_at=(room||note)?new Date(roomExpiryAt()).toISOString():null;
@@ -9866,12 +9907,8 @@ function renderFesQ(el,t){
    ・答え（悩み以外）はその週だけ、すれ違いの共通点になる（fes_attrs.wk。サーバーは supabase/tama_weekly.sql） */
 let wk=null, wkMissing=false, wkOpenT=new Set();
 const WK_NEED=5;
-// だめな言葉（サーバーの tama_wk_ng と同じ一覧。画面で先に止めるため）
-const WK_NG=['死ね','殺す','ころす','消えろ','きえろ','キモい','きもい','ブス','デブ','ガイジ','がいじ','池沼','クズ',
-  'セックス','せっくす','sex','エロ','ヤリモク','やりもく','セフレ','せふれ','パパ活','ぱぱ活','援交','えんこう','裏垢','うらあか',
-  'ちんこ','ちんぽ','まんこ','おっぱい','フェラ','ホテル','出会い','であい','彼女募集','彼氏募集','恋人募集','付き合って','つきあって',
-  'line交換','ライン交換','らいん交換','インスタ交換','電話番号','住所','@','http','大麻','覚醒剤','闇バイト'];
-const wkNg=v=>{ const t=String(v||'').normalize('NFKC').toLowerCase(); return WK_NG.some(w=>t.includes(w))||!!ngCheck(t); };   // チャットと同じ一覧（NGWORDS）も使う
+// 使えない言葉（ほかの所と同じ一覧。サーバーの tama_wk_ng も同じ tama_ng_hit を使う。2026-11-07）
+const wkNg=v=>!!ngCheck(v,'public');
 // 今週の月曜（日本時間）の日付
 function jstMonday(){ const d=new Date(Date.now()+9*3600000); d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+6)%7); return d.toISOString().slice(0,10); }
 // その人の今週の答え（先週以前の答えは数えない）
@@ -10041,7 +10078,7 @@ function renderDaily(){
     fesDailyOpts=t.fes?[...new Set((booths||[]).filter(b=>!isTest(b.id)||isTest(myId)).map(b=>(b.name||'').trim()).filter(Boolean))].slice(0,10):[];
     el.innerHTML=`<div class="dqline"><span class="dqh">${lbl}<span class="qhelp" role="button" aria-label="今日のお題の説明" onclick="event.stopPropagation();openHelp('daily')">?</span></span>${esc(t.q)}</div>`+(t.free
       ?(fesDailyOpts.length?`<div class="chips" style="margin-bottom:8px">${fesDailyOpts.map((o,i)=>`<span class="c" onclick="event.stopPropagation();answerDaily(fesDailyOpts[${i}])">${esc(o)}</span>`).join('')}</div>`:'')+`${t.fes&&SHOPS().length?`<button class="shopall" onclick="event.stopPropagation();openShopPick()">🏮 出店・企画の一覧から選ぶ（${SHOPS().length}件）</button>`:''}<div class="drow"><input id="dailyIn" maxlength="${t.fes?40:24}"${t.fes&&SHOPS().length?' data-sugg="shop"':''} placeholder="${esc(t.fes&&SHOPS().length?'名前・団体・食べ物を打つと候補が出ます':t.free)}"><button class="btn btn-primary" onclick="event.stopPropagation();answerDaily($('#dailyIn').value)">答える</button></div>`
-      :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="event.stopPropagation();answerDaily('${o}')">${esc(o)}</span>`).join('')}</div>`)
+      :`<div class="chips">${t.o.map(o=>`<span class="c" onclick="event.stopPropagation();answerDaily('${jsq(o)}')">${esc(o)}</span>`).join('')}</div>`)
       ;
     fillDailyStats();
     return;
@@ -11347,6 +11384,7 @@ loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   loadCt(); setInterval(()=>{ if(!document.hidden)loadCt(); },60000);   // ちかくタイム（2026-10-10）
   setTimeout(()=>loadTamasai(),3000); setInterval(()=>{ if(!document.hidden)loadTamasai(); },120000);
   loadWeekly(); setInterval(()=>{ if(!document.hidden)loadWeekly(); },5*60000);   // 今週のイベント（2026-11-07）
+  loadNgList();   // 使えない言葉の一覧（2026-11-07。supabase/tama_moderation.sql）
   loadAdmin(); loadClassRooms(); setInterval(()=>{ if(!document.hidden)loadClassRooms(); },60000);   // 授業のコミュニティ・運営かどうか（2026-10-15）
   loadWtp().then(()=>wtpMaybeAsk('day'));   // ちかくプラスのアンケート（2026-10-14。登録の次の日から、すれ違い・友達がまだの人にも）   // 多摩祭の参加人数（2026-10-11。多摩祭の日と、🎉をまだ持っていない参加者だけ）
   if(pushRoute)setTimeout(()=>openFromPush(pushRoute),600);   // 通知を押して開いた時は、その画面へ（2026-10-10）

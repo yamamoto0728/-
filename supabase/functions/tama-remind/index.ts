@@ -401,6 +401,9 @@ Deno.serve(async (req) => {
   // 記録の表（tama_fes_sent。tama_tamasai.sql）が無い時は、そのまま送る
   // 出店者向け（shop）は1日に2回あるので、回ごと（slot）に1回だけ
   if (body.kind === "recap" || body.kind === "fsurvey" || body.kind === "shop") onceKey = `${body.kind}:${todayJst}${body.slot ? ":" + body.slot : ""}`;
+  // 授業の始まり（period）と昼休み（lunch）も、その日に1回だけ（2026-11-07 安全の総点検：前は公開の鍵で何度も呼ぶと、そのたびに全員へ送れた）
+  if (body.kind === "period") onceKey = `period:${todayJst}:${Number(body.period)}`;
+  if (body.kind === "lunch") onceKey = `lunch:${todayJst}`;
   if (onceKey) {
     const { error: onceErr } = await supabase.from("tama_fes_sent").insert({ key: onceKey });
     if (onceErr && (onceErr.code === "23505" || /duplicate/i.test(onceErr.message))) return json({ ok: true, skipped: "already sent today" });

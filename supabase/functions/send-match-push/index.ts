@@ -153,6 +153,12 @@ Deno.serve(async (req) => {
         why = ids.length > 0 && await one(supabase.from("tama_room_members").select("room_id").eq("user_id", to).in("room_id", ids).limit(1));
       }
       if (!why) return deny("no relation");
+      // 通知の文も、使えない言葉を確かめる（2026-11-07 安全の総点検。トークに書けない文を、通知の文にして送れないように）。
+      // 関数 tama_ng_hit（supabase/tama_moderation.sql）がまだ無い時は確かめない
+      if (k !== "test") {
+        const { data: ng, error: ngErr } = await supabase.rpc("tama_ng_hit", { p: `${title} ${body}`, p_scope: k === "msg" || k === "friend" ? "dm" : "public" });
+        if (!ngErr && ng) return deny("ng_word");
+      }
       // 回数の上限：呼んだ人ごとに10分で60通・同じ相手には10分で20通
       const { count: nAll } = await supabase.from("tama_push_events").select("id", { count: "exact", head: true }).eq("sender_id", sender).gt("created_at", since(10));
       if ((nAll ?? 0) >= 60) return deny("too many");
