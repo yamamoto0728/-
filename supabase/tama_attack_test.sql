@@ -5,10 +5,10 @@
 --
 -- A・B は審査用のアカウント（chikaku.hosei+review1@gmail.com・+review2@gmail.com）。
 -- まだ作っていない時は、プロフィールのある人のうち新しい2人を使います（その2人のデータも変わりません）。
--- 結果の表の「OK？」が全部 true なら大丈夫。false の行があったら、その行を Claude に貼ってください。
+-- 結果の表の「結果OK」が全部 true なら大丈夫。false の行があったら、その行を Claude に貼ってください。
 -- ⚠️ tama_moderation.sql と tama_hardening.sql を実行した後に試してください。
 
-create temp table _r (no int, 試したこと text, "OK？" boolean, メモ text) on commit drop;
+create temp table _r (no int, 試したこと text, 結果OK boolean, メモ text) on commit drop;
 grant all on _r to authenticated, anon;
 
 -- A と B を決める
@@ -46,14 +46,14 @@ insert into _r select 1, 'A の名前を書きかえられない', true, '';
 do $$ declare n int; begin
   update public.tama_profiles set name = name where id::text = current_setting('t.a');
   get diagnostics n = row_count;
-  if n > 0 then update _r set "OK？" = false, メモ = '書きかえられた' where no = 1; end if;
+  if n > 0 then update _r set 結果OK = false, メモ = '書きかえられた' where no = 1; end if;
 exception when others then update _r set メモ = '止まった（' || left(sqlerrm, 60) || '）' where no = 1; end $$;
 insert into _r select 2, 'A のすれ違いの記録が読めない',
   (select count(*) = 0 from public.tama_encounters where owner_id::text = current_setting('t.a')), '';
 insert into _r select 3, 'A の正確な位置（tama_locs）が読めない', true, '下の DO で確かめる';
 do $$ begin
   perform 1 from public.tama_locs limit 1;
-  update _r set "OK？" = false, メモ = '読めてしまった' where no = 3;
+  update _r set 結果OK = false, メモ = '読めてしまった' where no = 3;
 exception when others then update _r set メモ = '読めない（' || sqlerrm || '）' where no = 3; end $$;
 insert into _r select 4, 'A の年齢・悩み（tama_private）が読めない',
   (select count(*) = 0 from public.tama_private where id::text = current_setting('t.a')), '';
@@ -64,32 +64,32 @@ insert into _r select 7, '止めた人の一覧が読めない', (select count(*
 insert into _r select 8, 'A になりすまして、いいねを送れない', true, '';
 do $$ begin
   insert into public.tama_likes (from_id, to_id, reason) values (current_setting('t.a')::uuid, gen_random_uuid(), 'なりすまし');
-  update _r set "OK？" = false, メモ = '送れてしまった' where no = 8;
+  update _r set 結果OK = false, メモ = '送れてしまった' where no = 8;
 exception when others then update _r set メモ = '止まった（' || left(sqlerrm, 60) || '）' where no = 8; end $$;
 insert into _r select 9, '友達の申請の相手を書きかえられない', true, '';
 do $$ begin
   if current_setting('t.fr') = '' then update _r set メモ = 'もとから2人の申請・友達の行があるので試せていない（その行にはさわらない）' where no = 9; return; end if;
   update public.tama_friends set from_id = gen_random_uuid() where id::text = current_setting('t.fr');
-  if found then update _r set "OK？" = false, メモ = '書きかえられた' where no = 9; end if;
+  if found then update _r set 結果OK = false, メモ = '書きかえられた' where no = 9; end if;
 exception when others then update _r set メモ = '止まった（' || left(sqlerrm, 60) || '）' where no = 9; end $$;
 insert into _r select 10, 'A とだれかのトークが読めない（B が入っていないトーク）',
   (select count(*) = 0 from public.tama_messages where position(current_setting('t.b') in match_key) = 0), '';
 insert into _r select 11, 'アカウント削除の関数を呼べない', true, '';
 do $$ begin
   perform public.tama_delete_user_data(current_setting('t.a')::uuid);
-  update _r set "OK？" = false, メモ = '呼べてしまった' where no = 11;
+  update _r set 結果OK = false, メモ = '呼べてしまった' where no = 11;
 exception when others then update _r set メモ = '呼べない（' || left(sqlerrm, 50) || '）' where no = 11; end $$;
 insert into _r select 12, '運営でない人は、人を止められない',
   (select public.tama_ban(current_setting('t.a')::uuid, '試し') = 'denied'), '';
 insert into _r select 13, '通知の記録（tama_push_log）が読めない', true, '';
 do $$ begin
   perform 1 from public.tama_push_log limit 1;
-  update _r set "OK？" = false, メモ = '読めてしまった' where no = 13;
+  update _r set 結果OK = false, メモ = '読めてしまった' where no = 13;
 exception when others then update _r set メモ = '読めない' where no = 13; end $$;
 insert into _r select 14, 'ひどい言葉で自己紹介を変えられない', true, '';
 do $$ begin
   update public.tama_profiles set bio = '死ねばいいのに' where id::text = current_setting('t.b');
-  if found then update _r set "OK？" = false, メモ = '変えられた（tama_moderation.sql の実行前？）' where no = 14;
+  if found then update _r set 結果OK = false, メモ = '変えられた（tama_moderation.sql の実行前？）' where no = 14;
   else update _r set メモ = 'B のプロフィールが無いので試せていない' where no = 14; end if;
 exception when others then update _r set メモ = '止まった（' || left(sqlerrm, 40) || '）' where no = 14; end $$;
 insert into _r select 15, 'A のいまどこ（友達でなければ）が読めない',
@@ -108,12 +108,12 @@ set local role anon;
 insert into _r select 17, 'ログインしていない人はプロフィールを読めない', true, '';
 do $$ begin
   perform 1 from public.tama_profiles limit 1;
-  update _r set "OK？" = false, メモ = '読めてしまった' where no = 17;
+  update _r set 結果OK = false, メモ = '読めてしまった' where no = 17;
 exception when others then update _r set メモ = '読めない' where no = 17; end $$;
 insert into _r select 18, 'ログインしていない人はトークを読めない', true, '';
 do $$ begin
   perform 1 from public.tama_messages limit 1;
-  update _r set "OK？" = false, メモ = '読めてしまった' where no = 18;
+  update _r set 結果OK = false, メモ = '読めてしまった' where no = 18;
 exception when others then update _r set メモ = '読めない' where no = 18; end $$;
 reset role;
 
@@ -124,4 +124,4 @@ delete from public.tama_encounters where current_setting('t.enc') = '1' and owne
 delete from public.tama_friends where current_setting('t.fr') <> '' and id::text = current_setting('t.fr');
 update public.tama_profiles set bio = nullif(current_setting('t.bio'), '') where id::text = current_setting('t.b') and bio = '死ねばいいのに';
 
-select no, 試したこと, "OK？", メモ, left(current_setting('t.a'), 8) as "A", left(current_setting('t.b'), 8) as "B" from _r order by no;
+select no, 試したこと, 結果OK, メモ, left(current_setting('t.a'), 8) as "A", left(current_setting('t.b'), 8) as "B" from _r order by no;
