@@ -2831,10 +2831,9 @@ function openCrossHow(){
     <h3 class="hwh">地図の見分け方</h3>
     <div class="hwleg"><span class="lg fr"></span><span><b>友達</b>：大きいアイコンと名前</span></div>
     <div class="hwleg"><span class="lg xd">👣</span><span><b>今日すれ違った人</b>：色の輪と足あとの印</span></div>
-    <div class="hwleg"><span class="lg nb"></span><span><b>近くの人</b>：小さいアイコン（まだすれ違っていない人）</span></div>
     <h3 class="hwh">地図に出る人</h3>
     <ul class="hwl"><li><b>友達</b>：あなたに「学内での居場所を見せる」をオンにしている友達</li>
-      <li><b>友達ではない人</b>：いまアプリを開いていて、学内にいて、「近くの人に出す」をオンにしている人。すれ違いの設定が合う人だけです</li>
+      <li><b>今日すれ違った人</b>：いまアプリを開いていて、学内にいて、「近くの人に出す」をオンにしている人だけ。まだすれ違っていない人は出ません</li>
       <li>友達ではない人の位置は、<b>約30mのます目</b>にぼかして出します（ぴったりの場所は出しません）</li>
       <li>アプリを閉じている人・隠れている人・ブロックした人／された人は出ません</li></ul>
     <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px" onclick="closeMembers();openCrossPrefs()">すれ違いの設定を見る</button>
@@ -5653,7 +5652,8 @@ function toggleMapFull(){
 }
 // closed：アプリを閉じた人（最後にいた位置に薄く出す）
 // 📱 2026-11-07 あおの依頼「すれ違いを強みに。地図で友達とすれ違いの人の違いがあると良い」：
-//   友達＝大きく・名前つき（drawFriendMarkers）／今日すれ違った人＝中くらい・アクセントの輪と足あとの印／ほかの近くの人＝小さく
+//   友達＝大きく・名前つき（drawFriendMarkers）／今日すれ違った人＝中くらい・アクセントの輪と足あとの印。
+//   まだすれ違っていない人は、アプリverの地図には出さない（drawMap）
 function mapIcon(emoji,me,closed,fr,crossed){
   const A=appvOn(), x=A&&crossed&&!fr&&!me, s=A?(me||fr?40:x?30:24):(me?30:28), tail=A&&fr&&!me;
   return L.divIcon({className:'',iconSize:[s,s],iconAnchor:tail?[s/2,s+6]:[s/2,s/2],
@@ -5676,6 +5676,7 @@ function drawMap(list){
       if(appvOn()&&friendOnMap(u.id))return;   // 📱 地図に出す友達は drawFriendMarkers で1回だけ描く（2回描かれていた）
       const j=u.srv?gridJit(u.id):[0,0];
       const xd=crossedToday(u.id);
+      if(appvOn()&&!xd&&!isFriend(u.id))return;   // 📱 2026-11-07 あお「すれ違ってない人はマップに出さなくていい」：地図は友達と、今日すれ違った人だけ
       L.marker([u.lat+j[0],u.lng+j[1]],{zIndexOffset:xd?300:0,icon:mapIcon(u.emoji,false,isClosed(u),isFriend(u.id),xd)}).on('click',()=>openSheet(u,d==null?null:Math.round(d))).addTo(fesLayer); });
     if(myPos&&inCampus(myPos.lat,myPos.lng)){
       const ll=[myPos.lat,myPos.lng], icon=mapIcon(profile?profile.emoji:'📍',true);
