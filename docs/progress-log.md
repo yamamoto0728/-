@@ -248,3 +248,4 @@
 - 2026-11-05: PR #118（iPhone の Apple/Google ログイン・通知をオン）。アプリ（`chikaku-app`、git の外）をストアの版（画面を同梱）に切りかえ
 - 2026-11-07: Mac の Xcode で TestFlight にビルド 1〜5。iPhone の「閉じてもすれ違い」を Transistorsoft から Apple の位置の仕組み（`ChikakuLocation.swift`・`tama/bgloc-native.js`）に作り直し、友達が学内に来たら知らせる（`tama_arrive.sql`、実行済み）、設定の並べ直し（PR #119）。すれ違いの項目をあとから足す・ひとこと・地図の印・ホームの人数（PR #120、`tama_xitems.sql` は実行待ち）
 - 2026-11-07: CLAUDE.md を軽くした（進捗ログをこのファイルへ、いまの状況を `docs/handoff.md` へ移した）
+- 2026-11-07（夜）: PR #119・#120 をマージ。Claude Code の環境整理（PR #121、未マージ）：CLAUDE.md を約6KB に、画面を撮る道具を `D:\ちかく\道具_画面を撮る\` に。あおの指示で古い資料と手元のブランチ 115本を消した。待ち：#121 のマージ・`tama_xitems.sql` の実行・プラグインを止めるか・ビルド 6
