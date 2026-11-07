@@ -22,7 +22,7 @@
 
 ## 待っていること
 1. （済み）PR #121・#122 はマージ済み。しゅうすけさんに CLAUDE.md を軽くしたことを一言
-2. **あお**：Supabase で `supabase/tama_weekly.sql`（今週のイベント）も実行。`supabase/tama_xitems.sql` を実行（中身を貼って渡す。確かめ：`select public.tama_simple_common('{"mbti":"INFP"}'::jsonb, '{"mbti":"INFP"}'::jsonb);` → `MBTI「INFP」`）
+2. （済み 11/07）`tama_xitems.sql`・`tama_weekly.sql` は Supabase で実行済み・確認済み
 3. **あお**：使わないプラグイン・コネクタを止めるか決める（「data」のプラグインは外すのがおすすめ。Canva・Figma・Gmail・カレンダー・Notion・Todoist は、ちかくで使わなければ `/mcp` でこのプロジェクトだけ止める）
 4. **あお（Mac）**：ビルド 6 → 実機で、閉じた状態のすれ違いと「友達が来た」通知を学内で試す
 5. **あお**：運営へのメール（Resend）が届くかの確認。届いたら試しの行を消す：`delete from public.tama_reports where reason = '運営への連絡：メールのテスト';`
