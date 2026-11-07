@@ -2067,6 +2067,28 @@
   html.appv .hwleg .lg.fr{width:28px;height:28px;border-width:3px}
   html.appv .hwleg .lg.xd{width:22px;height:22px;box-shadow:0 0 0 2.5px var(--tint);font-size:10px}
   html.appv .hwleg .lg.nb{width:16px;height:16px}
+  /* 📱 すれ違いの項目（プロフィール）・ひとこと・今日のレア（2026-11-07） */
+  html.appv .axi{margin:8px 16px 14px;border-radius:12px;background:var(--fill);overflow:hidden}
+  html.appv .axih{padding:12px 14px 6px}
+  html.appv .axih b{display:block;font-size:var(--fs2)}
+  html.appv .axih small{display:block;margin-top:2px;font-size:var(--fs4);color:var(--muted)}
+  html.appv .axrow{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:0;border-top:.5px solid var(--sep);background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .axrow:active{background:color-mix(in srgb,var(--ink) 8%,var(--fill))}
+  html.appv .axrow .ic{flex:none;width:24px;text-align:center;font-size:18px}
+  html.appv .axrow .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+  html.appv .axrow .tx b{font-size:var(--fs3);font-weight:600}
+  html.appv .axrow .tx small{font-size:var(--fs4);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .axrow i{flex:none;font-style:normal;font-size:var(--fs4);font-weight:700;color:var(--tint)}
+  html.appv .axrow.on i{color:var(--muted);font-weight:600}
+  html.appv .xichips .c{cursor:pointer}
+  html.appv .xichips .c.on{background:var(--tint);color:var(--on-tint,#fff);border-color:var(--tint)}
+  html.appv .b.xmsg{color:var(--ink);font-size:var(--fs4)}
+  html.appv .xrare{display:flex;align-items:center;gap:10px;width:calc(100% - 32px);margin:6px 16px 10px;padding:10px 12px;border:0;border-radius:12px;background:color-mix(in srgb,var(--tint) 14%,var(--fill));color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+  html.appv .xrare .av{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px}
+  html.appv .xrare .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+  html.appv .xrare small{font-size:var(--fs4);font-weight:700;color:var(--tint)}
+  html.appv .xrare b{font-size:var(--fs3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .xrare i{flex:none;font-style:normal;color:var(--muted)}
   html.appv #appvSet .setrow .toggle{flex:none}
   html.appv .ob{padding-top:calc(env(safe-area-inset-top,0px) + 26px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
   html.appv .wel{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
@@ -2320,6 +2342,7 @@
         <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
         <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="mebdg" id="meBadges"></div><div class="h" id="meFac"></div><div class="h" id="meLoc">📍 &mdash;</div><div id="meWorry"></div></div>
         <div class="appvx" id="appvMeCard"></div>
+        <div class="appvx" id="appvXItems"></div>
         <!-- アンケートの欄（答えると特典。中身は renderSurveyBox）。2026-10-09 あおの指示「見やすく」で、マイページの一番下からここ（プロフィールを編集のすぐ下）へ -->
         <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <!-- 2026-11-01 あお「アイコン・フレーム・背景をいじれる画面に行くのが難しい」：編集の横に「きせかえ」を並べる（インスタの「編集」「シェア」と同じ並び） -->
@@ -2804,6 +2827,52 @@ function appvLayout(on){
     $('#appvTop').hidden=true; $('#appvSheet').hidden=true;
   }
   if(typeof fesMap!=='undefined'&&fesMap)setTimeout(()=>{ try{ fesMap.invalidateSize(); appvMapBounds(on); }catch(e){} },80);
+}
+// 📱 プロフィールの「すれ違いの項目」：入れている項目と、まだの項目。押すと選ぶ画面
+function renderAppvXItems(){
+  const el=$('#appvXItems'); if(!el||!profile)return;
+  const a=attrsOf(profile), val=f=>{ const v=a[f.fa]; return Array.isArray(v)?v.join('・'):(v||''); };
+  const n=XF.filter(f=>val(f)).length+(xmsgOf(profile)?1:0);
+  el.innerHTML=`<div class="axi"><div class="axih"><b>すれ違いの項目</b><small>${n}/${XF.length+1} 入れています。入れるほど、すれ違った人との共通点が見つかります</small></div>`
+    +`<button class="axrow msg" onclick="openXItem('xmsg')"><span class="ic">👋</span><span class="tx"><b>すれ違いのひとこと</b><small>${xmsgOf(profile)?'「'+esc(xmsgOf(profile))+'」':'すれ違った人にだけ見える、短いひとこと'}</small></span><i>${xmsgOf(profile)?'変える':'書く'}</i></button>`
+    +XF.map(f=>`<button class="axrow${val(f)?' on':''}" onclick="openXItem('${f.k}')"><span class="ic">${f.icon}</span><span class="tx"><b>${esc(f.label)}</b><small>${val(f)?esc(val(f)):'まだ入れていません'}</small></span><i>${val(f)?'変える':'足す'}</i></button>`).join('')+'</div>';
+}
+let xiPick=[];
+function openXItem(k){
+  const sheet=$('#memSheet'), a=attrsOf(profile), close='<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;color:var(--muted)" onclick="closeMembers()">閉じる</button>';
+  if(k==='xmsg'){
+    sheet.innerHTML=`<div class="rinfo"><h2 class="pstitle">👋 すれ違いのひとこと</h2><p class="psdesc">すれ違った人と友達にだけ、あなたのプロフィールとすれ違いの一覧に出ます（30文字まで）。</p>
+      <input id="xiText" maxlength="30" value="${esc(xmsgOf(profile))}" placeholder="例：3限の統計学、だれか一緒に受けよ" style="width:100%;padding:12px;border:1px solid var(--sep);border-radius:10px;font:inherit;background:var(--night);color:var(--ink)">
+      <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px" onclick="saveXItem('xmsg',$('#xiText').value)">保存する</button>
+      ${xmsgOf(profile)?`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px" onclick="saveXItem('xmsg','')">消す</button>`:''}${close}</div>`;
+    $('#memOverlay').classList.add('show'); return;
+  }
+  const f=XF.find(x=>x.k===k); if(!f)return; const cur=a[f.fa];
+  let body='';
+  if(f.type==='one')body=`<div class="chips xichips">${f.opts.map(o=>`<span class="c${cur===o?' on':''}" onclick="saveXItem('${k}','${jsq(o)}')">${esc(o)}</span>`).join('')}</div>`;
+  else if(f.type==='multi'){ xiPick=Array.isArray(cur)?cur.slice():[];
+    body=`<p class="psdesc">${f.pick}つまで選べます</p><div class="chips xichips" id="xiMulti">${f.opts.map(o=>`<span class="c${xiPick.includes(o)?' on':''}" onclick="toggleXPick(this,'${jsq(o)}',${f.pick})">${esc(o)}</span>`).join('')}</div>
+      <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px" onclick="saveXItem('${k}',xiPick)">保存する</button>`; }
+  else if(f.type==='pref')body=`<select id="xiSel" style="width:100%;padding:12px;border:1px solid var(--sep);border-radius:10px;font:inherit;background:var(--night);color:var(--ink)"><option value="">選ばない</option>${PREFS.map(o=>`<option${cur===o?' selected':''}>${esc(o)}</option>`).join('')}</select>
+      <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px" onclick="saveXItem('${k}',$('#xiSel').value)">保存する</button>`;
+  else body=`<input id="xiText" maxlength="${f.max||20}" value="${esc(cur||'')}" placeholder="${esc(f.ph||'')}" style="width:100%;padding:12px;border:1px solid var(--sep);border-radius:10px;font:inherit;background:var(--night);color:var(--ink)">
+      <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:12px" onclick="saveXItem('${k}',$('#xiText').value)">保存する</button>`;
+  sheet.innerHTML=`<div class="rinfo"><h2 class="pstitle">${f.icon} ${esc(f.label)}</h2><p class="psdesc">同じものを入れた人とすれ違うと、共通点として出ます。</p>${body}
+    ${cur&&(!Array.isArray(cur)||cur.length)?`<button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px" onclick="saveXItem('${k}','')">入れない（外す）</button>`:''}${close}</div>`;
+  $('#memOverlay').classList.add('show');
+}
+function toggleXPick(el,o,max){
+  const i=xiPick.indexOf(o);
+  if(i>=0){ xiPick.splice(i,1); el.classList.remove('on'); }
+  else{ if(xiPick.length>=max){ toast(max+'つまでです'); return; } xiPick.push(o); el.classList.add('on'); }
+}
+async function saveXItem(k,v){
+  profile.fa=profile.fa||{};
+  const key=k==='xmsg'?'xmsg':(XF.find(f=>f.k===k)||{}).fa; if(!key)return;
+  const val=Array.isArray(v)?v.slice(0,6):String(v||'').trim().slice(0,30);
+  if(!val||(Array.isArray(val)&&!val.length))delete profile.fa[key]; else profile.fa[key]=val;
+  closeMembers(); renderAppvXItems(); updateRarity(); renderNearby(); renderCross();
+  await saveMyAttrs(); toast('保存しました');
 }
 // 「友達」「すれ違い」の切りかえに人数を出し、その下に、いま開いている方が何かを1行で（2026-11-07 あおの指摘「今日のお題の下の友達・すれ違いが見づらい、よく分からない」）
 function renderAppvSegInfo(){
@@ -4932,6 +5001,39 @@ function bindAttrForm(p,st){
    話題カード・会う前の1枚と、自分に届く「共通点のある人が近くにいます」「いいね（共通点つき）」の通知。相手の画面は変わらない。
    外した種類はプロフィール（fes_attrs.match_off）に入れる（ほかの人の端末が、自分あての通知を作る時に読むため）。
    commonDetail＝自分の設定で絞ったもの、commonRaw＝絞る前（相手あての通知は commonFor(u, 相手の設定) で作る） */
+/* ---------- 📱 すれ違いの項目（2026-11-07 あおの依頼「すれ違いを強みに。もっと面白い項目を。最初の登録で聞くとだるいので、あとでプロフィールから足せるように」） ----------
+   登録では聞かない。プロフィールの「すれ違いの項目」から、入れたい人だけ入れる（入れるほど、すれ違った人との共通点が見つかりやすい）。
+   多摩キャンは人数が少ないので、選ぶ形のものは選択肢を少なめにして、一致しやすくしている（FA.purposes の注意と同じ考え）。
+   値は fes_attrs に入れる：bus・hometown（前からある出身地）・food・genres（配列）・mbti・circle・xmsg（すれ違いのひとこと） */
+const XF=[
+  {k:'bus', fa:'bus', icon:'🚌', label:'通学で使う駅・バス', type:'one', opts:['西八王子駅','めじろ台駅','相原駅','京王堀之内駅','橋本駅','高尾駅','自転車・バイク','車・送迎','近くに住んでいる']},
+  {k:'home',fa:'hometown', icon:'🏠', label:'出身地', type:'pref'},
+  {k:'food',fa:'food', icon:'🍛', label:'好きな学食メニュー', type:'one', opts:['からあげ','カレー','ラーメン','うどん・そば','丼もの','パスタ','日替わり定食','パン・おにぎり','学食はあまり使わない'], weak:['学食はあまり使わない']},
+  {k:'gen', fa:'genres', icon:'🎮', label:'好きなジャンル', type:'multi', pick:3, opts:['アニメ','ゲーム','お笑い','スポーツ観戦','K-POP','J-POP・ボカロ','映画・ドラマ','YouTube・配信','漫画','アイドル','カフェめぐり','旅行','筋トレ・運動','ファッション']},
+  {k:'mbti',fa:'mbti', icon:'🧠', label:'MBTI', type:'one', opts:['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP']},
+  {k:'cir', fa:'circle', icon:'🏫', label:'サークル・部活', type:'text', max:20, ph:'例：軽音部、テニスサークル'},
+];
+const XF_LABEL={bus:'同じ駅・バス',home:'同じ出身',food:'好きな学食メニュー',gen:'好きなジャンル',mbti:'同じMBTI',cir:'同じサークル'};
+// 2人の、すれ違いの項目の共通点（commonRaw・keysOf から使う）
+function xfKeys(a){
+  const k=[], v=(f)=>a[f.fa];
+  XF.forEach(f=>{
+    const x=v(f); if(!x)return;
+    if(f.type==='multi')(Array.isArray(x)?x:[]).forEach(y=>k.push(f.k+':'+y));
+    else if(f.type==='text'){ const n=normAns(x); if(n)k.push(f.k+':'+n); }
+    else if(!(f.weak||[]).includes(x))k.push(f.k+':'+x);
+  });
+  return k;
+}
+function xfCommon(me,th,add){
+  const mine=new Set(xfKeys(me));
+  XF.forEach(f=>{
+    const x=th[f.fa]; if(!x)return;
+    const vals=f.type==='multi'?(Array.isArray(x)?x:[]):[x];
+    vals.forEach(y=>{ const key=f.k+':'+(f.type==='text'?normAns(y):y); if(mine.has(key))add(key,XF_LABEL[f.k]+'「'+y+'」'); });
+  });
+}
+const xmsgOf=u=>String(attrsOf(u).xmsg||'').trim();
 const MATCH_KINDS=[
   {k:'art', icon:'🎧', label:'よく聴くアーティスト'},
   {k:'cls', icon:'📚', label:'時間割の授業（同じ曜日・時限）'},
@@ -4940,6 +5042,7 @@ const MATCH_KINDS=[
   {k:'aru', icon:'💬', label:'わかる！あるある'},
   {k:'goal',icon:'🌱', label:'これから・目標'},
   {k:'pur', icon:'💭', label:'気になっていること（悩み・不安）'},
+  ...XF.map(f=>({k:f.k,icon:f.icon,label:f.label})),   // すれ違いの項目（入れた人だけ）
 ];
 const matchOffOf=u=>{ const o=attrsOf(u).match_off; return Array.isArray(o)?o:[]; };
 // その項目の、いまの自分の値（設定画面で「（ヨルシカ）」のように添える。入っていなければ空）
@@ -4947,6 +5050,7 @@ function matchMyValue(k){
   const a=attrsOf(profile);
   if(k==='art')return a.artist||''; if(k==='crs')return a.course||''; if(k==='day')return dailyAnswer(profile)||'';
   if(k==='cls'){ const n=slotKeys(myTimetable).filter(s=>(myTimetable[s]||'').trim()).length; return n?n+'コマ':''; }
+  const xf=XF.find(f=>f.k===k); if(xf){ const v=a[xf.fa]; return Array.isArray(v)?v.join('・'):(v||''); }
   const arr={aru:a.aruaru,goal:a.goals,pur:a.purposes}[k]||[]; return arr.length?arr.slice(0,2).join('・')+(arr.length>2?' ほか':''):'';
 }
 function renderMatchSum(){
@@ -5098,6 +5202,7 @@ function commonRaw(u){
   const ma=normAns(me.artist); if(ma&&ma===normAns(th.artist))add('art:'+ma,'同じアーティスト「'+th.artist+'」');
   (me.aruaru||[]).forEach(x=>{ if((th.aruaru||[]).includes(x))add('aru:'+x,'あるある「'+x+'」'); });
   if(sameCourse(u))add('crs:'+normCourse(me.course),'落としたくない授業「'+th.course+'」');
+  xfCommon(me,th,add);   // すれ違いの項目（駅・出身・学食・ジャンル・MBTI・サークル）
   // 時間割で同じ曜日・時限に同じ授業名を入れている人（毎週会える人なので、共通点に数える）
   (samePeers[u.id]||[]).forEach(r=>add('cls:'+r.slot+':'+normAns(r.course),'同じ授業「'+r.course+'」'));
   // 今日のお題で同じ答え（その日だけの共通点。偶然の出会いを作るため）
@@ -5129,6 +5234,7 @@ function keysOf(u){
   const ar=normAns(a.artist); if(ar)k.push('art:'+ar);
   (a.aruaru||[]).forEach(x=>k.push('aru:'+x));
   const c=normCourse(a.course); if(c)k.push('crs:'+c);
+  k.push(...xfKeys(a));
   const d=dailyAnswer(u); if(d)k.push('day:'+normAns(d));
   // 2026-10-15 エージェントの体験から：ちかくタイム・多摩祭の質問・見に行くステージも数える
   // （前は数えていなかったので、何人が同じでもいつも「✨レア」になり、本当にめずらしい一致がその下に埋もれていた）
@@ -5228,6 +5334,16 @@ function encPattern(id){
   const t=best(bySlot); if(t&&t.days.size>=3)return {text:t.s.label,n:t.days.size,place:placeOf(t.places),weekly:false};
   return null;
 }
+// 📱 相手のプロフィールに、すれ違いの項目を出す（同じものには「同じ！」）。ひとことは、すれ違った人・友達にだけ出す
+function xfRowsHTML(u){
+  const a=attrsOf(u), mine=new Set(xfKeys(attrsOf(profile)));
+  const rows=XF.filter(f=>f.k!=='home').map(f=>{ const x=a[f.fa]; if(!x||(Array.isArray(x)&&!x.length))return '';
+    const vals=f.type==='multi'?x:[x];
+    const shown=vals.map(y=>{ const hit=mine.has(f.k+':'+(f.type==='text'?normAns(y):y)); return esc(y)+(hit?' <span class="same">同じ！</span>':''); }).join('・');
+    return `<div class="frow">${f.icon} ${esc(f.label)} <b>${shown}</b></div>`; }).join('');
+  const m=xmsgOf(u), seen=!!encMap[u.id]||isFriend(u.id);
+  return rows+(m&&seen?`<div class="frow xmsgrow">👋 すれ違いのひとこと <b>「${esc(m)}」</b></div>`:'');
+}
 function attrBlock(u){
   const a=attrsOf(u); if(!a.faculty&&!(a.purposes||[]).length)return '';
   const common=new Set(commonWith(u)), courseHit=sameCourse(u), same=samePeers[u.id]||[], me=attrsOf(profile);
@@ -5241,6 +5357,7 @@ function attrBlock(u){
   return `<div class="fesattr">
     ${badgeKeys(u).map(k=>`<div class="frow">${BADGES[k].icon} <b>${BADGES[k].label}</b> <span style="color:var(--muted);font-size:11.5px">${BADGES[k].desc}</span></div>`).join('')}
     ${a.artist?`<div class="frow">🎧 よく聴く <b>${esc(a.artist)}</b>${artistHit?' <span class="same">同じ！</span>':''}</div>`:''}
+    ${appvOn()?xfRowsHTML(u):''}
     ${(a.aruaru||[]).length?`<div class="fh">わかる！あるある</div><div class="fchips">${a.aruaru.map(x=>`<span class="fchip${(me.aruaru||[]).includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>`:''}
     ${fesRoleOf(u)?`<div class="frow">🏮 <b>${esc(fesRoleOf(u))}</b> で出店・出演中${isCollabName(fesRoleOf(u))?" <span class=\"same\">🤝 ちかくコラボ</span>":""}${fesRolePlaceOf(u)?`<br>📍 ${esc(fesRolePlaceOf(u))}`:""}${dailyAnswer(profile)&&normAns(dailyAnswer(profile))===normAns(fesRoleOf(u))?' <span class="same">あなたの推し！</span>':''}</div>`:''}
     ${dailyAnswer(u)?`<div class="frow">${dailyToday().fes?'🏮 多摩祭のおすすめ':'🎲 今日のお題「'+esc(dailyToday().q)+'」'} <b>${esc(dailyAnswer(u))}</b>${sameDaily(u)?' <span class="same">同じ！</span>':''}</div>`:''}
@@ -5824,7 +5941,7 @@ async function addEncounter(u){
   // 共通点が無くても知らせる（2026-09-24 から全員を画面に出すため）。レアな共通点があればそれも添える
   const rare=commonDetail(u).filter(x=>isRare(x.key));
   // 登録・起動の直後は、まわりの人がまとめて記録されて通知が続くので、最初の1分は知らせない
-  if(Date.now()-bootAt>60000) toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`+(rare.length?`<br>✨ ${esc(rare[0].label)}`:''));
+  if(Date.now()-bootAt>60000) toast(`🚶 ${esc(u.name)} とすれ違いました（${count}回目）`+(rare.length?`<br>✨ ${esc(rare[0].label)}`:'')+(appvOn()&&xmsgOf(u)?`<br>👋「${esc(xmsgOf(u))}」`:''));
   crossNew++; bumpCrossDot(); crossStarNotify(u);
   const again=fesAgainNow(u.id);   // 記録する前に見る（昨日の記録があるか）
   (encLog[u.id]=encLog[u.id]||[]).push({at:Date.now(),place});
@@ -5888,7 +6005,7 @@ function renderCross(){
   const when=t=>new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',timeZone:'Asia/Tokyo'});
   const row=u=>`<div class="urow" onclick='openSheet(${JSON.stringify({id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:u.tags,work:u.work,looking:u.looking,likes:u.likes,interests:u.interests,fa:u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'>
     <div class="av${frCls(u)}" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div>
-    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${appvOn()&&crossStarHit(u)?`<div class="b xhit">★ 探している「${esc(crossStarOf(profile).label)}」</div>`:''}${commonLine(commonDetail(u))}${appvOn()&&seekOf(u)?`<div class="b xseek">探している：${esc(seekOf(u))}</div>`:''}${appvOn()&&dailyAnswer(findUser(u.id)||u)?`<div class="b xdaily">今日のお題：<b>${esc(dailyAnswer(findUser(u.id)||u))}</b>${sameDaily(findUser(u.id)||u)?'（あなたと同じ）':''}</div>`:''}<div class="b crosswhen">🕘 ${(u.last_at||0)>=today?hhmm(u.last_at||0):when(u.last_at||0)}${(u.last_at||0)>=today?'・'+esc(u.last_place||''):''}${u.first_at&&u.count>=2&&!appvOn()?`　（これまで${u.count}回）`:''}</div></div>
+    <div class="info"><div class="n">${esc(u.name)}${badgeIcons(u)?`<i class="bdg">${badgeIcons(u)}</i>`:''}<span class="gr">${esc(facLine(u))}</span></div>${appvOn()&&crossStarHit(u)?`<div class="b xhit">★ 探している「${esc(crossStarOf(profile).label)}」</div>`:''}${commonLine(commonDetail(u))}${appvOn()&&seekOf(u)?`<div class="b xseek">探している：${esc(seekOf(u))}</div>`:''}${appvOn()&&dailyAnswer(findUser(u.id)||u)?`<div class="b xdaily">今日のお題：<b>${esc(dailyAnswer(findUser(u.id)||u))}</b>${sameDaily(findUser(u.id)||u)?'（あなたと同じ）':''}</div>`:''}${appvOn()&&xmsgOf(u)?`<div class="b xmsg">👋「${esc(xmsgOf(u))}」</div>`:''}<div class="b crosswhen">🕘 ${(u.last_at||0)>=today?hhmm(u.last_at||0):when(u.last_at||0)}${(u.last_at||0)>=today?'・'+esc(u.last_place||''):''}${u.first_at&&u.count>=2&&!appvOn()?`　（これまで${u.count}回）`:''}</div></div>
     <div class="d">${appvOn()?(u.count>=2?'<div class="m rep">前にも</div>':''):`<div class="m${u.count>=2?' rep':''}">${u.count}回</div>`}${relTag(u.id)}</div></div>`;   // 📱 C3 相手の今日のお題の答え（すれ違いとお題を1本の話に）・D3 回数は出さず「前にも」
   // 前の日にすれ違った人（2026-10-09：「本来は有料の予定」の聞き取りの対象。初めて開く時に1回だけ聞く openCrossPast）
   const pastH=!past.length?'':crossShowPast
@@ -5913,7 +6030,10 @@ function renderCross(){
   if(appvOn()&&!crossShowAll){
     const key=arr.filter(u=>u.count>=2||commonWith(u).length).sort((a,b)=>crossStarHit(b)-crossStarHit(a)), rest=arr.length-key.length;
     const restH=rest?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">${key.length?'ほかに':''}${rest}人とすれ違いました（すべて見る）</button>`:'';
-    ul.innerHTML=xsetH+(key.length
+    // 🏆 今日のレア（2026-11-07）：今日すれ違った人の中で、いちばんめずらしい共通点を一番上に
+    let best=null; arr.forEach(u=>commonWith(u).forEach(c=>{ const r=rarityOf(c.key); if(isRare(c.key)&&(!best||r>best.r))best={u,c,r}; }));
+    const rareH=best?`<button class="xrare" onclick='openSheet(${JSON.stringify({id:best.u.id,name:best.u.name,emoji:best.u.emoji,fa:best.u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'><span class="av" style="background:${gr(best.u.emoji)}">${esc(best.u.emoji)}</span><span class="tx"><small>今日のレア</small><b>${esc(best.u.name)}さんと、${esc(best.c.label)}</b></span><i>›</i></button>`:'';
+    ul.innerHTML=xsetH+rareH+(key.length
       ?`<div class="nearsec" style="padding-left:6px">共通点のある人・また会えた人 <span class="cnt">${key.length}人</span></div>`+key.slice(0,CROSS_LIMIT).map(row).join('')+restH+pastH
       :`<div class="empty"><p>今日は${arr.length}人とすれ違いました。<br>共通点のある人や、2回目にすれ違った人がいると、ここに出ます。</p></div>`+restH+pastH);
     return;
@@ -11024,7 +11144,7 @@ function go(t){
   if(t==='near'&&document.documentElement.classList.contains('appv'))renderAppvChrome();
   if(t==='near')loadRooms();if(t==='friends')setCmTab(cmTab);   // 2026-10-15：友達のページは「コミュニティ」（📚 授業／🏠 コミュニティ／👥 友達）
   if(t==='me'||t==='set'){renderAppvRow();refreshPushToggle();renderNotifSum();renderWtpRow();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();
-    if(appvOn()){renderAppvMeCard();renderAppvSet();}}   // 📱 アプリverのプロフィールと設定（2026-11-01）
+    if(appvOn()){renderAppvMeCard();renderAppvSet();renderAppvXItems();}}   // 📱 アプリverのプロフィールと設定（2026-11-01）
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
 function startLoops(){applyAppv();setTimeout(maybeClassInvite,2500);   // 授業のコミュニティの招待のリンクから来た人（2026-10-20）
 loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
