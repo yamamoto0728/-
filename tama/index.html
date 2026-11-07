@@ -1898,6 +1898,31 @@
   html.appv #ashBody>.scroll>#appvWeek{order:-1}
   html.appv #ashBody>.scroll>#ctCard{order:1}
   html.appv #ashBody>.scroll>#dailyCard{order:2}
+  html.appv #ashBody>.scroll>#wkCard{order:2}
+  /* 今週のイベント（2026-11-07） */
+  #wkCard:empty,html:not(.appv) #wkCard{display:none}
+  html.appv #wkCard.daily{margin:8px 16px;padding:14px 16px}
+  html.appv .wkh{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:var(--fs4);font-weight:600;color:var(--muted)}
+  html.appv .wkh button{border:0;background:none;color:var(--tint);font:inherit;font-size:var(--fs4);font-weight:600;cursor:pointer;padding:4px 0}
+  html.appv .wkt{margin-top:10px;padding-top:10px;border-top:1px solid var(--sep)}
+  html.appv .wkt:first-of-type{border-top:0;padding-top:0}
+  html.appv .wkq{margin:6px 0 10px;font-size:18px;font-weight:700;line-height:1.4;color:var(--ink)}
+  html.appv .wkq small{display:block;font-size:var(--fs4);font-weight:600;color:var(--muted)}
+  html.appv #wkCard .chips{display:flex;gap:8px;flex-wrap:wrap;overflow:visible}
+  html.appv #wkCard .chips .c small{margin-left:6px;font-size:var(--fs4);font-weight:600;opacity:.7}
+  html.appv #wkCard .drow{margin-top:10px}
+  html.appv .wkme{display:flex;flex-direction:column;gap:6px;font-size:var(--fs3);color:var(--ink)}
+  html.appv .wkme .wkbar{height:6px;border-radius:3px;background:var(--fill);overflow:hidden}
+  html.appv .wkme .wkbar i{display:block;height:100%;background:var(--tint);border-radius:3px}
+  html.appv .wkme .wkrow{display:flex;gap:8px;flex-wrap:wrap}
+  html.appv .wkme .wkrow button,html.appv .wksmall{border:0;border-radius:16px;background:var(--fill);color:var(--ink);font:inherit;font-size:var(--fs4);font-weight:600;padding:7px 12px;cursor:pointer}
+  html.appv .wkme .wkrow button.pri{background:var(--tint);color:var(--on-tint)}
+  html.appv .wknext{display:block;width:100%;margin-top:12px;padding:10px 0 0;border:0;border-top:1px solid var(--sep);background:none;color:var(--tint);font:inherit;font-size:var(--fs3);font-weight:600;text-align:left;cursor:pointer}
+  html.appv .wkprop{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--sep)}
+  html.appv .wkprop b{flex:1;min-width:0;font-weight:600}
+  html.appv .wkprop button{flex:none;border:1.5px solid var(--tint);border-radius:16px;background:none;color:var(--tint);font:inherit;font-size:var(--fs4);font-weight:600;padding:6px 12px;cursor:pointer}
+  html.appv .wkprop button.on{background:var(--tint);color:var(--on-tint)}
+  html.appv .wkprop small{flex:none;color:var(--muted);font-size:var(--fs4)}
   html.appv #ashBody>.scroll>#appvSeg{order:3}
   html.appv #ashBody>.scroll>.apane{order:4}
   html.appv #appvTiles{padding:0 16px 4px}
@@ -2272,6 +2297,8 @@
       <div class="tscard" id="tamasaiCard"></div>
       <div class="ctcard" id="ctCard"></div>
       <div class="daily" id="dailyCard"></div>
+      <!-- 今週のイベント（2026-11-07 あおの案。renderWeekly。アプリverだけ） -->
+      <div class="daily wkcard" id="wkCard"></div>
       <div class="locbar" id="locbar"><span class="pin">📍</span><div class="t"><div class="place" id="locPlace">現在地を取得中…</div><div class="coord" id="locCoord">&mdash;</div></div><div class="acc" id="locAcc"></div></div>
       <!-- 地図は開いた時点でスクロールせずに見える位置に置き、人の一覧はその下に続ける
            （2026-09-24 に一度「一覧／地図」の切り替えにしたが、あおの希望で切り替えをやめて地図を常に出す形に戻した） -->
@@ -5039,6 +5066,7 @@ const MATCH_KINDS=[
   {k:'cls', icon:'📚', label:'時間割の授業（同じ曜日・時限）'},
   {k:'crs', icon:'📝', label:'これだけは落としたくない授業'},
   {k:'day', icon:'🎲', label:'今日のお題の答え'},
+  {k:'wk',  icon:'📅', label:'今週のイベントの答え'},
   {k:'aru', icon:'💬', label:'わかる！あるある'},
   {k:'goal',icon:'🌱', label:'これから・目標'},
   {k:'pur', icon:'💭', label:'気になっていること（悩み・不安）'},
@@ -5049,6 +5077,7 @@ const matchOffOf=u=>{ const o=attrsOf(u).match_off; return Array.isArray(o)?o:[]
 function matchMyValue(k){
   const a=attrsOf(profile);
   if(k==='art')return a.artist||''; if(k==='crs')return a.course||''; if(k==='day')return dailyAnswer(profile)||'';
+  if(k==='wk')return wkList(a).map(x=>x.l).join('・');
   if(k==='cls'){ const n=slotKeys(myTimetable).filter(s=>(myTimetable[s]||'').trim()).length; return n?n+'コマ':''; }
   const xf=XF.find(f=>f.k===k); if(xf){ const v=a[xf.fa]; return Array.isArray(v)?v.join('・'):(v||''); }
   const arr={aru:a.aruaru,goal:a.goals,pur:a.purposes}[k]||[]; return arr.length?arr.slice(0,2).join('・')+(arr.length>2?' ほか':''):'';
@@ -5206,6 +5235,8 @@ function commonRaw(u){
   // 時間割で同じ曜日・時限に同じ授業名を入れている人（毎週会える人なので、共通点に数える）
   (samePeers[u.id]||[]).forEach(r=>add('cls:'+r.slot+':'+normAns(r.course),'同じ授業「'+r.course+'」'));
   // 今日のお題で同じ答え（その日だけの共通点。偶然の出会いを作るため）
+  // 今週のイベントで同じ答え（その週だけ。2026-11-07）
+  { const mine=new Set(wkList(me).map(x=>x.o)); wkList(th).filter(x=>mine.has(x.o)).forEach(x=>add('wk:'+x.o,'今週のイベント「'+x.l+'」')); }
   if(sameDaily(u))add('day:'+normAns(dailyAnswer(u)),(dailyToday().fes?'多摩祭のおすすめ「':'今日のお題「')+dailyAnswer(u)+'」');
   // ちかくタイムで同じ答え（その日だけ。「今日のお題の答え」と同じスイッチでマッチングから外せる）
   // 2026-10-15：鍵に答えも入れる（前は回の番号だけで、レアの数え方で答えの違う人まで同じに数えられなかった）
@@ -5236,6 +5267,7 @@ function keysOf(u){
   const c=normCourse(a.course); if(c)k.push('crs:'+c);
   k.push(...xfKeys(a));
   const d=dailyAnswer(u); if(d)k.push('day:'+normAns(d));
+  wkList(a).forEach(x=>k.push('wk:'+x.o));
   // 2026-10-15 エージェントの体験から：ちかくタイム・多摩祭の質問・見に行くステージも数える
   // （前は数えていなかったので、何人が同じでもいつも「✨レア」になり、本当にめずらしい一致がその下に埋もれていた）
   const ca=ctAnswer(u); if(ca&&ctCur)k.push('day:ct'+ctCur.id+':'+ca);
@@ -9827,6 +9859,162 @@ function renderFesQ(el,t){
     <div class="dnote">同じ答えの人は「ホーム」に共通点つきで出ます。3人以上が同じ出店・企画を答えると、ここに多かった答えが出ます</div>`;
   fillDailyStats();
 }
+/* ---------- 今週のイベント（2026-11-07 あおの案） ----------
+   ・週に1回（月曜〜日曜）のすれ違いマッチングのイベント。テーマは「運営のテーマ」と「みんなが先週提案して票の多かったテーマ」
+   ・答えは選択肢から選ぶか自分で書く（書いた答えは、ほかの人の選択肢にも並ぶ）。同じ答えが5人そろうと、その答えの「今週だけの部屋」ができる
+   ・悩みのテーマは部屋を作らず、同じ人の人数だけ（だれが弱っているか分からないように）
+   ・答え（悩み以外）はその週だけ、すれ違いの共通点になる（fes_attrs.wk。サーバーは supabase/tama_weekly.sql） */
+let wk=null, wkMissing=false, wkOpenT=new Set();
+const WK_NEED=5;
+// だめな言葉（サーバーの tama_wk_ng と同じ一覧。画面で先に止めるため）
+const WK_NG=['死ね','殺す','ころす','消えろ','きえろ','キモい','きもい','ブス','デブ','ガイジ','がいじ','池沼','クズ',
+  'セックス','せっくす','sex','エロ','ヤリモク','やりもく','セフレ','せふれ','パパ活','ぱぱ活','援交','えんこう','裏垢','うらあか',
+  'ちんこ','ちんぽ','まんこ','おっぱい','フェラ','ホテル','出会い','であい','彼女募集','彼氏募集','恋人募集','付き合って','つきあって',
+  'line交換','ライン交換','らいん交換','インスタ交換','電話番号','住所','@','http','大麻','覚醒剤','闇バイト'];
+const wkNg=v=>{ const t=String(v||'').normalize('NFKC').toLowerCase(); return WK_NG.some(w=>t.includes(w))||!!ngCheck(t); };   // チャットと同じ一覧（NGWORDS）も使う
+// 今週の月曜（日本時間）の日付
+function jstMonday(){ const d=new Date(Date.now()+9*3600000); d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+6)%7); return d.toISOString().slice(0,10); }
+// その人の今週の答え（先週以前の答えは数えない）
+function wkList(a){ const w=a&&a.wk; return w&&w.w===jstMonday()&&Array.isArray(w.a)?w.a.filter(x=>x&&x.o&&x.l):[]; }
+async function loadWeekly(){
+  if(!sb||!myId||String(myId).startsWith('local-')||wkMissing||!appvOn())return;
+  try{
+    const {data,error}=await sb.rpc('tama_wk_state');
+    if(error){ if(isSchemaErr(error)){ wkMissing=true; renderWeekly(); } return; }
+    wk=data||null; syncWkAttr(); renderWeekly();
+  }catch(e){ console.warn('[wk] 今週のイベントを読めませんでした',e); }
+}
+// 今週の答え（悩み以外）をプロフィールに入れる。すれ違った時の共通点になる
+function syncWkAttr(){
+  if(!profile||!wk)return;
+  const a=(wk.themes||[]).filter(t=>t.kind!=='worry'&&t.mine).map(t=>{ const o=(t.opts||[]).find(x=>x.id===t.mine); return o?{o:String(o.id),l:o.label}:null; }).filter(Boolean);
+  const next=a.length?{w:wk.week,a}:null, cur=attrsOf(profile).wk||null;
+  if(JSON.stringify(next)===JSON.stringify(cur))return;
+  profile.fa=profile.fa||{}; if(next)profile.fa.wk=next; else delete profile.fa.wk;
+  saveMyAttrs();
+}
+function renderWeekly(){
+  const el=$('#wkCard'); if(!el)return;
+  if(!appvOn()||wkMissing||!wk||!(wk.themes||[]).length){ el.innerHTML=''; return; }
+  el.innerHTML=`<div class="wkh"><span>📅 今週のイベント（日曜まで）</span><button onclick="openWkHow()">しくみ</button></div>`
+    +wk.themes.map(wkThemeHTML).join('')
+    +`<button class="wknext" onclick="openWkNext()">🗳 来週のテーマを選ぶ・提案する${(wk.next||[]).length?`（${wk.next.length}件）`:''} ›</button>`;
+}
+function wkThemeHTML(t){
+  const need=wk.need||WK_NEED, worry=t.kind==='worry', opts=t.opts||[], mine=opts.find(o=>o.id===t.mine);
+  const head=`<div class="wkq"><small>${t.source==='vote'?'みんなが選んだテーマ':'運営のテーマ'}${worry?'・部屋は作りません（人数だけ）':''}</small>${esc(t.title)}</div>`;
+  if(mine&&!wkOpenT.has(t.id)){
+    const n=mine.n||0, left=Math.max(0,need-n);
+    let st;
+    if(worry)st=`同じ答えの人 <b>${n}人</b>（あなたも入れて）`;
+    else if(mine.room)st=`<b>${n}人</b>そろいました。今週だけの部屋があります`;
+    else st=`同じ答えの人 <b>${n}人</b>。あと<b>${left}人</b>で部屋ができます`;
+    return `<div class="wkt">${head}<div class="wkme"><div>→ <b>${esc(mine.label)}</b></div><div>${st}</div>`
+      +(worry||mine.room?'':`<div class="wkbar"><i style="width:${Math.min(100,Math.round(n/need*100))}%"></i></div>`)
+      +`<div class="wkrow">${mine.room?`<button class="pri" onclick="wkGoRoom('${jsq(mine.room)}')">部屋へ ›</button>`:''}${!worry&&!mine.room?`<button class="pri" onclick="wkInvite(${t.id})">友達をさそう</button>`:''}<button onclick="wkOpenT.add(${t.id});renderWeekly()">答えを変える</button></div></div></div>`;
+  }
+  const chips=opts.map(o=>`<span class="c${o.id===t.mine?' on':''}" onclick="wkAnswer(${t.id},${o.id})">${esc(o.label)}<small>${worry?(o.n?o.n+'人':''):o.room?'🏠':(o.n||0)+'/'+need}</small></span>`).join('');
+  return `<div class="wkt">${head}<div class="chips">${chips}</div>`
+    +`<div class="drow"><input id="wkIn${t.id}" maxlength="20" placeholder="ほかの答えを自分で書く（20文字まで）"><button class="btn btn-primary" onclick="wkAdd(${t.id})">答える</button></div>`
+    +`<div class="wkrow" style="display:flex;gap:8px;margin-top:8px">${mine?`<button class="wksmall" onclick="wkOpenT.delete(${t.id});renderWeekly()">閉じる</button><button class="wksmall" onclick="wkUnanswer(${t.id})">答えを取り消す</button>`:''}${opts.some(o=>o.user&&!o.own)?`<button class="wksmall" onclick="openWkReport(${t.id})">書かれた答えを知らせる</button>`:''}</div></div>`;
+}
+function wkAfter(t,r){
+  if(!r)return;
+  if(r.status==='ng'){ toast('その言葉は使えません。ほかの言い方でどうぞ'); return; }
+  if(r.status==='many'){ toast('自分で書ける答えは、1つのテーマに3つまでです'); return; }
+  if(r.status==='closed'){ toast('このテーマは終わりました'); loadWeekly(); return; }
+  if(r.status==='banned'){ toast('いまは参加できません'); return; }
+  if(r.status==='empty'){ toast('答えを書いてね'); return; }
+  if(r.status!=='ok'){ toast('答えられませんでした。少し待ってからどうぞ'); return; }
+  wkOpenT.delete(t);
+  const th=(wk&&wk.themes||[]).find(x=>x.id===t), need=(wk&&wk.need)||WK_NEED;
+  if(th&&th.kind==='worry')toast('答えました。同じ答えの人の人数が見られます');
+  else if(r.room&&r.n===need){ toast('🎉 '+need+'人そろいました！今週だけの部屋ができました'); loadRooms(); }
+  else if(r.room){ toast('🏠 同じ答えの人の部屋に入りました'); loadRooms(); }
+  else toast('答えました。同じ答えの人が'+need+'人になると部屋ができます');
+  loadWeekly();
+}
+async function wkAnswer(t,o){
+  if(!sb){ toast('この機能はまだ準備中です'); return; }
+  const th=(wk&&wk.themes||[]).find(x=>x.id===t); if(th&&th.mine===o){ wkOpenT.delete(t); renderWeekly(); return; }
+  const {data,error}=await sb.rpc('tama_wk_answer',{p_theme:t,p_opt:o});
+  if(error){ toast('答えられませんでした。少し待ってからどうぞ'); console.warn('[wk]',error.message); return; }
+  wkAfter(t,data);
+}
+async function wkAdd(t){
+  const inp=$('#wkIn'+t), v=(inp&&inp.value||'').trim(); if(!v){ toast('答えを書いてね'); return; }
+  if(wkNg(v)){ toast('その言葉は使えません。ほかの言い方でどうぞ'); return; }
+  const {data,error}=await sb.rpc('tama_wk_add_opt',{p_theme:t,p_label:v});
+  if(error){ toast('答えられませんでした。少し待ってからどうぞ'); console.warn('[wk]',error.message); return; }
+  wkAfter(t,data);
+}
+async function wkUnanswer(t){
+  const {error}=await sb.rpc('tama_wk_unanswer',{p_theme:t});
+  if(error){ toast('取り消せませんでした'); return; }
+  wkOpenT.delete(t); toast('答えを取り消しました（入った部屋からは、部屋の中の「抜ける」で出られます）'); loadWeekly();
+}
+async function wkGoRoom(id){ await loadRooms(); openRoom(id); }
+function wkInvite(t){
+  const th=(wk&&wk.themes||[]).find(x=>x.id===t), o=th&&(th.opts||[]).find(x=>x.id===th.mine); if(!o)return;
+  const left=Math.max(0,((wk&&wk.need)||WK_NEED)-(o.n||0));
+  const text=`「ちかく」の今週のイベント「${th.title}」で「${o.label}」を選んだ人、あと${left}人で部屋ができるよ。答えてみて `+OFFICIAL_URL;
+  if(navigator.share){ navigator.share({text}).catch(()=>{}); return; }
+  if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>toast('さそう文をコピーしました'),()=>{});
+}
+function openWkHow(){
+  const need=(wk&&wk.need)||WK_NEED;
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">📅 今週のイベントのしくみ</h2>
+    <ul class="hwl"><li>毎週月曜に、テーマが2つ出ます。<b>運営のテーマ</b>と、先週<b>みんなが提案して票が多かったテーマ</b>です</li>
+      <li>選択肢から選ぶか、自分で書いて答えます。書いた答えは、ほかの人の選択肢にも並びます</li>
+      <li>同じ答えの人が<b>${need}人</b>そろうと、その答えの<b>今週だけの部屋</b>ができて、答えた人が入ります（日曜の夜で終わり）</li>
+      <li>悩みのテーマは、部屋を作らず<b>同じ答えの人の人数</b>だけ出します</li>
+      <li>答えは<b>その週だけ</b>、すれ違った時の共通点になります（すれ違いの設定で外せます）</li>
+      <li>いやな言葉は書けません。書かれた答えがいやな時は「書かれた答えを知らせる」から。2人から知らされると隠れます</li></ul>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+function openWkNext(){
+  const list=(wk&&wk.next)||[], mineProp=list.some(x=>x.own);
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🗳 来週のテーマ</h2>
+    <p class="psdesc">票がいちばん多いテーマが、来週の「みんなが選んだテーマ」になります。いいと思うものに票を入れてね（いくつでも）。</p>
+    ${list.length?list.map(x=>`<div class="wkprop"><b>${esc(x.title)}</b><small>${x.votes}票</small>${x.own?'':`<button class="wksmall" style="background:none;color:var(--muted)" onclick="wkReportTheme(${x.id})">知らせる</button>`}<button class="${x.voted?'on':''}" onclick="wkVote(${x.id})">${x.voted?'票を入れた':'票を入れる'}</button></div>`).join(''):'<p class="psdesc">まだ提案がありません。最初の1つを出してみよう</p>'}
+    ${mineProp?'<p class="psdesc" style="margin-top:12px">今週はもう提案しました（1人1週に1つ）</p>':`<div class="drow" style="display:flex;gap:8px;margin-top:14px"><input id="wkPropIn" maxlength="40" placeholder="例：最近ハマっていること" style="flex:1;min-width:0;padding:12px;border:1px solid var(--sep);border-radius:10px;font:inherit;background:var(--night);color:var(--ink)"><button class="btn btn-primary" onclick="wkPropose()">提案する</button></div>`}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function wkVote(id){
+  const {error}=await sb.rpc('tama_wk_vote',{p_theme:id});
+  if(error){ toast('票を入れられませんでした'); return; }
+  await loadWeekly(); openWkNext();
+}
+async function wkPropose(){
+  const v=($('#wkPropIn')&&$('#wkPropIn').value||'').trim(); if(!v){ toast('テーマを書いてね'); return; }
+  if(wkNg(v)){ toast('その言葉は使えません。ほかの言い方でどうぞ'); return; }
+  const {data,error}=await sb.rpc('tama_wk_propose',{p_title:v});
+  if(error){ toast('提案できませんでした。少し待ってからどうぞ'); return; }
+  const st=data&&data.status;
+  if(st==='ng'){ toast('その言葉は使えません。ほかの言い方でどうぞ'); return; }
+  if(st==='once'){ toast('提案は1人1週に1つまでです'); return; }
+  if(st!=='ok'){ toast('提案できませんでした'); return; }
+  toast('提案しました。票が集まると来週のテーマになります'); await loadWeekly(); openWkNext();
+}
+function openWkReport(t){
+  const th=(wk&&wk.themes||[]).find(x=>x.id===t); if(!th)return;
+  const list=(th.opts||[]).filter(o=>o.user&&!o.own);
+  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">書かれた答えを知らせる</h2>
+    <p class="psdesc">いやな言葉・人を傷つける言葉の答えを、運営に知らせます。2人から知らされると、その答えは隠れます。だれが知らせたかは相手に分かりません。</p>
+    ${list.map(o=>`<div class="wkprop"><b>${esc(o.label)}</b><button onclick="wkReport(${o.id})">知らせる</button></div>`).join('')}
+    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
+  $('#memOverlay').classList.add('show');
+}
+async function wkReport(id){
+  const {error}=await sb.rpc('tama_wk_report',{p_kind:'opt',p_id:id});
+  toast(error?'知らせられませんでした':'知らせました。ありがとう'); closeMembers(); loadWeekly();
+}
+async function wkReportTheme(id){
+  const {error}=await sb.rpc('tama_wk_report',{p_kind:'theme',p_id:id});
+  toast(error?'知らせられませんでした':'知らせました。ありがとう'); await loadWeekly(); openWkNext();
+}
 function renderDaily(){
   const el=$('#dailyCard'); if(!el)return;
   if(!profile){ el.innerHTML=''; return; }
@@ -11142,7 +11330,7 @@ function go(t){
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='tt')renderAppvTT();   // 📱 アプリverの時間割タブ（2026-10-24）
   if(t==='near'&&document.documentElement.classList.contains('appv'))renderAppvChrome();
-  if(t==='near')loadRooms();if(t==='friends')setCmTab(cmTab);   // 2026-10-15：友達のページは「コミュニティ」（📚 授業／🏠 コミュニティ／👥 友達）
+  if(t==='near'){ loadRooms(); loadWeekly(); }if(t==='friends')setCmTab(cmTab);   // 2026-10-15：友達のページは「コミュニティ」（📚 授業／🏠 コミュニティ／👥 友達）
   if(t==='me'||t==='set'){renderAppvRow();refreshPushToggle();renderNotifSum();renderWtpRow();renderVisSummary();renderMeWorry();renderSurveyBox();renderCheckinRow();renderMatchSum();renderMeDeleted();const h=$('#pushHint');if(h)h.textContent=pushHintText();const db=$('#debugBox');if(db)db.hidden=!debugMode();
     if(appvOn()){renderAppvMeCard();renderAppvSet();renderAppvXItems();}}   // 📱 アプリverのプロフィールと設定（2026-11-01）
   if(tipCur)hideTip(); setTimeout(maybeTip,350);}
@@ -11158,6 +11346,7 @@ loadBooths();setInterval(()=>{if(!document.hidden)loadBooths();},5*60000);
   loadSurveyStatus(); loadCheckins().then(()=>setTimeout(maybeCheckinPopup,20000));
   loadCt(); setInterval(()=>{ if(!document.hidden)loadCt(); },60000);   // ちかくタイム（2026-10-10）
   setTimeout(()=>loadTamasai(),3000); setInterval(()=>{ if(!document.hidden)loadTamasai(); },120000);
+  loadWeekly(); setInterval(()=>{ if(!document.hidden)loadWeekly(); },5*60000);   // 今週のイベント（2026-11-07）
   loadAdmin(); loadClassRooms(); setInterval(()=>{ if(!document.hidden)loadClassRooms(); },60000);   // 授業のコミュニティ・運営かどうか（2026-10-15）
   loadWtp().then(()=>wtpMaybeAsk('day'));   // ちかくプラスのアンケート（2026-10-14。登録の次の日から、すれ違い・友達がまだの人にも）   // 多摩祭の参加人数（2026-10-11。多摩祭の日と、🎉をまだ持っていない参加者だけ）
   if(pushRoute)setTimeout(()=>openFromPush(pushRoute),600);   // 通知を押して開いた時は、その画面へ（2026-10-10）
