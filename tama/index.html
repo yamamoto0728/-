@@ -2048,6 +2048,10 @@
   html.appv .sharerow.dim .toggle{opacity:.45}
   html.appv .tkclear{display:block;margin:14px auto 22px;padding:8px 16px;border:0;border-radius:16px;background:none;color:var(--muted);font:inherit;font-size:var(--fs4);cursor:pointer}
   html.appv .tkclear:active{background:var(--fill)}
+  /* 設定：アカウントの削除は一番下に小さく、赤い文字で（2026-11-07） */
+  html.appv .asetdel{display:block;margin:28px auto 6px;padding:10px 18px;border:0;border-radius:18px;background:none;color:var(--rose);font:inherit;font-size:var(--fs3);cursor:pointer}
+  html.appv .asetdel:active{background:var(--fill)}
+  html.appv #appvSet .setrow .toggle{flex:none}
   html.appv .ob{padding-top:calc(env(safe-area-inset-top,0px) + 26px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
   html.appv .wel{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
   html.appv .guide .gnav{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
@@ -3283,12 +3287,18 @@ function appvRelabel(el,txt,on){
   else if(el.dataset.lab!=null){ tn.textContent=el.dataset.lab; delete el.dataset.lab; }
 }
 // 文字列はマイページから移す行、配列は設定で作る行（[キー, 見出し, 説明, 押した時]）
+// 2026-11-07 あおの依頼「設定のページが見づらい。肝心な通知・位置情報の設定がない。削れる所は削って、移せる所は移して」：
+//   ・アプリの中でも「通知」を出す（前は、アプリの通知がまだ無かった頃の名残で、まとめて隠していた）。「位置情報」のまとまりを足す
+//   ・きせかえはプロフィールのアイコンを押すと開けるので、設定からは外す。アカウントの削除は一番下に小さく
+//   ・アプリの中では「アプリverで見る」（試す人向け）・長い注意書き・「プロフィールを消して共有をやめる」（アカウントの削除と同じ）・届いた通知（Web 版だけの仕組み）を出さない
+// 5つ目は 'toggle' の行（右にスイッチ。状態は renderAppvSetState が入れる）
 const APPV_SET=[
   ['アカウント',[['acct',isNativeApp()?'ログイン':'アプリに移る',' ','openAcct()']]],
-  ['見せ方',['vis',['xpref','すれ違いの設定','すべての人・共通点がある人だけ・使わない','openCrossPrefs()'],'match','block']],
-  ['通知',['push','prefs','center']],
-  ['きせかえ・アンケート',[['look','きせかえ','アイコン・背景・フレーム',"$('#lookDot').hidden=true;openLook()"],['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],'wtp','ck',['inv','友達をちかくに誘う','','openInvite()']]],
-  ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['privacy','プライバシーポリシー','取る情報・見える範囲・保存期間・消し方',"location.href='/privacy/index.html'"],['delacct','アカウントを削除','ログインの記録まで、すべて消えます','deleteAccount()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'appv','debug']]];
+  ['通知',[['npush','通知','','appvTogglePush()','toggle'],'push','prefs','center']],
+  ['位置情報',[['bg','閉じていても、すれ違う','','appvToggleBg()','toggle'],['locperm','位置情報の許可','','appvOpenSettings()'],['xpref','すれ違いの設定','すべての人・共通点がある人だけ・使わない','openCrossPrefs()'],'match']],
+  ['プライバシー',['vis','block']],
+  ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['privacy','プライバシーポリシー','取る情報・見える範囲・保存期間・消し方',"location.href='/privacy/index.html'"]]],
+  ['その他',[['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],['inv','友達をちかくに誘う','','openInvite()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'ck','wtp','appv','debug']]];
 const APPV_SET_LAB={vis:'見せる範囲',match:'すれ違いに使う共通点',block:'ブロックした人',prefs:'通知の種類・テスト通知',center:'届いた通知',wtp:'ちかくプラスのアンケート',ck:'ひとこと'};
 function appvMeLayout(on){
   const set=$('#appvSet'); if(!set)return;
@@ -3302,8 +3312,11 @@ function appvMeLayout(on){
   Object.entries(APPV_SET_LAB).forEach(([k,t])=>{ if(M[k])appvRelabel(M[k].el,t,on); });
   if(!on){ Object.values(M).forEach(({el,c})=>{ if(c.nextSibling!==el)c.after(el); }); if($('#s-set').classList.contains('active'))go('me'); return; }
   if(!set.dataset.b){ set.dataset.b='1';
-    const r=([k,t,s,fn])=>`<div class="setrow visrow" data-r="${k}" onclick="${fn}"><div class="lab">${t}${s?`<small>${s}</small>`:''}</div><span class="go">›</span></div>`;
-    set.innerHTML=APPV_SET.map(([h,L_])=>`<div class="asetg"><h3>${h}</h3><div class="aset">${L_.map(x=>typeof x==='string'?`<div data-k="${x}"></div>`:r(x)).join('')}</div></div>`).join('')
+    const r=([k,t,s,fn,kind])=>kind==='toggle'
+      ?`<div class="setrow visrow" data-r="${k}"><div class="lab">${t}<small>${s||''}</small></div><div class="toggle" onclick="${fn}"><div class="k"></div></div></div>`
+      :`<div class="setrow visrow" data-r="${k}" onclick="${fn}"><div class="lab">${t}${s?`<small>${s}</small>`:''}</div><span class="go">›</span></div>`;
+    set.innerHTML=APPV_SET.map(([h,L_])=>`<div class="asetg" data-g="${h}"><h3>${h}</h3><div class="aset">${L_.map(x=>typeof x==='string'?`<div data-k="${x}"></div>`:r(x)).join('')}</div></div>`).join('')
+      +'<button class="asetdel" onclick="deleteAccount()">アカウントを削除</button>'
       +'<p class="asetfoot">話を聞いてくれる場所：多摩学生相談室（総合棟2F・月〜金 9:30〜16:30・無料・予約制）</p><div data-k="stop"></div><div data-k="note"></div><div data-k="no"></div>';
   }
   set.querySelectorAll('[data-k]').forEach(ph=>{ const m=M[ph.dataset.k]; if(m&&m.el.parentNode!==ph)ph.appendChild(m.el); });
@@ -3315,10 +3328,48 @@ function renderAppvSet(){
   const sv=set.querySelector('[data-r="survey"]'); if(sv)sv.hidden=!surveyOpen()||surveyDone;
   // 包んだアプリ（ストア版）では、ブラウザの通知の仕組みが使えない（アプリの通知はこれから作る）。動かないスイッチは出さない（Apple 2.1）。
   // 「ちかくプラス」（有料の予定のアンケート）も、買えない有料の話になるので出さない（Apple 3.1.1）
-  if(isNativeApp()){ const pg=set.querySelector('[data-k="push"]'); if(pg&&pg.closest('.asetg'))pg.closest('.asetg').hidden=true; const w=set.querySelector('[data-k="wtp"]'); if(w)w.hidden=true; }
-  const lk=set.querySelector('[data-r="look"]'), ld=$('#lookDot');
-  if(lk&&ld){ let d=lk.querySelector('.dot'); if(!ld.hidden&&!d){ d=document.createElement('span'); d.className='dot'; lk.querySelector('.go').before(d); } else if(ld.hidden&&d)d.remove(); }
+  // アプリの中：ブラウザの通知のスイッチ・届いた通知（Web 版だけの仕組み）・ちかくプラス（買えない有料の話。Apple 3.1.1）・試す人向けの行・長い注意書きは出さない。
+  // アプリの通知のスイッチ（npush）と位置情報の行は、アプリの中だけ
+  const N=isNativeApp(), hide=(sel,h)=>{ const el=set.querySelector(sel); if(el)el.hidden=h; };
+  ['[data-k="push"]','[data-k="center"]','[data-k="wtp"]','[data-k="appv"]','[data-k="stop"]','[data-k="note"]'].forEach(q=>hide(q,N));
+  ['[data-r="npush"]','[data-r="bg"]','[data-r="locperm"]'].forEach(q=>hide(q,!N));
+  renderAppvSetState();
 }
+// 📱 設定の「通知」「位置情報」の行に、いまの状態を入れる（スイッチの入り切り・許可の状態）
+async function renderAppvSetState(){
+  const set=$('#appvSet'); if(!set||!set.dataset.b||!isNativeApp())return;
+  const put=(k,on,txt)=>{ const row=set.querySelector(`[data-r="${k}"]`); if(!row)return; const sm=row.querySelector('small'); if(sm)sm.textContent=txt; const t=row.querySelector('.toggle'); if(t&&on!=null)t.classList.toggle('on',!!on); };
+  // 通知
+  let ps='unknown'; try{ const P=nPush(); if(P)ps=(await P.checkPermissions()).receive; }catch(e){}
+  const pOn=ps==='granted'&&!isPushOptOut();
+  put('npush',pOn,!nativePushOn()?'この版のアプリでは使えません':ps==='denied'?'スマホの設定で、ちかくの通知がオフになっています（押すと設定を開きます）':pOn?'オン：トーク・いいね・友達のお知らせが届きます':'オフ：押すとオンにできます');
+  // 位置情報（閉じていても、すれ違う・許可）
+  try{ if(window.ChikakuBG)bgPerm=await window.ChikakuBG.permission(); }catch(e){}
+  const off=crossModeOf(profile)==='off', bOn=bgOnLocal()&&!off;
+  put('bg',bOn,off?'すれ違いを「使わない」にしている間は使えません':!bOn?'オフ：学内にいる間だけ、閉じていても記録します':bgPerm==='always'?'オン：学内にいる間は、閉じていても記録します':'オン。ただ、位置情報が「常に」になっていないので、閉じている間は記録できません');
+  put('locperm',null,({always:'常に（閉じていてもすれ違えます）',whenInUse:'使用中のみ（閉じている間はすれ違えません）',denied:'許可していません（地図・すれ違いが使えません）'})[bgPerm]||'スマホの設定 → ちかく → 位置情報');
+}
+// 通知のスイッチ（アプリの中）。スマホの設定でオフにしている時は、設定を開く
+async function appvTogglePush(){
+  if(!nativePushOn()){ toast('この版のアプリでは使えません'); return; }
+  const P=nPush(); let ps='unknown'; try{ ps=(await P.checkPermissions()).receive; }catch(e){}
+  if(ps==='granted'&&!isPushOptOut()){ setPushOptOut(true); await nativePushOff(); toast('通知をオフにしました'); }
+  else if(ps==='denied'){ appvOpenSettings(); return; }
+  else{ setPushOptOut(false); const ok=await nativePushEnsure(true); toast(ok?'通知をオンにしました':'通知が許可されませんでした'); }
+  renderAppvSetState();
+}
+// 閉じていても、すれ違う（アプリの中）
+async function appvToggleBg(){
+  if(bgOnLocal())await bgDisable(); else await bgEnable();
+  renderAppvSetState();
+}
+// スマホの「設定」アプリの、ちかくのページを開く（位置情報・通知の許可を変える所）
+async function appvOpenSettings(){
+  try{ const C=window.Capacitor, P=C&&C.Plugins&&C.Plugins.ChikakuLocation; if(P&&P.openSettings){ const r=await P.openSettings(); if(r&&r.ok)return; } }catch(e){}
+  toast('スマホの「設定」→「ちかく」から変えられます');
+}
+// 設定から戻ってきた時（許可を変えたかもしれない）に、行の状態を直す
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&$('#s-set')&&$('#s-set').classList.contains('active'))renderAppvSetState(); });
 function renderAppvTT(){
   const el=$('#appvTT'); if(!el)return;
   const slots=myTimetable||{}, rooms=myRooms||{}, keys=Object.keys(slots);
