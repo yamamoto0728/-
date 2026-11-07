@@ -48,7 +48,7 @@ alter table public.room_members enable row level security;
 -- RLSポリシー
 -- ---------------------------------------------------------------------------
 -- ⚠️ SELECTポリシーは必須。無いとPostgREST経由の .upsert() が 403 で弾かれる。
---    （push_subscriptions で実際にこれを踏み、原因特定に数セッション溶かした。詳細はCLAUDE.md）
+--    （push_subscriptions で実際にこれを踏み、原因特定に数セッション溶かした。詳細は docs/progress-log.md）
 --    メンバー一覧は「誰が入っているか」を全員に見せる前提なので using (true) でよい。
 drop policy if exists "read room members" on public.room_members;
 create policy "read room members"
