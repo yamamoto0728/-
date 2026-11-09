@@ -1372,7 +1372,11 @@
   html.appv .atpill{flex:1;min-width:0;height:36px;padding:0 14px;border-radius:18px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 4px rgba(0,0,0,.12);display:flex;align-items:center;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   html.appv .atpill .dot{width:8px;height:8px;border-radius:50%;background:var(--muted2);margin-right:8px;flex:none}
   html.appv .atpill .dot.in{background:var(--ok)}
-  html.appv .appvsheet{display:flex;flex-direction:column;position:absolute;left:0;right:0;bottom:0;z-index:600;height:var(--ash-h,52%);background:var(--night);border-radius:16px 16px 0 0;box-shadow:0 -1px 0 var(--sep),0 -6px 24px rgba(0,0,0,.08);transition:height .25s cubic-bezier(.25,.8,.3,1)}
+  html.appv .appvsheet{display:flex;flex-direction:column;position:absolute;left:0;right:0;bottom:0;z-index:600;height:calc(100% - env(safe-area-inset-top,0px) - 68px);transform:translateY(var(--ash-y,48%));will-change:transform;background:var(--night);border-radius:16px 16px 0 0;box-shadow:0 -1px 0 var(--sep),0 -6px 24px rgba(0,0,0,.08);transition:transform .38s cubic-bezier(.2,.9,.25,1)}
+  /* 2026-11-09 あお「下からのタブが一回止まる。もっと滑らかに」：高さを変えて動かすと、毎回中身を並べ直すので重かった。
+     シートはいつも一番上の高さで作り、下にずらして（transform）見える高さを変える。下に隠れた分は、中身の下に余白（--ash-pad）を足して最後まで読めるように */
+  html.appv .ash-body>.scroll{overscroll-behavior-y:contain}
+  html.appv #ashBody>.scroll{padding-bottom:calc(16px + var(--ash-pad,0px))!important}
   html.appv .appvsheet.drag{transition:none}
   html.appv .ash-grab{flex:none;padding:7px 16px 6px;cursor:grab;touch-action:none}
   html.appv .ash-grab i{display:block;width:36px;height:5px;border-radius:3px;background:var(--muted2);opacity:.6;margin:0 auto 8px}
@@ -1474,7 +1478,8 @@
   html.appv .atbtn,html.appv .atpill{box-shadow:var(--float)}
   html.appv .appvtop .atbtn:first-child{box-shadow:0 0 0 2.5px var(--me),var(--float)}
   html.appv .atbtn.atlab.on{background:var(--ink);color:var(--night)}   /* 隠れている時は黒の札（自分の状態なのでアクセント色にしない） */
-  html.appv .appvloc{display:grid;position:absolute;right:16px;bottom:calc(var(--ash-h,52%) + 12px);z-index:500;transition:bottom .25s cubic-bezier(.25,.8,.3,1)}
+  html.appv .appvloc{display:grid;position:absolute;right:16px;bottom:12px;transform:translateY(calc(-1 * var(--ash-h,116px)));z-index:500;transition:transform .38s cubic-bezier(.2,.9,.25,1),opacity .25s}
+  html.appv .appvloc.drag{transition:opacity .25s}
   html.appv .appvloc svg{width:20px;height:20px;color:var(--tint)}
   html.appv #s-near[data-detent="full"] .appvloc{opacity:0;pointer-events:none}   /* シートを一番上まで上げた時は、右上の「隠れる」と重なるので消す */
   /* ピン：友達はしずく形（建物を指す）、自分は自分の色の輪、ほかの人は小さく */
@@ -1804,6 +1809,13 @@
   html.appv .asetg{margin:20px 16px 0}
   html.appv .asetg>h3{margin:0 0 6px 16px;font-size:var(--fs4);font-weight:600;color:var(--muted)}
   html.appv .aset{border-radius:12px;background:var(--fill);overflow:hidden}
+  html.appv .asetg.fold:not(.open) .aset{display:none}
+  html.appv .asetfold{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 16px;border:0;border-radius:12px;background:var(--fill);color:var(--ink);font:inherit;font-size:var(--fs2);font-weight:600;text-align:left;cursor:pointer}
+  html.appv .asetfold:active{background:color-mix(in srgb,var(--ink) 8%,var(--fill))}
+  html.appv .asetfold small{display:block;margin-top:2px;font-size:var(--fs4);font-weight:400;color:var(--muted)}
+  html.appv .asetfold i{font-style:normal;font-size:18px;color:var(--muted);transform:rotate(90deg);transition:transform .25s}
+  html.appv .asetg.open .asetfold{margin-bottom:8px}
+  html.appv .asetg.open .asetfold i{transform:rotate(-90deg)}
   html.appv .aset .setting{margin:0;padding:0;border:0;border-radius:0;background:none}
   html.appv .aset .setrow,html.appv .aset .sharerow{min-height:52px;padding:10px 16px;border:0;border-radius:0;background:none;font-size:var(--fs2);color:var(--ink)}   /* 区切り線は行の上に（隠れている行があっても線が余らない） */
   html.appv .aset .setrow .lab,html.appv .aset .sharerow .lab{font-size:var(--fs2);font-weight:500}
@@ -2107,6 +2119,15 @@
   html.appv .hwleg .lg.nb{width:16px;height:16px}
   /* 📱 すれ違いの項目（プロフィール）・ひとこと・今日のレア（2026-11-07） */
   html.appv .axi{margin:8px 16px 14px;border-radius:12px;background:var(--fill);overflow:hidden}
+  html.appv #appvMeSub .axi{margin-top:16px}
+  html.appv .lk .lkh.lkmore{margin-top:20px;padding-top:14px;border-top:1px solid var(--sep);color:var(--muted)}
+  html.appv .lk .lkh.lksub{font-size:var(--fs3);font-weight:600}
+  html.appv .lk .lkc.on{border-color:var(--tint);background:color-mix(in srgb,var(--tint) 12%,var(--night))}
+  html.appv #edEmoField{display:none}   /* アプリverのアイコンは「きせかえ」の1か所で選ぶ（2026-11-09） */
+  html.appv .axmore{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;border:0;border-top:.5px solid var(--sep);background:none;color:var(--tint);font:inherit;font-size:var(--fs3);font-weight:600;text-align:left;cursor:pointer}
+  html.appv .axmore:active{background:color-mix(in srgb,var(--ink) 8%,var(--fill))}
+  html.appv .axmore i{font-style:normal;font-size:18px;color:var(--muted);transform:rotate(90deg);transition:transform .25s}
+  html.appv .axmore i.up{transform:rotate(-90deg)}
   html.appv .axih{padding:12px 14px 6px}
   html.appv .axih b{display:block;font-size:var(--fs2)}
   html.appv .axih small{display:block;margin-top:2px;font-size:var(--fs4);color:var(--muted)}
@@ -2382,12 +2403,12 @@
         <!-- マイページ：自分のこと（プロフィール・時間割）→ 人を誘う → 設定 の順（2026-09-24 に「設定」から名前を変えて整理） -->
         <div class="me-hero"><div class="ring2" id="meAv"></div><h2 id="meName">あなた</h2><div class="mebdg" id="meBadges"></div><div class="h" id="meFac"></div><div class="h" id="meLoc">📍 &mdash;</div><div id="meWorry"></div></div>
         <div class="appvx" id="appvMeCard"></div>
-        <div class="appvx" id="appvXItems"></div>
         <!-- アンケートの欄（答えると特典。中身は renderSurveyBox）。2026-10-09 あおの指示「見やすく」で、マイページの一番下からここ（プロフィールを編集のすぐ下）へ -->
         <div id="meDeleted"></div><button class="btn btn-primary" id="meEditBtn" style="margin:0 16px 4px;width:calc(100% - 32px);padding:14px;font-size:15px" onclick="openEdit()">プロフィールを編集</button>
         <!-- 2026-11-01 あお「アイコン・フレーム・背景をいじれる画面に行くのが難しい」：編集の横に「きせかえ」を並べる（インスタの「編集」「シェア」と同じ並び） -->
-        <div class="appvx" id="appvMeSub"><div class="ame2"><button onclick="openEdit()">プロフィールを編集</button><button onclick="openLook()">きせかえ</button></div>
-          <button class="alink" onclick="openPreview('near')">友達・近くの人からの見え方</button><div id="appvMeRec"></div></div>
+        <!-- 2026-11-09 あお「プロフィールは項目とボタンが多くてよくわからない。アイコンもいじりやすく」：編集・アイコンのボタンをカードのすぐ下に。すれ違いの項目はその下で、入れていない物は1行にたたむ -->
+        <div class="appvx" id="appvMeSub"><div class="ame2"><button onclick="openEdit()">プロフィールを編集</button><button onclick="openLook('icon')">アイコンを変える</button></div>
+          <button class="alink" onclick="openPreview('near')">友達・近くの人からの見え方</button><div id="appvXItems"></div><div id="appvMeRec"></div></div>
         <div id="surveyBox"></div>
         <!-- 多摩祭の日だけ、ホームの「いまの自分・時間割」（#nowBar）をここへ移す（2026-10-15 しゅうすけさんの依頼。placeNowBar） -->
         <div id="meNowWrap" hidden><div class="listhead" style="margin-top:10px">📍 いまの自分・時間割</div><div id="meNowSlot"></div></div>
@@ -2881,13 +2902,17 @@ function appvLayout(on){
   if(typeof fesMap!=='undefined'&&fesMap)setTimeout(()=>{ try{ fesMap.invalidateSize(); appvMapBounds(on); }catch(e){} },80);
 }
 // 📱 プロフィールの「すれ違いの項目」：入れている項目と、まだの項目。押すと選ぶ画面
+let axOpen=false;   // 入れていない項目を広げているか
 function renderAppvXItems(){
   const el=$('#appvXItems'); if(!el||!profile)return;
-  const a=attrsOf(profile), val=f=>{ const v=a[f.fa]; return Array.isArray(v)?v.join('・'):(v||''); };
-  const n=XF.filter(f=>val(f)).length+(xmsgOf(profile)?1:0);
-  el.innerHTML=`<div class="axi"><div class="axih"><b>すれ違いの項目</b><small>${n}/${XF.length+1} 入れています。入れるほど、すれ違った人との共通点が見つかります</small></div>`
-    +`<button class="axrow msg" onclick="openXItem('xmsg')"><span class="ic">👋</span><span class="tx"><b>すれ違いのひとこと</b><small>${xmsgOf(profile)?'「'+esc(xmsgOf(profile))+'」':'すれ違った人にだけ見える、短いひとこと'}</small></span><i>${xmsgOf(profile)?'変える':'書く'}</i></button>`
-    +XF.map(f=>`<button class="axrow${val(f)?' on':''}" onclick="openXItem('${f.k}')"><span class="ic">${f.icon}</span><span class="tx"><b>${esc(f.label)}</b><small>${val(f)?esc(val(f)):'まだ入れていません'}</small></span><i>${val(f)?'変える':'足す'}</i></button>`).join('')+'</div>';
+  const a=attrsOf(profile), val=f=>{ const v=a[f.fa]; return Array.isArray(v)?v.join('・'):(v||''); }, xm=xmsgOf(profile);
+  const rows=[{k:'xmsg',icon:'👋',label:'すれ違いのひとこと',v:xm?'「'+xm+'」':'',ph:'すれ違った人にだけ見える、短いひとこと'},...XF.map(f=>({k:f.k,icon:f.icon,label:f.label,v:val(f),ph:'まだ入れていません'}))];
+  const row=r=>`<button class="axrow${r.v?' on':''}" onclick="openXItem('${r.k}')"><span class="ic">${r.icon}</span><span class="tx"><b>${esc(r.label)}</b><small>${esc(r.v||r.ph)}</small></span><i>${r.v?'変える':'足す'}</i></button>`;
+  const on=rows.filter(r=>r.v), off=rows.filter(r=>!r.v);
+  el.innerHTML=`<div class="axi"><div class="axih"><b>すれ違いの項目</b><small>入れるほど、すれ違った人との共通点が見つかります</small></div>`
+    +on.map(row).join('')
+    +(off.length?`<button class="axmore" onclick="axOpen=!axOpen;renderAppvXItems()"><span>${on.length?'ほかの項目を入れる':'項目を入れる'}（あと${off.length}つ）</span><i class="${axOpen?'up':''}">›</i></button>`+(axOpen?off.map(row).join(''):''):'')
+    +'</div>';
 }
 let xiPick=[];
 function openXItem(k){
@@ -2971,29 +2996,72 @@ function setAppvPane(k,quiet){
   renderAppvSegInfo();
 }
 // シートの高さ：low（見出しだけ）・mid（半分）・full（全画面）
-const ASH_H={low:'116px',mid:'52%',full:'calc(100% - env(safe-area-inset-top,0px) - 68px)'};   // 一番上は、上のアイコンと位置のバーのすぐ下まで（2026-11-03）   // 一番上でも、隅のボタンの下に地図を細く残す（E13。地図の上のシートだと分かるように）。低い時は「いまの自分・時間割」の2枚が見える高さ（2026-11-01）
-function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'), n=$('#s-near'); if(s)s.style.removeProperty('--ash-h'); if(n){ n.style.setProperty('--ash-h',ASH_H[d]); n.dataset.detent=d; } }
+const ASH_H={low:116,mid:.52};   // 低い時は「いまの自分・時間割」の2枚が見える高さ（2026-11-01）。一番上は CSS の高さ（上のアイコンと位置のバーのすぐ下まで。2026-11-03。E13：地図を細く残す）
+const ASH_ORDER=['low','mid','full'];
+// いまの決まった位置の、見える高さ（px）
+function ashPx(d){ const s=$('#appvSheet'); if(!s)return 0; const F=s.offsetHeight, P=s.parentNode.clientHeight;
+  return Math.min(F,d==='low'?ASH_H.low:d==='mid'?Math.round(P*ASH_H.mid):F); }
+// 見える高さを変える（ずらすだけ。中身は並べ直さない）。地図の右下のボタンもいっしょに動かす
+function ashShow(h,dragging){
+  const s=$('#appvSheet'), loc=$('#s-near .appvloc'); if(!s)return;
+  s.style.setProperty('--ash-y',Math.max(0,s.offsetHeight-h)+'px');
+  if(loc){ loc.classList.toggle('drag',!!dragging); loc.style.setProperty('--ash-h',h+'px'); }
+}
+function setAppvDetent(d){ appvDetent=d; const s=$('#appvSheet'), n=$('#s-near'); if(!s||!n)return;
+  s.classList.remove('drag'); n.dataset.detent=d;
+  const F=s.offsetHeight; if(!F)return;   // まだ出ていない時は、出た時（appvBindSheet の resize）に合わせる
+  const h=ashPx(d); ashShow(h,false); s.style.setProperty('--ash-pad',(F-h)+'px');
+}
+// 指を離した時の止まる位置：離した位置だけでなく、はじいた速さも見る（Apple マップと同じ）。
+// 速く動かした時は、少なくとも1段はその向きに進む（前は位置だけで決めていたので、はじいても元に戻り「止まる」感じがした）
+function ashSettle(h,v,from){
+  const H=Object.fromEntries(ASH_ORDER.map(d=>[d,ashPx(d)])), proj=h+v*220;
+  let to=ASH_ORDER.reduce((a,d)=>Math.abs(H[d]-proj)<Math.abs(H[a]-proj)?d:a,'low');
+  if(Math.abs(v)>.35&&to===from){ const i=ASH_ORDER.indexOf(from)+(v>0?1:-1); if(i>=0&&i<ASH_ORDER.length)to=ASH_ORDER[i]; }
+  setAppvDetent(to); if(navigator.vibrate)try{ navigator.vibrate(6); }catch(_){}
+}
+// 引っぱっている間：見える高さ・速さ（px/ms。上向きが＋）を覚える
+function ashDrag(){
+  const s=$('#appvSheet');
+  // 動いている途中でつかんだ時も飛ばないように、いま画面に見えている位置から始める
+  return { h0:Math.max(0,s.parentNode.getBoundingClientRect().bottom-s.getBoundingClientRect().top), h:0, pts:[],
+    start(){ ashShow(this.h0,true); s.classList.add('drag'); this.h=this.h0; this.pts=[[performance.now(),this.h]]; },
+    move(dy){ const F=s.offsetHeight; let h=this.h0-dy;
+      if(h>F)h=F; if(h<ASH_H.low)h=ASH_H.low-(ASH_H.low-h)*.3;   // 一番下より下は、少しだけ重くついてくる
+      this.h=h; ashShow(h,true); const t=performance.now(); this.pts.push([t,h]); while(this.pts.length>2&&t-this.pts[0][0]>90)this.pts.shift(); },
+    vel(){ const a=this.pts[0], b=this.pts[this.pts.length-1]; if(!a||!b||performance.now()-b[0]>90)return 0;   // 止めてから離した時は、はじいていない
+      return b[0]-a[0]>8?(b[1]-a[1])/(b[0]-a[0]):0; } };
+}
 function appvBindSheet(){
   const g=$('#ashGrab'), s=$('#appvSheet'); if(!g||!s||g.dataset.b)return; g.dataset.b='1';
-  let y0=null,h0=0,moved=false;
-  g.addEventListener('pointerdown',e=>{ y0=e.clientY; h0=s.getBoundingClientRect().height; moved=false; s.classList.add('drag'); try{ g.setPointerCapture(e.pointerId); }catch(_){} });
-  g.addEventListener('pointermove',e=>{ if(y0==null)return; const dy=e.clientY-y0; if(Math.abs(dy)>4)moved=true; s.style.setProperty('--ash-h',Math.max(96,h0-dy)+'px'); });
-  g.addEventListener('pointerup',()=>{ if(y0==null)return; s.classList.remove('drag'); const H=s.parentNode.getBoundingClientRect().height, h=s.getBoundingClientRect().height; y0=null;
+  window.addEventListener('resize',()=>setAppvDetent(appvDetent));
+  let gd=null, y0=0, moved=false;
+  g.addEventListener('pointerdown',e=>{ y0=e.clientY; moved=false; gd=ashDrag(); gd.start(); try{ g.setPointerCapture(e.pointerId); }catch(_){} });
+  g.addEventListener('pointermove',e=>{ if(!gd)return; const dy=e.clientY-y0; if(Math.abs(dy)>4)moved=true; gd.move(dy); });
+  const gEnd=()=>{ if(!gd)return; const d=gd; gd=null;
     if(!moved){ setAppvDetent(appvDetent==='full'?'mid':'full'); return; }   // タップは 半分⇔全画面
-    const r=h/H; setAppvDetent(r<.33?'low':r<.72?'mid':'full'); if(navigator.vibrate)try{ navigator.vibrate(6); }catch(_){} });
+    ashSettle(d.h,d.vel(),appvDetent); };
+  g.addEventListener('pointerup',gEnd); g.addEventListener('pointercancel',gEnd);
   // 2026-11-01 あお「タブを上に引っ張りづらい。当たり判定が小さい」：つまみだけでなく、シートの中のどこからでも引っぱれるように（Apple マップと同じ）。
-  // 全画面でない時に上へ、中身が一番上までスクロールされている時に下へ動かした時だけシートを動かす。横の動き・それ以外は中身のスクロールのまま
+  // 全画面でない時に上へ、中身が一番上までスクロールされている時に下へ動かした時だけシートを動かす。横の動き・それ以外は中身のスクロールのまま。
+  // 2026-11-09：動かし始めの1回目で決める（前は 8px 待ってから決めていたので、その間に中身が少しスクロールして、シートが一度止まって見えた）。
+  // 上に引っぱって一番上に着いたら、同じ指のまま中身のスクロールに切りかえる
   const body=$('#ashBody'); let t0=null;
   if(body){
-    body.addEventListener('touchstart',e=>{ const sc=body.querySelector(':scope>.scroll'); t0={y:e.touches[0].clientY,x:e.touches[0].clientX,h:s.getBoundingClientRect().height,top:!sc||sc.scrollTop<=0,drag:false}; },{passive:true});
+    body.addEventListener('touchstart',e=>{ const sc=body.querySelector(':scope>.scroll'); t0={y:e.touches[0].clientY,x:e.touches[0].clientX,sc,st:sc?sc.scrollTop:0,d:null,on:false}; },{passive:true});
     body.addEventListener('touchmove',e=>{
-      if(!t0)return; const dy=e.touches[0].clientY-t0.y, dx=e.touches[0].clientX-t0.x;
-      if(!t0.drag){ if(Math.abs(dy)<8||Math.abs(dx)>Math.abs(dy))return;
-        if((dy<0&&appvDetent!=='full')||(dy>0&&t0.top)){ t0.drag=true; s.classList.add('drag'); } else { t0=null; return; } }
-      e.preventDefault(); s.style.setProperty('--ash-h',Math.max(96,t0.h-dy)+'px');
+      if(!t0)return; const y=e.touches[0].clientY, dy=y-t0.y, dx=e.touches[0].clientX-t0.x;
+      if(!t0.on){ if(!dy&&!dx)return;
+        if(Math.abs(dx)>Math.abs(dy)){ t0=null; return; }   // 横（カードの横スクロールなど）はそのまま
+        const top=!t0.sc||t0.sc.scrollTop<=0;
+        if((dy<0&&appvDetent!=='full')||(dy>0&&top)){ t0.on=true; t0.y=y-dy; t0.d=ashDrag(); t0.d.start(); } else { t0=null; return; } }
+      e.preventDefault();
+      const F=s.offsetHeight, want=t0.d.h0-dy;
+      t0.d.move(dy);
+      if(want>F&&t0.sc)t0.sc.scrollTop=t0.st+(want-F);   // 一番上に着いた後の分は、中身をスクロール
     },{passive:false});
-    body.addEventListener('touchend',()=>{ if(!t0)return; const was=t0.drag; t0=null; if(!was)return; s.classList.remove('drag');
-      const H=s.parentNode.getBoundingClientRect().height, r=s.getBoundingClientRect().height/H; setAppvDetent(r<.33?'low':r<.72?'mid':'full'); if(navigator.vibrate)try{ navigator.vibrate(6); }catch(_){} });
+    const bEnd=()=>{ if(!t0)return; const c=t0; t0=null; if(!c.on)return; ashSettle(c.d.h,c.d.vel(),appvDetent); };
+    body.addEventListener('touchend',bEnd); body.addEventListener('touchcancel',bEnd);
   }
 }
 // 隠れる（1時間／今日はずっと）。位置の共有を止めるだけなので、友達や近くの人の画面では「学内にいない」と同じ見た目になり、隠れていることは相手に分からない
@@ -3155,7 +3223,7 @@ function appvMapBounds(on){
 // 地図は、シートに隠れない上の部分にキャンパスが収まるように合わせる
 function appvFitMap(){
   if(typeof fesMap==='undefined'||!fesMap||typeof fesCampusBounds==='undefined'||!fesCampusBounds)return;
-  const s=$('#appvSheet'), h=s?s.getBoundingClientRect().height:0;
+  const s=$('#appvSheet'), h=s?Math.max(0,s.parentNode.getBoundingClientRect().bottom-s.getBoundingClientRect().top):0;   // ずらして隠れている分は数えない
   try{ fesMap.invalidateSize(); fesMap.fitBounds(fesCampusBounds,{paddingTopLeft:[16,72],paddingBottomRight:[16,h+12]}); }catch(e){}
 }
 /* ---------- 📱 アプリver：UI改善ファイル（2026-10-28 あおの依頼「調べて作ったファイルの改善を全部適用」。J:\ちかく\UI改善\00_改善ファイル.md） ----------
@@ -3447,11 +3515,10 @@ function renderAppvMeCard(){
   const a=attrsOf(profile), chips=l=>`<div class="chips">${l.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`;
   const items=[a.artist&&['よく聴く',esc(a.artist)],(a.aruaru||[]).length&&['わかる！あるある',chips(a.aruaru)],(a.goals||[]).length&&['これから・目標',chips(a.goals)],
     a.course&&['これだけは落としたくない授業',esc(a.course)],a.hometown&&['出身',esc(a.hometown)]].filter(Boolean);
-  const miss=[!profile.bio&&'自己紹介',!a.artist&&'よく聴くアーティスト',!(a.aruaru||[]).length&&'あるある',!a.course&&'落としたくない授業'].filter(Boolean);
   const h=`<div class="amecard"><div class="top"><button class="av${frCls(profile)}" style="background:${gr(profile.emoji)}" onclick="openLook()" aria-label="アイコン・フレーム・背景を変える">${esc(profile.emoji||'🙂')}<i>変える</i></button><div><h2>${esc(profile.name)}</h2><div class="fac">${esc([a.faculty,a.dept,a.grade].filter(Boolean).join(' '))}</div></div></div>
     ${profile.bio?`<p class="bio">${esc(profile.bio)}</p>`:''}
     ${items.length?`<dl>${items.map(([t,v])=>`<dt>${t}</dt><dd>${v}</dd>`).join('')}</dl>`:''}
-    ${miss.length?`<div class="miss">まだ入れていない：${miss.join('・')}　<button onclick="openEdit()">入れる</button></div>`:''}</div>`;
+    </div>`;
   if(el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; }
 }
 let appvMeMarks=null;
@@ -3467,13 +3534,15 @@ function appvRelabel(el,txt,on){
 //   ・きせかえはプロフィールのアイコンを押すと開けるので、設定からは外す。アカウントの削除は一番下に小さく
 //   ・アプリの中では「アプリverで見る」（試す人向け）・長い注意書き・「プロフィールを消して共有をやめる」（アカウントの削除と同じ）・届いた通知（Web 版だけの仕組み）を出さない
 // 5つ目は 'toggle' の行（右にスイッチ。状態は renderAppvSetState が入れる）
+// 2026-11-09 あお「設定は項目とボタンが多くてよくわからない」：よく変える物（通知・すれ違い・見せる範囲）を上に。
+//   使い方・規約・アンケートなど、たまにしか開かない物は「そのほか」にたたむ（3つ目が 'fold'）。アカウントは下の方に
 const APPV_SET=[
-  ['アカウント',[['acct',isNativeApp()?'ログイン':'アプリに移る',' ','openAcct()']]],
   ['通知',[['npush','通知','','appvTogglePush()','toggle'],'push','prefs','center']],
-  ['位置情報',[['bg','閉じていても、すれ違う','','appvToggleBg()','toggle'],['locperm','位置情報の許可','','appvOpenSettings()'],['xpref','すれ違いの設定','すべての人・共通点がある人だけ・使わない','openCrossPrefs()'],'match']],
+  ['すれ違い・位置情報',[['bg','閉じていても、すれ違う','','appvToggleBg()','toggle'],['xpref','すれ違いの設定','すべての人・共通点がある人だけ・使わない','openCrossPrefs()'],'match',['locperm','位置情報の許可','','appvOpenSettings()']]],
   ['プライバシー',['vis','block']],
-  ['ちかくについて',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['privacy','プライバシーポリシー','取る情報・見える範囲・保存期間・消し方',"location.href='/privacy/index.html'"]]],
-  ['その他',[['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],['inv','友達をちかくに誘う','','openInvite()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'ck','wtp','appv','debug']]];
+  ['アカウント',[['acct',isNativeApp()?'ログイン':'アプリに移る',' ','openAcct()']]],
+  ['そのほか',[['guide','使い方','','openGuide()'],['contact','困ったとき・お問い合わせ','','openContact()'],['terms','利用規約','','openTerms()'],['privacy','プライバシーポリシー','取る情報・見える範囲・保存期間・消し方',"location.href='/privacy/index.html'"],
+    ['survey','アンケートに答える','答えると、限定のアイコン・背景がもらえます','openSurvey()'],['inv','友達をちかくに誘う','','openInvite()'],['idea','お題の案を送る','今日のお題・ちかくタイムに使えそうな質問','openAppvIdea()'],'ck','wtp','appv','debug'],'fold']];
 const APPV_SET_LAB={vis:'見せる範囲',match:'すれ違いに使う共通点',block:'ブロックした人',prefs:'通知の種類・テスト通知',center:'届いた通知',wtp:'ちかくプラスのアンケート',ck:'ひとこと'};
 function appvMeLayout(on){
   const set=$('#appvSet'); if(!set)return;
@@ -3490,7 +3559,7 @@ function appvMeLayout(on){
     const r=([k,t,s,fn,kind])=>kind==='toggle'
       ?`<div class="setrow visrow" data-r="${k}"><div class="lab">${t}<small>${s||''}</small></div><div class="toggle" onclick="${fn}"><div class="k"></div></div></div>`
       :`<div class="setrow visrow" data-r="${k}" onclick="${fn}"><div class="lab">${t}${s?`<small>${s}</small>`:''}</div><span class="go">›</span></div>`;
-    set.innerHTML=APPV_SET.map(([h,L_])=>`<div class="asetg" data-g="${h}"><h3>${h}</h3><div class="aset">${L_.map(x=>typeof x==='string'?`<div data-k="${x}"></div>`:r(x)).join('')}</div></div>`).join('')
+    set.innerHTML=APPV_SET.map(([h,L_,fold])=>`<div class="asetg${fold?' fold':''}" data-g="${h}">${fold?`<button class="asetfold" onclick="this.parentNode.classList.toggle('open')"><span>${h}<small>使い方・お問い合わせ・利用規約・アンケートなど</small></span><i>›</i></button>`:`<h3>${h}</h3>`}<div class="aset">${L_.map(x=>typeof x==='string'?`<div data-k="${x}"></div>`:r(x)).join('')}</div></div>`).join('')
       +'<button class="asetdel" onclick="deleteAccount()">アカウントを削除</button>'
       +'<p class="asetfoot">話を聞いてくれる場所：多摩学生相談室（総合棟2F・月〜金 9:30〜16:30・無料・予約制）</p><div data-k="stop"></div><div data-k="note"></div><div data-k="no"></div>';
   }
@@ -11106,9 +11175,9 @@ function openEdit(){
   const es=$('#editSheet');
   es.innerHTML=`
     <h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:16px">プロフィールを編集</h2>
-    <button class="edlook" onclick="closeEdit();openLook()"><span class="av${frCls(profile)}" style="background:${gr(profile.emoji)}">${esc(profile.emoji||'🙂')}</span><span class="t"><b>アイコン・フレーム・背景</b><small>きせかえで変える</small></span><i>›</i></button>
+    <button class="edlook" onclick="closeEdit();openLook()"><span class="av${frCls(profile)}" style="background:${gr(profile.emoji)}">${esc(profile.emoji||'🙂')}</span><span class="t"><b>アイコン・フレーム・背景</b><small>${appvOn()?'押して選ぶと、すぐ変わります':'きせかえで変える'}</small></span><i>›</i></button>
     <div class="field"><label>ニックネーム</label><input id="edName" maxlength="12" value="${esc(profile.name)}"></div>
-    <div class="field"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
+    <div class="field" id="edEmoField"><label>アイコン</label><div class="emojis" id="edEmojis"></div></div>
     <div class="field"><label>自己紹介<span class="opt">任意・だれにでも見えます</span></label><textarea id="edBio" rows="2" maxlength="60">${esc(profile.bio)}</textarea></div>
     ${attrFieldsHTML('ed')}
     <div class="field"><label>年齢（ほかの人には表示されません）</label><input id="edAge" type="number" inputmode="numeric" min="18" max="99" value="${profile.age||''}"></div>
@@ -11266,6 +11335,15 @@ function renderLook(){
       +`<div class="lkh">はじめから使えるアイコン</div><div class="lkg">${EMO.map(e=>cell(e,'free')).join('')}</div>`
       +`<div class="lkh">${BADGES.survey.icon} アンケートに答えた人<span>${lookHas('survey')?'':'🔒 '+lookHow('survey')}</span></div><div class="lkg">${EMO_SP.map(e=>cell(e,'survey')).join('')}</div>`
       +LOOK_ICONS.map(s=>`<div class="lkh">🎁 ${esc(s.name)}<span>${lookHas(s.c)?'✅ もらいました':'🔒 '+esc(lookHow(s.c))}</span></div><div class="lkg">${s.icons.map(e=>cell(e,s.c)).join('')}</div>`).join('');
+    // 📱 アプリver（2026-11-09 あお「アイコンもいじりやすく」）：使えるアイコンを全部まとめて先に（いま使っているものが下の段に埋もれていた）。
+    // まだ持っていないものは、その下に、もらい方といっしょに
+    if(appvOn()){
+      const own=[...(dev?[[DEV_ICON,'dev']]:[]),...EMO.map(e=>[e,'free']),...EMO_SP.map(e=>[e,'survey']),...LOOK_ICONS.flatMap(g=>g.icons.map(e=>[e,g.c]))].filter(([e,c])=>lookHas(c)||p.emoji===e);
+      const lockG=[...(lookHas('survey')?[]:[{name:'アンケートに答えた人',c:'survey',icons:EMO_SP}]),...LOOK_ICONS.filter(g=>!lookHas(g.c))]
+        .map(g=>({...g,icons:g.icons.filter(e=>e!==p.emoji)})).filter(g=>g.icons.length);
+      body=`<div class="lkh">使えるアイコン<span>押すと、すぐ変わります</span></div><div class="lkg">${own.map(([e,c])=>cell(e,c)).join('')}</div>`
+        +(lockG.length?`<div class="lkh lkmore">まだ持っていないアイコン</div>`+lockG.map(g=>`<div class="lkh lksub">${esc(g.name)}<span>${esc(lookHow(g.c))}</span></div><div class="lkg">${g.icons.map(e=>cell(e,g.c)).join('')}</div>`).join(''):'');
+    }
   }else if(lookTab==='bg'){
     body=svGate+`<div class="lkg wide">${Object.entries(LOOK_BG).filter(([,b])=>vis(b)).map(([id,b])=>lookCell((svOpen?L.bg||'auto':'auto')===id,svOpen&&lookHas(b.c),`<span class="lkbg" style="background:${b.g?lookBgCss(b):gr(p.emoji)}"></span>`,(svOpen?lookHow(b.c):'アンケートに答えると変えられます'),`lookSet('bg','${id}')`,lookHas(b.c)?(b.c==='dev'?'🛠 ':'')+b.name:lookHow(b.c))).join('')}</div>`;
   }else if(lookTab==='fr'){
