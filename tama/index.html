@@ -2937,7 +2937,7 @@ function renderAppvSegInfo(){
   seg.querySelectorAll('button').forEach(b=>{ const h=lab[b.dataset.p]; if(h!=null&&b.dataset.h!==h){ b.dataset.h=h; b.innerHTML=h; } });
   let note=$('#appvSegNote'); if(!note){ note=document.createElement('div'); note.id='appvSegNote'; note.className='asegnote'; }
   if(note.previousElementSibling!==seg)seg.after(note);
-  const txt=appvPane==='cross'?'今日、学内で50m以内ですれ違った人。共通点がある人ほど上に':'いま学内にいる友達と、その居場所（あなたに見せている人だけ）';
+  const txt=appvPane==='cross'?'今日、学内の50m以内ですれ違った人（共通点の多い順）':'いま学内にいる友達と、その居場所（あなたに見せている人だけ）';
   const h=`<span>${txt}</span><button onclick="openCrossHow()">しくみ</button>`;
   if(note.dataset.h!==h){ note.dataset.h=h; note.innerHTML=h; }
 }
