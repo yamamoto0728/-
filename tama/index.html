@@ -3577,6 +3577,10 @@ function renderAppvSet(){
   const N=isNativeApp(), hide=(sel,h)=>{ const el=set.querySelector(sel); if(el)el.hidden=h; };
   ['[data-k="push"]','[data-k="center"]','[data-k="wtp"]','[data-k="appv"]','[data-k="stop"]','[data-k="note"]'].forEach(q=>hide(q,N));
   ['[data-r="npush"]','[data-r="bg"]','[data-r="locperm"]'].forEach(q=>hide(q,!N));
+  // 審査用のアカウントの時だけ、いちばん上に「すれ違いの試し」（demoCrossTry）
+  const dg=set.querySelector('[data-g="demo"]');
+  if(demoUser()&&!dg)set.insertAdjacentHTML('afterbegin','<div class="asetg" data-g="demo"><h3>審査用（Review）</h3><div class="aset"><div class="setrow visrow" onclick="demoCrossTry()"><div class="lab">すれ違いの試し<small>押して5秒後に、試しの人とすれ違った時の画面が出ます（この端末の中だけ）。Try a pass-by: a sample person appears 5 seconds later (on this device only)</small></div><span class="go">›</span></div></div></div>');
+  else if(!demoUser()&&dg)dg.remove();
   renderAppvSetState();
 }
 // 📱 設定の「通知」「位置情報」の行に、いまの状態を入れる（スイッチの入り切り・許可の状態）
@@ -3971,6 +3975,31 @@ async function authVerify(){
    2人を友達にしてトークの履歴を入れるのは supabase/tama_demo.sql。審査のメモにアドレスとパスワードを書く */
 const DEMO={emails:['chikaku.hosei+review1@gmail.com','chikaku.hosei+review2@gmail.com'],pos:{lat:35.61387,lng:139.29758}};
 const demoUser=()=>!!(authUser&&authUser.email&&DEMO.emails.includes(String(authUser.email).toLowerCase()));
+// 審査用のアカウントだけ：すれ違いの試し（2026-11-10 あお「家でも審査用の動画が撮れるように。すれ違った演出だけ出させて」）。
+// 押して5秒後に、試しの人（test-demo）と近くですれ違ったことにする。この端末の中だけで、サーバーには何も書かない。
+// 試しの人にいいねすると、すぐ返ってきて「おたがいにいいね！」まで進む（spawnTest と同じ仕組み）
+function demoCrossTry(){
+  if(!demoUser())return;
+  toast('5秒後に、試しの人とすれ違います');
+  setTimeout(()=>{
+    const me=attrsOf(profile), ar=me.aruaru||[], p=myPos||{lat:DEMO.pos.lat,lng:DEMO.pos.lng};
+    const u={id:'test-demo',name:'ゆい（試し）',age:20,emoji:'☕',bio:'学食のカレーが好きです',tags:[],work:'',looking:[],likes:[],interests:[],
+      fa:{faculty:me.faculty||'社会学部',grade:'2年',artist:me.artist||'ヨルシカ',aruaru:[ar[0]||FA.aruaru[0],'方向音痴'],course:me.course||'心理学',xmsg:'3限のあと、学食にいます'},
+      lat:p.lat+0.0002,lng:p.lng+0.0001};
+    testUsers=testUsers.filter(x=>x.id!==u.id).concat([u]); others=others.filter(x=>x.id!==u.id).concat([u]);
+    const now=Date.now(), prev=encMap[u.id], place=curPlace||placeName||'食堂A棟';
+    encMap[u.id]={id:u.id,name:u.name,age:u.age,emoji:u.emoji,bio:u.bio,tags:[],work:'',looking:[],likes:[],interests:[],fa:u.fa,count:(prev?prev.count:0)+1,last_place:place,last_at:now,first_at:(prev&&prev.first_at)||now};
+    (encLog[u.id]=encLog[u.id]||[]).push({at:now,place});
+    crossNew++; bumpCrossDot(); renderCross(); renderNearby();
+    if(navigator.vibrate)try{ navigator.vibrate(20); }catch(_){}
+    const cm=commonDetail(u).map(x=>x.label).slice(0,3);
+    $('#matchpop').innerHTML=`<h2 style="color:var(--tint);text-shadow:none">すれ違いました</h2><p><b style="color:var(--ink)">${esc(u.name)}</b> さんと、${esc(place)}のあたりで</p>
+      ${cm.length?`<div class="chips" style="justify-content:center;margin:4px 0 18px">${cm.map(x=>`<span class="c on">${esc(x)}</span>`).join('')}</div>`:''}
+      <div class="avs"><div class="a" style="background:${gr(profile.emoji)}">${esc(profile.emoji)}</div><span class="heart" style="animation:none">👣</span><div class="a" style="background:${gr(u.emoji)}">${esc(u.emoji)}</div></div>
+      <div class="mbtns"><button class="btn btn-wave" onclick="closePop();go('near');setAppvPane('cross');setAppvDetent('full')">すれ違いの一覧を見る</button><button class="btn later" onclick="closePop()">あとで</button></div>`;
+    $('#matchpop').classList.add('show');
+  },5000);
+}
 function renderAuthDemo(){
   const s=authSt;
   showAuth(`<div class="aulogo">ちかく</div><div class="auh">審査用のアカウント</div>
