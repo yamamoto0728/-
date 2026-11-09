@@ -1611,7 +1611,7 @@
   html.appv .atw{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   html.appv .ats{font-size:11px;font-weight:500;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* B4 地図：ちかくタイムの場所と時刻、B5 次の授業の建物 */
-  html.appv .ctpin{display:inline-block;transform:translate(-50%,2px);white-space:nowrap;padding:1px 6px;border-radius:8px;background:var(--tint);color:var(--on-tint);font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
+  html.appv .ctpin{display:inline-block;transform:translate(-50%,calc(-100% - 12px));white-space:nowrap;padding:1px 6px;border-radius:8px;background:var(--tint);color:var(--on-tint);font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
   /* いまの状態の行は端までの行（前の .astat button の丸い枠が残っていた） */
   html.appv .astat .astbtn{border-left:0;border-right:0;border-radius:0}
   /* お題の「答える」の文字が沈まないように */
@@ -1657,6 +1657,7 @@
   html.appv .ctbtns button{background:var(--night);color:var(--tint)}   /* ダークで白く浮かないように */
   /* B1 一覧の見出しにも人数を出さない */
   html.appv .nearsec .cnt,html.appv .clstg .cnt{display:none}
+  html.appv #crossList .nearsec{padding-left:16px!important;padding-right:16px}   /* すれ違いの一覧の見出しを、ほかのカードの左とそろえる（2026-11-09） */
   html.appv .ametbox h3{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 6px}
   html.appv .ametbox p{margin:0;font-size:13px;color:var(--muted)}
   html.appv .amet{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--sep)}
@@ -1730,7 +1731,7 @@
   html.appv .topics{background:var(--night);border-top:1px solid var(--sep);padding:8px 12px 0}
   html.appv .topics .tc,html.appv .topics .tc.rare{background:var(--fill);border:0;border-radius:16px;font-size:13.5px;color:var(--ink)}
   html.appv .topics .tshow{color:var(--tint)}
-  html.appv .chatbar{gap:8px;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--sep);background:var(--night);align-items:center}
+  html.appv .chatbar{gap:8px;padding:8px 12px 10px;border-top:1px solid var(--sep);background:var(--night);align-items:center}
   html.appv .chatbar input{height:40px;padding:0 16px;border:0;border-radius:20px;background:var(--fill);font-size:16px}
   html.appv .chatbar input:focus{border:0;box-shadow:0 0 0 2px var(--tint-soft)}
   html.appv .chatbar .send{width:40px;height:40px;background:var(--tint);color:var(--on-tint);font-size:20px;font-weight:700}
@@ -3201,8 +3202,8 @@ function appvDrawCtPins(){
   const {dow,min}=appvJ(), on=appvOn()&&CT_FIXED.days.includes(dow)&&min<appvHM(CT_FIXED.at)+CT_MIN&&!fesDayNow();
   if(!on){ if(appvCtPins){ fesMap.removeLayer(appvCtPins); appvCtPins=null; } return; }
   if(appvCtPins)return;
-  appvCtPins=L.layerGroup(CAMPUS_LABELS.filter(([n])=>/食堂/.test(n)).map(([n,lat,lng])=>L.marker([lat-0.00009,lng],{pane:'labels',interactive:false,keyboard:false,
-    icon:L.divIcon({className:'',iconSize:null,html:`<span class="ctpin">${CT_FIXED.at}</span>`})}))).addTo(fesMap);   // 建物名のすぐ下に時刻だけ（名前を隠さない）
+  appvCtPins=L.layerGroup(CAMPUS_LABELS.filter(([n])=>/食堂/.test(n)).map(([n,lat,lng])=>L.marker([lat,lng],{pane:'labels',interactive:false,keyboard:false,
+    icon:L.divIcon({className:'',iconSize:null,html:`<span class="ctpin">${CT_FIXED.at}</span>`})}))).addTo(fesMap);   // 建物名のすぐ上に時刻だけ（名前を隠さない。2026-11-09：下に出すと、となりの「図書館・研究棟」の名前に重なっていた）
 }
 // B4 自分が今日いた建物を、地図にうすく残す（この端末の中だけ・日付が変わると消える。位置そのものの履歴は残さない）
 function appvTrail(){ try{ const t=JSON.parse(localStorage.getItem('tama_trail')||'null'); return t&&t.d===appvJ().day?t.p:[]; }catch(e){ return []; } }
@@ -6368,7 +6369,7 @@ ${CONTACT.email?`メール：${CONTACT.email}<br>`:''}${CONTACT.urgentEmail?`緊
 <p>本サービスのデータは、米国の事業者が提供するクラウドサービス（データベースの Supabase、サイトの配信の Vercel）を使って保存・送信します。運営は、これらの事業者に本サービスの運営に必要な範囲でデータの取り扱いを任せており、他の目的で第三者に提供することはありません。</p>
 <h4>第13条（規約の変更）</h4>
 <p>運営は、法令の変更や本サービスの内容の変更に合わせて、本規約を変更することがあります。変更する場合は、変更後の内容と、変更が効力を持つ日を、その日より前にアプリの中でお知らせします。利用者に不利になる変更の場合は、あらためて同意をお願いすることがあります。</p>
-<p class="tver">2026年11月2日 改定</p>
+<p class="tver">2026年11月5日 改定</p>
 `;
 function openTerms(news){
   $('#termsSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:4px">利用規約</h2>
@@ -6381,6 +6382,7 @@ function openTerms(news){
 function closeTerms(){ $('#termsOverlay').classList.remove('show'); }
 // 規約を変えた時、前から使っている人に1回だけ知らせる（民法548条の4：変更の内容と効力が生じる日を、前もって知らせる）。
 // 変える時は TERMS_VER を上げ、TERMS_NEWS に何が変わったかを1行で書く。新しく登録した人は登録の時に読んでいるので出さない
+// ⚠️ 規約を変えた時は、ここと TERMS_HTML のいちばん下（tver の日付）の両方を変える
 const TERMS_VER='2026-11-05', TERMS_DATE='2026年11月5日', TERMS_NEWS='アプリ版の「閉じている間も、すれ違う」（オンにした人だけ）について、位置情報の取り扱い（第3条）に書き足しました';
 function termsChangedNotice(){
   let seen=''; try{ seen=localStorage.getItem('tama_termsVer')||''; }catch(e){}
@@ -11371,7 +11373,10 @@ function go(t){
   if(t==='comm'){ t='match'; setTalkTab('comm'); } else if(t==='match') setTalkTab(appvOn()?(appvComm?'comm':'list'):talkTab);   // 📱 アプリverは、コミュニティを開いていた時だけコミュニティに戻る
   $$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
   if(t==='near'&&fesMap)setTimeout(()=>fesMap.invalidateSize(),60);   // 非表示の間にサイズが変わっても地図が崩れないように
-  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
+  // トークの中（chat）・コミュニティの部屋（room）を開いている間も、下のタブはどこから来たかを光らせる（2026-11-09：前はどれも光らなかった）
+  let rf='comm'; try{ rf=roomFrom; }catch(e){}   // roomFrom は下の方で let で作るので、作られる前に呼ばれても止まらないように
+  const navT=t==='chat'?'match':t==='room'?(rf==='near'?'near':'match'):t;
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===navT));
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='tt')renderAppvTT();   // 📱 アプリverの時間割タブ（2026-10-24）
