@@ -2937,7 +2937,7 @@ function renderAppvSegInfo(){
   seg.querySelectorAll('button').forEach(b=>{ const h=lab[b.dataset.p]; if(h!=null&&b.dataset.h!==h){ b.dataset.h=h; b.innerHTML=h; } });
   let note=$('#appvSegNote'); if(!note){ note=document.createElement('div'); note.id='appvSegNote'; note.className='asegnote'; }
   if(note.previousElementSibling!==seg)seg.after(note);
-  const txt=appvPane==='cross'?'今日、学内で50m以内ですれ違った人。共通点がある人ほど上に出ます':'いま学内にいる友達と、その居場所（あなたに見せている人だけ）';
+  const txt=appvPane==='cross'?'今日、学内で50m以内ですれ違った人。共通点がある人ほど上に':'いま学内にいる友達と、その居場所（あなたに見せている人だけ）';
   const h=`<span>${txt}</span><button onclick="openCrossHow()">しくみ</button>`;
   if(note.dataset.h!==h){ note.dataset.h=h; note.innerHTML=h; }
 }
@@ -6118,7 +6118,7 @@ function renderCross(){
     const restH=rest?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">${key.length?'ほかに':''}${rest}人とすれ違いました（すべて見る）</button>`:'';
     // 🏆 今日のレア（2026-11-07）：今日すれ違った人の中で、いちばんめずらしい共通点を一番上に
     let best=null; arr.forEach(u=>commonDetail(u).forEach(c=>{ const r=rarityOf(c.key); if(isRare(c.key)&&(!best||r>best.r))best={u,c,r}; }));
-    const rareH=best?`<button class="xrare" onclick='openSheet(${JSON.stringify({id:best.u.id,name:best.u.name,emoji:best.u.emoji,fa:best.u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'><span class="av" style="background:${gr(best.u.emoji)}">${esc(best.u.emoji)}</span><span class="tx"><small>今日のレア</small><b>${esc(best.u.name)}さんと、<span style="display:inline-block">${esc(best.c.label)}</span></b></span><i>›</i></button>`:'';
+    const rareH=best?`<button class="xrare" onclick='openSheet(${JSON.stringify({id:best.u.id,name:best.u.name,emoji:best.u.emoji,fa:best.u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'><span class="av" style="background:${gr(best.u.emoji)}">${esc(best.u.emoji)}</span><span class="tx"><small>今日のレア</small><b>${esc(best.u.name)}さんと、<br>${esc(best.c.label)}</b></span><i>›</i></button>`:'';
     ul.innerHTML=xsetH+rareH+(key.length
       ?`<div class="nearsec" style="padding-left:6px">共通点のある人・また会えた人 <span class="cnt">${key.length}人</span></div>`+key.slice(0,CROSS_LIMIT).map(row).join('')+restH+pastH
       :`<div class="empty"><p>今日は${arr.length}人とすれ違いました。<br>共通点のある人や、2回目にすれ違った人がいると、ここに出ます。</p></div>`+restH+pastH);
