@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="ちかく多摩キャン">
 <!-- 📱 アプリver（2026-10-23 あおの依頼「アプリ化を検討しながら、UI・操作性を見たい」）。前に開いた時にアプリverだった端末は、
      最初の描画から html.appv にして起動画面を出す（ユーザーIDはログインの後でないと分からないため、端末に覚えておく。本当に対象かはログインの後に確かめ直す） -->
-<script>try{ if(localStorage.getItem('tama_appv')==='1'||/ChikakuApp/.test(navigator.userAgent))document.documentElement.classList.add('appv','appv-boot'); }catch(e){}</script>
+<script>try{ if(localStorage.getItem('tama_appv')==='1'||/ChikakuApp/.test(navigator.userAgent))document.documentElement.classList.add('appv','appv-boot'); if(/ChikakuApp/.test(navigator.userAgent))document.documentElement.classList.add('native'); }catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -1309,6 +1309,11 @@
   .fesfw{position:absolute;left:0;top:0;width:100%;height:260px;pointer-events:none;z-index:55}
   @media (prefers-reduced-motion:reduce){html.matsuri .apphead::before{animation:none}.tscard .tsst.on .tm{animation:none}}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
+  /* 📱 アプリの中（html.native）は、画面の幅にかかわらず、いつも画面いっぱいに出す（2026-11-09。iPhone の Pro Max は幅440で、上の 430 より広いので、
+     パソコン用のスマホの枠の中に小さく出ていた。ストアのスクリーンショットを撮って見つけた） */
+  html.native body{padding:0}
+  html.native .phone{width:100%;max-width:none;height:100vh;height:100dvh;max-height:none;border-radius:0;border:0;box-shadow:none}
+  html.native .notch{display:none}
   /* ---------- 📱 アプリver（2026-10-23。html.appv の時だけ。対象は APPV.testers） ----------
      ①アプリらしい見た目：大きい見出し・すりガラスの下のタブ・画面の切りかえをスライド・シートのつまみ
      ②起動画面：開いた瞬間に「ち」のロゴを一瞬出す（html.appv-boot の間）
@@ -1441,6 +1446,10 @@
   html.appv .atbtn.atlab{width:auto;padding:0 12px 0 10px;border-radius:22px;gap:4px;display:flex;font-size:13px;font-weight:600}
   html.appv .appvnote{position:absolute;top:62px;left:12px;right:12px;z-index:500;padding:10px 14px;border-radius:12px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 4px rgba(0,0,0,.12);font-size:13px;line-height:1.5;color:var(--ink)}
   html.appv .appvnote[hidden]{display:none}
+  /* 初めての人の使い方（#guide）と通知の許可の画面（#pushGate）は、地図の上のシート（600）・上の帯（700）より上に出す
+     （2026-11-09 あお「初めて入れた人の『くわしく見る／はじめる』の画面に、下のいまの自分・時間割が重なる」）。ほかの画面（900）よりは下 */
+  html.appv .guide{z-index:880}
+  html.appv #pushGate{z-index:885!important}
   html.appv .overlay{z-index:900}   /* 地図の上のシート（600）・隅のボタン（500）より上に、ほかの画面（プロフィール・状態・隠れる など）を出す */
   html.appv .toast{z-index:950}
   /* ---------- 📱 アプリver 2026-10-24 ビジュアルの見直し（エージェント3人の意見。research_notes\アプリver画面\review_*.md） ----------
@@ -1602,7 +1611,7 @@
   html.appv .atw{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   html.appv .ats{font-size:11px;font-weight:500;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* B4 地図：ちかくタイムの場所と時刻、B5 次の授業の建物 */
-  html.appv .ctpin{display:inline-block;transform:translate(-50%,2px);white-space:nowrap;padding:1px 6px;border-radius:8px;background:var(--tint);color:var(--on-tint);font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
+  html.appv .ctpin{display:inline-block;transform:translate(-50%,calc(-100% - 12px));white-space:nowrap;padding:1px 6px;border-radius:8px;background:var(--tint);color:var(--on-tint);font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
   /* いまの状態の行は端までの行（前の .astat button の丸い枠が残っていた） */
   html.appv .astat .astbtn{border-left:0;border-right:0;border-radius:0}
   /* お題の「答える」の文字が沈まないように */
@@ -1648,6 +1657,7 @@
   html.appv .ctbtns button{background:var(--night);color:var(--tint)}   /* ダークで白く浮かないように */
   /* B1 一覧の見出しにも人数を出さない */
   html.appv .nearsec .cnt,html.appv .clstg .cnt{display:none}
+  html.appv #crossList .nearsec{padding-left:16px!important;padding-right:16px}   /* すれ違いの一覧の見出しを、ほかのカードの左とそろえる（2026-11-09） */
   html.appv .ametbox h3{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 6px}
   html.appv .ametbox p{margin:0;font-size:13px;color:var(--muted)}
   html.appv .amet{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--sep)}
@@ -1721,7 +1731,7 @@
   html.appv .topics{background:var(--night);border-top:1px solid var(--sep);padding:8px 12px 0}
   html.appv .topics .tc,html.appv .topics .tc.rare{background:var(--fill);border:0;border-radius:16px;font-size:13.5px;color:var(--ink)}
   html.appv .topics .tshow{color:var(--tint)}
-  html.appv .chatbar{gap:8px;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--sep);background:var(--night);align-items:center}
+  html.appv .chatbar{gap:8px;padding:8px 12px 10px;border-top:1px solid var(--sep);background:var(--night);align-items:center}
   html.appv .chatbar input{height:40px;padding:0 16px;border:0;border-radius:20px;background:var(--fill);font-size:16px}
   html.appv .chatbar input:focus{border:0;box-shadow:0 0 0 2px var(--tint-soft)}
   html.appv .chatbar .send{width:40px;height:40px;background:var(--tint);color:var(--on-tint);font-size:20px;font-weight:700}
@@ -1973,6 +1983,9 @@
   html.appv .awant{background:var(--c-want);outline:1.5px dashed var(--c-want-b);outline-offset:-1.5px}
   html.appv .awant small{color:var(--c-want-t)}
   html.appv #ashBody>.scroll>#ctCard.ctcard{background:var(--c-ct)!important;box-shadow:inset 0 0 0 1.5px var(--c-ct-b)!important}
+  /* 色の付いたカードにしたので、ほかのカードと同じく左右16の余白を付ける（2026-11-09：前は画面の端まで広がっていた）。問いの文は濃い色で */
+  html.appv #ashBody>.scroll>#ctCard.ctcard{margin:8px 16px!important;border-radius:12px}
+  html.appv #ctCard .ctq{color:var(--ink)}
   html.appv .ctcard .cth,html.appv .ctcard .cth *{color:var(--c-ct-t)}
   html.appv .ctcard .ctleft{background:var(--c-ct-t);color:var(--night)}
   html.appv .ctcard .ctbtns button{border:1.5px solid var(--c-ct-b);color:var(--c-ct-t);background:var(--night)}
@@ -2112,7 +2125,7 @@
   html.appv .xrare .av{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px}
   html.appv .xrare .tx{flex:1;min-width:0;display:flex;flex-direction:column}
   html.appv .xrare small{font-size:var(--fs4);font-weight:700;color:var(--tint)}
-  html.appv .xrare b{font-size:var(--fs3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .xrare b{font-size:var(--fs3);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}   /* 2行まで出す（2026-11-09：1行だと共通点の名前が「…」で切れていた） */
   html.appv .xrare i{flex:none;font-style:normal;color:var(--muted)}
   html.appv #appvSet .setrow .toggle{flex:none}
   html.appv .ob{padding-top:calc(env(safe-area-inset-top,0px) + 26px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
@@ -2924,7 +2937,7 @@ function renderAppvSegInfo(){
   seg.querySelectorAll('button').forEach(b=>{ const h=lab[b.dataset.p]; if(h!=null&&b.dataset.h!==h){ b.dataset.h=h; b.innerHTML=h; } });
   let note=$('#appvSegNote'); if(!note){ note=document.createElement('div'); note.id='appvSegNote'; note.className='asegnote'; }
   if(note.previousElementSibling!==seg)seg.after(note);
-  const txt=appvPane==='cross'?'今日、学内で50m以内ですれ違った人。共通点がある人ほど上に出ます':'いま学内にいる友達と、その居場所（あなたに見せている人だけ）';
+  const txt=appvPane==='cross'?'今日、学内の50m以内ですれ違った人（共通点の多い順）':'いま学内にいる友達と、その居場所（あなたに見せている人だけ）';
   const h=`<span>${txt}</span><button onclick="openCrossHow()">しくみ</button>`;
   if(note.dataset.h!==h){ note.dataset.h=h; note.innerHTML=h; }
 }
@@ -3192,8 +3205,8 @@ function appvDrawCtPins(){
   const {dow,min}=appvJ(), on=appvOn()&&CT_FIXED.days.includes(dow)&&min<appvHM(CT_FIXED.at)+CT_MIN&&!fesDayNow();
   if(!on){ if(appvCtPins){ fesMap.removeLayer(appvCtPins); appvCtPins=null; } return; }
   if(appvCtPins)return;
-  appvCtPins=L.layerGroup(CAMPUS_LABELS.filter(([n])=>/食堂/.test(n)).map(([n,lat,lng])=>L.marker([lat-0.00009,lng],{pane:'labels',interactive:false,keyboard:false,
-    icon:L.divIcon({className:'',iconSize:null,html:`<span class="ctpin">${CT_FIXED.at}</span>`})}))).addTo(fesMap);   // 建物名のすぐ下に時刻だけ（名前を隠さない）
+  appvCtPins=L.layerGroup(CAMPUS_LABELS.filter(([n])=>/食堂/.test(n)).map(([n,lat,lng])=>L.marker([lat,lng],{pane:'labels',interactive:false,keyboard:false,
+    icon:L.divIcon({className:'',iconSize:null,html:`<span class="ctpin">${CT_FIXED.at}</span>`})}))).addTo(fesMap);   // 建物名のすぐ上に時刻だけ（名前を隠さない。2026-11-09：下に出すと、となりの「図書館・研究棟」の名前に重なっていた）
 }
 // B4 自分が今日いた建物を、地図にうすく残す（この端末の中だけ・日付が変わると消える。位置そのものの履歴は残さない）
 function appvTrail(){ try{ const t=JSON.parse(localStorage.getItem('tama_trail')||'null'); return t&&t.d===appvJ().day?t.p:[]; }catch(e){ return []; } }
@@ -5437,7 +5450,7 @@ function attrBlock(u){
     ${tamasaiDay()?(FES.tamasai.qs||[]).map(q=>{ const x=tamasaiAns(u,q.k); return x?`<div class="frow">${q.icon} ${esc(q.label)} <b>${esc(x)}</b>${x===tamasaiAns(profile,q.k)&&!(q.weak||[]).includes(x)?' <span class="same">同じ！</span>':''}</div>`:''; }).join(''):''}
     ${fesGoToday(u).map(k=>{ const s=fesStageByKey(k); return s?`<div class="frow">👀 見に行く <b>${esc(s.n)}</b>（${s.s}〜）${fesGoToday(profile).includes(k)?' <span class="same">同じ！</span>':''}</div>`:''; }).join('')}
     ${ctAnswer(u)?`<div class="frow">⏰ ちかくタイム「${esc(ctCur.q)}」 <b>${esc(ctAnswer(u))}</b>${sameCt(u)?' <span class="same">同じ！</span>':''}</div>`:''}
-    ${same.length?`<div class="frow">📚 同じ授業 ${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')} <span class="same">同じ！</span></div>`:''}
+    ${same.length?`<div class="frow">📚 同じ授業 ${same.map(r=>`<b style="white-space:nowrap">${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')} <span class="same">同じ！</span></div>`:''}
     ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${a.faculty===me.faculty?' <span class="same">同じ！</span>':''}</div>`:''}
     ${statusOf(u)?`<div class="frow">💬 いま <b>${esc(statusOf(u))}</b></div>`:''}
     ${shownWorry.length?`<div class="fh">${openWorry?'いま、気になっていること':'いま、おたがいに気になっていること'}</div><div class="fchips">${shownWorry.map(x=>`<span class="fchip worry${sharedPurposes.includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>${sharedPurposes.length?'<div class="worrysame">🤝 あなたと同じことが気になっています</div>':''}`:''}
@@ -6104,8 +6117,8 @@ function renderCross(){
     const key=arr.filter(u=>u.count>=2||commonWith(u).length).sort((a,b)=>crossStarHit(b)-crossStarHit(a)), rest=arr.length-key.length;
     const restH=rest?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">${key.length?'ほかに':''}${rest}人とすれ違いました（すべて見る）</button>`:'';
     // 🏆 今日のレア（2026-11-07）：今日すれ違った人の中で、いちばんめずらしい共通点を一番上に
-    let best=null; arr.forEach(u=>commonWith(u).forEach(c=>{ const r=rarityOf(c.key); if(isRare(c.key)&&(!best||r>best.r))best={u,c,r}; }));
-    const rareH=best?`<button class="xrare" onclick='openSheet(${JSON.stringify({id:best.u.id,name:best.u.name,emoji:best.u.emoji,fa:best.u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'><span class="av" style="background:${gr(best.u.emoji)}">${esc(best.u.emoji)}</span><span class="tx"><small>今日のレア</small><b>${esc(best.u.name)}さんと、${esc(best.c.label)}</b></span><i>›</i></button>`:'';
+    let best=null; arr.forEach(u=>commonDetail(u).forEach(c=>{ const r=rarityOf(c.key); if(isRare(c.key)&&(!best||r>best.r))best={u,c,r}; }));
+    const rareH=best?`<button class="xrare" onclick='openSheet(${JSON.stringify({id:best.u.id,name:best.u.name,emoji:best.u.emoji,fa:best.u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'><span class="av" style="background:${gr(best.u.emoji)}">${esc(best.u.emoji)}</span><span class="tx"><small>今日のレア</small><b>${esc(best.u.name)}さんと、<br>${esc(best.c.label)}</b></span><i>›</i></button>`:'';
     ul.innerHTML=xsetH+rareH+(key.length
       ?`<div class="nearsec" style="padding-left:6px">共通点のある人・また会えた人 <span class="cnt">${key.length}人</span></div>`+key.slice(0,CROSS_LIMIT).map(row).join('')+restH+pastH
       :`<div class="empty"><p>今日は${arr.length}人とすれ違いました。<br>共通点のある人や、2回目にすれ違った人がいると、ここに出ます。</p></div>`+restH+pastH);
@@ -6359,7 +6372,7 @@ ${CONTACT.email?`メール：${CONTACT.email}<br>`:''}${CONTACT.urgentEmail?`緊
 <p>本サービスのデータは、米国の事業者が提供するクラウドサービス（データベースの Supabase、サイトの配信の Vercel）を使って保存・送信します。運営は、これらの事業者に本サービスの運営に必要な範囲でデータの取り扱いを任せており、他の目的で第三者に提供することはありません。</p>
 <h4>第13条（規約の変更）</h4>
 <p>運営は、法令の変更や本サービスの内容の変更に合わせて、本規約を変更することがあります。変更する場合は、変更後の内容と、変更が効力を持つ日を、その日より前にアプリの中でお知らせします。利用者に不利になる変更の場合は、あらためて同意をお願いすることがあります。</p>
-<p class="tver">2026年11月2日 改定</p>
+<p class="tver">2026年11月5日 改定</p>
 `;
 function openTerms(news){
   $('#termsSheet').innerHTML=`<h2 style="font-family:'Zen Maru Gothic';font-size:20px;margin-bottom:4px">利用規約</h2>
@@ -6372,6 +6385,7 @@ function openTerms(news){
 function closeTerms(){ $('#termsOverlay').classList.remove('show'); }
 // 規約を変えた時、前から使っている人に1回だけ知らせる（民法548条の4：変更の内容と効力が生じる日を、前もって知らせる）。
 // 変える時は TERMS_VER を上げ、TERMS_NEWS に何が変わったかを1行で書く。新しく登録した人は登録の時に読んでいるので出さない
+// ⚠️ 規約を変えた時は、ここと TERMS_HTML のいちばん下（tver の日付）の両方を変える
 const TERMS_VER='2026-11-05', TERMS_DATE='2026年11月5日', TERMS_NEWS='アプリ版の「閉じている間も、すれ違う」（オンにした人だけ）について、位置情報の取り扱い（第3条）に書き足しました';
 function termsChangedNotice(){
   let seen=''; try{ seen=localStorage.getItem('tama_termsVer')||''; }catch(e){}
@@ -11362,7 +11376,10 @@ function go(t){
   if(t==='comm'){ t='match'; setTalkTab('comm'); } else if(t==='match') setTalkTab(appvOn()?(appvComm?'comm':'list'):talkTab);   // 📱 アプリverは、コミュニティを開いていた時だけコミュニティに戻る
   $$('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+t).classList.add('active');
   if(t==='near'&&fesMap)setTimeout(()=>fesMap.invalidateSize(),60);   // 非表示の間にサイズが変わっても地図が崩れないように
-  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
+  // トークの中（chat）・コミュニティの部屋（room）を開いている間も、下のタブはどこから来たかを光らせる（2026-11-09：前はどれも光らなかった）
+  let rf='comm'; try{ rf=roomFrom; }catch(e){}   // roomFrom は下の方で let で作るので、作られる前に呼ばれても止まらないように
+  const navT=t==='chat'?'match':t==='room'?(rf==='near'?'near':'match'):t;
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===navT));
   if(t==='match'){ talkNew=0; updateTalkDot(); }
   if(t==='cross'){ crossNew=0; bumpCrossDot(); }
   if(t==='tt')renderAppvTT();   // 📱 アプリverの時間割タブ（2026-10-24）

@@ -48,4 +48,21 @@ begin
    where not exists (select 1 from public.tama_encounters e where e.owner_id = x.o and e.other_id = x.t);
 end $$;
 
+-- 2026-11-09 時間割（ストアのスクリーンショットと審査で、時間割の画面・同じ授業の人が空にならないように）。
+-- 2人に同じ授業を3つ入れ、おたがいに時間割を見せ合う。キーは「曜日-時限」（1＝月〜5＝金）
+do $$
+declare
+  a uuid := (select id from auth.users where lower(email) = 'chikaku.hosei+review1@gmail.com');
+  b uuid := (select id from auth.users where lower(email) = 'chikaku.hosei+review2@gmail.com');
+begin
+  if a is null or b is null then return; end if;
+  insert into public.tama_timetable (id, slots, rooms, updated_at) values
+    (a, '{"1-2":"社会学概論","1-3":"統計学入門","2-1":"英語コミュニケーション","3-3":"メディア社会論","4-2":"情報処理演習","5-4":"社会調査法"}'::jsonb,
+        '{"1-2":"総合棟 201","1-3":"社会学部棟 B301","3-3":"大教室A棟"}'::jsonb, now()),
+    (b, '{"1-2":"社会学概論","1-3":"統計学入門","2-2":"心理学入門","3-3":"メディア社会論","4-4":"スポーツ実習"}'::jsonb,
+        '{"1-2":"総合棟 201","1-3":"社会学部棟 B301"}'::jsonb, now())
+  on conflict (id) do update set slots = excluded.slots, rooms = excluded.rooms, updated_at = now();
+  insert into public.tama_timetable_shares (owner_id, friend_id) values (a, b), (b, a) on conflict do nothing;
+end $$;
+
 select id, email from auth.users where lower(email) in ('chikaku.hosei+review1@gmail.com', 'chikaku.hosei+review2@gmail.com');
