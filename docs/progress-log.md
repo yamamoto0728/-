@@ -249,3 +249,4 @@
 - 2026-11-07: Mac の Xcode で TestFlight にビルド 1〜5。iPhone の「閉じてもすれ違い」を Transistorsoft から Apple の位置の仕組み（`ChikakuLocation.swift`・`tama/bgloc-native.js`）に作り直し、友達が学内に来たら知らせる（`tama_arrive.sql`、実行済み）、設定の並べ直し（PR #119）。すれ違いの項目をあとから足す・ひとこと・地図の印・ホームの人数（PR #120、`tama_xitems.sql` は実行待ち）
 - 2026-11-07: CLAUDE.md を軽くした（進捗ログをこのファイルへ、いまの状況を `docs/handoff.md` へ移した）
 - 2026-11-07（夜）: PR #119・#120 をマージ。Claude Code の環境整理（PR #121、未マージ）：CLAUDE.md を約6KB に、画面を撮る道具を `D:\ちかく\道具_画面を撮る\` に。あおの指示で古い資料と手元のブランチ 115本を消した。待ち：#121 のマージ・`tama_xitems.sql` の実行・プラグインを止めるか・ビルド 6
+- 2026-11-08〜09: 安全の総点検（PR #126。`tama_moderation.sql`・`tama_hardening.sql`、本番の試し18項目が全部 OK）。審査用アカウントと時間割（`tama_demo.sql`）。使っていない背景モード・動きのセンサーの説明文を外した。Pro Max でスマホの枠の中に小さく出ていたのを直した（`html.native`）ほか見た目の直し多数。ストア用スクショ6枚。TestFlight 1.0.0 (11) を審査に出す予定。ビルドの道具を `chikaku-app/tools/` に写した
