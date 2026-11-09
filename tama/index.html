@@ -1983,6 +1983,9 @@
   html.appv .awant{background:var(--c-want);outline:1.5px dashed var(--c-want-b);outline-offset:-1.5px}
   html.appv .awant small{color:var(--c-want-t)}
   html.appv #ashBody>.scroll>#ctCard.ctcard{background:var(--c-ct)!important;box-shadow:inset 0 0 0 1.5px var(--c-ct-b)!important}
+  /* 色の付いたカードにしたので、ほかのカードと同じく左右16の余白を付ける（2026-11-09：前は画面の端まで広がっていた）。問いの文は濃い色で */
+  html.appv #ashBody>.scroll>#ctCard.ctcard{margin:8px 16px!important;border-radius:12px}
+  html.appv #ctCard .ctq{color:var(--ink)}
   html.appv .ctcard .cth,html.appv .ctcard .cth *{color:var(--c-ct-t)}
   html.appv .ctcard .ctleft{background:var(--c-ct-t);color:var(--night)}
   html.appv .ctcard .ctbtns button{border:1.5px solid var(--c-ct-b);color:var(--c-ct-t);background:var(--night)}
@@ -5447,7 +5450,7 @@ function attrBlock(u){
     ${tamasaiDay()?(FES.tamasai.qs||[]).map(q=>{ const x=tamasaiAns(u,q.k); return x?`<div class="frow">${q.icon} ${esc(q.label)} <b>${esc(x)}</b>${x===tamasaiAns(profile,q.k)&&!(q.weak||[]).includes(x)?' <span class="same">同じ！</span>':''}</div>`:''; }).join(''):''}
     ${fesGoToday(u).map(k=>{ const s=fesStageByKey(k); return s?`<div class="frow">👀 見に行く <b>${esc(s.n)}</b>（${s.s}〜）${fesGoToday(profile).includes(k)?' <span class="same">同じ！</span>':''}</div>`:''; }).join('')}
     ${ctAnswer(u)?`<div class="frow">⏰ ちかくタイム「${esc(ctCur.q)}」 <b>${esc(ctAnswer(u))}</b>${sameCt(u)?' <span class="same">同じ！</span>':''}</div>`:''}
-    ${same.length?`<div class="frow">📚 同じ授業 ${same.map(r=>`<b>${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')} <span class="same">同じ！</span></div>`:''}
+    ${same.length?`<div class="frow">📚 同じ授業 ${same.map(r=>`<b style="white-space:nowrap">${slotLabel(r.slot)} ${esc(r.course)}</b>`).join('・')} <span class="same">同じ！</span></div>`:''}
     ${a.faculty?`<div class="frow">🎓 <b>${esc(a.faculty)}</b>${a.dept?' '+esc(a.dept):''}${a.grade?' '+esc(a.grade):''}${a.faculty===me.faculty?' <span class="same">同じ！</span>':''}</div>`:''}
     ${statusOf(u)?`<div class="frow">💬 いま <b>${esc(statusOf(u))}</b></div>`:''}
     ${shownWorry.length?`<div class="fh">${openWorry?'いま、気になっていること':'いま、おたがいに気になっていること'}</div><div class="fchips">${shownWorry.map(x=>`<span class="fchip worry${sharedPurposes.includes(x)?' hit':''}">${esc(x)}</span>`).join('')}</div>${sharedPurposes.length?'<div class="worrysame">🤝 あなたと同じことが気になっています</div>':''}`:''}
@@ -6114,7 +6117,7 @@ function renderCross(){
     const key=arr.filter(u=>u.count>=2||commonWith(u).length).sort((a,b)=>crossStarHit(b)-crossStarHit(a)), rest=arr.length-key.length;
     const restH=rest?`<button class="btn btn-ghost nearmore" onclick="crossShowAll=true;renderCross()">${key.length?'ほかに':''}${rest}人とすれ違いました（すべて見る）</button>`:'';
     // 🏆 今日のレア（2026-11-07）：今日すれ違った人の中で、いちばんめずらしい共通点を一番上に
-    let best=null; arr.forEach(u=>commonWith(u).forEach(c=>{ const r=rarityOf(c.key); if(isRare(c.key)&&(!best||r>best.r))best={u,c,r}; }));
+    let best=null; arr.forEach(u=>commonDetail(u).forEach(c=>{ const r=rarityOf(c.key); if(isRare(c.key)&&(!best||r>best.r))best={u,c,r}; }));
     const rareH=best?`<button class="xrare" onclick='openSheet(${JSON.stringify({id:best.u.id,name:best.u.name,emoji:best.u.emoji,fa:best.u.fa}).replace(/&/g,"&amp;").replace(/'/g,"&#39;")},null)'><span class="av" style="background:${gr(best.u.emoji)}">${esc(best.u.emoji)}</span><span class="tx"><small>今日のレア</small><b>${esc(best.u.name)}さんと、${esc(best.c.label)}</b></span><i>›</i></button>`:'';
     ul.innerHTML=xsetH+rareH+(key.length
       ?`<div class="nearsec" style="padding-left:6px">共通点のある人・また会えた人 <span class="cnt">${key.length}人</span></div>`+key.slice(0,CROSS_LIMIT).map(row).join('')+restH+pastH
