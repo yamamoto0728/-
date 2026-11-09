@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="ちかく多摩キャン">
 <!-- 📱 アプリver（2026-10-23 あおの依頼「アプリ化を検討しながら、UI・操作性を見たい」）。前に開いた時にアプリverだった端末は、
      最初の描画から html.appv にして起動画面を出す（ユーザーIDはログインの後でないと分からないため、端末に覚えておく。本当に対象かはログインの後に確かめ直す） -->
-<script>try{ if(localStorage.getItem('tama_appv')==='1'||/ChikakuApp/.test(navigator.userAgent))document.documentElement.classList.add('appv','appv-boot'); }catch(e){}</script>
+<script>try{ if(localStorage.getItem('tama_appv')==='1'||/ChikakuApp/.test(navigator.userAgent))document.documentElement.classList.add('appv','appv-boot'); if(/ChikakuApp/.test(navigator.userAgent))document.documentElement.classList.add('native'); }catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -1309,6 +1309,11 @@
   .fesfw{position:absolute;left:0;top:0;width:100%;height:260px;pointer-events:none;z-index:55}
   @media (prefers-reduced-motion:reduce){html.matsuri .apphead::before{animation:none}.tscard .tsst.on .tm{animation:none}}
   @media (max-width:430px){body{padding:0}.phone{height:100vh;max-height:100vh;border-radius:0;border:0}.notch{display:none}}
+  /* 📱 アプリの中（html.native）は、画面の幅にかかわらず、いつも画面いっぱいに出す（2026-11-09。iPhone の Pro Max は幅440で、上の 430 より広いので、
+     パソコン用のスマホの枠の中に小さく出ていた。ストアのスクリーンショットを撮って見つけた） */
+  html.native body{padding:0}
+  html.native .phone{width:100%;max-width:none;height:100vh;height:100dvh;max-height:none;border-radius:0;border:0;box-shadow:none}
+  html.native .notch{display:none}
   /* ---------- 📱 アプリver（2026-10-23。html.appv の時だけ。対象は APPV.testers） ----------
      ①アプリらしい見た目：大きい見出し・すりガラスの下のタブ・画面の切りかえをスライド・シートのつまみ
      ②起動画面：開いた瞬間に「ち」のロゴを一瞬出す（html.appv-boot の間）
