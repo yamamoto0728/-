@@ -11,6 +11,10 @@
 --   ・今週の答え（悩み以外）は、すれ違いの共通点にも入る（プロフィールの fes_attrs.wk＝{w:週の月曜, a:[{o:選択肢の番号, l:答え}]}。tama_simple_common も直す）
 --
 -- 運営が来週のテーマを出す時は、下の「5. 運営のテーマ」の insert を、week と title・選択肢を変えて実行する
+--
+-- 2026-11-10 あおの決定「今週のイベントは運営が考える方針に」：テーマは運営が出すもの（source='ops'）だけにする。
+--   みんなの提案・票（source='vote'）はやめる。tama_wk_propose・tama_wk_vote は何もせずに 'closed' を返し、
+--   tama_wk_state も運営のテーマだけを返す（前の版のアプリから提案・票を押しても、何も起きない）。表と前の提案は残す
 
 -- ---------------------------------------------------------------------------
 -- 1. 表（アプリからは直接読めない。下の関数からだけ使う）
@@ -104,14 +108,6 @@ declare
   r  jsonb;
 begin
   if me is null then return null; end if;
-  -- みんなの票がいちばん多かった提案を、今週の「みんなのテーマ」にする（月曜になって、はじめてだれかが開いた時）
-  if not exists (select 1 from public.tama_wk_themes where week = w and source = 'vote' and status = 'active') then
-    update public.tama_wk_themes set status = 'active'
-     where id = (select t.id from public.tama_wk_themes t
-                  where t.week = w and t.status = 'proposed' and exists (select 1 from public.tama_wk_votes v where v.theme_id = t.id)
-                  order by (select count(*) from public.tama_wk_votes v where v.theme_id = t.id) desc, t.id
-                  limit 1);
-  end if;
   select jsonb_build_object(
     'week', w,
     'need', 5,
@@ -127,14 +123,8 @@ begin
                         order by (select count(*) from public.tama_wk_answers a where a.opt_id = o.id) desc, o.id)
                    from public.tama_wk_opts o where o.theme_id = t.id and not o.hidden), '[]'::jsonb))
              order by t.source, t.id)
-        from public.tama_wk_themes t where t.week = w and t.status = 'active'), '[]'::jsonb),
-    'next', coalesce((
-      select jsonb_agg(jsonb_build_object(
-               'id', t.id, 'title', t.title, 'own', t.proposed_by = me,
-               'votes', (select count(*) from public.tama_wk_votes v where v.theme_id = t.id),
-               'voted', exists (select 1 from public.tama_wk_votes v where v.theme_id = t.id and v.user_id = me))
-             order by (select count(*) from public.tama_wk_votes v where v.theme_id = t.id) desc, t.id)
-        from public.tama_wk_themes t where t.week = w + 7 and t.status = 'proposed'), '[]'::jsonb)
+        from public.tama_wk_themes t where t.week = w and t.status = 'active' and t.source = 'ops'), '[]'::jsonb),
+    'next', '[]'::jsonb   -- 来週のテーマの提案・票はやめた（2026-11-10）
   ) into r;
   return r;
 end $$;
@@ -229,43 +219,15 @@ returns void language sql volatile security definer set search_path = public as 
   delete from public.tama_wk_answers where theme_id = p_theme and user_id = auth.uid();
 $$;
 
--- 来週のテーマを提案する（1人1週に1つ。自分の票も1つ入る）
+-- 来週のテーマの提案・票（2026-11-10 にやめた。前の版のアプリから呼ばれても、何も入れずに 'closed' を返す）
 create or replace function public.tama_wk_propose(p_title text)
-returns jsonb language plpgsql volatile security definer set search_path = public as $$
-declare
-  me  uuid := auth.uid();
-  w   date := public.tama_wk_week() + 7;
-  tit text := left(trim(coalesce(p_title, '')), 40);
-  nm  text := public.tama_norm(p_title);
-  v_t bigint;
-begin
-  if me is null then raise exception 'not signed in'; end if;
-  if tit = '' or nm = '' then return jsonb_build_object('status', 'empty'); end if;
-  if public.tama_wk_ng(tit) then return jsonb_build_object('status', 'ng'); end if;
-  if exists (select 1 from public.tama_bans b where b.user_id = me) then return jsonb_build_object('status', 'banned'); end if;
-  if exists (select 1 from public.tama_wk_themes where week = w and proposed_by = me) then return jsonb_build_object('status', 'once'); end if;
-  select id into v_t from public.tama_wk_themes where week = w and status = 'proposed' and norm = nm;
-  if v_t is null then
-    insert into public.tama_wk_themes (week, title, norm, kind, source, status, proposed_by)
-    values (w, tit, nm, 'like', 'vote', 'proposed', me) returning id into v_t;
-  end if;
-  insert into public.tama_wk_votes (theme_id, user_id) values (v_t, me) on conflict do nothing;
-  return jsonb_build_object('status', 'ok', 'id', v_t);
-end $$;
-
--- 来週のテーマに票を入れる・取り消す。返り値：入れた後なら true
+returns jsonb language sql stable security definer set search_path = public as $$
+  select jsonb_build_object('status', 'closed')
+$$;
 create or replace function public.tama_wk_vote(p_theme bigint)
-returns boolean language plpgsql volatile security definer set search_path = public as $$
-declare me uuid := auth.uid();
-begin
-  if me is null then raise exception 'not signed in'; end if;
-  if not exists (select 1 from public.tama_wk_themes where id = p_theme and week = public.tama_wk_week() + 7 and status = 'proposed') then return false; end if;
-  if exists (select 1 from public.tama_wk_votes where theme_id = p_theme and user_id = me) then
-    delete from public.tama_wk_votes where theme_id = p_theme and user_id = me; return false;
-  end if;
-  insert into public.tama_wk_votes (theme_id, user_id) values (p_theme, me) on conflict do nothing;
-  return true;
-end $$;
+returns boolean language sql stable security definer set search_path = public as $$
+  select false
+$$;
 
 -- 書かれた選択肢・提案されたテーマを通報する。2人から通報されたら隠す（運営があとで見て戻せる）
 create or replace function public.tama_wk_report(p_kind text, p_id bigint)

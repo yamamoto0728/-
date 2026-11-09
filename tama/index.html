@@ -1920,7 +1920,7 @@
   html.appv #ashBody>.scroll>#appvWeek{order:-1}
   html.appv #ashBody>.scroll>#ctCard{order:1}
   html.appv #ashBody>.scroll>#dailyCard{order:2}
-  html.appv #ashBody>.scroll>#wkCard{order:2}
+  html.appv #ashBody>.scroll>#wkCard{order:0}   /* 今週のイベントはメインのイベント。いまの自分・時間割のすぐ下（2026-11-10） */
   /* 今週のイベント（2026-11-07） */
   #wkCard:empty,html:not(.appv) #wkCard{display:none}
   html.appv #wkCard.daily{margin:8px 16px;padding:14px 16px}
@@ -1939,7 +1939,6 @@
   html.appv .wkme .wkrow{display:flex;gap:8px;flex-wrap:wrap}
   html.appv .wkme .wkrow button,html.appv .wksmall{border:0;border-radius:16px;background:var(--fill);color:var(--ink);font:inherit;font-size:var(--fs4);font-weight:600;padding:7px 12px;cursor:pointer}
   html.appv .wkme .wkrow button.pri{background:var(--tint);color:var(--on-tint)}
-  html.appv .wknext{display:block;width:100%;margin-top:12px;padding:10px 0 0;border:0;border-top:1px solid var(--sep);background:none;color:var(--tint);font:inherit;font-size:var(--fs3);font-weight:600;text-align:left;cursor:pointer}
   html.appv .wkprop{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--sep)}
   html.appv .wkprop b{flex:1;min-width:0;font-weight:600}
   html.appv .wkprop button{flex:none;border:1.5px solid var(--tint);border-radius:16px;background:none;color:var(--tint);font:inherit;font-size:var(--fs4);font-weight:600;padding:6px 12px;cursor:pointer}
@@ -2073,6 +2072,16 @@
      ・シートより手前に出す（前はシートの方が手前で、全画面や引っぱっている途中にバーが隠れた）。シートはバーの下までしか上がらない
      ・ほかの画面の見出し（トーク・時間割・プロフィール・設定・チャット）も、時計の表示とかぶらないように下げる */
   html.appv .appvtop{top:calc(env(safe-area-inset-top,0px) + 8px);z-index:700}
+  /* 今週のイベントのバナー（2026-11-10）。上のアイコンの下。地図はその分だけ下から始める */
+  html.appv .awkban{position:absolute;top:calc(env(safe-area-inset-top,0px) + 60px);left:16px;right:16px;z-index:650;display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 14px;border:1.5px solid color-mix(in srgb,var(--tint) 45%,var(--night));border-radius:12px;background:color-mix(in srgb,var(--tint) 10%,var(--night));color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:opacity .25s}
+  html.appv .awkban:active{background:color-mix(in srgb,var(--tint) 18%,var(--night))}
+  html.appv .awkban .wbt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+  html.appv .awkban small{font-size:var(--fs4);font-weight:700;color:var(--tint)}
+  html.appv .awkban b{font-size:var(--fs2);font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .awkban .wbt span{font-size:var(--fs4);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .awkban i{flex:none;font-style:normal;padding:7px 14px;border-radius:16px;background:var(--tint);color:var(--on-tint);font-size:var(--fs3);font-weight:700}
+  html.appv #s-near[data-detent="full"] .awkban{opacity:0;pointer-events:none}
+  html.appv #s-near.has-wk #mapWrap{top:calc(env(safe-area-inset-top,0px) + 124px)}
   html.appv .appvsheet{max-height:calc(100% - env(safe-area-inset-top,0px) - 64px)}
   html.appv .apphead{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
   html.appv .aphead{padding-top:calc(env(safe-area-inset-top,0px) + 6px)}
@@ -10015,14 +10024,38 @@ function syncWkAttr(){
 }
 function renderWeekly(){
   const el=$('#wkCard'); if(!el)return;
-  if(!appvOn()||wkMissing||!wk||!(wk.themes||[]).length){ el.innerHTML=''; return; }
+  if(!appvOn()||wkMissing||!wk||!(wk.themes||[]).length){ el.innerHTML=''; renderWkBanner(); return; }
+  // 2026-11-10 あおの決定「今週のイベントは運営が考える方針に」：テーマは運営だけが出す（来週のテーマの提案・票はやめた。supabase/tama_weekly_ops_only.sql）
   el.innerHTML=`<div class="wkh"><span>📅 今週のイベント（日曜まで）</span><button onclick="openWkHow()">しくみ</button></div>`
-    +wk.themes.map(wkThemeHTML).join('')
-    +`<button class="wknext" onclick="openWkNext()">🗳 来週のテーマを選ぶ・提案する${(wk.next||[]).length?`（${wk.next.length}件）`:''} ›</button>`;
+    +wk.themes.map(wkThemeHTML).join('');
+  renderWkBanner();
+}
+// 2026-11-10 あお「今週のイベントをメインイベントにしたい。マップを少し下げて、上に今週のイベントのバナーを」：
+// 上のアイコンの下に1本の帯。答える前は「答える」、答えた後は自分の答えと部屋までの様子。押すとシートを上げて、カードを出す
+function renderWkBanner(){
+  const near=$('#s-near'), top=$('#appvTop'); if(!near||!top)return;
+  let b=$('#appvWkBan');
+  const list=appvOn()&&!wkMissing&&wk?(wk.themes||[]):[];
+  if(!list.length){ if(b)b.remove(); if(near.classList.contains('has-wk')){ near.classList.remove('has-wk'); setTimeout(appvFitMap,60); } return; }
+  if(!b){ b=document.createElement('button'); b.id='appvWkBan'; b.className='awkban'; b.onclick=openWkBanner; top.after(b); }
+  const need=wk.need||WK_NEED, t=list.find(x=>!x.mine)||list[0], mine=(t.opts||[]).find(o=>o.id===t.mine);
+  let sub, act;
+  if(!mine){ sub=list.length>1?'ほかにもう'+(list.length-1)+'つ':'答えると、同じ答えの人と部屋ができます'; act='答える'; }
+  else if(t.kind==='worry'){ sub='→ '+esc(mine.label)+'・同じ答えの人 '+(mine.n||0)+'人'; act='見る'; }
+  else if(mine.room){ sub='→ '+esc(mine.label)+'・今週だけの部屋があります'; act='部屋へ'; }
+  else{ sub='→ '+esc(mine.label)+'・あと'+Math.max(0,need-(mine.n||0))+'人で部屋ができます'; act='見る'; }
+  const h=`<span class="wbt"><small>今週のイベント</small><b>${esc(t.title)}</b><span>${sub}</span></span><i>${act}</i>`;
+  if(b.dataset.h!==h){ b.dataset.h=h; b.innerHTML=h; }
+  if(!near.classList.contains('has-wk')){ near.classList.add('has-wk'); setTimeout(appvFitMap,60); }
+}
+function openWkBanner(){
+  if(typeof setAppvDetent==='function')setAppvDetent('full');
+  setTimeout(()=>{ const c=$('#wkCard'), sc=$('#ashBody>.scroll'); if(!c||!sc)return;
+    sc.scrollTo({top:Math.max(0,c.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-8),behavior:'smooth'}); },60);
 }
 function wkThemeHTML(t){
   const need=wk.need||WK_NEED, worry=t.kind==='worry', opts=t.opts||[], mine=opts.find(o=>o.id===t.mine);
-  const head=`<div class="wkq"><small>${t.source==='vote'?'みんなが選んだテーマ':'運営のテーマ'}${worry?'・部屋は作りません（人数だけ）':''}</small>${esc(t.title)}</div>`;
+  const head=`<div class="wkq">${worry?'<small>部屋は作りません（人数だけ）</small>':''}${esc(t.title)}</div>`;
   if(mine&&!wkOpenT.has(t.id)){
     const n=mine.n||0, left=Math.max(0,need-n);
     let st;
@@ -10084,7 +10117,7 @@ function wkInvite(t){
 function openWkHow(){
   const need=(wk&&wk.need)||WK_NEED;
   $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">📅 今週のイベントのしくみ</h2>
-    <ul class="hwl"><li>毎週月曜に、テーマが2つ出ます。<b>運営のテーマ</b>と、先週<b>みんなが提案して票が多かったテーマ</b>です</li>
+    <ul class="hwl"><li>毎週月曜に、<b>運営がテーマを出します</b>（日曜の夜まで）</li>
       <li>選択肢から選ぶか、自分で書いて答えます。書いた答えは、ほかの人の選択肢にも並びます</li>
       <li>同じ答えの人が<b>${need}人</b>そろうと、その答えの<b>今週だけの部屋</b>ができて、答えた人が入ります（日曜の夜で終わり）</li>
       <li>悩みのテーマは、部屋を作らず<b>同じ答えの人の人数</b>だけ出します</li>
@@ -10092,31 +10125,6 @@ function openWkHow(){
       <li>いやな言葉は書けません。書かれた答えがいやな時は「書かれた答えを知らせる」から。2人から知らされると隠れます</li></ul>
     <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
   $('#memOverlay').classList.add('show');
-}
-function openWkNext(){
-  const list=(wk&&wk.next)||[], mineProp=list.some(x=>x.own);
-  $('#memSheet').innerHTML=`<div class="rinfo"><h2 class="pstitle">🗳 来週のテーマ</h2>
-    <p class="psdesc">票がいちばん多いテーマが、来週の「みんなが選んだテーマ」になります。いいと思うものに票を入れてね（いくつでも）。</p>
-    ${list.length?list.map(x=>`<div class="wkprop"><b>${esc(x.title)}</b><small>${x.votes}票</small>${x.own?'':`<button class="wksmall" style="background:none;color:var(--muted)" onclick="wkReportTheme(${x.id})">知らせる</button>`}<button class="${x.voted?'on':''}" onclick="wkVote(${x.id})">${x.voted?'票を入れた':'票を入れる'}</button></div>`).join(''):'<p class="psdesc">まだ提案がありません。最初の1つを出してみよう</p>'}
-    ${mineProp?'<p class="psdesc" style="margin-top:12px">今週はもう提案しました（1人1週に1つ）</p>':`<div class="drow" style="display:flex;gap:8px;margin-top:14px"><input id="wkPropIn" maxlength="40" placeholder="例：最近ハマっていること" style="flex:1;min-width:0;padding:12px;border:1px solid var(--sep);border-radius:10px;font:inherit;background:var(--night);color:var(--ink)"><button class="btn btn-primary" onclick="wkPropose()">提案する</button></div>`}
-    <button class="btn btn-ghost" style="width:100%;padding:12px;margin-top:12px;color:var(--muted)" onclick="closeMembers()">閉じる</button></div>`;
-  $('#memOverlay').classList.add('show');
-}
-async function wkVote(id){
-  const {error}=await sb.rpc('tama_wk_vote',{p_theme:id});
-  if(error){ toast('票を入れられませんでした'); return; }
-  await loadWeekly(); openWkNext();
-}
-async function wkPropose(){
-  const v=($('#wkPropIn')&&$('#wkPropIn').value||'').trim(); if(!v){ toast('テーマを書いてね'); return; }
-  if(wkNg(v)){ toast('その言葉は使えません。ほかの言い方でどうぞ'); return; }
-  const {data,error}=await sb.rpc('tama_wk_propose',{p_title:v});
-  if(error){ toast('提案できませんでした。少し待ってからどうぞ'); return; }
-  const st=data&&data.status;
-  if(st==='ng'){ toast('その言葉は使えません。ほかの言い方でどうぞ'); return; }
-  if(st==='once'){ toast('提案は1人1週に1つまでです'); return; }
-  if(st!=='ok'){ toast('提案できませんでした'); return; }
-  toast('提案しました。票が集まると来週のテーマになります'); await loadWeekly(); openWkNext();
 }
 function openWkReport(t){
   const th=(wk&&wk.themes||[]).find(x=>x.id===t); if(!th)return;
@@ -10130,10 +10138,6 @@ function openWkReport(t){
 async function wkReport(id){
   const {error}=await sb.rpc('tama_wk_report',{p_kind:'opt',p_id:id});
   toast(error?'知らせられませんでした':'知らせました。ありがとう'); closeMembers(); loadWeekly();
-}
-async function wkReportTheme(id){
-  const {error}=await sb.rpc('tama_wk_report',{p_kind:'theme',p_id:id});
-  toast(error?'知らせられませんでした':'知らせました。ありがとう'); await loadWeekly(); openWkNext();
 }
 function renderDaily(){
   const el=$('#dailyCard'); if(!el)return;
