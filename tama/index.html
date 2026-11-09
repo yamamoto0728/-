@@ -2125,7 +2125,7 @@
   html.appv .xrare .av{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px}
   html.appv .xrare .tx{flex:1;min-width:0;display:flex;flex-direction:column}
   html.appv .xrare small{font-size:var(--fs4);font-weight:700;color:var(--tint)}
-  html.appv .xrare b{font-size:var(--fs3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.appv .xrare b{font-size:var(--fs3);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}   /* 2行まで出す（2026-11-09：1行だと共通点の名前が「…」で切れていた） */
   html.appv .xrare i{flex:none;font-style:normal;color:var(--muted)}
   html.appv #appvSet .setrow .toggle{flex:none}
   html.appv .ob{padding-top:calc(env(safe-area-inset-top,0px) + 26px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
