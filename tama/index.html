@@ -1441,6 +1441,10 @@
   html.appv .atbtn.atlab{width:auto;padding:0 12px 0 10px;border-radius:22px;gap:4px;display:flex;font-size:13px;font-weight:600}
   html.appv .appvnote{position:absolute;top:62px;left:12px;right:12px;z-index:500;padding:10px 14px;border-radius:12px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 4px rgba(0,0,0,.12);font-size:13px;line-height:1.5;color:var(--ink)}
   html.appv .appvnote[hidden]{display:none}
+  /* 初めての人の使い方（#guide）と通知の許可の画面（#pushGate）は、地図の上のシート（600）・上の帯（700）より上に出す
+     （2026-11-09 あお「初めて入れた人の『くわしく見る／はじめる』の画面に、下のいまの自分・時間割が重なる」）。ほかの画面（900）よりは下 */
+  html.appv .guide{z-index:880}
+  html.appv #pushGate{z-index:885!important}
   html.appv .overlay{z-index:900}   /* 地図の上のシート（600）・隅のボタン（500）より上に、ほかの画面（プロフィール・状態・隠れる など）を出す */
   html.appv .toast{z-index:950}
   /* ---------- 📱 アプリver 2026-10-24 ビジュアルの見直し（エージェント3人の意見。research_notes\アプリver画面\review_*.md） ----------
