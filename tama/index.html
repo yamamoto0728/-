@@ -1455,6 +1455,11 @@
   html.appv .guide{z-index:880}
   html.appv #pushGate{z-index:885!important}
   html.appv .overlay{z-index:900}   /* 地図の上のシート（600）・隅のボタン（500）より上に、ほかの画面（プロフィール・状態・隠れる など）を出す */
+  /* 2026-11-11 あお「マッチ・すれ違いの演出が下のシートと重なる。問答無用で全画面に」：演出はシート（600）・ほかの画面（900）・下のタブより上に。
+     背景も透けない地の色にする（ダークでも読めるように） */
+  html.appv .matchpop{position:absolute;inset:0;z-index:2000;background:var(--night);padding:calc(env(safe-area-inset-top,0px) + 30px) 30px calc(env(safe-area-inset-bottom,0px) + 30px)}
+  html.appv .matchpop p{color:var(--muted)}
+  html.appv #confetti{z-index:2001!important}
   html.appv .toast{z-index:950}
   /* ---------- 📱 アプリver 2026-10-24 ビジュアルの見直し（エージェント3人の意見。research_notes\アプリver画面\review_*.md） ----------
      性格は「ちかい・ほがらか・そっと」。色や飾りを足すのではなく、地図・アバター・数字という中身をきれいに大きく見せる */
